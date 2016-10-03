@@ -5,7 +5,7 @@ class QApplicationMessaging(QApplication):
 
     def __init__(self, argv):
         QApplication.__init__(self, argv)
-        self._key = 'PCT'
+        self._key = 'SLPA'
         self._timeout = 1000
         self._locked = False
         socket = QLocalSocket(self)
@@ -46,40 +46,123 @@ class QApplicationMessaging(QApplication):
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
 
+class MajorFeatureLayout(QVBoxLayout):
+
+    def __init__(self):
+        QVBoxLayout.__init__(self)
+        self.majorLocation = QComboBox()
+        self.majorLocation.addItem('Major Location')
+        self.minorLocation = QComboBox()
+        self.minorLocation.addItem('Minor Location')
+        self.movement = QComboBox()
+        self.movement.addItem('Movement')
+        self.orientation = QComboBox()
+        self.orientation.addItem('Orientation')
+        self.addWidget(self.majorLocation)
+        self.addWidget(self.minorLocation)
+        self.addWidget(self.movement)
+        self.addWidget(self.orientation)
+
+class ConfigLayout(QGridLayout):
+
+    def __init__(self, n, handshapes, hand2):
+        QGridLayout.__init__(self)
+        self.setSpacing(0)
+        self.setContentsMargins(0,0,0,0)
+
+        if n == 1:
+            number = '1st'
+        elif n == 2:
+            number = '2nd'
+        elif n == 3:
+            number = '3rd'
+        else:
+            number = str(n)+'th'
+        configLabel = QLabel('{} config'.format(number))
+        self.addWidget(configLabel, 0, 0)
+        forearmButton = QRadioButton('1. Forearm')
+        self.addWidget(forearmButton, 0, 1)
+        self.addLayout(handshapes, 0, 2)
+        self.handShapeMatch = QPushButton('Make Hand 2 = Hand 1')
+        self.addWidget(self.handShapeMatch, 1, 0)
+        self.hand2 = hand2
+        self.handShapeMatch.clicked.connect(self.hand2.match)
+
+    @Slot(int)
+    def changeMatched(self, checked):
+        if self.handShapeMatch.isChecked():
+            self.handShapeMatch.setChecked(False)
+
 class HandShapeLayout(QVBoxLayout):
     def __init__(self, parent = None, hand = None):
         QVBoxLayout.__init__(self)#, parent)
-
-        handTitle = QLabel(hand)
-        self.addWidget(handTitle)
-        globalcombo = QComboBox()
-        globalcombo.addItem('Global')
-        self.addWidget(globalcombo)
+        self.handTitle = QLabel(hand)
+        self.addWidget(self.handTitle)
+        self.globalWidget = QComboBox()
+        self.globalWidget.addItem('Global')
+        self.globalWidget.addItem('Alternative')
+        self.addWidget(self.globalWidget)
 
         self.thumbWidget = QComboBox()
         self.thumbWidget.addItem('2.Thumb')
+        self.thumbWidget.addItem('Alternative')
         self.addWidget(self.thumbWidget)
 
         self.thumbAndFingerWidget = QComboBox()
         self.thumbAndFingerWidget.addItem('3.Thumb/Finger')
+        self.thumbAndFingerWidget.addItem('Alternative')
         self.addWidget(self.thumbAndFingerWidget)
 
         self.indexWidget = QComboBox()
         self.indexWidget.addItem('4.Index finger')
+        self.indexWidget.addItem('Alternative')
         self.addWidget(self.indexWidget)
 
         self.middleWidget = QComboBox()
         self.middleWidget.addItem('5.Middle finger')
+        self.middleWidget.addItem('Alternative')
         self.addWidget(self.middleWidget)
 
         self.ringWidget = QComboBox()
         self.ringWidget.addItem('6.Ring finger')
+        self.ringWidget.addItem('Alternative')
         self.addWidget(self.ringWidget)
 
         self.pinkyWidget = QComboBox()
         self.pinkyWidget.addItem('7.Pinky finger')
+        self.pinkyWidget.addItem('Alternative')
         self.addWidget(self.pinkyWidget)
 
+    def fingers(self):
+        return {'globalWidget': self.globalWidget.currentText(),
+                'thumbWidget': self.thumbWidget.currentText(),
+                'thumbAndFingerWidget': self.thumbAndFingerWidget.currentText(),
+                'indexWidget': self.indexWidget.currentText(),
+                'middleWidget': self.middleWidget.currentText(),
+                'ringWidget': self.ringWidget.currentText(),
+                'pinkyWidget': self.pinkyWidget.currentText()}
+
+class SecondHandShapeLayout(HandShapeLayout):
+
+    def __init__(self, parent = None, hand = None, otherHand = None):
+        HandShapeLayout.__init__(self, parent, hand)
+        self.otherHand = otherHand
+
+    def setConfigLayout(self, configLayout):
+        self.configLayout = configLayout
+        self.globalWidget.currentIndexChanged.connect(self.configLayout.changeMatched)
+        self.thumbWidget.currentIndexChanged.connect(self.configLayout.changeMatched)
+        self.thumbAndFingerWidget.currentIndexChanged.connect(self.configLayout.changeMatched)
+        self.indexWidget.currentIndexChanged.connect(self.configLayout.changeMatched)
+        self.middleWidget.currentIndexChanged.connect(self.configLayout.changeMatched)
+        self.ringWidget.currentIndexChanged.connect(self.configLayout.changeMatched)
+        self.pinkyWidget.currentIndexChanged.connect(self.configLayout.changeMatched)
+
+    @Slot(bool)
+    def match(self, clicked):
+        for finger,value in self.otherHand.fingers().items():
+            widget = getattr(self, finger)
+            widget.setCurrentText(value)
 
 class GlossLayout(QBoxLayout):
     def __init__(self, parent = None):
@@ -180,12 +263,6 @@ class GlossLayout(QBoxLayout):
         self.lineLayout.addWidget(slot7b)
         self.lineLayout.addWidget(QLabel(']7'))
 
-class HandConfigLayout(QHBoxLayout):
-    def __init__(self):
-        QHBoxLayout.__init__(self)
-
-
-
 class MainWindow(QMainWindow):
     def __init__(self,app):
         app.messageFromOtherInstance.connect(self.handleMessage)
@@ -201,10 +278,17 @@ class MainWindow(QMainWindow):
         handsLayout = QGridLayout()
         hand1 = HandShapeLayout(handsLayout, 'Hand 1')
         handsLayout.addLayout(hand1, 0, 0)
-        hand2 = HandShapeLayout(handsLayout, 'Hand 2')
+        hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', hand1)
         handsLayout.addLayout(hand2, 0, 1)
+        #layout.addLayout(handsLayout)
 
-        layout.addLayout(handsLayout)
+        configLayout = ConfigLayout(1, handsLayout, hand2)
+        layout.addLayout(configLayout)
+
+        #hand2.setConfigLayout(configLayout)
+
+        featuresLayout = MajorFeatureLayout()
+        layout.addLayout(featuresLayout)
 
         self.wrapper.setLayout(layout)
         self.setCentralWidget(self.wrapper)
