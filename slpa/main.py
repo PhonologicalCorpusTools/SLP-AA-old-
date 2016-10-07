@@ -1,4 +1,5 @@
 from .imports import *
+import itertools
 
 class QApplicationMessaging(QApplication):
     messageFromOtherInstance = Signal(bytes)
@@ -80,7 +81,7 @@ class ConfigLayout(QGridLayout):
             number = str(n)+'th'
         configLabel = QLabel('{} config'.format(number))
         self.addWidget(configLabel, 0, 0)
-        forearmButton = QRadioButton('1. Forearm')
+        forearmButton = QCheckBox('1. Forearm')
         self.addWidget(forearmButton, 0, 1)
         self.addLayout(handshapes, 0, 2)
         self.handShapeMatch = QPushButton('Make Hand 2 = Hand 1')
@@ -113,24 +114,16 @@ class HandShapeLayout(QVBoxLayout):
         self.thumbAndFingerWidget.addItem('Alternative')
         self.addWidget(self.thumbAndFingerWidget)
 
-        self.indexWidget = QComboBox()
-        self.indexWidget.addItem('4.Index finger')
-        self.indexWidget.addItem('Alternative')
+        self.indexWidget = FingerConfigurationComboBox()#('4.Index finger')
         self.addWidget(self.indexWidget)
 
-        self.middleWidget = QComboBox()
-        self.middleWidget.addItem('5.Middle finger')
-        self.middleWidget.addItem('Alternative')
+        self.middleWidget = FingerConfigurationComboBox()#('5.Middle finger')
         self.addWidget(self.middleWidget)
 
-        self.ringWidget = QComboBox()
-        self.ringWidget.addItem('6.Ring finger')
-        self.ringWidget.addItem('Alternative')
+        self.ringWidget = FingerConfigurationComboBox()#('6.Ring finger')
         self.addWidget(self.ringWidget)
 
-        self.pinkyWidget = QComboBox()
-        self.pinkyWidget.addItem('7.Pinky finger')
-        self.pinkyWidget.addItem('Alternative')
+        self.pinkyWidget = FingerConfigurationComboBox()#('7.Pinky finger')
         self.addWidget(self.pinkyWidget)
 
     def fingers(self):
@@ -141,6 +134,44 @@ class HandShapeLayout(QVBoxLayout):
                 'middleWidget': self.middleWidget.currentText(),
                 'ringWidget': self.ringWidget.currentText(),
                 'pinkyWidget': self.pinkyWidget.currentText()}
+
+    def fingerWidgets(self):
+        return [self.indexWidget, self.middleWidget, self.ringWidget, self.pinkyWidget]
+
+class FingerConfigurationComboBox(QComboBox):
+
+    def __init__(self, first=None):
+        QCheckBox.__init__(self)
+        if first is not None:
+            self.addItem(first)
+        self.symbols = ['H','h','E','e','F', 'f', 'i']
+        triples = [triple for triple in itertools.product(self.symbols, self.symbols, self.symbols)]
+
+
+        marked = list()
+        for n in range(len(triples)):
+            # Constraint - no medial joint can be 'H'
+            if triples[n][1] == 'H':
+                marked.append(n)
+            # Constraint - distal joint must match medial join in flexion
+            distal = triples[n][2]
+            medial = triples[n][1]
+            if (distal == 'f' and medial=='F') or (distal =='F' and medial == 'f'):
+                marked.append(n)
+        triples = [triples[n] for n in range(len(triples)) if not n in marked]
+
+        # marked = list()
+        # for n in range(len(triples)):
+        #     distal = triples[n][2]
+        #     medial = triples[n][1]
+        #     if (distal == 'f' and medial=='F') or (distal =='F' and medial == 'f'):
+        #         marked.append(n)
+        # triples = [triples[n] for n in range(len(triples)) if not n in marked]
+
+
+        for t in triples:
+            self.addItem(','.join(t))
+
 
 class SecondHandShapeLayout(HandShapeLayout):
 
@@ -165,103 +196,163 @@ class SecondHandShapeLayout(HandShapeLayout):
             widget.setCurrentText(value)
 
 class GlossLayout(QBoxLayout):
-    def __init__(self, parent = None):
+    def __init__(self, parent = None, comboBoxes = None):
         QBoxLayout.__init__(self, QBoxLayout.TopToBottom, parent=parent)
 
+        defaultFont = QFont("Arial", 12)
+        fontMetric = QFontMetricsF(defaultFont)
         self.setContentsMargins(-1,-1,-1,0)
         self.glossEdit = QLineEdit()
         self.glossEdit.setPlaceholderText('Gloss')
+        self.glossEdit.setFont(defaultFont)
         self.addWidget(self.glossEdit)
         self.lineLayout = QHBoxLayout()
         self.lineLayout.setContentsMargins(-1,0,-1,-1)
 
         #SLOT 1
         self.lineLayout.addWidget(QLabel('['))
-        slot1 = QLineEdit()
-        slot1.setMaxLength(1)
-        slot1.setFixedWidth(slot1.maxLength()*12)
-        slot1.setPlaceholderText('_'*slot1.maxLength())
-        self.lineLayout.addWidget(slot1)
+        self.slot1 = QLineEdit()
+        self.slot1.setMaxLength(1)
+        self.slot1.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ '*(self.slot1.maxLength()+1)).width()
+        self.slot1.setFixedWidth(width)
+        self.slot1.setPlaceholderText('_'*self.slot1.maxLength())
+        self.lineLayout.addWidget(self.slot1)
         self.lineLayout.addWidget(QLabel(']1'))
         self.addLayout(self.lineLayout)
 
         #SLOT 2
         self.lineLayout.addWidget(QLabel('['))
-        slot2 = QLineEdit()
-        slot2.setMaxLength(4)
-        slot2.setFixedWidth(slot2.maxLength()*12)
-        slot2.setPlaceholderText('_ '*slot2.maxLength())
-        self.lineLayout.addWidget(slot2)
+        self.slot2 = QLineEdit()
+        self.slot2.setMaxLength(4)
+        self.slot2.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot2.maxLength() + 1)).width()
+        self.slot2.setFixedWidth(width)
+        self.slot2.setPlaceholderText('_ '*self.slot2.maxLength())
+        self.lineLayout.addWidget(self.slot2)
         self.lineLayout.addWidget(QLabel(']2'))
 
         #SLOT 3
         self.lineLayout.addWidget(QLabel('['))
-        slot3a = QLineEdit()
-        slot3a.setMaxLength(2)
-        slot3a.setFixedWidth(slot3a.maxLength()*12)
-        slot3a.setPlaceholderText('_ '*slot3a.maxLength())
-        self.lineLayout.addWidget(slot3a)
+        self.slot3a = QLineEdit()
+        self.slot3a.setMaxLength(2)
+        self.slot3a.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot3a.maxLength() + 1)).width()
+        self.slot3a.setFixedWidth(width)
+        self.slot3a.setPlaceholderText('_ '*self.slot3a.maxLength())
+        self.lineLayout.addWidget(self.slot3a)
         self.lineLayout.addWidget(QLabel(u'\u2205/'))
-        slot3b = QLineEdit()
-        slot3b.setMaxLength(6)
-        slot3b.setFixedWidth(slot3b.maxLength()*12)
-        slot3b.setPlaceholderText('_ '*slot3b.maxLength())
-        self.lineLayout.addWidget(slot3b)
+        self.slot3b = QLineEdit()
+        self.slot3b.setMaxLength(6)
+        self.slot3b.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot3b.maxLength() + 1)).width()
+        self.slot3b.setFixedWidth(width)
+        self.slot3b.setPlaceholderText('_ '*self.slot3b.maxLength())
+        self.lineLayout.addWidget(self.slot3b)
         self.lineLayout.addWidget(QLabel(']3'))
 
         #SLOT 4
         self.lineLayout.addWidget(QLabel('[1'))
-        slot4 = QLineEdit()
-        slot4.setMaxLength(3)
-        slot4.setFixedWidth(slot4.maxLength()*12)
-        slot4.setPlaceholderText('_ '*slot4.maxLength())
-        self.lineLayout.addWidget(slot4)
+        self.slot4 = QLineEdit()
+        self.slot4.setMaxLength(3)
+        self.slot4.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot4.maxLength() + 1)).width()
+        self.slot4.setFixedWidth(width)
+        self.slot4.setPlaceholderText('_ '*self.slot4.maxLength())
+        self.lineLayout.addWidget(self.slot4)
         self.lineLayout.addWidget(QLabel(']4'))
 
         #SLOT 5
         self.lineLayout.addWidget(QLabel('['))
-        slot5a = QLineEdit()
-        slot5a.setMaxLength(1)
-        slot5a.setFixedWidth(slot5a.maxLength()*12)
-        slot5a.setPlaceholderText(('_'*slot5a.maxLength()))
-        self.lineLayout.addWidget(slot5a)
+        self.slot5a = QLineEdit()
+        self.slot5a.setMaxLength(1)
+        self.slot5a.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot5a.maxLength() + 1)).width()
+        self.slot5a.setFixedWidth(width)
+        self.slot5a.setPlaceholderText(('_'*self.slot5a.maxLength()))
+        self.lineLayout.addWidget(self.slot5a)
         self.lineLayout.addWidget(QLabel('2'))
-        slot5b = QLineEdit()
-        slot5b.setMaxLength(3)
-        slot5b.setFixedWidth(slot5b.maxLength()*12)
-        slot5b.setPlaceholderText('_ '*slot5b.maxLength())
-        self.lineLayout.addWidget(slot5b)
+        self.slot5b = QLineEdit()
+        self.slot5b.setMaxLength(3)
+        self.slot5b.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot5b.maxLength() + 1)).width()
+        self.slot5b.setFixedWidth(width)
+        self.slot5b.setPlaceholderText('_ '*self.slot5b.maxLength())
+        self.lineLayout.addWidget(self.slot5b)
         self.lineLayout.addWidget(QLabel(']5'))
 
         #SLOT 6
         self.lineLayout.addWidget(QLabel('['))
-        slot6a = QLineEdit()
-        slot6a.setMaxLength(1)
-        slot6a.setFixedWidth(slot6a.maxLength()*12)
-        slot6a.setPlaceholderText('_'*slot6a.maxLength())
-        self.lineLayout.addWidget(slot6a)
+        self.slot6a = QLineEdit()
+        self.slot6a.setMaxLength(1)
+        self.slot6a.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot6a.maxLength() + 1)).width()
+        self.slot6a.setFixedWidth(width)
+        self.slot6a.setPlaceholderText('_ '*self.slot6a.maxLength())
+        self.lineLayout.addWidget(self.slot6a)
         self.lineLayout.addWidget(QLabel('3'))
-        slot6b = QLineEdit()
-        slot6b.setMaxLength(3)
-        slot6b.setFixedWidth(slot6b.maxLength()*12)
-        slot6b.setPlaceholderText('_ '*slot6b.maxLength())
-        self.lineLayout.addWidget(slot6b)
+        self.slot6b = QLineEdit()
+        self.slot6b.setMaxLength(3)
+        self.slot6b.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot6b.maxLength() + 1)).width()
+        self.slot6b.setFixedWidth(width)
+        self.slot6b.setPlaceholderText('_ '*self.slot6b.maxLength())
+        self.lineLayout.addWidget(self.slot6b)
         self.lineLayout.addWidget(QLabel(']6'))
 
         #SLOT 7
         self.lineLayout.addWidget(QLabel('['))
-        slot7a = QLineEdit()
-        slot7a.setMaxLength(1)
-        slot7a.setFixedWidth(slot7a.maxLength()*12)
-        slot7a.setPlaceholderText('_'*slot7a.maxLength())
-        self.lineLayout.addWidget(slot7a)
+        self.slot7a = QLineEdit()
+        self.slot7a.setMaxLength(1)
+        self.slot7a.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot7a.maxLength() + 1)).width()
+        self.slot7a.setFixedWidth(width)
+        self.slot7a.setPlaceholderText('_'*self.slot7a.maxLength())
+        self.lineLayout.addWidget(self.slot7a)
         self.lineLayout.addWidget(QLabel('4'))
-        slot7b = QLineEdit()
-        slot7b.setMaxLength(3)
-        slot7b.setFixedWidth(slot7b.maxLength()*12)
-        slot7b.setPlaceholderText('_ '*slot7b.maxLength())
-        self.lineLayout.addWidget(slot7b)
+        self.slot7b = QLineEdit()
+        self.slot7b.setMaxLength(3)
+        self.slot7b.setFont(defaultFont)
+        width = fontMetric.boundingRect('_ ' * (self.slot7b.maxLength() + 1)).width()
+        self.slot7b.setFixedWidth(width)
+        self.slot7b.setPlaceholderText('_ '*self.slot7b.maxLength())
+        self.lineLayout.addWidget(self.slot7b)
         self.lineLayout.addWidget(QLabel(']7'))
+
+        #Update button
+        self.updateButton = QPushButton()
+        self.updateButton.setText('Update from drop-down boxes')
+        self.updateButton.clicked.connect(self.updateFromComboBoxes)
+        self.lineLayout.addWidget(self.updateButton)
+
+    def setComboBoxes(self, boxes):
+        print(boxes)
+        self.indexBox, self.middleBox, self.ringBox, self.pinkBox = boxes
+
+    def updateFromComboBoxes(self):
+        indexText = self.indexBox.currentText().replace(',','')
+        self.slot4.setText(indexText)
+        middleText = self.middleBox.currentText().replace(',','')
+        self.slot5a.setText(middleText[0])
+        self.slot5b.setText(middleText[1:])
+        ringText = self.ringBox.currentText().replace(',','')
+        self.slot6a.setText(ringText[0])
+        self.slot6b.setText(ringText[1:])
+        pinkyText = self.pinkBox.currentText().replace(',','')
+        self.slot7a.setText(pinkText[0])
+        self.slot7b.setText(pinkyText[1:])
+
+class HandConfigurationNames(QVBoxLayout):
+
+    def __init__(self):
+        QVBoxLayout.__init__(self)
+        self.addWidget(QLabel('1. Global'))
+        self.addWidget(QLabel('2. Thumb'))
+        self.addWidget(QLabel('3. Thumb/Finger'))
+        self.addWidget(QLabel('4. Index'))
+        self.addWidget(QLabel('5. Middle'))
+        self.addWidget(QLabel('6. Ring'))
+        self.addWidget(QLabel('7. Pinky'))
 
 class MainWindow(QMainWindow):
     def __init__(self,app):
@@ -276,16 +367,17 @@ class MainWindow(QMainWindow):
         layout.addLayout(self.gloss)
 
         handsLayout = QGridLayout()
+        handNames = HandConfigurationNames()
+        handsLayout.addLayout(handNames, 0, 0)
         hand1 = HandShapeLayout(handsLayout, 'Hand 1')
-        handsLayout.addLayout(hand1, 0, 0)
+        handsLayout.addLayout(hand1, 0, 1)
         hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', hand1)
-        handsLayout.addLayout(hand2, 0, 1)
-        #layout.addLayout(handsLayout)
+        handsLayout.addLayout(hand2, 0, 2)
+
+        self.gloss.setComboBoxes(hand1.fingerWidgets())
 
         configLayout = ConfigLayout(1, handsLayout, hand2)
         layout.addLayout(configLayout)
-
-        #hand2.setConfigLayout(configLayout)
 
         featuresLayout = MajorFeatureLayout()
         layout.addLayout(featuresLayout)
@@ -314,7 +406,6 @@ class MainWindow(QMainWindow):
         for i in self.__dict__:
             item = self.__dict__[i]
             clean(item)
-
 
 def clean(item):
     """Clean up the memory by closing and deleting the item if possible."""

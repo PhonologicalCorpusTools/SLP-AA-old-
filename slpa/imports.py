@@ -7,7 +7,7 @@ from PyQt5.QtCore import (QRectF, Qt, QModelIndex, QItemSelection,
                         QStringListModel)
 from PyQt5.QtGui import (QFont, QKeySequence, QPainter, QFontMetrics, QPen,
                         QRegion,QStandardItemModel,QStandardItem, QIcon, QPixmap,
-                        QDesktopServices, QCursor)
+                        QDesktopServices, QCursor, QFontMetricsF)
 from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction,
                             QApplication, QWidget, QMessageBox,QSplitter,
                             QDialog, QListWidget, QGroupBox,QVBoxLayout,
