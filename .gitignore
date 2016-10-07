@@ -9,6 +9,7 @@
 *.app
 *.xls
 *.xlsx
+*.pyc
 
 # C extensions
 *.so
