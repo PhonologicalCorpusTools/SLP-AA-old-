@@ -5,7 +5,6 @@ sys.path.insert(0,base)
 import slpa.main as Main
 
 if __name__ == '__main__':
-
     app = Main.QApplicationMessaging(sys.argv)
     if app.isRunning():
         if len(sys.argv) > 1:

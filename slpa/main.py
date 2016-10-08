@@ -1,5 +1,10 @@
 from .imports import *
 import itertools
+from enum import Enum
+
+
+FONT_NAME = 'Arial'
+FONT_SIZE = 12
 
 class QApplicationMessaging(QApplication):
     messageFromOtherInstance = Signal(bytes)
@@ -47,6 +52,40 @@ class QApplicationMessaging(QApplication):
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
 
+class HandShape(Enum):
+
+    global_ = (1, None)
+    thumb = (2, None)
+    thumbAndFinger = (3, None)
+    index = (4, 'EFHi')
+    middle = (5, 'EFHi')
+    ring = (6, 'EFHi')
+    pinky = (7, 'EFHi')
+
+    def __init__(self, num, symbols):
+        self.num = num
+        self.symbols = symbols
+
+    @property
+    def features(self):
+        if self.symbols is None:
+            return None
+        triples = [triple for triple in itertools.product(self.symbols, repeat=3)]
+        marked = list()
+        for n in range(len(triples)):
+            # Constraint - no medial joint can be 'H'
+            if triples[n][1] == 'H':
+                marked.append(n)
+            # Constraint - distal joint must match medial join in flexion
+            # distal = triples[n][2]
+            # medial = triples[n][1]
+            # if (distal == 'f' and medial=='F') or (distal =='F' and medial == 'f'):
+            #     marked.append(n)
+        triples = [triples[n] for n in range(len(triples)) if not n in marked]
+        return triples
+
+
+
 class MajorFeatureLayout(QVBoxLayout):
 
     def __init__(self):
@@ -89,90 +128,82 @@ class ConfigLayout(QGridLayout):
         self.hand2 = hand2
         self.handShapeMatch.clicked.connect(self.hand2.match)
 
-    @Slot(int)
-    def changeMatched(self, checked):
-        if self.handShapeMatch.isChecked():
-            self.handShapeMatch.setChecked(False)
-
 class HandShapeLayout(QVBoxLayout):
+
     def __init__(self, parent = None, hand = None, transcription = None):
         QVBoxLayout.__init__(self)#, parent)
         self.handTitle = QLabel(hand)
         self.addWidget(self.handTitle)
         self.transcription = transcription
-
-        self.globalWidget = QComboBox()
-        self.globalWidget.addItem('Global')
-        self.globalWidget.addItem('Alternative')
-        self.addWidget(self.globalWidget)
-
-        self.thumbWidget = QComboBox()
-        self.thumbWidget.addItem('2.Thumb')
-        self.thumbWidget.addItem('Alternative')
-        self.addWidget(self.thumbWidget)
-
-        self.thumbAndFingerWidget = QComboBox()
-        self.thumbAndFingerWidget.addItem('3.Thumb/Finger')
-        self.thumbAndFingerWidget.addItem('Alternative')
-        self.addWidget(self.thumbAndFingerWidget)
-
-        self.indexWidget = FingerConfigurationComboBox()#('4.Index finger')
-        self.addWidget(self.indexWidget)
-
-        self.middleWidget = FingerConfigurationComboBox()#('5.Middle finger')
-        self.addWidget(self.middleWidget)
-
-        self.ringWidget = FingerConfigurationComboBox()#('6.Ring finger')
-        self.addWidget(self.ringWidget)
-
-        self.pinkyWidget = FingerConfigurationComboBox()#('7.Pinky finger')
-        self.addWidget(self.pinkyWidget)
-
+        self.defineWidgets()
         self.updateButton = QPushButton('Update from transcription')
         self.updateButton.clicked.connect(self.updateFromTranscription)
         self.addWidget(self.updateButton)
 
+    def defineWidgets(self):
+
+        for finger in HandShape:
+            setattr(self, finger.name+'Widget', QComboBox())
+            w = getattr(self, finger.name+'Widget')
+            if finger.features is None:
+                w.addItem(finger.name, 'Alternative')
+            else:
+                for triple in finger.features:
+                    triple = ','.join(triple)
+                    w.addItem(triple)
+            self.addWidget(w)
+
+
     def updateFromTranscription(self):
-        problems = list()
-        indexConfig = self.transcription.slot4.text()
-        indexConfig = ','.join(indexConfig)
-        search = self.indexWidget.findText(indexConfig)
-        if search == -1:
-            problems.append('index (slot 4)')
-        else:
-            self.indexWidget.setCurrentText(indexConfig)
+        try:
+            problems = list()
 
-        middleConfig = self.transcription.slot5b.text()
-        middleConfig = ','.join(middleConfig)
-        search = self.middleWidget.findText(middleConfig)
-        if search == -1:
-            problems.append('middle (slot 5)')
-        else:
-            self.middleWidget.setCurrentText(middleConfig)
+            indexConfig = self.transcription.slot4.text()
+            indexConfig = ','.join(indexConfig)
+            search = self.indexWidget.findText(indexConfig)
+            if search == -1:
+                problems.append('index (slot 4)')
+            else:
+                self.indexWidget.setCurrentText(indexConfig)
 
-        ringConfig = self.transcription.slot6b.text()
-        ringConfig = ','.join(ringConfig)
-        search = self.ringWidget.findText(ringConfig)
-        if search == -1:
-            problems.append('ring (slot 6)')
-        else:
-            self.ringWidget.setCurrentText(ringConfig)
+            middleConfig = self.transcription.slot5b.text()
+            middleConfig = ','.join(middleConfig)
+            search = self.middleWidget.findText(middleConfig)
+            if search == -1:
+                problems.append('middle (slot 5)')
+            else:
+                self.middleWidget.setCurrentText(middleConfig)
 
-        pinkyConfig = self.transcription.slot7b.text()
-        pinkyConfig = ','.join(pinkyConfig)
-        search = self.pinkyWidget.findText(pinkyConfig)
-        if search == -1:
-            problems.append('pinky (slot 7)')
-        else:
-            self.pinkyWidget.setCurrentText(pinkyConfig)
+            ringConfig = self.transcription.slot6b.text()
+            ringConfig = ','.join(ringConfig)
+            search = self.ringWidget.findText(ringConfig)
+            if search == -1:
+                problems.append('ring (slot 6)')
+            else:
+                self.ringWidget.setCurrentText(ringConfig)
 
-        if problems:
-            alert = QMessageBox()
-            alert.setWindowTitle('Transcription error')
-            alert.setText(('There was a problem trying to update some of your drop-down boxes. Transcriptions for the '
-                    'following fingers either have non-standard symbols, impossible combinations, or they are blank:'
-                    '\n\n{}\n\n'.format(', '.join(problems))))
-            alert.exec_()
+            pinkyConfig = self.transcription.slot7b.text()
+            pinkyConfig = ','.join(pinkyConfig)
+            search = self.pinkyWidget.findText(pinkyConfig)
+            if search == -1:
+                problems.append('pinky (slot 7)')
+            else:
+                self.pinkyWidget.setCurrentText(pinkyConfig)
+
+            if problems:
+                alert = QMessageBox()
+                alert.setWindowTitle('Transcription error')
+                alert.setText(('There was a problem trying to update your dropdown boxes for the following fingers on '
+                        'the {} hand:\n\n'
+                        '{}'
+                        'There are several reasons why this error may have occured:\n\n1.Non-standard symbols\n\n'
+                        '2.Impossible combinations\n\n3.Blank transcriptions\nTranscriptions slots without any problems'
+                        ' have been properly updated.'.format(
+                                     'second' if isinstance(self, SecondHandShapeLayout) else 'first',
+                                     ', '.join(problems))))
+                alert.exec_()
+        except Exception as e:
+            print(e)
 
     def fingers(self):
         return {'globalWidget': self.globalWidget.currentText(),
@@ -186,34 +217,10 @@ class HandShapeLayout(QVBoxLayout):
     def fingerWidgets(self):
         return [self.indexWidget, self.middleWidget, self.ringWidget, self.pinkyWidget]
 
-class FingerConfigurationComboBox(QComboBox):
-
-    def __init__(self, first=None):
-        QCheckBox.__init__(self)
-        if first is not None:
-            self.addItem(first)
-        self.symbols = ['H','E','F','i']
-        triples = [triple for triple in itertools.product(self.symbols, self.symbols, self.symbols)]
-
-        marked = list()
-        for n in range(len(triples)):
-            # Constraint - no medial joint can be 'H'
-            if triples[n][1] == 'H':
-                marked.append(n)
-            # Constraint - distal joint must match medial join in flexion
-            # distal = triples[n][2]
-            # medial = triples[n][1]
-            # if (distal == 'f' and medial=='F') or (distal =='F' and medial == 'f'):
-            #     marked.append(n)
-        triples = [triples[n] for n in range(len(triples)) if not n in marked]
-
-        for t in triples:
-            self.addItem(','.join(t))
-
 class SecondHandShapeLayout(HandShapeLayout):
 
-    def __init__(self, parent = None, hand = None, otherHand = None):
-        HandShapeLayout.__init__(self, parent, hand)
+    def __init__(self, parent = None, hand = None, transcription = None, otherHand = None, ):
+        HandShapeLayout.__init__(self, parent, hand, transcription)
         self.otherHand = otherHand
 
     @Slot(bool)
@@ -225,14 +232,22 @@ class SecondHandShapeLayout(HandShapeLayout):
 class GlossLayout(QBoxLayout):
     def __init__(self, parent = None, comboBoxes = None):
         QBoxLayout.__init__(self, QBoxLayout.TopToBottom, parent=parent)
-
-        defaultFont = QFont("Arial", 12)
-        fontMetric = QFontMetricsF(defaultFont)
+        defaultFont = QFont(FONT_NAME, FONT_SIZE)
         self.setContentsMargins(-1,-1,-1,0)
         self.glossEdit = QLineEdit()
-        self.glossEdit.setPlaceholderText('Gloss')
         self.glossEdit.setFont(defaultFont)
+        self.glossEdit.setPlaceholderText('Gloss')
         self.addWidget(self.glossEdit)
+
+
+class TranscriptionLayout(QVBoxLayout):
+
+    def __init__(self):
+        QVBoxLayout.__init__(self)
+
+        defaultFont = QFont(FONT_NAME, FONT_SIZE)
+        fontMetric = QFontMetricsF(defaultFont)
+
         self.lineLayout = QHBoxLayout()
         self.lineLayout.setContentsMargins(-1,0,-1,-1)
 
@@ -392,15 +407,21 @@ class MainWindow(QMainWindow):
         self.gloss = GlossLayout(self)
         layout.addLayout(self.gloss)
 
+        self.hand1Transcription = TranscriptionLayout()
+        layout.addLayout(self.hand1Transcription)
+        self.hand2Transcription = TranscriptionLayout()
+        layout.addLayout(self.hand2Transcription)
+
         handsLayout = QGridLayout()
         handNames = HandConfigurationNames()
         handsLayout.addLayout(handNames, 0, 0)
-        hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.gloss)
+        hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
         handsLayout.addLayout(hand1, 0, 1)
-        hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', hand1)
+        hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription, hand1)
         handsLayout.addLayout(hand2, 0, 2)
 
-        self.gloss.setComboBoxes(hand1.fingerWidgets())
+        self.hand1Transcription.setComboBoxes(hand1.fingerWidgets())
+        self.hand2Transcription.setComboBoxes(hand2.fingerWidgets())
 
         configLayout = ConfigLayout(1, handsLayout, hand2)
         layout.addLayout(configLayout)
@@ -423,8 +444,6 @@ class MainWindow(QMainWindow):
 
     def handleMessage(self):
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
-        # self.raise_()
-        # self.show()
         self.activateWindow()
 
     def cleanUp(self):
