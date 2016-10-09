@@ -7,4 +7,4 @@ from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction,
                             QPushButton, QFrame, QGridLayout,QRadioButton,
                             QLineEdit, QFileDialog, QComboBox,
                             QProgressDialog, QCheckBox, QMenu, QSizePolicy,
-                            QBoxLayout, QStackedWidget)
+                            QBoxLayout, QStackedWidget, QTabWidget)

@@ -110,16 +110,6 @@ class ConfigLayout(QGridLayout):
         self.setSpacing(0)
         self.setContentsMargins(0,0,0,0)
 
-        if n == 1:
-            number = '1st'
-        elif n == 2:
-            number = '2nd'
-        elif n == 3:
-            number = '3rd'
-        else:
-            number = str(n)+'th'
-        configLabel = QLabel('{} config'.format(number))
-        self.addWidget(configLabel, 0, 0)
         self.forearmButton = QCheckBox('1. Forearm')
         self.addWidget(self.forearmButton, 0, 1)
         self.addLayout(handshapes, 0, 2)
@@ -195,10 +185,12 @@ class HandShapeLayout(QVBoxLayout):
                 alert.setWindowTitle('Transcription error')
                 alert.setText(('There was a problem trying to update your dropdown boxes for the following fingers on '
                         'the {} hand:\n\n'
-                        '{}'
-                        'There are several reasons why this error may have occured:\n\n1.Non-standard symbols\n\n'
-                        '2.Impossible combinations\n\n3.Blank transcriptions\nTranscriptions slots without any problems'
-                        ' have been properly updated.'.format(
+                        '{}\n\n'
+                        'There are several reasons why this problem may have occured:'
+                        '\n\n1.Non-standard symbols\n\n'
+                        '2.Impossible combinations\n\n'
+                        '3.Blank transcriptions\n\n'
+                        'Transcription slots without any problems have been properly updated.'.format(
                                      'second' if isinstance(self, SecondHandShapeLayout) else 'first',
                                      ', '.join(problems))))
                 alert.exec_()
@@ -206,7 +198,7 @@ class HandShapeLayout(QVBoxLayout):
             print(e)
 
     def fingers(self):
-        return {'globalWidget': self.globalWidget.currentText(),
+        return {'global_Widget': self.global_Widget.currentText(),
                 'thumbWidget': self.thumbWidget.currentText(),
                 'thumbAndFingerWidget': self.thumbAndFingerWidget.currentText(),
                 'indexWidget': self.indexWidget.currentText(),
@@ -219,15 +211,31 @@ class HandShapeLayout(QVBoxLayout):
 
 class SecondHandShapeLayout(HandShapeLayout):
 
-    def __init__(self, parent = None, hand = None, transcription = None, otherHand = None, ):
+    def __init__(self, parent = None, hand = None, transcription = None, otherHand = None, otherTranscription = None):
         HandShapeLayout.__init__(self, parent, hand, transcription)
         self.otherHand = otherHand
+        self.transcription = transcription
+        self.otherTranscription = otherTranscription
 
     @Slot(bool)
     def match(self, clicked):
         for finger,value in self.otherHand.fingers().items():
             widget = getattr(self, finger)
             widget.setCurrentText(value)
+
+        values = self.otherTranscription.values()
+        self.transcription.slot1.setText(values[0])
+        self.transcription.slot2.setText(values[1])
+        self.transcription.slot3a.setText(values[2])
+        self.transcription.slot3b.setText(values[3])
+        self.transcription.slot4.setText(values[4])
+        self.transcription.slot5a.setText(values[5])
+        self.transcription.slot5b.setText(values[6])
+        self.transcription.slot6a.setText(values[7])
+        self.transcription.slot6b.setText(values[8])
+        self.transcription.slot7a.setText(values[9])
+        self.transcription.slot7b.setText(values[10])
+
 
 class GlossLayout(QBoxLayout):
     def __init__(self, parent = None, comboBoxes = None):
@@ -368,7 +376,12 @@ class TranscriptionLayout(QVBoxLayout):
         self.lineLayout.addWidget(self.updateButton)
 
     def setComboBoxes(self, boxes):
-        self.indexBox, self.middleBox, self.ringBox, self.pinkyBox = boxes
+        self.indexBox, self.middleBox, self.ringBox, self.pinkyBox = boxes\
+
+    def values(self):
+        return [self.slot1.text(), self.slot2.text(), self.slot3a.text(), self.slot3b.text(), self.slot4.text(),
+                self.slot5a.text(), self.slot5b.text(), self.slot6a.text(), self.slot6b.text(),
+                self.slot7a.text(), self.slot7b.text()]
 
     def updateFromComboBoxes(self):
         indexText = self.indexBox.currentText().replace(',','')
@@ -395,6 +408,35 @@ class HandConfigurationNames(QVBoxLayout):
         self.addWidget(QLabel('6. Ring'))
         self.addWidget(QLabel('7. Pinky'))
 
+class HandConfigTab(QWidget):
+
+    def __init__(self, hand_number):
+        QWidget.__init__(self)
+
+        self.configLayout = QVBoxLayout()
+
+        self.hand1Transcription = TranscriptionLayout()
+        self.configLayout.addLayout(self.hand1Transcription)
+        self.hand2Transcription = TranscriptionLayout()
+        self.configLayout.addLayout(self.hand2Transcription)
+
+        handsLayout = QGridLayout()
+        handNames = HandConfigurationNames()
+        handsLayout.addLayout(handNames, 0, 0)
+        hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
+        handsLayout.addLayout(hand1, 0, 1)
+        hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription, hand1, self.hand1Transcription)
+        handsLayout.addLayout(hand2, 0, 2)
+
+        self.hand1Transcription.setComboBoxes(hand1.fingerWidgets())
+        self.hand2Transcription.setComboBoxes(hand2.fingerWidgets())
+
+        configLayout = ConfigLayout(hand_number, handsLayout, hand2)
+        self.configLayout.addLayout(configLayout)
+
+        self.setLayout(self.configLayout)
+
+
 class MainWindow(QMainWindow):
     def __init__(self,app):
         app.messageFromOtherInstance.connect(self.handleMessage)
@@ -407,27 +449,15 @@ class MainWindow(QMainWindow):
         self.gloss = GlossLayout(self)
         layout.addLayout(self.gloss)
 
-        self.hand1Transcription = TranscriptionLayout()
-        layout.addLayout(self.hand1Transcription)
-        self.hand2Transcription = TranscriptionLayout()
-        layout.addLayout(self.hand2Transcription)
+        self.configTabs = QTabWidget()
+        self.configTabs.addTab(HandConfigTab(1), 'Config 1')
+        self.configTabs.addTab(HandConfigTab(2), 'Config 2')
 
-        handsLayout = QGridLayout()
-        handNames = HandConfigurationNames()
-        handsLayout.addLayout(handNames, 0, 0)
-        hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
-        handsLayout.addLayout(hand1, 0, 1)
-        hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription, hand1)
-        handsLayout.addLayout(hand2, 0, 2)
-
-        self.hand1Transcription.setComboBoxes(hand1.fingerWidgets())
-        self.hand2Transcription.setComboBoxes(hand2.fingerWidgets())
-
-        configLayout = ConfigLayout(1, handsLayout, hand2)
-        layout.addLayout(configLayout)
+        layout.addWidget(self.configTabs)
 
         featuresLayout = MajorFeatureLayout()
         layout.addLayout(featuresLayout)
+
 
         self.wrapper.setLayout(layout)
         self.setCentralWidget(self.wrapper)
