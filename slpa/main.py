@@ -2,7 +2,6 @@ from .imports import *
 import itertools
 from enum import Enum
 
-
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
 
@@ -84,7 +83,26 @@ class HandShape(Enum):
         triples = [triples[n] for n in range(len(triples)) if not n in marked]
         return triples
 
+class Locations(Enum):
 
+    Head = ['CheekNose', 'Chin', 'Eye', 'Forehead', 'HeadTop', 'Mouth', 'UnderChin', 'UpperLip', 'Other']
+    Arm = ['ElbowBack', 'ElbowFront', 'ForearmBack', 'ForearmFront', 'ForearmUlnar', 'UpperArm',
+           'WristBack', 'WristFront', 'Other']
+    Trunk = ['Clavicle', 'Hips', 'Neck', 'Neutral', 'Shoulder', 'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist', 'Other']
+    NonDominant = ['FingerBack', 'FingerFront', 'FingerRadial', 'FingerUlnar', 'Heel', 'Palm', 'PalmBack', 'Other']
+    Neutral = ['FingerRadial', 'Neutral', 'Palm', 'Other']
+    Other = []
+
+
+class Movements(Enum):
+
+    Arc = 1
+    Circular = 2
+    Straight = 3
+    BackAndForth = 4
+    Other = 5
+    None_ = 6
+    Multiple = 7
 
 class MajorFeatureLayout(QVBoxLayout):
 
@@ -92,16 +110,31 @@ class MajorFeatureLayout(QVBoxLayout):
         QVBoxLayout.__init__(self)
         self.majorLocation = QComboBox()
         self.majorLocation.addItem('Major Location')
+        for location in Locations:
+            self.majorLocation.addItem(location.name)
+        self.majorLocation.currentIndexChanged.connect(self.changeMinorLocation)
         self.minorLocation = QComboBox()
         self.minorLocation.addItem('Minor Location')
         self.movement = QComboBox()
         self.movement.addItem('Movement')
+        for movement in Movements:
+            self.movement.addItem(movement.name)
         self.orientation = QComboBox()
         self.orientation.addItem('Orientation')
         self.addWidget(self.majorLocation)
         self.addWidget(self.minorLocation)
         self.addWidget(self.movement)
         self.addWidget(self.orientation)
+
+    def changeMinorLocation(self):
+        major = self.majorLocation.currentText()
+        self.minorLocation.clear()
+        try:
+            minors = Locations[major].value
+            for location in minors:
+                self.minorLocation.addItem(location)
+        except KeyError:
+            self.minorLocation.addItem('Minor Location')
 
 class ConfigLayout(QGridLayout):
 
@@ -110,8 +143,8 @@ class ConfigLayout(QGridLayout):
         self.setSpacing(0)
         self.setContentsMargins(0,0,0,0)
 
-        self.forearmButton = QCheckBox('1. Forearm')
-        self.addWidget(self.forearmButton, 0, 1)
+        # self.forearmButton = QCheckBox('1. Forearm')
+        # self.addWidget(self.forearmButton, 0, 1)
         self.addLayout(handshapes, 0, 2)
         self.handShapeMatch = QPushButton('Make Hand 2 = Hand 1')
         self.addWidget(self.handShapeMatch, 1, 0)
@@ -145,57 +178,54 @@ class HandShapeLayout(QVBoxLayout):
 
 
     def updateFromTranscription(self):
-        try:
-            problems = list()
+        problems = list()
+        indexConfig = self.transcription.slot4.text()
+        indexConfig = ','.join(indexConfig)
+        search = self.indexWidget.findText(indexConfig)
+        if search == -1:
+            problems.append('index (slot 4)')
+        else:
+            self.indexWidget.setCurrentText(indexConfig)
 
-            indexConfig = self.transcription.slot4.text()
-            indexConfig = ','.join(indexConfig)
-            search = self.indexWidget.findText(indexConfig)
-            if search == -1:
-                problems.append('index (slot 4)')
-            else:
-                self.indexWidget.setCurrentText(indexConfig)
+        middleConfig = self.transcription.slot5b.text()
+        middleConfig = ','.join(middleConfig)
+        search = self.middleWidget.findText(middleConfig)
+        if search == -1:
+            problems.append('middle (slot 5)')
+        else:
+            self.middleWidget.setCurrentText(middleConfig)
 
-            middleConfig = self.transcription.slot5b.text()
-            middleConfig = ','.join(middleConfig)
-            search = self.middleWidget.findText(middleConfig)
-            if search == -1:
-                problems.append('middle (slot 5)')
-            else:
-                self.middleWidget.setCurrentText(middleConfig)
+        ringConfig = self.transcription.slot6b.text()
+        ringConfig = ','.join(ringConfig)
+        search = self.ringWidget.findText(ringConfig)
+        if search == -1:
+            problems.append('ring (slot 6)')
+        else:
+            self.ringWidget.setCurrentText(ringConfig)
 
-            ringConfig = self.transcription.slot6b.text()
-            ringConfig = ','.join(ringConfig)
-            search = self.ringWidget.findText(ringConfig)
-            if search == -1:
-                problems.append('ring (slot 6)')
-            else:
-                self.ringWidget.setCurrentText(ringConfig)
+        pinkyConfig = self.transcription.slot7b.text()
+        pinkyConfig = ','.join(pinkyConfig)
+        search = self.pinkyWidget.findText(pinkyConfig)
+        if search == -1:
+            problems.append('pinky (slot 7)')
+        else:
+            self.pinkyWidget.setCurrentText(pinkyConfig)
 
-            pinkyConfig = self.transcription.slot7b.text()
-            pinkyConfig = ','.join(pinkyConfig)
-            search = self.pinkyWidget.findText(pinkyConfig)
-            if search == -1:
-                problems.append('pinky (slot 7)')
-            else:
-                self.pinkyWidget.setCurrentText(pinkyConfig)
+        if problems:
+            alert = QMessageBox()
+            alert.setWindowTitle('Transcription error')
+            alert.setText(('There was a problem trying to update your dropdown boxes for the following fingers on '
+                    'the {} hand:\n\n'
+                    '{}\n\n'
+                    'There are several reasons why this problem may have occured:'
+                    '\n\n1.Non-standard symbols\n\n'
+                    '2.Impossible combinations\n\n'
+                    '3.Blank transcriptions\n\n'
+                    'Transcription slots without any problems have been properly updated.'.format(
+                                 'second' if isinstance(self, SecondHandShapeLayout) else 'first',
+                                 ', '.join(problems))))
+            alert.exec_()
 
-            if problems:
-                alert = QMessageBox()
-                alert.setWindowTitle('Transcription error')
-                alert.setText(('There was a problem trying to update your dropdown boxes for the following fingers on '
-                        'the {} hand:\n\n'
-                        '{}\n\n'
-                        'There are several reasons why this problem may have occured:'
-                        '\n\n1.Non-standard symbols\n\n'
-                        '2.Impossible combinations\n\n'
-                        '3.Blank transcriptions\n\n'
-                        'Transcription slots without any problems have been properly updated.'.format(
-                                     'second' if isinstance(self, SecondHandShapeLayout) else 'first',
-                                     ', '.join(problems))))
-                alert.exec_()
-        except Exception as e:
-            print(e)
 
     def fingers(self):
         return {'global_Widget': self.global_Widget.currentText(),
@@ -224,7 +254,7 @@ class SecondHandShapeLayout(HandShapeLayout):
             widget.setCurrentText(value)
 
         values = self.otherTranscription.values()
-        self.transcription.slot1.setText(values[0])
+        self.transcription.slot1.setChecked(values[0])
         self.transcription.slot2.setText(values[1])
         self.transcription.slot3a.setText(values[2])
         self.transcription.slot3b.setText(values[3])
@@ -261,12 +291,13 @@ class TranscriptionLayout(QVBoxLayout):
 
         #SLOT 1
         self.lineLayout.addWidget(QLabel('['))
-        self.slot1 = QLineEdit()
-        self.slot1.setMaxLength(1)
-        self.slot1.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ '*(self.slot1.maxLength()+1)).width()
-        self.slot1.setFixedWidth(width)
-        self.slot1.setPlaceholderText('_'*self.slot1.maxLength())
+        self.slot1 = QCheckBox()
+        # self.slot1 = QLineEdit()
+        # self.slot1.setMaxLength(1)
+        # self.slot1.setFont(defaultFont)
+        # width = fontMetric.boundingRect('_ '*(self.slot1.maxLength()+1)).width()
+        # self.slot1.setFixedWidth(width)
+        # self.slot1.setPlaceholderText('_'*self.slot1.maxLength())
         self.lineLayout.addWidget(self.slot1)
         self.lineLayout.addWidget(QLabel(']1'))
         self.addLayout(self.lineLayout)
@@ -379,7 +410,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.indexBox, self.middleBox, self.ringBox, self.pinkyBox = boxes\
 
     def values(self):
-        return [self.slot1.text(), self.slot2.text(), self.slot3a.text(), self.slot3b.text(), self.slot4.text(),
+        return [self.slot1.isChecked(), self.slot2.text(), self.slot3a.text(), self.slot3b.text(), self.slot4.text(),
                 self.slot5a.text(), self.slot5b.text(), self.slot6a.text(), self.slot6b.text(),
                 self.slot7a.text(), self.slot7b.text()]
 
