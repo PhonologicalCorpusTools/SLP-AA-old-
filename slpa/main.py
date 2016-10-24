@@ -1,6 +1,7 @@
-from .imports import *
 import itertools
+import os
 from enum import Enum
+from .imports import *
 
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
@@ -51,7 +52,7 @@ class QApplicationMessaging(QApplication):
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
 
-class HandShape(Enum):
+class Fingers(Enum):
 
     global_ = (1, None)
     thumb = (2, None)
@@ -151,6 +152,7 @@ class ConfigLayout(QGridLayout):
         self.hand2 = hand2
         self.handShapeMatch.clicked.connect(self.hand2.match)
 
+
 class HandShapeLayout(QVBoxLayout):
 
     def __init__(self, parent = None, hand = None, transcription = None):
@@ -165,7 +167,7 @@ class HandShapeLayout(QVBoxLayout):
 
     def defineWidgets(self):
 
-        for finger in HandShape:
+        for finger in Fingers:
             setattr(self, finger.name+'Widget', QComboBox())
             w = getattr(self, finger.name+'Widget')
             if finger.features is None:
@@ -267,16 +269,16 @@ class SecondHandShapeLayout(HandShapeLayout):
         self.transcription.slot7b.setText(values[10])
 
 
-class GlossLayout(QBoxLayout):
+class GlossLayout(QHBoxLayout):
     def __init__(self, parent = None, comboBoxes = None):
-        QBoxLayout.__init__(self, QBoxLayout.TopToBottom, parent=parent)
+        #QBoxLayout.__init__(self, QBoxLayout.TopToBottom, parent=parent)
+        QHBoxLayout.__init__(self)
         defaultFont = QFont(FONT_NAME, FONT_SIZE)
         self.setContentsMargins(-1,-1,-1,0)
         self.glossEdit = QLineEdit()
         self.glossEdit.setFont(defaultFont)
         self.glossEdit.setPlaceholderText('Gloss')
         self.addWidget(self.glossEdit)
-
 
 class TranscriptionLayout(QVBoxLayout):
 
@@ -292,12 +294,6 @@ class TranscriptionLayout(QVBoxLayout):
         #SLOT 1
         self.lineLayout.addWidget(QLabel('['))
         self.slot1 = QCheckBox()
-        # self.slot1 = QLineEdit()
-        # self.slot1.setMaxLength(1)
-        # self.slot1.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ '*(self.slot1.maxLength()+1)).width()
-        # self.slot1.setFixedWidth(width)
-        # self.slot1.setPlaceholderText('_'*self.slot1.maxLength())
         self.lineLayout.addWidget(self.slot1)
         self.lineLayout.addWidget(QLabel(']1'))
         self.addLayout(self.lineLayout)
@@ -414,6 +410,16 @@ class TranscriptionLayout(QVBoxLayout):
                 self.slot5a.text(), self.slot5b.text(), self.slot6a.text(), self.slot6b.text(),
                 self.slot7a.text(), self.slot7b.text()]
 
+    def __str__(self):
+        value = self.values()
+        if value[0]:
+            values = ['Yes']
+        else:
+            values = ['No']
+        values.extend(value[1:])
+        values = ','.join(values)
+        return values
+
     def updateFromComboBoxes(self):
         indexText = self.indexBox.currentText().replace(',','')
         self.slot4.setText(indexText)
@@ -431,6 +437,7 @@ class TranscriptionLayout(QVBoxLayout):
 class HandConfigurationNames(QVBoxLayout):
     def __init__(self):
         QVBoxLayout.__init__(self)
+        self.addWidget(QLabel(''))
         self.addWidget(QLabel('1. Global'))
         self.addWidget(QLabel('2. Thumb'))
         self.addWidget(QLabel('3. Thumb/Finger'))
@@ -444,26 +451,25 @@ class HandConfigTab(QWidget):
     def __init__(self, hand_number):
         QWidget.__init__(self)
 
-        self.configLayout = QVBoxLayout()
+        self.configLayout = QGridLayout()
 
         self.hand1Transcription = TranscriptionLayout()
-        self.configLayout.addLayout(self.hand1Transcription)
+        self.configLayout.addLayout(self.hand1Transcription, 0, 0)
         self.hand2Transcription = TranscriptionLayout()
-        self.configLayout.addLayout(self.hand2Transcription)
+        self.configLayout.addLayout(self.hand2Transcription, 1, 0)
 
-        handsLayout = QGridLayout()
-        handNames = HandConfigurationNames()
-        handsLayout.addLayout(handNames, 0, 0)
+        handsLayout = QHBoxLayout()
         hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
-        handsLayout.addLayout(hand1, 0, 1)
+        handsLayout.addLayout(hand1)
         hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription, hand1, self.hand1Transcription)
-        handsLayout.addLayout(hand2, 0, 2)
+        handsLayout.addLayout(hand2)
+        self.configLayout.addLayout(handsLayout, 2, 0)
 
         self.hand1Transcription.setComboBoxes(hand1.fingerWidgets())
         self.hand2Transcription.setComboBoxes(hand2.fingerWidgets())
 
-        configLayout = ConfigLayout(hand_number, handsLayout, hand2)
-        self.configLayout.addLayout(configLayout)
+        #configLayout = ConfigLayout(hand_number, handsLayout, hand2)
+        #self.configLayout.addLayout(configLayout)
 
         self.setLayout(self.configLayout)
 
@@ -473,11 +479,16 @@ class MainWindow(QMainWindow):
         app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
+        self.createActions()
+        self.createMenus()
         self.wrapper = QWidget()
-
+        self.corpus = None
         layout = QVBoxLayout()
 
-        self.gloss = GlossLayout(self)
+        self.saveButton = QPushButton('Add word to corpus')
+        layout.addWidget(self.saveButton)
+
+        self.gloss = GlossLayout(parent=self)
         layout.addLayout(self.gloss)
 
         self.configTabs = QTabWidget()
@@ -486,12 +497,72 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(self.configTabs)
 
-        featuresLayout = MajorFeatureLayout()
-        layout.addLayout(featuresLayout)
-
+        self.featuresLayout = MajorFeatureLayout()
+        layout.addLayout(self.featuresLayout)
 
         self.wrapper.setLayout(layout)
         self.setCentralWidget(self.wrapper)
+
+        self.saveButton.clicked.connect(self.addToCorpus)
+
+    def addToCorpus(self):
+        if not self.gloss.glossEdit.text():
+            alert = QMessageBox()
+            alert.setWindowTitle('Missing gloss')
+            alert.setText('Please enter a gloss before saving this hand configuration')
+            alert.exec_()
+            return
+
+        if self.corpus is None:
+            alert = QMessageBox()
+            alert.setWindowTitle('No corpus loaded')
+            alert.setText('You must load a corpus before you can add words. Would you like to create corpus now?')
+            alert.addButton('Yes', QMessageBox.AcceptRole)
+            alert.addButton('No', QMessageBox.RejectRole)
+            alert.exec_()
+            if alert.clickedButton().text() == 'Yes':
+                try:
+                    kwargs = {'config1hand1':None, 'config1hand2': None, 'config2hand1': None, 'config2hand2': None,
+                              'major': None, 'minor': None, 'movement': None, 'orientation': None}
+                    kwargs['config1hand1'] = self.configTabs.widget(0).findChild(TranscriptionLayout)
+                    kwargs['config2hand1'] = self.configTabs.widget(1).findChild(TranscriptionLayout)
+                    gloss = self.gloss.glossEdit.text().strip()
+                    kwargs['gloss'] = gloss
+                    kwargs['path'] = os.path.join(os.getcwd(), gloss+'.csv')
+                    saveHandShape(kwargs)
+                except Exception as e:
+                    print(e)
+
+
+            elif alert.clickedButton().text() == 'No':
+                print('No')
+                return
+
+    def createMenus(self):
+        self.fileMenu = self.menuBar().addMenu("&Menu")
+        self.fileMenu.addAction(self.loadCorpusAct)
+        self.fileMenu.addAction(self.saveCorpusAct)
+        self.fileMenu.addAction(self.quitAct)
+
+    def createActions(self):
+
+        self.loadCorpusAct = QAction( "&Load corpus...",
+                self,
+                statusTip="Load a corpus", triggered=self.loadCorpus)
+
+        self.saveCorpusAct = QAction( "&Save corpus...",
+                self,
+                statusTip="Save a corpus", triggered=self.saveCorpus)
+
+        self.quitAct = QAction( "&Quit",
+                self,
+                statusTip="Quit", triggered=self.close)
+
+    def saveCorpus(self):
+        pass
+
+    def loadCorpus(self):
+        pass
 
 
     def sizeHint(self):
@@ -527,3 +598,21 @@ def clean(item):
             item.deleteLater()
         except (RuntimeError, AttributeError): # deleted or no deleteLater method
             pass
+
+
+def saveHandShape(kwargs):
+    # kwargs = {'config1hand1': None, 'config1hand2': None, 'config2hand1': None, 'config2hand2': None,
+    #           'major': None, 'minor': None, 'movement': None, 'orientation': None}
+    path = kwargs.pop('path')
+    header = list(kwargs.keys())
+    with open(path, 'w') as file:
+        print(','.join(header), file=file)
+        line = list()
+        for kw,value in kwargs.items():
+            if value is None:
+                line.append('None')
+            else:
+                line.append(str(value))
+        line = ','.join(line)
+        print(line, file=file)
+
