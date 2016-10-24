@@ -417,7 +417,7 @@ class TranscriptionLayout(QVBoxLayout):
         else:
             values = ['No']
         values.extend(value[1:])
-        values = ','.join(values)
+        values = ';'.join(values)
         return values
 
     def updateFromComboBoxes(self):
@@ -473,6 +473,36 @@ class HandConfigTab(QWidget):
 
         self.setLayout(self.configLayout)
 
+class NewCorpusDialog(QDialog):
+
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setWindowTitle('New Corpus')
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel('What do you want to call this corpus?'))
+        self.nameEdit = QLineEdit()
+        layout.addWidget(self.nameEdit)
+        buttonLayout = QHBoxLayout()
+        ok = QPushButton('OK')
+        cancel = QPushButton('Cancel')
+        ok.clicked.connect(self.accept)
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+    def accept(self):
+        name = self.nameEdit.text()
+        if not name:
+            alert = QMessageBox()
+            alert.setWindowTitle('Missing information')
+            alert.setText('Please enter a name for your corpus')
+            alert.exec_()
+            return
+        else:
+            self.name = name
+        QDialog.accept(self)
 
 class MainWindow(QMainWindow):
     def __init__(self,app):
@@ -481,7 +511,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('SLP-Annotator')
         self.createActions()
         self.createMenus()
-        self.wrapper = QWidget()
+
+        self.wrapper = QWidget()#placeholder for central widget in QMainWindow
         self.corpus = None
         layout = QVBoxLayout()
 
@@ -505,38 +536,72 @@ class MainWindow(QMainWindow):
 
         self.saveButton.clicked.connect(self.addToCorpus)
 
+        self.corpusDock = QDockWidget()
+        self.corpusDock.setWindowTitle('Corpus')
+        self.corpusDock.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.corpusDock.setFeatures(QDockWidget.NoDockWidgetFeatures)
+        self.dockWrapper = QWidget()
+        self.dockLayout = QVBoxLayout()
+        self.dockWrapper.setLayout(self.dockLayout)
+        self.corpusDock.setWidget(self.dockWrapper)
+        # self.corpusDock.widget().layout().addWidget(QLabel('vikings'))
+        # self.corpusDock.widget().layout().addWidget(QLabel('spam and eggs'))
+        self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
+
     def addToCorpus(self):
-        if not self.gloss.glossEdit.text():
-            alert = QMessageBox()
-            alert.setWindowTitle('Missing gloss')
-            alert.setText('Please enter a gloss before saving this hand configuration')
-            alert.exec_()
-            return
-
-        if self.corpus is None:
-            alert = QMessageBox()
-            alert.setWindowTitle('No corpus loaded')
-            alert.setText('You must load a corpus before you can add words. Would you like to create corpus now?')
-            alert.addButton('Yes', QMessageBox.AcceptRole)
-            alert.addButton('No', QMessageBox.RejectRole)
-            alert.exec_()
-            if alert.clickedButton().text() == 'Yes':
-                try:
-                    kwargs = {'config1hand1':None, 'config1hand2': None, 'config2hand1': None, 'config2hand2': None,
-                              'major': None, 'minor': None, 'movement': None, 'orientation': None}
-                    kwargs['config1hand1'] = self.configTabs.widget(0).findChild(TranscriptionLayout)
-                    kwargs['config2hand1'] = self.configTabs.widget(1).findChild(TranscriptionLayout)
-                    gloss = self.gloss.glossEdit.text().strip()
-                    kwargs['gloss'] = gloss
-                    kwargs['path'] = os.path.join(os.getcwd(), gloss+'.csv')
-                    saveHandShape(kwargs)
-                except Exception as e:
-                    print(e)
-
-
-            elif alert.clickedButton().text() == 'No':
-                print('No')
+        try:
+            if not self.gloss.glossEdit.text():
+                alert = QMessageBox()
+                alert.setWindowTitle('Missing gloss')
+                alert.setText('Please enter a gloss before saving this hand configuration')
+                alert.exec_()
                 return
+
+            if self.corpus is None:
+                alert = QMessageBox()
+                alert.setWindowTitle('No corpus loaded')
+                alert.setText('You must load a corpus before you can add words. Would you like to create corpus now?')
+                alert.addButton('Yes', QMessageBox.AcceptRole)
+                alert.addButton('No', QMessageBox.RejectRole)
+                alert.exec_()
+                if alert.clickedButton().text() == 'Yes':
+                    nameDialog = NewCorpusDialog()
+                    result = nameDialog.exec_()
+                    if not result:
+                        return
+                    else:
+                        name = nameDialog.name
+                    kwargs = self.generateKwargs()
+                    kwargs['file_mode'] = 'w'
+                    kwargs['path'] = os.path.join(os.getcwd(), name + '.csv')
+                    self.corpus = kwargs['path']
+                    saveHandShape(kwargs)
+                    self.corpusDock.widget().layout().addWidget(QLabel(kwargs['gloss']))
+                    QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
+
+                elif alert.clickedButton().text() == 'No':
+                    return
+
+            else: #corpus exists
+                kwargs = self.generateKwargs()
+                kwargs['path'] = self.corpus
+                kwargs['file_mode'] = 'a'
+                saveHandShape(kwargs)
+                self.corpusDock.widget().layout().addWidget(QLabel(kwargs['gloss']))
+                QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
+        except Exception as e:
+            print(e)
+
+
+    def generateKwargs(self):
+        kwargs = {'path': None, 'file_mode': None,
+                'hand1config': None, 'hand2config': None,
+                'major': None, 'minor': None, 'movement': None, 'orientation': None}
+        kwargs['hand1config'] = self.configTabs.widget(0).findChildren(TranscriptionLayout)
+        kwargs['hand2config'] = self.configTabs.widget(1).findChildren(TranscriptionLayout)
+        gloss = self.gloss.glossEdit.text().strip()
+        kwargs['gloss'] = gloss
+        return kwargs
 
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&Menu")
@@ -559,7 +624,7 @@ class MainWindow(QMainWindow):
                 statusTip="Quit", triggered=self.close)
 
     def saveCorpus(self):
-        pass
+        self.addToCorpus()
 
     def loadCorpus(self):
         pass
@@ -601,14 +666,18 @@ def clean(item):
 
 
 def saveHandShape(kwargs):
-    # kwargs = {'config1hand1': None, 'config1hand2': None, 'config2hand1': None, 'config2hand2': None,
-    #           'major': None, 'minor': None, 'movement': None, 'orientation': None}
     path = kwargs.pop('path')
-    header = list(kwargs.keys())
-    with open(path, 'w') as file:
-        print(','.join(header), file=file)
+    file_mode = kwargs.pop('file_mode')
+    kwargs['hand1config'] = '&'.join([str(kw) for kw in kwargs['hand1config']])
+    kwargs['hand2config'] = '&'.join([str(kw) for kw in kwargs['hand2config']])
+    headers = sorted(list(kwargs.keys()))
+    with open(path, mode=file_mode, encoding='utf-8') as file:
+        if file_mode == 'w':
+            print(','.join(headers), file=file)
         line = list()
-        for kw,value in kwargs.items():
+        for header in headers:
+            value = kwargs[header]
+            print(header, value)
             if value is None:
                 line.append('None')
             else:
