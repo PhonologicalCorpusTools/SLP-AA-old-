@@ -110,33 +110,38 @@ class MajorFeatureLayout(QVBoxLayout):
 
     def __init__(self):
         QVBoxLayout.__init__(self)
-        self.majorLocation = QComboBox()
-        self.majorLocation.addItem('Major Location')
+        self.major = QComboBox()
+        self.major.addItem('Major Location')
         for location in Locations:
-            self.majorLocation.addItem(location.name)
-        self.majorLocation.currentIndexChanged.connect(self.changeMinorLocation)
-        self.minorLocation = QComboBox()
-        self.minorLocation.addItem('Minor Location')
+            self.major.addItem(location.name)
+        self.major.currentIndexChanged.connect(self.changeMinorLocation)
+        self.minor = QComboBox()
+        self.minor.addItem('Minor Location')
         self.movement = QComboBox()
         self.movement.addItem('Movement')
         for movement in Movements:
             self.movement.addItem(movement.name)
         self.orientation = QComboBox()
         self.orientation.addItem('Orientation')
-        self.addWidget(self.majorLocation)
-        self.addWidget(self.minorLocation)
+        self.addWidget(self.major)
+        self.addWidget(self.minor)
         self.addWidget(self.movement)
         self.addWidget(self.orientation)
 
     def changeMinorLocation(self):
-        major = self.majorLocation.currentText()
-        self.minorLocation.clear()
+        majorText = self.major.currentText()
+        self.minor.clear()
         try:
-            minors = Locations[major].value
+            minors = Locations[majorText].value
             for location in minors:
-                self.minorLocation.addItem(location)
+                self.minor.addItem(location)
         except KeyError:
-            self.minorLocation.addItem('Minor Location')
+            self.minor.addItem('Minor Location')
+
+    def reset(self):
+        self.major.setCurrentIndex(0)
+        self.movement.setCurrentIndex(0)
+        self.orientation.setCurrentIndex(0)
 
 class ConfigLayout(QGridLayout):
 
@@ -179,7 +184,6 @@ class HandShapeLayout(QVBoxLayout):
                     w.addItem(triple)
             self.addWidget(w)
 
-
     def updateFromTranscription(self):
         problems = list()
         indexConfig = self.transcription.slot4.text()
@@ -220,8 +224,8 @@ class HandShapeLayout(QVBoxLayout):
             alert.setText(('There was a problem trying to update your dropdown boxes for the following fingers on '
                     'the {} hand:\n\n'
                     '{}\n\n'
-                    'There are several reasons why this problem may have occured:'
-                    '\n\n1.Non-standard symbols\n\n'
+                    'There are several reasons why this problem may have occured:\n\n'
+                    '1.Non-standard symbols\n\n'
                     '2.Impossible combinations\n\n'
                     '3.Blank transcriptions\n\n'
                     'Transcription slots without any problems have been properly updated.'.format(
@@ -464,14 +468,15 @@ class HandConfigTab(QWidget):
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
 
         handsLayout = QHBoxLayout()
-        hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
-        handsLayout.addLayout(hand1)
-        hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription, hand1, self.hand1Transcription)
-        handsLayout.addLayout(hand2)
+        self.hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
+        handsLayout.addLayout(self.hand1)
+        self.hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription,
+                                           self.hand1, self.hand1Transcription)
+        handsLayout.addLayout(self.hand2)
         self.configLayout.addLayout(handsLayout, 2, 0)
 
-        self.hand1Transcription.setComboBoxes(hand1.fingerWidgets())
-        self.hand2Transcription.setComboBoxes(hand2.fingerWidgets())
+        self.hand1Transcription.setComboBoxes(self.hand1.fingerWidgets())
+        self.hand2Transcription.setComboBoxes(self.hand2.fingerWidgets())
 
         self.setLayout(self.configLayout)
 
@@ -480,17 +485,16 @@ class HandConfigTab(QWidget):
         for slot in self.hand1Transcription.slots[1:]:
             textBox = getattr(self.hand1Transcription, slot)
             textBox.setText('')
+
         self.hand2Transcription.slot1.setChecked(False)
         for slot in self.hand2Transcription.slots[1:]:
             textBox = getattr(self.hand2Transcription, slot)
             textBox.setText('')
 
-
-class CorpusList(QListWidget):
-
-    def __init__(self):
-        QListWidget.__init__(self)
-
+        for widget in self.hand1.fingerWidgets():
+            widget.setCurrentIndex(0)
+        for widget in self.hand2.fingerWidgets():
+            widget.setCurrentIndex(0)
 
 class MainWindow(QMainWindow):
     def __init__(self,app):
@@ -528,7 +532,7 @@ class MainWindow(QMainWindow):
         self.corpusDock.setWindowTitle('Corpus')
         self.corpusDock.setAllowedAreas(Qt.RightDockWidgetArea)
         self.corpusDock.setFeatures(QDockWidget.NoDockWidgetFeatures)
-        self.dockWrapper = QWidget()#CorpusList()
+        self.dockWrapper = QWidget()
         self.dockLayout = QVBoxLayout()
         self.dockWrapper.setLayout(self.dockLayout)
         self.corpusDock.setWidget(self.dockWrapper)
@@ -544,26 +548,23 @@ class MainWindow(QMainWindow):
             return
         for i in reversed(range(self.corpusDock.widget().layout().count())):
             self.corpusDock.widget().layout().itemAt(i).widget().setParent(None)
+
         with open(path, mode='r', encoding='utf-8') as file:
-            headers = file.readline()
+            headers = file.readline().strip().split(',')
             for line in file:
                 line = line.split(',')
-                data = dict()
-                data['gloss'] = line[0]
-                data['config1'] = line[1]
-                data['config2'] = line[2]
-                data['major'] = line[3]
-                data['minor'] = line[4]
-                data['movement'] = line[5]
-                data['orientation'] = line[6]
+                data = {headers[n]:line[n] for n in range(len(headers))}
                 button = DataButton(data)
+                button.sendData.connect(self.loadHandShape)
                 self.corpusDock.widget().layout().addWidget(button)
+        self.newGloss(giveWarning=False)
+        self.corpus = Corpus(path, None)
 
     def saveCorpus(self):
         if not self.gloss.glossEdit.text():
             alert = QMessageBox()
             alert.setWindowTitle('Missing gloss')
-            alert.setText('Please enter a gloss before saving this hand configuration')
+            alert.setText('Please enter a gloss before saving')
             alert.exec_()
             return
 
@@ -596,6 +597,9 @@ class MainWindow(QMainWindow):
 
             elif role == 0:
                 self.loadCorpus()
+                button = DataButton(kwargs)
+                button.sendData.connect(self.loadHandShape)
+                self.corpusDock.widget().layout().addWidget(button)
 
         else: #corpus exists
             kwargs = self.generateKwargs()
@@ -642,6 +646,14 @@ class MainWindow(QMainWindow):
             textBox = getattr(config2.hand2Transcription, slot)
             textBox.setText(value)
 
+        for name in ['major', 'minor', 'movement', 'orientation']:
+            widget = getattr(self.featuresLayout, name)
+            index = widget.findText(buttonData[name])
+            if index == -1:
+                index = 0
+            widget.setCurrentIndex(index)
+
+
     def generateKwargs(self):
         kwargs = {'path': None, 'file_mode': None,
                 'config1': None, 'config2': None,
@@ -650,6 +662,14 @@ class MainWindow(QMainWindow):
         kwargs['config2'] = self.configTabs.widget(1).findChildren(TranscriptionLayout)
         gloss = self.gloss.glossEdit.text().strip()
         kwargs['gloss'] = gloss
+        major = self.featuresLayout.major.currentText()
+        kwargs['major'] = 'None' if major == 'Major Location' else major
+        minor = self.featuresLayout.minor.currentText()
+        kwargs['minor'] = 'None' if minor == 'Minor Location' else minor
+        movement = self.featuresLayout.movement.currentText()
+        kwargs['movement'] = 'None' if movement == 'Movement' else movement
+        orientation = self.featuresLayout.orientation.currentText()
+        kwargs['orientation'] = 'None' if orientation == 'Orientation' else orientation
         return kwargs
 
     def createMenus(self):
@@ -698,23 +718,23 @@ class MainWindow(QMainWindow):
             item = self.__dict__[i]
             clean(item)
 
-    def newGloss(self):
-        alert = QMessageBox()
-        alert.setWindowTitle('Warning')
-        alert.setText('This will erase the information for the current word, and you will lose any unsaved changes.')
-        alert.addButton('OK', QMessageBox.AcceptRole)
-        alert.addButton('Cancel', QMessageBox.RejectRole)
-        alert.exec_()
-        role = alert.buttonRole(alert.clickedButton())
-        if role == 0:#AcceptRole:
-            pass
-        elif role == 1:#reject role
-            return
-
-
+    def newGloss(self, giveWarning=True):
+        if giveWarning:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('This will erase the information for the current word, and you will lose any unsaved changes.')
+            alert.addButton('OK', QMessageBox.AcceptRole)
+            alert.addButton('Cancel', QMessageBox.RejectRole)
+            alert.exec_()
+            role = alert.buttonRole(alert.clickedButton())
+            if role == 0:#AcceptRole:
+                pass
+            elif role == 1:#reject role
+                return
         self.gloss.glossEdit.setText('')
         self.configTabs.widget(0).clearAll()
         self.configTabs.widget(1).clearAll()
+        self.featuresLayout.reset()
 
 
 class Corpus():
@@ -743,7 +763,7 @@ class DataButton(QPushButton):
         self.movement = data['movement']
         self.orientation = data['orientation']
         self.setData()
-        self.clicked.connect(self.loadHandShape)
+        self.clicked.connect(self.emitData)
 
     def parseConfiguration(self, config, num):
         hand1,hand2 = config.split('&')
@@ -759,7 +779,7 @@ class DataButton(QPushButton):
                     'config2hand1': self.config2hand1, 'config2hand2': self.config2hand2,
                     'gloss': self.gloss}
 
-    def loadHandShape(self):
+    def emitData(self):
         self.sendData.emit(self.data)
 
 
@@ -798,13 +818,29 @@ def clean(item):
         except (RuntimeError, AttributeError): # deleted or no deleteLater method
             pass
 
+def sortData(data):
+    if data == 'gloss':
+        return 0
+    elif data == 'config1':
+        return 1
+    elif data == 'config2':
+        return 2
+    elif data == 'major':
+        return 3
+    elif data == 'minor':
+        return 4
+    elif data == 'movement':
+        return 5
+    elif data == 'orientation':
+        return 6
 
 def saveHandShape(kwargs):
+    #see MainWindow.generateKwargs() for where this data comes from in the first place
     path = kwargs.pop('path')
     file_mode = kwargs.pop('file_mode')
     kwargs['config1'] = '&'.join([str(kw) for kw in kwargs['config1']])
     kwargs['config2'] = '&'.join([str(kw) for kw in kwargs['config2']])
-    headers = sorted(list(kwargs.keys()))
+    headers = sorted(list(kwargs.keys()), key=sortData)
     with open(path, mode=file_mode, encoding='utf-8') as file:
         if file_mode == 'w':
             print(','.join(headers), file=file)
