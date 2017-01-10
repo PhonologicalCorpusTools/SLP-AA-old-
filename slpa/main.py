@@ -3,6 +3,9 @@ import itertools
 import os
 from enum import Enum
 from .imports import *
+from .handshapes import *
+from .lexicon import Corpus
+from slpa import __version__ as currentSLPAversion
 
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
@@ -53,58 +56,7 @@ class QApplicationMessaging(QApplication):
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
 
-class Fingers(Enum):
 
-    global_ = (1, None)
-    thumb = (2, None)
-    thumbAndFinger = (3, None)
-    index = (4, 'EFHi')
-    middle = (5, 'EFHi')
-    ring = (6, 'EFHi')
-    pinky = (7, 'EFHi')
-
-    def __init__(self, num, symbols):
-        self.num = num
-        self.symbols = symbols
-
-    @property
-    def features(self):
-        if self.symbols is None:
-            return None
-        triples = [triple for triple in itertools.product(self.symbols, repeat=3)]
-        marked = list()
-        for n in range(len(triples)):
-            # Constraint - no medial joint can be 'H'
-            if triples[n][1] == 'H':
-                marked.append(n)
-            # Constraint - distal joint must match medial join in flexion
-            # distal = triples[n][2]
-            # medial = triples[n][1]
-            # if (distal == 'f' and medial=='F') or (distal =='F' and medial == 'f'):
-            #     marked.append(n)
-        triples = [triples[n] for n in range(len(triples)) if not n in marked]
-        return triples
-
-class Locations(Enum):
-
-    Head = ['CheekNose', 'Chin', 'Eye', 'Forehead', 'HeadTop', 'Mouth', 'UnderChin', 'UpperLip', 'Other']
-    Arm = ['ElbowBack', 'ElbowFront', 'ForearmBack', 'ForearmFront', 'ForearmUlnar', 'UpperArm',
-           'WristBack', 'WristFront', 'Other']
-    Trunk = ['Clavicle', 'Hips', 'Neck', 'Neutral', 'Shoulder', 'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist', 'Other']
-    NonDominant = ['FingerBack', 'FingerFront', 'FingerRadial', 'FingerUlnar', 'Heel', 'Palm', 'PalmBack', 'Other']
-    Neutral = ['FingerRadial', 'Neutral', 'Palm', 'Other']
-    Other = []
-
-
-class Movements(Enum):
-
-    Arc = 1
-    Circular = 2
-    Straight = 3
-    BackAndForth = 4
-    Other = 5
-    None_ = 6
-    Multiple = 7
 
 class MajorFeatureLayout(QVBoxLayout):
 
@@ -528,6 +480,18 @@ class MainWindow(QMainWindow):
 
         self.saveButton.clicked.connect(self.saveCorpus)
 
+        self.makeCorpusDock()
+
+    def clearLayout(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget() is not None:
+                child.widget().deleteLater()
+            elif child.layout() is not None:
+                clearLayout(child.layout())
+
+
+    def makeCorpusDock(self):
         self.corpusDock = QDockWidget()
         self.corpusDock.setWindowTitle('Corpus')
         self.corpusDock.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -536,18 +500,17 @@ class MainWindow(QMainWindow):
         self.dockLayout = QVBoxLayout()
         self.dockWrapper.setLayout(self.dockLayout)
         self.corpusDock.setWidget(self.dockWrapper)
-        # self.corpusDock.widget().layout().addWidget(QPushButton('vikings'))
-        # self.corpusDock.widget().layout().addWidget(QPushButton('spam and eggs'))
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
     def loadCorpus(self):
         load = QFileDialog.getOpenFileName(self,
-                'Open Corpus File', os.getcwd(), '*.txt *.csv')
+                'Open Corpus File', os.getcwd(), '*.csv')
         path = load[0]
         if not path:
             return
-        for i in reversed(range(self.corpusDock.widget().layout().count())):
-            self.corpusDock.widget().layout().itemAt(i).widget().setParent(None)
+        # for i in reversed(range(self.corpusDock.widget().layout().count())):
+        #     self.corpusDock.widget().layout().itemAt(i).widget().setParent(None)
+        self.clearLayout(self.dockLayout)
 
         with open(path, mode='r', encoding='utf-8') as file:
             headers = file.readline().strip().split(',')
@@ -558,7 +521,7 @@ class MainWindow(QMainWindow):
                 button.sendData.connect(self.loadHandShape)
                 self.corpusDock.widget().layout().addWidget(button)
         self.newGloss(giveWarning=False)
-        self.corpus = Corpus(path, None)
+        self.corpus = Corpus(path)
 
     def saveCorpus(self):
         if not self.gloss.glossEdit.text():
@@ -569,6 +532,7 @@ class MainWindow(QMainWindow):
             return
 
         if self.corpus is None:
+            kwargs = self.generateKwargs()
             alert = QMessageBox()
             alert.setWindowTitle('No corpus loaded')
             alert.setText('You must have a corpus loaded before you can save words. What would you like to do?')
@@ -576,41 +540,66 @@ class MainWindow(QMainWindow):
             alert.addButton('Create a new corpus', QMessageBox.RejectRole)
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
-            if role ==  1:
-                savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.txt *.csv')
+            if role ==  1:#create new corpus
+                savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.csv')
 
                 path = savename[0]
                 if not path:
                     return
-                kwargs = self.generateKwargs()
+                if not path.endswith('.csv') or not path.endswith('.txt'):
+                    path = path+'.csv'
                 kwargs['file_mode'] = 'w'
                 kwargs['path'] = path
-                self.corpus = Corpus(kwargs['path'], None)
+                self.corpus = Corpus(kwargs['path'])
                 saveHandShape(kwargs)
 
                 button = DataButton(kwargs)
                 button.sendData.connect(self.loadHandShape)
                 self.corpusDock.widget().layout().addWidget(button)
 
+                self.corpus.addWord(Sign(button.data))
+
                 QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
                 #self.newGloss()
 
-            elif role == 0:
+            elif role == 0: #load existing corpus and add to it
                 self.loadCorpus()
+                print(kwargs)
                 button = DataButton(kwargs)
                 button.sendData.connect(self.loadHandShape)
                 self.corpusDock.widget().layout().addWidget(button)
+                self.corpus.addWord(kwargs)
 
         else: #corpus exists
             kwargs = self.generateKwargs()
             kwargs['path'] = self.corpus.path
             kwargs['file_mode'] = 'a'
+            if kwargs['gloss'] in self.corpus.wordlist:
+                alert = QMessageBox()
+                alert.setWindowTitle('Duplicate entry')
+                alert.setText('A word with the gloss {} already exists in your corpus. '
+                                'What do you want to do?'.format(kwargs['gloss']))
+                alert.addButton('Overwrite exising word', QMessageBox.AcceptRole)
+                alert.addButton('Go back and edit the gloss', QMessageBox.RejectRole)
+                alert.exec_()
+                role = alert.buttonRole(alert.clickedButton())
+                if role == 0:#overwrite
+                    pass
+                elif role == 1:#edit
+                    return
+
             saveHandShape(kwargs)
             button = DataButton(kwargs)
             button.sendData.connect(self.loadHandShape)
             self.corpusDock.widget().layout().addWidget(button)
+            self.corpus.addWord(Sign(kwargs))
             QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
             #self.newGloss()
+
+    def newCorpus(self):
+        self.corpus = None
+        self.newGloss()
+        self.clearLayout(self.dockLayout)
 
     def loadHandShape(self, buttonData):
 
@@ -653,6 +642,22 @@ class MainWindow(QMainWindow):
                 index = 0
             widget.setCurrentIndex(index)
 
+    def generateSign(self):
+        data = {'config1': None, 'config2': None,
+                'major': None, 'minor': None, 'movement': None, 'orientation': None}
+        data['config1'] = self.configTabs.widget(0).findChildren(TranscriptionLayout)
+        data['config2'] = self.configTabs.widget(1).findChildren(TranscriptionLayout)
+        gloss = self.gloss.glossEdit.text().strip()
+        data['gloss'] = gloss
+        major = self.featuresLayout.major.currentText()
+        data['major'] = 'None' if major == 'Major Location' else major
+        minor = self.featuresLayout.minor.currentText()
+        data['minor'] = 'None' if minor == 'Minor Location' else minor
+        movement = self.featuresLayout.movement.currentText()
+        data['movement'] = 'None' if movement == 'Movement' else movement
+        orientation = self.featuresLayout.orientation.currentText()
+        data['orientation'] = 'None' if orientation == 'Orientation' else orientation
+        return Sign(data)
 
     def generateKwargs(self):
         kwargs = {'path': None, 'file_mode': None,
@@ -672,14 +677,27 @@ class MainWindow(QMainWindow):
         kwargs['orientation'] = 'None' if orientation == 'Orientation' else orientation
         return kwargs
 
+    def printCorpusToConsole(self):
+        print(self.corpus.name, len(self.corpus))
+        for word in self.corpus:
+            print(word.gloss)
+
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&Menu")
+        self.fileMenu.addAction(self.newCorpusAct)
         self.fileMenu.addAction(self.loadCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAct)
         self.fileMenu.addAction(self.newGlossAct)
+        self.fileMenu.addAction(self.printCorpusToConsoleAct)
         self.fileMenu.addAction(self.quitAct)
 
     def createActions(self):
+
+        self.printCorpusToConsoleAct = QAction('Print corpus to console', self, triggered=self.printCorpusToConsole)
+
+        self.newCorpusAct = QAction('&New corpus...',
+                                    self,
+                                    statusTip="Start a new corpus", triggered = self.newCorpus)
 
         self.loadCorpusAct = QAction( "&Load corpus...",
                 self,
@@ -722,30 +740,21 @@ class MainWindow(QMainWindow):
         if giveWarning:
             alert = QMessageBox()
             alert.setWindowTitle('Warning')
-            alert.setText('This will erase the information for the current word, and you will lose any unsaved changes.')
-            alert.addButton('OK', QMessageBox.AcceptRole)
-            alert.addButton('Cancel', QMessageBox.RejectRole)
+            alert.setText('This will erase the information for the current word, '
+                          'and you will lose any unsaved changes.\n What would you like to do?')
+            alert.addButton('Continue without saving', QMessageBox.AcceptRole)
+            alert.addButton('Go back', QMessageBox.RejectRole)
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
             if role == 0:#AcceptRole:
                 pass
-            elif role == 1:#reject role
+            elif role == 1:#RejectRole
                 return
         self.gloss.glossEdit.setText('')
         self.configTabs.widget(0).clearAll()
         self.configTabs.widget(1).clearAll()
         self.featuresLayout.reset()
 
-
-class Corpus():
-
-    def __init__(self, path, handshapes):
-        self.path = path
-        self.name = os.path.split(path)[-1]
-        self.words = list()
-        if handshapes is not None:
-            for hs in handshapes:
-                self.words.append(hs)
 
 class DataButton(QPushButton):
 
@@ -781,7 +790,6 @@ class DataButton(QPushButton):
 
     def emitData(self):
         self.sendData.emit(self.data)
-
 
 class TranscriptionData():
 
@@ -841,6 +849,7 @@ def saveHandShape(kwargs):
     kwargs['config1'] = '&'.join([str(kw) for kw in kwargs['config1']])
     kwargs['config2'] = '&'.join([str(kw) for kw in kwargs['config2']])
     headers = sorted(list(kwargs.keys()), key=sortData)
+
     with open(path, mode=file_mode, encoding='utf-8') as file:
         if file_mode == 'w':
             print(','.join(headers), file=file)
