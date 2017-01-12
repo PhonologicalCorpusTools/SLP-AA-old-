@@ -11,7 +11,7 @@ class Corpus():
                          }
     basic_attributes = ['spelling', 'transcription', 'frequency']
 
-    def __init__(self, path):
+    def __init__(self, name, path):
         self.path = path
         self.name = os.path.split(path)[-1]
         self.wordlist = dict()

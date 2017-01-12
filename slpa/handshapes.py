@@ -78,3 +78,6 @@ class Sign():
 
     def __repr__(self):
         return self.__str__()
+
+    def getConfigInfo(self, config_num, hand_num):
+        pass

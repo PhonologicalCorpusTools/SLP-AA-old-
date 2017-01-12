@@ -5,6 +5,8 @@ from enum import Enum
 from .imports import *
 from .handshapes import *
 from .lexicon import Corpus
+from .binary import *
+from .settings import Settings
 from slpa import __version__ as currentSLPAversion
 
 FONT_NAME = 'Arial'
@@ -453,6 +455,9 @@ class MainWindow(QMainWindow):
         app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
+
+        self.settings = Settings()
+
         self.createActions()
         self.createMenus()
 
@@ -504,23 +509,13 @@ class MainWindow(QMainWindow):
 
     def loadCorpus(self):
         load = QFileDialog.getOpenFileName(self,
-                'Open Corpus File', os.getcwd(), '*.csv')
+                'Open Corpus File', os.getcwd(), '*.corpus')
         path = load[0]
         if not path:
             return
-        # for i in reversed(range(self.corpusDock.widget().layout().count())):
-        #     self.corpusDock.widget().layout().itemAt(i).widget().setParent(None)
         self.clearLayout(self.dockLayout)
-
-        with open(path, mode='r', encoding='utf-8') as file:
-            headers = file.readline().strip().split(',')
-            for line in file:
-                line = line.split(',')
-                data = {headers[n]:line[n] for n in range(len(headers))}
-                button = DataButton(data)
-                button.sendData.connect(self.loadHandShape)
-                self.corpusDock.widget().layout().addWidget(button)
         self.newGloss(giveWarning=False)
+
         self.corpus = Corpus(path)
 
     def saveCorpus(self):
@@ -541,34 +536,34 @@ class MainWindow(QMainWindow):
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
             if role ==  1:#create new corpus
-                savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.csv')
+                savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.corpus')
 
                 path = savename[0]
                 if not path:
                     return
-                if not path.endswith('.csv') or not path.endswith('.txt'):
-                    path = path+'.csv'
+                if not path.endswith('.corpus'):
+                    path = path + '.corpus'
                 kwargs['file_mode'] = 'w'
                 kwargs['path'] = path
                 self.corpus = Corpus(kwargs['path'])
-                saveHandShape(kwargs)
-
+                #saveHandShape(kwargs)
                 button = DataButton(kwargs)
                 button.sendData.connect(self.loadHandShape)
                 self.corpusDock.widget().layout().addWidget(button)
-
                 self.corpus.addWord(Sign(button.data))
-
+                save_binary(self.corpus,
+                            os.path.join(self.settings['storage'], 'CORPUS', self.corpus.name + '.corpus'))
                 QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
                 #self.newGloss()
 
             elif role == 0: #load existing corpus and add to it
                 self.loadCorpus()
-                print(kwargs)
                 button = DataButton(kwargs)
                 button.sendData.connect(self.loadHandShape)
                 self.corpusDock.widget().layout().addWidget(button)
                 self.corpus.addWord(kwargs)
+                save_binary(self.corpus,
+                            os.path.join(self.settings['storage'], 'CORPUS', self.corpus.name + '.corpus'))
 
         else: #corpus exists
             kwargs = self.generateKwargs()
@@ -864,3 +859,12 @@ def saveHandShape(kwargs):
         line = ','.join(line)
         print(line, file=file)
 
+def loadcsvCorpus(path):
+    with open(path, mode='r', encoding='utf-8') as file:
+        headers = file.readline().strip().split(',')
+        for line in file:
+            line = line.split(',')
+            data = {headers[n]: line[n] for n in range(len(headers))}
+            button = DataButton(data)
+            button.sendData.connect(self.loadHandShape)
+            self.corpusDock.widget().layout().addWidget(button)
