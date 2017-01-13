@@ -465,6 +465,26 @@ class MainWindow(QMainWindow):
         self.corpus = None
         layout = QVBoxLayout()
 
+        layout.addWidget(QLabel('Video player (should be!) below'))
+        self.player = QMediaPlayer()
+        self.playlist = QMediaPlaylist()
+        self.videoWidget = QVideoWidget()
+        layout.addWidget(self.videoWidget)
+
+
+        self.playlist.addMedia(QMediaContent(
+                            QUrl.fromLocalFile(
+                            r'C:\Users\Scott\Documents\GitHub\SLP-Annotator\media\reasonable-English.mp4')))
+        self.player.setPlaylist(self.playlist)
+        self.playlist.setCurrentIndex(0)
+        self.player.setVideoOutput(self.videoWidget)
+        self.videoWidget.setMaximumWidth(300)
+        self.videoWidget.setMaximumHeight(300)
+        self.videoWidget.show()
+
+        self.player.play()
+        layout.addWidget(QLabel('Video player (should be!) above'))
+
         self.saveButton = QPushButton('Add word to corpus')
         layout.addWidget(self.saveButton)
 

@@ -37,3 +37,42 @@ class Settings(object):
             os.mkdir(CORPUS_DIR)
         if not os.path.exists(FEATURE_DIR):
             os.mkdir(FEATURE_DIR)
+
+    def __getitem__(self, key):
+
+        mapped_key = self.key_to_ini[key]
+        if isinstance(mapped_key, list):
+            return tuple(type(d)(self.qs.value(k,d)) for k, d in mapped_key)
+        else:
+            inikey, default = mapped_key
+            if key == 'num_cores':
+                if self['use_multi']:
+                    return type(default)(self.qs.value(inikey,default))
+                else:
+                    return -1
+            else:
+                return type(default)(self.qs.value(inikey, default))
+
+    def __setitem__(self, key, value):
+        mapped_key = self.key_to_ini[key]
+        if isinstance(mapped_key, list):
+            if not isinstance(value,list) and not isinstance(value,tuple):
+                raise(KeyError)
+            if len(mapped_key) != len(value):
+                raise(KeyError)
+            for i,(k, d) in enumerate(mapped_key):
+                self.qs.setValue(k,value[i])
+        else:
+            inikey, default = mapped_key
+            self.qs.setValue(inikey,value)
+
+    def sync(self):
+        self.qs.sync()
+
+    def update(self,setting_dict):
+        for k,v in setting_dict.items():
+            self[k] = v
+
+    def get_storage_settings(self):
+        out = {x: self[x] for x in self.storage_setting_keys}
+        return out
