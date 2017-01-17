@@ -8,8 +8,21 @@
 *.msi
 *.app
 *.xls
+*.csv
 *.xlsx
 *.pyc
+*.pyw
+*.pdf
+*.spec
+*.xml
+*.tff
+*.pl
+*.docx
+*.doc
+*.iml
+*.keylayout
+*.wav
+*.DS_Store
 
 # C extensions
 *.so

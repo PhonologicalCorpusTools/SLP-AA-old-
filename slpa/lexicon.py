@@ -1,19 +1,17 @@
-from slpa import __version__ as currentSLPAversion
-import os
-
+#from slpa import __version__ as currentSLPAversion
 
 class Corpus():
     corpus_attributes = {'name': 'corpus', 'wordlist': dict(), '_discourse': None,
                          'specifier': None, 'inventory': None, 'inventoryModel': None, 'has_frequency': True,
                          'has_spelling': False, 'has_wordtokens': False, 'has_audio': False, 'wav_path': None,
                          '_attributes': list(),
-                         '_version': currentSLPAversion
+                         '_version': 0.1#currentSLPAversion
                          }
     basic_attributes = ['spelling', 'transcription', 'frequency']
 
     def __init__(self, name, path):
         self.path = path
-        self.name = os.path.split(path)[-1]
+        self.name = name
         self.wordlist = dict()
 
     def __len__(self):

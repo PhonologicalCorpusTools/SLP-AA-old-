@@ -1,6 +1,7 @@
 import traceback
 import itertools
 import os
+import sys
 from enum import Enum
 from .imports import *
 from .handshapes import *
@@ -450,6 +451,91 @@ class HandConfigTab(QWidget):
         for widget in self.hand2.fingerWidgets():
             widget.setCurrentIndex(0)
 
+class VideoPlayer(QWidget):
+
+    def __init__(self, parent=None):
+        super(VideoPlayer, self).__init__(parent)
+        self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
+        #self.setMedia()
+        self.videoItem = QGraphicsVideoItem()
+        self.videoItem.setSize(QSizeF(640, 480))
+        scene = QGraphicsScene(self)
+        graphicsView = QGraphicsView(scene)
+        scene.addItem(self.videoItem)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(graphicsView)
+        self.makeButtons()
+        self.setLayout(self.layout)
+        self.mediaPlayer.setVideoOutput(self.videoItem)
+
+
+    def makeButtons(self):
+        self.buttonLayout = QHBoxLayout()
+
+        self.playButton = QPushButton('Play')
+        self.playButton.clicked.connect(self.play)
+        self.buttonLayout.addWidget(self.playButton)
+
+        self.loopButton = QPushButton('Loop')
+        self.loopButton.clicked.connect(self.loop)
+        self.buttonLayout.addWidget(self.loopButton)
+
+        self.pauseButton = QPushButton('Pause')
+        self.pauseButton.clicked.connect(self.pause)
+        self.buttonLayout.addWidget(self.pauseButton)
+
+        self.stopButton = QPushButton('Stop')
+        self.stopButton.clicked.connect(self.stop)
+        self.buttonLayout.addWidget(self.stopButton)
+
+        self.changeMediaButton = QPushButton('Change media file')
+        self.changeMediaButton.clicked.connect(self.changeMedia)
+        self.buttonLayout.addWidget(self.changeMediaButton)
+
+        self.layout.addLayout(self.buttonLayout)
+
+    def play(self):
+        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
+            pass
+        else:
+            path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', 'reasonable-English.mp4')
+            file = QMediaContent(QUrl.fromLocalFile(QFileInfo(path).absoluteFilePath()))
+            self.mediaPlayer.setMedia(file)
+            self.mediaPlayer.play()
+
+    def setMedia(self):
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', 'reasonable-English.mp4')
+        file = QMediaContent(QUrl.fromLocalFile(QFileInfo(path).absoluteFilePath()))
+        self.mediaPlayer.setMedia(file)
+
+    def pause(self):
+
+        if self.mediaPlayer.state() == QMediaPlayer.StoppedState:
+            pass
+        elif self.mediaPlayer.state() == QMediaPlayer.PausedState:
+            self.pauseButton.setText('Pause')
+            self.mediaPlayer.play()
+        else:
+            self.mediaPlayer.pause()
+            self.pauseButton.setText('Unpause')
+
+    def stop(self):
+        if self.mediaPlayer.state() == QMediaPlayer.StoppedState:
+            pass
+        else:
+            self.mediaPlayer.stop()
+
+    def loop(self):
+        if not self.looping:
+            self.looping = True
+            self.loopButton.setText('Stop looping')
+        else:
+            self.looping = False
+            self.loopButton.setText('Loop media')
+
+    def changeMedia(self):
+        pass
+
 class MainWindow(QMainWindow):
     def __init__(self,app):
         app.messageFromOtherInstance.connect(self.handleMessage)
@@ -463,27 +549,11 @@ class MainWindow(QMainWindow):
 
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
         self.corpus = None
+        self.globalLayout = QHBoxLayout()
+        self.videoPlayer = VideoPlayer()
+        self.globalLayout.addWidget(self.videoPlayer)
+
         layout = QVBoxLayout()
-
-        layout.addWidget(QLabel('Video player (should be!) below'))
-        self.player = QMediaPlayer()
-        self.playlist = QMediaPlaylist()
-        self.videoWidget = QVideoWidget()
-        layout.addWidget(self.videoWidget)
-
-
-        self.playlist.addMedia(QMediaContent(
-                            QUrl.fromLocalFile(
-                            r'C:\Users\Scott\Documents\GitHub\SLP-Annotator\media\reasonable-English.mp4')))
-        self.player.setPlaylist(self.playlist)
-        self.playlist.setCurrentIndex(0)
-        self.player.setVideoOutput(self.videoWidget)
-        self.videoWidget.setMaximumWidth(300)
-        self.videoWidget.setMaximumHeight(300)
-        self.videoWidget.show()
-
-        self.player.play()
-        layout.addWidget(QLabel('Video player (should be!) above'))
 
         self.saveButton = QPushButton('Add word to corpus')
         layout.addWidget(self.saveButton)
@@ -500,7 +570,9 @@ class MainWindow(QMainWindow):
         self.featuresLayout = MajorFeatureLayout()
         layout.addLayout(self.featuresLayout)
 
-        self.wrapper.setLayout(layout)
+        self.globalLayout.addLayout(layout)
+
+        self.wrapper.setLayout(self.globalLayout)
         self.setCentralWidget(self.wrapper)
 
         self.saveButton.clicked.connect(self.saveCorpus)
@@ -513,7 +585,7 @@ class MainWindow(QMainWindow):
             if child.widget() is not None:
                 child.widget().deleteLater()
             elif child.layout() is not None:
-                clearLayout(child.layout())
+                self.clearLayout(child.layout())
 
 
     def makeCorpusDock(self):
@@ -535,7 +607,6 @@ class MainWindow(QMainWindow):
             return
         self.clearLayout(self.dockLayout)
         self.newGloss(giveWarning=False)
-
         self.corpus = Corpus(path)
 
     def saveCorpus(self):
@@ -603,7 +674,7 @@ class MainWindow(QMainWindow):
                 elif role == 1:#edit
                     return
 
-            saveHandShape(kwargs)
+            #saveHandShape(kwargs)
             button = DataButton(kwargs)
             button.sendData.connect(self.loadHandShape)
             self.corpusDock.widget().layout().addWidget(button)
