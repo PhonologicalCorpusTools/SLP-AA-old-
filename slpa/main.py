@@ -262,11 +262,13 @@ class TranscriptionCheckBox(QCheckBox):
 
 class TranscriptionLayout(QVBoxLayout):
 
-    def __init__(self):
+    def __init__(self, hand=None):
         QVBoxLayout.__init__(self)
 
         defaultFont = QFont(FONT_NAME, FONT_SIZE)
         fontMetric = QFontMetricsF(defaultFont)
+
+        self.hand = hand
 
         self.lineLayout = QHBoxLayout()
         self.lineLayout.setContentsMargins(-1,0,-1,-1)
@@ -377,13 +379,13 @@ class TranscriptionLayout(QVBoxLayout):
         self.lineLayout.addWidget(QLabel(']7'))
 
         #Update button
-        self.updateButton = QPushButton()
-        self.updateButton.setText('Update from drop-down boxes')
-        self.updateButton.clicked.connect(self.updateFromComboBoxes)
-        self.lineLayout.addWidget(self.updateButton)
+        # self.updateButton = QPushButton()
+        # self.updateButton.setText('Update from drop-down boxes')
+        # self.updateButton.clicked.connect(self.updateFromComboBoxes)
+        # self.lineLayout.addWidget(self.updateButton)
 
     def setComboBoxes(self, boxes):
-        self.indexBox, self.middleBox, self.ringBox, self.pinkyBox = boxes\
+        self.indexBox, self.middleBox, self.ringBox, self.pinkyBox = boxes
 
     def values(self):
         return [self.slot1.isChecked(), self.slot2.text(), self.slot3a.text(), self.slot3b.text(), self.slot4.text(),
@@ -438,9 +440,9 @@ class HandConfigTab(QWidget):
 
         self.configLayout = QGridLayout()
 
-        self.hand1Transcription = TranscriptionLayout()
+        self.hand1Transcription = TranscriptionLayout(hand=1)
         self.configLayout.addLayout(self.hand1Transcription, 0, 0)
-        self.hand2Transcription = TranscriptionLayout()
+        self.hand2Transcription = TranscriptionLayout(hand=2)
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
 
 
@@ -561,11 +563,12 @@ class VideoPlayer(QWidget):
 
 class HandShapeImage(QLabel):
 
-    def __init__(self, path, parent=None):
+    def __init__(self, path, reversed=False, parent=None):
         super().__init__()
         self.image = QPixmap(path)
+        self.isReversed = False
         self.setPixmap(self.image)
-        self.mapping = {0: 'hand.png'
+        self.mapping = {0: 'hand.png',
                         1: 'hand.png',
                         2: 'hand.png',
                         3: 'hand_thumb_selected.png',
@@ -573,11 +576,20 @@ class HandShapeImage(QLabel):
                         5: 'hand_middle_selected.png',
                         6: 'hand_ring_selected.png',
                         7: 'hand_pinky_selected.png'}
+        self.reversed_mapping = {n:'reversed_'+self.mapping[n] for n in self.mapping}
+        self.mappingChoice = self.mapping
 
     @Slot(int)
     def transcriptionSlotChanged(self, e):
-        self.setPixmap(QPixmap(getMediaFilePath(self.mapping[e])))
+        self.setPixmap(QPixmap(getMediaFilePath(self.mappingChoice[e])))
 
+    @Slot(bool)
+    def useReverseImage(self, e):
+        self.mappingChoice = self.reversed_mapping
+
+    @Slot(bool)
+    def useNormalImage(self, e):
+        self.mappingChoice = self.mapping
 
 class MainWindow(QMainWindow):
     def __init__(self,app):
@@ -614,9 +626,16 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.handImage)
 
         for k in [0,1]:
-            for slot_id in self.configTabs.widget(k).hand1Transcription.slots:
+            for slot_id in self.configTabs.widget(k).hand1Transcription.slots[1:]:
                 slot = getattr(self.configTabs.widget(k).hand1Transcription, slot_id)
+                slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+            for slot_id in self.configTabs.widget(k).hand2Transcription.slots[1:]:
+                slot = getattr(self.configTabs.widget(k).hand2Transcription, slot_id)
+                slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
+                slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+
+
 
         self.featuresLayout = MajorFeatureLayout()
         layout.addLayout(self.featuresLayout)
