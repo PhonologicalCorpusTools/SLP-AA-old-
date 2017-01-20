@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QIODevice, QEvent, pyqtSignal as Signal, pyqtSlot as Slot, QUrl, QSizeF, QFileInfo
 from PyQt5.QtNetwork import QLocalSocket, QLocalServer
-from PyQt5.QtGui import QFont, QFontMetrics, QIcon, QFontMetricsF
+from PyQt5.QtGui import QFont, QFontMetrics, QIcon, QFontMetricsF, QPixmap
 from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction, QDockWidget,
                             QApplication, QWidget, QMessageBox,
                             QDialog, QGroupBox,QVBoxLayout,

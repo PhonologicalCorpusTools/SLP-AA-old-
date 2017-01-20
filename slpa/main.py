@@ -239,6 +239,27 @@ class GlossLayout(QHBoxLayout):
         self.glossEdit.setPlaceholderText('Gloss')
         self.addWidget(self.glossEdit)
 
+class TranscriptionLineEdit(QLineEdit):
+
+    slotSelectionChanged = Signal(int)
+
+    def __init__(self, slot_id, parent=None):
+        super().__init__(parent)
+        self.slot_id = slot_id
+
+    def focusInEvent(self, e):
+        self.slotSelectionChanged.emit(self.slot_id)
+
+class TranscriptionCheckBox(QCheckBox):
+
+    slotSelectionChanged = Signal(int)
+
+    def __init__(self, slot_id, parent=None):
+        super().__init__(parent)
+        self.slot_id = slot_id
+        self.stateChanged.connect(lambda x: self.slotSelectionChanged.emit(0))
+
+
 class TranscriptionLayout(QVBoxLayout):
 
     def __init__(self):
@@ -252,14 +273,14 @@ class TranscriptionLayout(QVBoxLayout):
 
         #SLOT 1
         self.lineLayout.addWidget(QLabel('['))
-        self.slot1 = QCheckBox()
+        self.slot1 = TranscriptionCheckBox(1)
         self.lineLayout.addWidget(self.slot1)
         self.lineLayout.addWidget(QLabel(']1'))
         self.addLayout(self.lineLayout)
 
         #SLOT 2
         self.lineLayout.addWidget(QLabel('['))
-        self.slot2 = QLineEdit()
+        self.slot2 = TranscriptionLineEdit(2)
         self.slot2.setMaxLength(4)
         self.slot2.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot2.maxLength() + 1)).width()
@@ -270,7 +291,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #SLOT 3
         self.lineLayout.addWidget(QLabel('['))
-        self.slot3a = QLineEdit()
+        self.slot3a = TranscriptionLineEdit(3)
         self.slot3a.setMaxLength(2)
         self.slot3a.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot3a.maxLength() + 1)).width()
@@ -278,7 +299,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot3a.setPlaceholderText('_ '*self.slot3a.maxLength())
         self.lineLayout.addWidget(self.slot3a)
         self.lineLayout.addWidget(QLabel(u'\u2205/'))
-        self.slot3b = QLineEdit()
+        self.slot3b = TranscriptionLineEdit(3)
         self.slot3b.setMaxLength(6)
         self.slot3b.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot3b.maxLength() + 1)).width()
@@ -289,7 +310,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #SLOT 4
         self.lineLayout.addWidget(QLabel('[1'))
-        self.slot4 = QLineEdit()
+        self.slot4 = TranscriptionLineEdit(4)
         self.slot4.setMaxLength(3)
         self.slot4.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot4.maxLength() + 1)).width()
@@ -300,7 +321,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #SLOT 5
         self.lineLayout.addWidget(QLabel('['))
-        self.slot5a = QLineEdit()
+        self.slot5a = TranscriptionLineEdit(5)
         self.slot5a.setMaxLength(1)
         self.slot5a.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot5a.maxLength() + 1)).width()
@@ -308,7 +329,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot5a.setPlaceholderText(('_'*self.slot5a.maxLength()))
         self.lineLayout.addWidget(self.slot5a)
         self.lineLayout.addWidget(QLabel('2'))
-        self.slot5b = QLineEdit()
+        self.slot5b = TranscriptionLineEdit(5)
         self.slot5b.setMaxLength(3)
         self.slot5b.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot5b.maxLength() + 1)).width()
@@ -319,7 +340,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #SLOT 6
         self.lineLayout.addWidget(QLabel('['))
-        self.slot6a = QLineEdit()
+        self.slot6a = TranscriptionLineEdit(6)
         self.slot6a.setMaxLength(1)
         self.slot6a.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot6a.maxLength() + 1)).width()
@@ -327,7 +348,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot6a.setPlaceholderText('_ '*self.slot6a.maxLength())
         self.lineLayout.addWidget(self.slot6a)
         self.lineLayout.addWidget(QLabel('3'))
-        self.slot6b = QLineEdit()
+        self.slot6b = TranscriptionLineEdit(6)
         self.slot6b.setMaxLength(3)
         self.slot6b.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot6b.maxLength() + 1)).width()
@@ -338,7 +359,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #SLOT 7
         self.lineLayout.addWidget(QLabel('['))
-        self.slot7a = QLineEdit()
+        self.slot7a = TranscriptionLineEdit(7)
         self.slot7a.setMaxLength(1)
         self.slot7a.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot7a.maxLength() + 1)).width()
@@ -346,7 +367,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot7a.setPlaceholderText('_'*self.slot7a.maxLength())
         self.lineLayout.addWidget(self.slot7a)
         self.lineLayout.addWidget(QLabel('4'))
-        self.slot7b = QLineEdit()
+        self.slot7b = TranscriptionLineEdit(7)
         self.slot7b.setMaxLength(3)
         self.slot7b.setFont(defaultFont)
         width = fontMetric.boundingRect('_ ' * (self.slot7b.maxLength() + 1)).width()
@@ -422,16 +443,18 @@ class HandConfigTab(QWidget):
         self.hand2Transcription = TranscriptionLayout()
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
 
-        handsLayout = QHBoxLayout()
-        self.hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
-        handsLayout.addLayout(self.hand1)
-        self.hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription,
-                                           self.hand1, self.hand1Transcription)
-        handsLayout.addLayout(self.hand2)
-        self.configLayout.addLayout(handsLayout, 2, 0)
 
-        self.hand1Transcription.setComboBoxes(self.hand1.fingerWidgets())
-        self.hand2Transcription.setComboBoxes(self.hand2.fingerWidgets())
+        #The following code is for displaying the drop-down boxes which are going to be disabled for now
+        # handsLayout = QHBoxLayout()
+        # self.hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
+        # handsLayout.addLayout(self.hand1)
+        # self.hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription,
+        #                                    self.hand1, self.hand1Transcription)
+        # handsLayout.addLayout(self.hand2)
+        # self.configLayout.addLayout(handsLayout, 2, 0)
+        #
+        # self.hand1Transcription.setComboBoxes(self.hand1.fingerWidgets())
+        # self.hand2Transcription.setComboBoxes(self.hand2.fingerWidgets())
 
         self.setLayout(self.configLayout)
 
@@ -457,8 +480,9 @@ class VideoPlayer(QWidget):
         super(VideoPlayer, self).__init__(parent)
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         #self.setMedia()
+        self.looping = False
         self.videoItem = QGraphicsVideoItem()
-        self.videoItem.setSize(QSizeF(640, 480))
+        #self.videoItem.setSize(QSizeF(640, 480))
         scene = QGraphicsScene(self)
         graphicsView = QGraphicsView(scene)
         scene.addItem(self.videoItem)
@@ -468,7 +492,6 @@ class VideoPlayer(QWidget):
         self.setLayout(self.layout)
         self.mediaPlayer.setVideoOutput(self.videoItem)
 
-
     def makeButtons(self):
         self.buttonLayout = QHBoxLayout()
 
@@ -476,7 +499,7 @@ class VideoPlayer(QWidget):
         self.playButton.clicked.connect(self.play)
         self.buttonLayout.addWidget(self.playButton)
 
-        self.loopButton = QPushButton('Loop')
+        self.loopButton = QPushButton('Loop media')
         self.loopButton.clicked.connect(self.loop)
         self.buttonLayout.addWidget(self.loopButton)
 
@@ -498,13 +521,13 @@ class VideoPlayer(QWidget):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             pass
         else:
-            path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', 'reasonable-English.mp4')
+            path = getMediaFilePath('reasonable-English.mp4')
             file = QMediaContent(QUrl.fromLocalFile(QFileInfo(path).absoluteFilePath()))
             self.mediaPlayer.setMedia(file)
             self.mediaPlayer.play()
 
     def setMedia(self):
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', 'reasonable-English.mp4')
+        path = getMediaFilePath('reasonable-English.mp4')
         file = QMediaContent(QUrl.fromLocalFile(QFileInfo(path).absoluteFilePath()))
         self.mediaPlayer.setMedia(file)
 
@@ -536,6 +559,26 @@ class VideoPlayer(QWidget):
     def changeMedia(self):
         pass
 
+class HandShapeImage(QLabel):
+
+    def __init__(self, path, parent=None):
+        super().__init__()
+        self.image = QPixmap(path)
+        self.setPixmap(self.image)
+        self.mapping = {0: 'hand.png'
+                        1: 'hand.png',
+                        2: 'hand.png',
+                        3: 'hand_thumb_selected.png',
+                        4: 'hand_index_selected.png',
+                        5: 'hand_middle_selected.png',
+                        6: 'hand_ring_selected.png',
+                        7: 'hand_pinky_selected.png'}
+
+    @Slot(int)
+    def transcriptionSlotChanged(self, e):
+        self.setPixmap(QPixmap(getMediaFilePath(self.mapping[e])))
+
+
 class MainWindow(QMainWindow):
     def __init__(self,app):
         app.messageFromOtherInstance.connect(self.handleMessage)
@@ -566,6 +609,14 @@ class MainWindow(QMainWindow):
         self.configTabs.addTab(HandConfigTab(2), 'Config 2')
 
         layout.addWidget(self.configTabs)
+
+        self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
+        layout.addWidget(self.handImage)
+
+        for k in [0,1]:
+            for slot_id in self.configTabs.widget(k).hand1Transcription.slots:
+                slot = getattr(self.configTabs.widget(k).hand1Transcription, slot_id)
+                slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
 
         self.featuresLayout = MajorFeatureLayout()
         layout.addLayout(self.featuresLayout)
@@ -959,3 +1010,7 @@ def loadcsvCorpus(path):
             button = DataButton(data)
             button.sendData.connect(self.loadHandShape)
             self.corpusDock.widget().layout().addWidget(button)
+
+def getMediaFilePath(filename):
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', filename)
+    return path
