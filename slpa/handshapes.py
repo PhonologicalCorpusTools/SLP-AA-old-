@@ -4,12 +4,13 @@ import itertools
 class Fingers(Enum):
 
     global_ = (1, None)
-    thumb = (2, None)
-    thumbAndFinger = (3, None)
-    index = (4, 'EFHi')
-    middle = (5, 'EFHi')
-    ring = (6, 'EFHi')
-    pinky = (7, 'EFHi')
+    thumb = (2, '[LUO][{<=][HEefF]{2}')
+    thumbAndFinger = (3, '[ftbru][tdpM][fbru][tdmpM][1\s][2\s][3\s][4\s]')
+    index = (4, '[EFHi]{3}')
+    middle = (5, '[EFHi]{3}')
+    ring = (6, '[EFHi]{3}')
+    pinky = (7, '[EFHi]{3}')
+    contact = (8,'[{<=]')
 
     def __init__(self, num, symbols):
         self.num = num

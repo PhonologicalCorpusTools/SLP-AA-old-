@@ -239,6 +239,24 @@ class GlossLayout(QHBoxLayout):
         self.glossEdit.setPlaceholderText('Gloss')
         self.addWidget(self.glossEdit)
 
+class TranscriptionHint(QToolTip):
+
+    def __init__(self):
+        super().__init__()
+        self.setText('The allowable symbols are:...')
+
+class TranscriptionValidator(QRegExpValidator):
+
+    def __init__(self, expression):
+        super().__init__(expression)
+
+    def validate_(self,expressions):
+        result = QRegExpValidator.validate(expression)
+        if result == QRegExpValidator.Invalid:
+            pass
+
+        return result
+
 class TranscriptionLineEdit(QLineEdit):
 
     slotSelectionChanged = Signal(int)
@@ -246,9 +264,35 @@ class TranscriptionLineEdit(QLineEdit):
     def __init__(self, slot_id, parent=None):
         super().__init__(parent)
         self.slot_id = slot_id
+        self.style = 'border:0px;background:#ffffff'
+        self.setStyleSheet(self.style)
+        self.setFocusPolicy(Qt.TabFocus)
+        for finger in Fingers:
+            if finger.num == slot_id:
+                self.regex = QRegExp(finger.symbols)
+                break
+        else:
+            self.regex = QRegExp('.*')
+        validator = TranscriptionValidator(self.regex)# QRegExpValidator(self.regex)
+        self.setValidator(validator)
 
     def focusInEvent(self, e):
         self.slotSelectionChanged.emit(self.slot_id)
+        self.setStyleSheet('background: pink')
+
+    def focusOutEvent(self, e):
+        self.setStyleSheet(self.style)
+
+    def mousePressEvent(self, e):
+        self.setFocus(Qt.TabFocusReason)
+        #this tricks the application into thinking the user tabbed in instead of clicking
+        #which prevents focus from being stolen just because you moused away while typing
+
+    def enterEvent(self, e):
+        pass
+
+    def leaveEvent(self, e):
+        pass
 
 class TranscriptionCheckBox(QCheckBox):
 
@@ -258,7 +302,6 @@ class TranscriptionCheckBox(QCheckBox):
         super().__init__(parent)
         self.slot_id = slot_id
         self.stateChanged.connect(lambda x: self.slotSelectionChanged.emit(0))
-
 
 class TranscriptionLayout(QVBoxLayout):
 
@@ -277,7 +320,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.lineLayout.addWidget(QLabel('['))
         self.slot1 = TranscriptionCheckBox(1)
         self.lineLayout.addWidget(self.slot1)
-        self.lineLayout.addWidget(QLabel(']1'))
+        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>1</sub></b></font>'))
         self.addLayout(self.lineLayout)
 
         #SLOT 2
@@ -289,7 +332,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot2.setFixedWidth(width)
         self.slot2.setPlaceholderText('_ '*self.slot2.maxLength())
         self.lineLayout.addWidget(self.slot2)
-        self.lineLayout.addWidget(QLabel(']2'))
+        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>2</sub></b></font>'))
 
         #SLOT 3
         self.lineLayout.addWidget(QLabel('['))
@@ -300,7 +343,11 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot3a.setFixedWidth(width)
         self.slot3a.setPlaceholderText('_ '*self.slot3a.maxLength())
         self.lineLayout.addWidget(self.slot3a)
-        self.lineLayout.addWidget(QLabel(u'\u2205/'))
+        nulltext = QLineEdit()
+        nulltext.setText(u'\u2205/')
+        nulltext.setEnabled(False)
+        nulltext.setFixedWidth(fontMetric.boundingRect('_ _').width())
+        self.lineLayout.addWidget(nulltext)#(QLabel(u'\u2205/'))
         self.slot3b = TranscriptionLineEdit(3)
         self.slot3b.setMaxLength(6)
         self.slot3b.setFont(defaultFont)
@@ -308,7 +355,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot3b.setFixedWidth(width)
         self.slot3b.setPlaceholderText('_ '*self.slot3b.maxLength())
         self.lineLayout.addWidget(self.slot3b)
-        self.lineLayout.addWidget(QLabel(']3'))
+        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>3</sub></b></font>'))
 
         #SLOT 4
         self.lineLayout.addWidget(QLabel('[1'))
@@ -319,7 +366,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot4.setFixedWidth(width)
         self.slot4.setPlaceholderText('_ '*self.slot4.maxLength())
         self.lineLayout.addWidget(self.slot4)
-        self.lineLayout.addWidget(QLabel(']4'))
+        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>4</sub></b></font>'))
 
         #SLOT 5
         self.lineLayout.addWidget(QLabel('['))
@@ -338,7 +385,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot5b.setFixedWidth(width)
         self.slot5b.setPlaceholderText('_ '*self.slot5b.maxLength())
         self.lineLayout.addWidget(self.slot5b)
-        self.lineLayout.addWidget(QLabel(']5'))
+        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>5</sub></b></font>'))
 
         #SLOT 6
         self.lineLayout.addWidget(QLabel('['))
@@ -357,7 +404,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot6b.setFixedWidth(width)
         self.slot6b.setPlaceholderText('_ '*self.slot6b.maxLength())
         self.lineLayout.addWidget(self.slot6b)
-        self.lineLayout.addWidget(QLabel(']6'))
+        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>6</sub></b></font>'))
 
         #SLOT 7
         self.lineLayout.addWidget(QLabel('['))
@@ -376,7 +423,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot7b.setFixedWidth(width)
         self.slot7b.setPlaceholderText('_ '*self.slot7b.maxLength())
         self.lineLayout.addWidget(self.slot7b)
-        self.lineLayout.addWidget(QLabel(']7'))
+        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>7</sub></b></font>'))
 
         #Update button
         # self.updateButton = QPushButton()
@@ -570,8 +617,8 @@ class HandShapeImage(QLabel):
         self.setPixmap(self.image)
         self.mapping = {0: 'hand.png',
                         1: 'hand.png',
-                        2: 'hand.png',
-                        3: 'hand_thumb_selected.png',
+                        2: 'hand_thumb_selected.png',
+                        3: 'hand_thumb_finger_contact.png',
                         4: 'hand_index_selected.png',
                         5: 'hand_middle_selected.png',
                         6: 'hand_ring_selected.png',
