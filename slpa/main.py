@@ -7,6 +7,7 @@ from .imports import *
 from .handshapes import *
 from .lexicon import Corpus
 from .binary import *
+from .transcriptions import *
 from .settings import Settings
 from slpa import __version__ as currentSLPAversion
 
@@ -239,235 +240,6 @@ class GlossLayout(QHBoxLayout):
         self.glossEdit.setPlaceholderText('Gloss')
         self.addWidget(self.glossEdit)
 
-class TranscriptionHint(QToolTip):
-
-    def __init__(self):
-        super().__init__()
-        self.setText('The allowable symbols are:...')
-
-class TranscriptionValidator(QRegExpValidator):
-
-    def __init__(self, expression):
-        super().__init__(expression)
-
-    def validate_(self,expressions):
-        result = QRegExpValidator.validate(expression)
-        if result == QRegExpValidator.Invalid:
-            pass
-
-        return result
-
-class TranscriptionLineEdit(QLineEdit):
-
-    slotSelectionChanged = Signal(int)
-
-    def __init__(self, slot_id, parent=None):
-        super().__init__(parent)
-        self.slot_id = slot_id
-        self.style = 'border:0px;background:#ffffff'
-        self.setStyleSheet(self.style)
-        self.setFocusPolicy(Qt.TabFocus)
-        for finger in Fingers:
-            if finger.num == slot_id:
-                self.regex = QRegExp(finger.symbols)
-                break
-        else:
-            self.regex = QRegExp('.*')
-        validator = TranscriptionValidator(self.regex)# QRegExpValidator(self.regex)
-        self.setValidator(validator)
-
-    def focusInEvent(self, e):
-        self.slotSelectionChanged.emit(self.slot_id)
-        self.setStyleSheet('background: pink')
-
-    def focusOutEvent(self, e):
-        self.setStyleSheet(self.style)
-
-    def mousePressEvent(self, e):
-        self.setFocus(Qt.TabFocusReason)
-        #this tricks the application into thinking the user tabbed in instead of clicking
-        #which prevents focus from being stolen just because you moused away while typing
-
-    def enterEvent(self, e):
-        pass
-
-    def leaveEvent(self, e):
-        pass
-
-class TranscriptionCheckBox(QCheckBox):
-
-    slotSelectionChanged = Signal(int)
-
-    def __init__(self, slot_id, parent=None):
-        super().__init__(parent)
-        self.slot_id = slot_id
-        self.stateChanged.connect(lambda x: self.slotSelectionChanged.emit(0))
-
-class TranscriptionLayout(QVBoxLayout):
-
-    def __init__(self, hand=None):
-        QVBoxLayout.__init__(self)
-
-        defaultFont = QFont(FONT_NAME, FONT_SIZE)
-        fontMetric = QFontMetricsF(defaultFont)
-
-        self.hand = hand
-
-        self.lineLayout = QHBoxLayout()
-        self.lineLayout.setContentsMargins(-1,0,-1,-1)
-
-        #SLOT 1
-        self.lineLayout.addWidget(QLabel('['))
-        self.slot1 = TranscriptionCheckBox(1)
-        self.lineLayout.addWidget(self.slot1)
-        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>1</sub></b></font>'))
-        self.addLayout(self.lineLayout)
-
-        #SLOT 2
-        self.lineLayout.addWidget(QLabel('['))
-        self.slot2 = TranscriptionLineEdit(2)
-        self.slot2.setMaxLength(4)
-        self.slot2.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot2.maxLength() + 1)).width()
-        self.slot2.setFixedWidth(width)
-        self.slot2.setPlaceholderText('_ '*self.slot2.maxLength())
-        self.lineLayout.addWidget(self.slot2)
-        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>2</sub></b></font>'))
-
-        #SLOT 3
-        self.lineLayout.addWidget(QLabel('['))
-        self.slot3a = TranscriptionLineEdit(3)
-        self.slot3a.setMaxLength(2)
-        self.slot3a.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot3a.maxLength() + 1)).width()
-        self.slot3a.setFixedWidth(width)
-        self.slot3a.setPlaceholderText('_ '*self.slot3a.maxLength())
-        self.lineLayout.addWidget(self.slot3a)
-        nulltext = QLineEdit()
-        nulltext.setText(u'\u2205/')
-        nulltext.setEnabled(False)
-        nulltext.setFixedWidth(fontMetric.boundingRect('_ _').width())
-        self.lineLayout.addWidget(nulltext)#(QLabel(u'\u2205/'))
-        self.slot3b = TranscriptionLineEdit(3)
-        self.slot3b.setMaxLength(6)
-        self.slot3b.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot3b.maxLength() + 1)).width()
-        self.slot3b.setFixedWidth(width)
-        self.slot3b.setPlaceholderText('_ '*self.slot3b.maxLength())
-        self.lineLayout.addWidget(self.slot3b)
-        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>3</sub></b></font>'))
-
-        #SLOT 4
-        self.lineLayout.addWidget(QLabel('[1'))
-        self.slot4 = TranscriptionLineEdit(4)
-        self.slot4.setMaxLength(3)
-        self.slot4.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot4.maxLength() + 1)).width()
-        self.slot4.setFixedWidth(width)
-        self.slot4.setPlaceholderText('_ '*self.slot4.maxLength())
-        self.lineLayout.addWidget(self.slot4)
-        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>4</sub></b></font>'))
-
-        #SLOT 5
-        self.lineLayout.addWidget(QLabel('['))
-        self.slot5a = TranscriptionLineEdit(5)
-        self.slot5a.setMaxLength(1)
-        self.slot5a.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot5a.maxLength() + 1)).width()
-        self.slot5a.setFixedWidth(width)
-        self.slot5a.setPlaceholderText(('_'*self.slot5a.maxLength()))
-        self.lineLayout.addWidget(self.slot5a)
-        self.lineLayout.addWidget(QLabel('2'))
-        self.slot5b = TranscriptionLineEdit(5)
-        self.slot5b.setMaxLength(3)
-        self.slot5b.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot5b.maxLength() + 1)).width()
-        self.slot5b.setFixedWidth(width)
-        self.slot5b.setPlaceholderText('_ '*self.slot5b.maxLength())
-        self.lineLayout.addWidget(self.slot5b)
-        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>5</sub></b></font>'))
-
-        #SLOT 6
-        self.lineLayout.addWidget(QLabel('['))
-        self.slot6a = TranscriptionLineEdit(6)
-        self.slot6a.setMaxLength(1)
-        self.slot6a.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot6a.maxLength() + 1)).width()
-        self.slot6a.setFixedWidth(width)
-        self.slot6a.setPlaceholderText('_ '*self.slot6a.maxLength())
-        self.lineLayout.addWidget(self.slot6a)
-        self.lineLayout.addWidget(QLabel('3'))
-        self.slot6b = TranscriptionLineEdit(6)
-        self.slot6b.setMaxLength(3)
-        self.slot6b.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot6b.maxLength() + 1)).width()
-        self.slot6b.setFixedWidth(width)
-        self.slot6b.setPlaceholderText('_ '*self.slot6b.maxLength())
-        self.lineLayout.addWidget(self.slot6b)
-        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>6</sub></b></font>'))
-
-        #SLOT 7
-        self.lineLayout.addWidget(QLabel('['))
-        self.slot7a = TranscriptionLineEdit(7)
-        self.slot7a.setMaxLength(1)
-        self.slot7a.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot7a.maxLength() + 1)).width()
-        self.slot7a.setFixedWidth(width)
-        self.slot7a.setPlaceholderText('_'*self.slot7a.maxLength())
-        self.lineLayout.addWidget(self.slot7a)
-        self.lineLayout.addWidget(QLabel('4'))
-        self.slot7b = TranscriptionLineEdit(7)
-        self.slot7b.setMaxLength(3)
-        self.slot7b.setFont(defaultFont)
-        width = fontMetric.boundingRect('_ ' * (self.slot7b.maxLength() + 1)).width()
-        self.slot7b.setFixedWidth(width)
-        self.slot7b.setPlaceholderText('_ '*self.slot7b.maxLength())
-        self.lineLayout.addWidget(self.slot7b)
-        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>7</sub></b></font>'))
-
-        #Update button
-        # self.updateButton = QPushButton()
-        # self.updateButton.setText('Update from drop-down boxes')
-        # self.updateButton.clicked.connect(self.updateFromComboBoxes)
-        # self.lineLayout.addWidget(self.updateButton)
-
-    def setComboBoxes(self, boxes):
-        self.indexBox, self.middleBox, self.ringBox, self.pinkyBox = boxes
-
-    def values(self):
-        return [self.slot1.isChecked(), self.slot2.text(), self.slot3a.text(), self.slot3b.text(), self.slot4.text(),
-                self.slot5a.text(), self.slot5b.text(), self.slot6a.text(), self.slot6b.text(),
-                self.slot7a.text(), self.slot7b.text()]
-
-    @property
-    def slots(self):
-        return ['slot1', 'slot2', 'slot3a', 'slot3b', 'slot4',
-                 'slot5a', 'slot5b', 'slot6a', 'slot6b', 'slot7a', 'slot7b']
-
-    def __str__(self):
-        value = self.values()
-        if value[0]:
-            values = ['Yes']
-        else:
-            values = ['No']
-        values.extend(value[1:])
-        values = ';'.join(values)
-        return values
-
-    def updateFromComboBoxes(self):
-        indexText = self.indexBox.currentText().replace(',','')
-        self.slot4.setText(indexText)
-        middleText = self.middleBox.currentText().replace(',','')
-        #self.slot5a.setText(middleText[0])
-        self.slot5b.setText(middleText)#[1:])
-        ringText = self.ringBox.currentText().replace(',','')
-        #self.slot6a.setText(ringText[0])
-        self.slot6b.setText(ringText)#[1:])
-        pinkyText = self.pinkyBox.currentText().replace(',','')
-        #self.slot7a.setText(pinkyText[0])
-        self.slot7b.setText(pinkyText)#[1:])
-
-
 class HandConfigurationNames(QVBoxLayout):
     def __init__(self):
         QVBoxLayout.__init__(self)
@@ -492,18 +264,6 @@ class HandConfigTab(QWidget):
         self.hand2Transcription = TranscriptionLayout(hand=2)
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
 
-
-        #The following code is for displaying the drop-down boxes which are going to be disabled for now
-        # handsLayout = QHBoxLayout()
-        # self.hand1 = HandShapeLayout(handsLayout, 'Hand 1',  self.hand1Transcription)
-        # handsLayout.addLayout(self.hand1)
-        # self.hand2 = SecondHandShapeLayout(handsLayout, 'Hand 2', self.hand2Transcription,
-        #                                    self.hand1, self.hand1Transcription)
-        # handsLayout.addLayout(self.hand2)
-        # self.configLayout.addLayout(handsLayout, 2, 0)
-        #
-        # self.hand1Transcription.setComboBoxes(self.hand1.fingerWidgets())
-        # self.hand2Transcription.setComboBoxes(self.hand2.fingerWidgets())
 
         self.setLayout(self.configLayout)
 
@@ -673,14 +433,14 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.handImage)
 
         for k in [0,1]:
-            for slot_id in self.configTabs.widget(k).hand1Transcription.slots[1:]:
-                slot = getattr(self.configTabs.widget(k).hand1Transcription, slot_id)
-                slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
-                slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
-            for slot_id in self.configTabs.widget(k).hand2Transcription.slots[1:]:
-                slot = getattr(self.configTabs.widget(k).hand2Transcription, slot_id)
-                slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
-                slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+            for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
+                #slot = getattr(self.configTabs.widget(k).hand1Transcription, slot_id)
+                slot.transcription.slotSelectionChanged.connect(self.handImage.useNormalImage)
+                slot.transcription.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+            for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
+                #slot = getattr(self.configTabs.widget(k).hand2Transcription, slot_id)
+                slot.transcription.slotSelectionChanged.connect(self.handImage.useReverseImage)
+                slot.transcription.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
 
 
 
@@ -994,25 +754,7 @@ class DataButton(QPushButton):
     def emitData(self):
         self.sendData.emit(self.data)
 
-class TranscriptionData():
 
-    def __init__(self, info):
-        self.slot1 = True if info[0] == 'Yes' else False
-        self.slot2 = info[1]
-        self.slot3a = info[2]
-        self.slot3b = info[3]
-        self.slot4 = info[4]
-        self.slot5a = info[5]
-        self.slot5b = info[6]
-        self.slot6a = info[7]
-        self.slot6b = info[8]
-        self.slot7a = info[9]
-        self.slot7b = info[10]
-
-    @property
-    def slots(self):
-        return ['slot1', 'slot2', 'slot3a', 'slot3b', 'slot4',
-                'slot5a', 'slot5b', 'slot6a', 'slot6b', 'slot7a', 'slot7b']
 
 def clean(item):
     """Clean up the memory by closing and deleting the item if possible."""

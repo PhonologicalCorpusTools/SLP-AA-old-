@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction,
                             QDialog, QGroupBox, QVBoxLayout,
                             QPushButton, QFrame, QGridLayout,QRadioButton,
                             QLineEdit, QFileDialog, QComboBox, QListWidget,
-                            QProgressDialog, QCheckBox, QMenu, QSizePolicy, QToolTip,
+                            QProgressDialog, QCheckBox, QMenu, QSizePolicy, QToolTip, QCompleter,
                             QBoxLayout, QStackedWidget, QTabWidget, QGraphicsScene, QGraphicsView)
 from PyQt5.QtMultimedia import (QMediaPlayer, QMediaPlaylist, QMediaContent, QAbstractVideoSurface, QVideoSurfaceFormat)
 from PyQt5.QtMultimediaWidgets import QVideoWidget, QGraphicsVideoItem
