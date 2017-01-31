@@ -60,8 +60,6 @@ class QApplicationMessaging(QApplication):
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
 
-
-
 class MajorFeatureLayout(QVBoxLayout):
 
     def __init__(self):
@@ -270,18 +268,12 @@ class HandConfigTab(QWidget):
     def clearAll(self):
         self.hand1Transcription.slot1.setChecked(False)
         for slot in self.hand1Transcription.slots[1:]:
-            textBox = getattr(self.hand1Transcription, slot)
-            textBox.setText('')
+            slot.transcription.setText('')
 
         self.hand2Transcription.slot1.setChecked(False)
         for slot in self.hand2Transcription.slots[1:]:
-            textBox = getattr(self.hand2Transcription, slot)
-            textBox.setText('')
+            slot.transcription.setText('')
 
-        for widget in self.hand1.fingerWidgets():
-            widget.setCurrentIndex(0)
-        for widget in self.hand2.fingerWidgets():
-            widget.setCurrentIndex(0)
 
 class VideoPlayer(QWidget):
 
@@ -477,14 +469,19 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
     def loadCorpus(self):
-        load = QFileDialog.getOpenFileName(self,
+        file_path = QFileDialog.getOpenFileName(self,
                 'Open Corpus File', os.getcwd(), '*.corpus')
-        path = load[0]
-        if not path:
+        print(file_path)
+        file_path = file_path[0]
+        if not file_path:
             return
         self.clearLayout(self.dockLayout)
         self.newGloss(giveWarning=False)
-        self.corpus = Corpus(path)
+        self.corpus = load_binary(file_path)
+        for sign in self.corpus:
+            data = sign.data()
+            self.addButtonToDock(data)
+
 
     def saveCorpus(self):
         if not self.gloss.glossEdit.text():
@@ -513,25 +510,24 @@ class MainWindow(QMainWindow):
                     path = path + '.corpus'
                 kwargs['file_mode'] = 'w'
                 kwargs['path'] = path
-                self.corpus = Corpus(kwargs['path'])
+                kwargs['name'] = os.path.split(path)[1].split('.')[0]
+                self.corpus = Corpus(kwargs)
                 #saveHandShape(kwargs)
-                button = DataButton(kwargs)
-                button.sendData.connect(self.loadHandShape)
-                self.corpusDock.widget().layout().addWidget(button)
-                self.corpus.addWord(Sign(button.data))
+                self.addButtonToDock(kwargs)
+                self.corpus.addWord(Sign(kwargs))
                 save_binary(self.corpus,
-                            os.path.join(self.settings['storage'], 'CORPUS', self.corpus.name + '.corpus'))
+                            #os.path.join(self.settings['storage'], 'CORPUS', self.corpus.name + '.corpus'))
+                            kwargs['path'])
                 QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
                 #self.newGloss()
 
             elif role == 0: #load existing corpus and add to it
                 self.loadCorpus()
-                button = DataButton(kwargs)
-                button.sendData.connect(self.loadHandShape)
-                self.corpusDock.widget().layout().addWidget(button)
-                self.corpus.addWord(kwargs)
+                self.addButtonToDock(kwargs)
+                self.corpus.addWord(Sign(kwargs))
                 save_binary(self.corpus,
-                            os.path.join(self.settings['storage'], 'CORPUS', self.corpus.name + '.corpus'))
+                            #os.path.join(self.settings['storage'], 'CORPUS', self.corpus.name + '.corpus'))
+                            kwargs['path'])
 
         else: #corpus exists
             kwargs = self.generateKwargs()
@@ -552,12 +548,15 @@ class MainWindow(QMainWindow):
                     return
 
             #saveHandShape(kwargs)
-            button = DataButton(kwargs)
-            button.sendData.connect(self.loadHandShape)
-            self.corpusDock.widget().layout().addWidget(button)
+            self.addButtonToDock(kwargs)
             self.corpus.addWord(Sign(kwargs))
             QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
             #self.newGloss()
+
+    def addButtonToDock(self, kwargs):
+        button = DataButton(kwargs)
+        button.sendData.connect(self.loadHandShape)
+        self.corpusDock.widget().layout().addWidget(button)
 
     def newCorpus(self):
         self.corpus = None
@@ -573,30 +572,22 @@ class MainWindow(QMainWindow):
         config1hand1 = buttonData['config1hand1']
         config1.hand1Transcription.slot1.setChecked(config1hand1.slot1)
         for slot in config1hand1.slots[1:]:
-            value = getattr(config1hand1, slot)
-            textBox = getattr(config1.hand1Transcription, slot)
-            textBox.setText(value)
+            slot.transcription.setText(value)
 
         config1hand2 = buttonData['config1hand2']
         config1.hand2Transcription.slot1.setChecked(config1hand2.slot1)
         for slot in config1hand2.slots[1:]:
-            value = getattr(config1hand2, slot)
-            textBox = getattr(config1.hand2Transcription, slot)
-            textBox.setText(value)
+            slot.transcription.setText(value)
 
         config2hand1 = buttonData['config2hand1']
         config2.hand2Transcription.slot1.setChecked(config2hand1.slot1)
         for slot in config2hand1.slots[1:]:
-            value = getattr(config2hand1, slot)
-            textBox = getattr(config2.hand1Transcription, slot)
-            textBox.setText(value)
+            slot.transcription.setText(value)
 
         config2hand2 = buttonData['config2hand2']
         config2.hand2Transcription.slot1.setChecked(config2hand2.slot1)
         for slot in config2hand2.slots[1:]:
-            value = getattr(config2hand2, slot)
-            textBox = getattr(config2.hand2Transcription, slot)
-            textBox.setText(value)
+            slot.transcription.setText(value)
 
         for name in ['major', 'minor', 'movement', 'orientation']:
             widget = getattr(self.featuresLayout, name)
@@ -738,10 +729,10 @@ class DataButton(QPushButton):
         self.clicked.connect(self.emitData)
 
     def parseConfiguration(self, config, num):
-        hand1,hand2 = config.split('&')
-        info = hand1.split(';')
+        hand1,hand2 = config
+        info = str(hand1).split(';')
         setattr(self, 'config'+num+'hand1', TranscriptionData(info))
-        info = hand2.split(';')
+        info = str(hand2).split(';')
         setattr(self, 'config'+num+'hand2', TranscriptionData(info))
 
     def setData(self):

@@ -9,9 +9,9 @@ class Corpus():
                          }
     basic_attributes = ['spelling', 'transcription', 'frequency']
 
-    def __init__(self, name, path):
-        self.path = path
-        self.name = name
+    def __init__(self, kwargs):
+        self.path = kwargs['path']
+        self.name = kwargs['name']
         self.wordlist = dict()
 
     def __len__(self):
@@ -26,4 +26,7 @@ class Corpus():
 
     def addWord(self, hs):
         self.wordlist[hs.gloss] = hs
+
+    def __str__(self):
+        return 'Corpus object called "{}"'.format(self.name)
 

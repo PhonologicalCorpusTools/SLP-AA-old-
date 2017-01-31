@@ -41,115 +41,35 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot3 = TranscriptionSlot(number=3, max_length=8)
         self.lineLayout.addLayout(self.slot3)
         self.slots.append(self.slot3)
-        # self.lineLayout.addWidget(QLabel('['))
-        # self.slot3a = TranscriptionLineEdit(3)
-        # self.slot3a.setMaxLength(2)
-        # self.slot3a.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot3a.maxLength() + 1)).width()
-        # self.slot3a.setFixedWidth(width)
-        # self.slot3a.setPlaceholderText('_ '*self.slot3a.maxLength())
-        # self.lineLayout.addWidget(self.slot3a)
-        # nulltext = QLineEdit()
-        # nulltext.setText(u'\u2205/')
-        # nulltext.setEnabled(False)
-        # nulltext.setFixedWidth(fontMetric.boundingRect('_ _').width())
-        # self.lineLayout.addWidget(nulltext)#(QLabel(u'\u2205/'))
-        # self.slot3b = TranscriptionLineEdit(3)
-        # self.slot3b.setMaxLength(6)
-        # self.slot3b.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot3b.maxLength() + 1)).width()
-        # self.slot3b.setFixedWidth(width)
-        # self.slot3b.setPlaceholderText('_ '*self.slot3b.maxLength())
-        # self.lineLayout.addWidget(self.slot3b)
-        # self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>3</sub></b></font>'))
+
 
         # #SLOT 4
         self.slot4 = TranscriptionSlot(number=4, max_length=4)
         self.lineLayout.addLayout(self.slot4)
         self.slots.append(self.slot4)
-        # self.lineLayout.addWidget(QLabel('[1'))
-        # self.slot4 = TranscriptionLineEdit(4)
-        # self.slot4.setMaxLength(3)
-        # self.slot4.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot4.maxLength() + 1)).width()
-        # self.slot4.setFixedWidth(width)
-        # self.slot4.setPlaceholderText('_ '*self.slot4.maxLength())
-        # self.lineLayout.addWidget(self.slot4)
-        # self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>4</sub></b></font>'))
-        #
-        # #SLOT 5
+
+        #SLOT 5
         self.slot5 = TranscriptionSlot(number=5, max_length=4)
         self.lineLayout.addLayout(self.slot5)
         self.slots.append(self.slot5)
-        # self.lineLayout.addWidget(QLabel('['))
-        # self.slot5a = TranscriptionLineEdit(5)
-        # self.slot5a.setMaxLength(1)
-        # self.slot5a.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot5a.maxLength() + 1)).width()
-        # self.slot5a.setFixedWidth(width)
-        # self.slot5a.setPlaceholderText(('_'*self.slot5a.maxLength()))
-        # self.lineLayout.addWidget(self.slot5a)
-        # self.lineLayout.addWidget(QLabel('2'))
-        # self.slot5b = TranscriptionLineEdit(5)
-        # self.slot5b.setMaxLength(3)
-        # self.slot5b.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot5b.maxLength() + 1)).width()
-        # self.slot5b.setFixedWidth(width)
-        # self.slot5b.setPlaceholderText('_ '*self.slot5b.maxLength())
-        # self.lineLayout.addWidget(self.slot5b)
-        # self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>5</sub></b></font>'))
-        #
+
         # #SLOT 6
         self.slot6 = TranscriptionSlot(number=6, max_length=4)
         self.lineLayout.addLayout(self.slot6)
         self.slots.append(self.slot6)
-        # self.lineLayout.addWidget(QLabel('['))
-        # self.slot6a = TranscriptionLineEdit(6)
-        # self.slot6a.setMaxLength(1)
-        # self.slot6a.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot6a.maxLength() + 1)).width()
-        # self.slot6a.setFixedWidth(width)
-        # self.slot6a.setPlaceholderText('_ '*self.slot6a.maxLength())
-        # self.lineLayout.addWidget(self.slot6a)
-        # self.lineLayout.addWidget(QLabel('3'))
-        # self.slot6b = TranscriptionLineEdit(6)
-        # self.slot6b.setMaxLength(3)
-        # self.slot6b.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot6b.maxLength() + 1)).width()
-        # self.slot6b.setFixedWidth(width)
-        # self.slot6b.setPlaceholderText('_ '*self.slot6b.maxLength())
-        # self.lineLayout.addWidget(self.slot6b)
-        # self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>6</sub></b></font>'))
-        #
+
         # #SLOT 7
         self.slot7 = TranscriptionSlot(number=7, max_length=4)
         self.lineLayout.addLayout(self.slot7)
         self.slots.append(self.slot7)
-        # self.lineLayout.addWidget(QLabel('['))
-        # self.slot7a = TranscriptionLineEdit(7)
-        # self.slot7a.setMaxLength(1)
-        # self.slot7a.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot7a.maxLength() + 1)).width()
-        # self.slot7a.setFixedWidth(width)
-        # self.slot7a.setPlaceholderText('_'*self.slot7a.maxLength())
-        # self.lineLayout.addWidget(self.slot7a)
-        # self.lineLayout.addWidget(QLabel('4'))
-        # self.slot7b = TranscriptionLineEdit(7)
-        # self.slot7b.setMaxLength(3)
-        # self.slot7b.setFont(defaultFont)
-        # width = fontMetric.boundingRect('_ ' * (self.slot7b.maxLength() + 1)).width()
-        # self.slot7b.setFixedWidth(width)
-        # self.slot7b.setPlaceholderText('_ '*self.slot7b.maxLength())
-        # self.lineLayout.addWidget(self.slot7b)
-        # self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>7</sub></b></font>'))
+
 
     def setComboBoxes(self, boxes):
         self.indexBox, self.middleBox, self.ringBox, self.pinkyBox = boxes
 
     def values(self):
-        return [self.slot1.isChecked(), self.slot2.text(), self.slot3a.text(), self.slot3b.text(), self.slot4.text(),
-                self.slot5a.text(), self.slot5b.text(), self.slot6a.text(), self.slot6b.text(),
-                self.slot7a.text(), self.slot7b.text()]
+        return [self.slot1.isChecked(), self.slot2.text(), self.slot3.text(), self.slot4.text(),
+                self.slot5.text(), self.slot6.text(), self.slot7.text()]
 
     def __str__(self):
         value = self.values()
@@ -161,38 +81,18 @@ class TranscriptionLayout(QVBoxLayout):
         values = ';'.join(values)
         return values
 
-    def updateFromComboBoxes(self):
-        indexText = self.indexBox.currentText().replace(',','')
-        self.slot4.setText(indexText)
-        middleText = self.middleBox.currentText().replace(',','')
-        #self.slot5a.setText(middleText[0])
-        self.slot5b.setText(middleText)#[1:])
-        ringText = self.ringBox.currentText().replace(',','')
-        #self.slot6a.setText(ringText[0])
-        self.slot6b.setText(ringText)#[1:])
-        pinkyText = self.pinkyBox.currentText().replace(',','')
-        #self.slot7a.setText(pinkyText[0])
-        self.slot7b.setText(pinkyText)#[1:])
 
 class TranscriptionData():
 
     def __init__(self, info):
-        self.slot1 = True if info[0] == 'Yes' else False
-        self.slot2 = info[1]
-        self.slot3a = info[2]
-        self.slot3b = info[3]
-        self.slot4 = info[4]
-        self.slot5a = info[5]
-        self.slot5b = info[6]
-        self.slot6a = info[7]
-        self.slot6b = info[8]
-        self.slot7a = info[9]
-        self.slot7b = info[10]
+        for n in range(1,8):
+            setattr(self, 'slot{}'.format(n), info.pop())
+        self.slot1 = True if self.slot1 == 'Yes' else False
 
     @property
     def slots(self):
-        return ['slot1', 'slot2', 'slot3a', 'slot3b', 'slot4',
-                'slot5a', 'slot5b', 'slot6a', 'slot6b', 'slot7a', 'slot7b']
+        return ['slot1', 'slot2', 'slot3', 'slot4',
+                'slot5', 'slot6', 'slot7']
 
 class TranscriptionHint(QToolTip):
 
@@ -200,24 +100,44 @@ class TranscriptionHint(QToolTip):
         super().__init__()
         self.setText('The allowable symbols are:...')
 
+class TranscriptionSlot2Validator(QRegExpValidator):
+
+    def __init__(self, expression):
+        super().__init__(expression)
+
+    def validate(self, string, position):
+        prefix,suffix = string.split('\u2205/')
+
 class TranscriptionValidator(QRegExpValidator):
 
     def __init__(self, expression):
         super().__init__(expression)
 
     def validate(self,string, position):
+        #string is the full string entered so far
+        #position is the position that was changed recently
         #note that position starts counting at 1, not 0
+        if '/' in string:
+            print(self.regExp())
+            string = string.strip()
+            pass #this transcription slot can contain spaces, don't do anything
+        else:
+            string = string.strip()
         result = super().validate(string, position)
-        if result == QRegExpValidator.Invalid:
-            pass
-
+        print(result)
+        # if result[0] == 0:
+        #     return QRegExpValidator.Invalid
+        # elif result[0] == 1:
+        #     return QRegExpValidator.Intermediate
+        # else:
+        #     return QRegExpValidator.Acceptable
+    #     #result[0] == INVALID, INTERMEDIATE, ACCEPTABLE
         return result
 
 class TranscriptionCompleter(QCompleter):
 
     def __init__(self, options):
         super().__init__(options)
-
 
 
 class TranscriptionLineEdit(QLineEdit):
@@ -234,38 +154,31 @@ class TranscriptionLineEdit(QLineEdit):
             if finger.num == slot_id:
                 self.regex = QRegExp(finger.symbols)
                 break
-        else:
-            self.regex = QRegExp('.*')
+        # else:
+        #     self.regex = QRegExp('.*')
         validator = TranscriptionValidator(self.regex)# QRegExpValidator(self.regex)
         self.setValidator(validator)
+        self.cursor
 
     def focusInEvent(self, e):
         self.slotSelectionChanged.emit(self.slot_id)
-        self.setStyleSheet('background: pink')
-
-    def focusOutEvent(self, e):
-        self.setStyleSheet(self.style)
+    #     self.setStyleSheet('background: pink')
+    #
+    # def focusOutEvent(self, e):
+    #     self.setStyleSheet(self.style)
 
     def mousePressEvent(self, e):
         self.setFocus(Qt.TabFocusReason)
-        pos = self.cursorPosition()
-        print(pos)
         #TranscriptionLineEdit objects don't allow you to set focus by with the mouse, since
         #that has the side-effect that mousing away while typing can change the focus.
         #the purpose of this method is to trick the application into thinking the user tabbed-in instead of clicking
-
-    def enterEvent(self, e):
-        pass
-
-    def leaveEvent(self, e):
-        pass
-
 
 
 class TranscriptionSlot(QHBoxLayout):
 
     slotSelectionChanged = Signal(int)
-    masks = {2: 'AXAA', 3: 'AAA{}/dddd'.format(u'\u2205'), 4: '1AAA', 5: 'A2AA', 6: 'AA3A', 7: 'AAA4'}
+    #masks = {2: 'AXAA', 3: 'AAAA{}/dddd'.format('\u2205'), 4: '1AAA', 5: 'A2AA', 6: 'AA3A', 7: 'AAA4'}
+    masks = {2: 'AXAA', 3: 'AAAA{}dddd'.format('\u2205'), 4: '1AAA', 5: 'A2AA', 6: 'AA3A', 7: 'AAA4'}
 
     def __init__(self, number, max_length):
         super().__init__()
@@ -278,7 +191,7 @@ class TranscriptionSlot(QHBoxLayout):
         self.transcription.setFont(TranscriptionLayout.defaultFont)
         width = TranscriptionLayout.fontMetric.boundingRect('_ ' * (self.transcription.maxLength() + 1)).width()
         self.transcription.setFixedWidth(width)
-        self.transcription.setPlaceholderText('_ ' * self.transcription.maxLength())
+        #self.transcription.setPlaceholderText('_ ' * self.transcription.maxLength())
 
         self.addWidget(self.left_bracket)
         self.addWidget(self.transcription)
@@ -287,8 +200,8 @@ class TranscriptionSlot(QHBoxLayout):
         try:
             mask = TranscriptionSlot.masks[self.number]
             self.transcription.setInputMask(mask)
-
         except KeyError:
-            pass #slot1 is a checkbox and this doesn't apply
+            pass #slot1 is a checkbox and doesn't have a mask
 
-
+    def text(self):
+        return self.transcription.text()

@@ -5,11 +5,12 @@ class Fingers(Enum):
 
     global_ = (1, None)
     thumb = (2, '[LUO][{<=][HEefF]{2}')
-    thumbAndFinger = (3, '[ftbru][tdpM][fbru][tdmpM][1\s][2\s][3\s][4\s]')
-    index = (4, '[EFHi]{3}')
-    middle = (5, '[EFHi]{3}')
-    ring = (6, '[EFHi]{3}')
-    pinky = (7, '[EFHi]{3}')
+    #thumbAndFinger = (3, '[ftbru][tdpM][fbru][tdmpM]\u2205/[-1\s][-2\s][-3\s][-4\s]')
+    thumbAndFinger = (3, '[ftbru][tdpM][fbru][tdmpM]\u2205[-1\s][-2\s][-3\s][-4\s]')
+    index = (4, '1[EFHi]{3}')
+    middle = (5, '[EFHi]2[EFHi]{2}')
+    ring = (6, '[EFHi]{2}3[EFHi]')
+    pinky = (7, '[EFHi]{3}4')
     contact = (8,'[{<=]')
 
     def __init__(self, num, symbols):
@@ -56,17 +57,18 @@ class Movements(Enum):
 
 class Sign():
 
-    sign_attributes = {'major': None, 'minor': None,
+    sign_attributes = {'gloss': None, 'major': None, 'minor': None,
                     'movement': None, 'orientation': None,
-                    'config1hand1': None, 'config1hand2': None,
-                    'config2hand1': None, 'config2hand2': None,
-                    'gloss': None}
+                    'config1': None, 'config2': None,
+                       }
 
     def __init__(self, data):
         self.attributes = list()
-        for key,value in data.items():
-            self.attributes.append(key)
-            setattr(self, key, value)
+        for key, default_value in Sign.sign_attributes.items():
+            try:
+                setattr(self, key, data[key])
+            except KeyError:
+                setattr(self, key, default_value)
 
     def __eq__(self, other):
         if not isinstance(other, Sign):
@@ -80,5 +82,5 @@ class Sign():
     def __repr__(self):
         return self.__str__()
 
-    def getConfigInfo(self, config_num, hand_num):
-        pass
+    def data(self):
+        return {key:getattr(self, key) for key in Sign.sign_attributes}
