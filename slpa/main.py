@@ -283,7 +283,7 @@ class VideoPlayer(QWidget):
         #self.setMedia()
         self.looping = False
         self.videoItem = QGraphicsVideoItem()
-        #self.videoItem.setSize(QSizeF(640, 480))
+        self.videoItem.setSize(QSizeF(640, 480))
         scene = QGraphicsScene(self)
         graphicsView = QGraphicsView(scene)
         scene.addItem(self.videoItem)
@@ -404,8 +404,8 @@ class MainWindow(QMainWindow):
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
         self.corpus = None
         self.globalLayout = QHBoxLayout()
-        self.videoPlayer = VideoPlayer()
-        self.globalLayout.addWidget(self.videoPlayer)
+        # self.videoPlayer = VideoPlayer()
+        # self.globalLayout.addWidget(self.videoPlayer)
 
         layout = QVBoxLayout()
 
@@ -424,17 +424,15 @@ class MainWindow(QMainWindow):
         self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
         layout.addWidget(self.handImage)
 
-        for k in [0,1]:
-            for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
-                #slot = getattr(self.configTabs.widget(k).hand1Transcription, slot_id)
-                slot.transcription.slotSelectionChanged.connect(self.handImage.useNormalImage)
-                slot.transcription.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
-            for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
-                #slot = getattr(self.configTabs.widget(k).hand2Transcription, slot_id)
-                slot.transcription.slotSelectionChanged.connect(self.handImage.useReverseImage)
-                slot.transcription.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
-
-
+        # for k in [0,1]:
+        #     for slot in self.configTabs.widget(k).hand1Transcription.fields[1:]:
+        #         #slot = getattr(self.configTabs.widget(k).hand1Transcription, slot_id)
+        #         field.transcription.slotSelectionChanged.connect(self.handImage.useNormalImage)
+        #         field.transcription.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+        #     for slot in self.configTabs.widget(k).hand2Transcription.fields[1:]:
+        #         #slot = getattr(self.configTabs.widget(k).hand2Transcription, slot_id)
+        #         field.transcription.slotSelectionChanged.connect(self.handImage.useReverseImage)
+        #         field.transcription.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
 
         self.featuresLayout = MajorFeatureLayout()
         layout.addLayout(self.featuresLayout)

@@ -20,52 +20,110 @@ class TranscriptionLayout(QVBoxLayout):
         QVBoxLayout.__init__(self)
 
         self.hand = hand
-        self.slots = list()
+        self.fields = list()
         self.lineLayout = QHBoxLayout()
         self.lineLayout.setContentsMargins(-1,0,-1,-1)
 
-        #SLOT 1
+        self.generateSlots()
+
+        #FIELD 1 (Forearm)
         self.lineLayout.addWidget(QLabel('['))
-        self.slot1 = TranscriptionCheckBox(1)
-        self.lineLayout.addWidget(self.slot1)
-        self.slots.append(self.slot1)
+        self.field1 = TranscriptionCheckBox(1)
+        self.lineLayout.addWidget(self.field1)
+        self.fields.append(self.field1)
         self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>1</sub></b></font>'))
         self.addLayout(self.lineLayout)
 
-        #SLOT 2
-        self.slot2 = TranscriptionSlot(number=2, max_length=4)
-        self.lineLayout.addLayout(self.slot2)
-        self.slots.append(self.slot2)
+        #FIELD 2 (Thumb)
+        self.field2 = TranscriptionField(number=2)
+        for j in range(2,6):
+            self.field2.addSlot(getattr(self, 'slot{}'.format(j)))
+        self.lineLayout.addLayout(self.field2)
+        self.fields.append(self.field2)
 
-        #SLOT 3
-        self.slot3 = TranscriptionSlot(number=3, max_length=8)
-        self.lineLayout.addLayout(self.slot3)
-        self.slots.append(self.slot3)
+        #FIELD 3 (Thumb/Finger contact)
+        self.field3 = TranscriptionField(number=3)
+        for j in range(6,16):
+            self.field3.addSlot(getattr(self, 'slot{}'.format(j)))
+        self.lineLayout.addLayout(self.field3)
+        self.fields.append(self.field3)
 
+        #FIELD 4 (Index)
+        self.field4 = TranscriptionField(number=4)
+        for j in range(16,20):
+            self.field4.addSlot(getattr(self, 'slot{}'.format(j)))
+        self.lineLayout.addLayout(self.field4)
+        self.fields.append(self.field4)
 
-        # #SLOT 4
-        self.slot4 = TranscriptionSlot(number=4, max_length=4)
-        self.lineLayout.addLayout(self.slot4)
-        self.slots.append(self.slot4)
+        #FIELD 5 (Middle)
+        self.field5 = TranscriptionField(number=5)
+        for j in range(20,25):
+            self.field5.addSlot(getattr(self, 'slot{}'.format(j)))
+        self.lineLayout.addLayout(self.field5)
+        self.fields.append(self.field5)
 
-        #SLOT 5
-        self.slot5 = TranscriptionSlot(number=5, max_length=4)
-        self.lineLayout.addLayout(self.slot5)
-        self.slots.append(self.slot5)
+        #FIELD 6 (Ring)
+        self.field6 = TranscriptionField(number=6)
+        for j in range(25,30):
+            self.field6.addSlot(getattr(self, 'slot{}'.format(j)))
+        self.lineLayout.addLayout(self.field6)
+        self.fields.append(self.field6)
 
-        # #SLOT 6
-        self.slot6 = TranscriptionSlot(number=6, max_length=4)
-        self.lineLayout.addLayout(self.slot6)
-        self.slots.append(self.slot6)
+        #FIELD 7 (Pinky)
+        self.field7 = TranscriptionField(number=7)
+        for j in range(30,35):
+            self.field7.addSlot(getattr(self, 'slot{}'.format(j)))
+        self.lineLayout.addLayout(self.field7)
+        self.fields.append(self.field7)
 
-        # #SLOT 7
-        self.slot7 = TranscriptionSlot(number=7, max_length=4)
-        self.lineLayout.addLayout(self.slot7)
-        self.slots.append(self.slot7)
+    def generateSlots(self):
+        #FIELD 1 (Forearm)
+        #This field is a check box, and does not contain any slots
 
+        #FIELD 2 (Thumb)
+        self.slot2 = TranscriptionSlot(2, '[LUO]', list('LUO'))
+        self.slot3 = TranscriptionSlot(3, '[{<=]', list('{<='))
+        self.slot4 = TranscriptionSlot(4, '[HEefF]', list('HEefF'))
+        self.slot5 = TranscriptionSlot(5, '[HEefF]', list('HEefF'))
 
-    def setComboBoxes(self, boxes):
-        self.indexBox, self.middleBox, self.ringBox, self.pinkyBox = boxes
+        #FIELD 3 (Thumb/Finger Contact)
+        self.slot6 = TranscriptionSlot(6, '[ftbru]', list('ftbru'))
+        self.slot7 = TranscriptionSlot(7, '[tdpM]', list('tdpM'))
+        self.slot8 = TranscriptionSlot(8, '[fbru]', list('fbru'))
+        self.slot9 = TranscriptionSlot(9, '[tdmpM]', list('tdmpM'))
+        self.slot10 = TranscriptionSlot(10, '\u2205', ['\u2205'])
+        self.slot11 = TranscriptionSlot(11, '/', ['/'])
+        self.slot12 = TranscriptionSlot(12, '[-1\s]', ['-','1'])
+        self.slot13 = TranscriptionSlot(13, '[-2\s]', ['-','2'])
+        self.slot14 = TranscriptionSlot(14, '[-3\s]', ['-','3'])
+        self.slot15 = TranscriptionSlot(15, '[-4\s]', ['-','4'])
+
+        #FIELD 4 (Index)
+        self.slot16 = TranscriptionSlot(16, '1', ['1'])
+        self.slot17 = TranscriptionSlot(17, '[EFHi]', list('EFHi'))
+        self.slot18 = TranscriptionSlot(18, '[EFHi]', list('EFHi'))
+        self.slot19 = TranscriptionSlot(19, '[EFHi]', list('EFHi'))
+
+        #FIELD 5 (Middle)
+        self.slot20 = TranscriptionSlot(20, '[{<=x(x+)(x-)\u2327]', ['{','<','=','x','x+','x-','\u2327'])
+        self.slot21 = TranscriptionSlot(21, '2', ['2'])
+        self.slot22 = TranscriptionSlot(22, '[EFHi]', list('EFHi'))
+        self.slot23 = TranscriptionSlot(23, '[EFHi]', list('EFHi'))
+        self.slot24 = TranscriptionSlot(24, '[EFHi]', list('EFHi'))
+
+        #FIELD 6 (Ring)
+        self.slot25 = TranscriptionSlot(25, '[{<=x(x+)(x-)\u2327]', ['{','<','=','x','x+','x-','\u2327'])
+        self.slot26 = TranscriptionSlot(26, '3', ['3'])
+        self.slot27 = TranscriptionSlot(27, '[EFHi]', list('EFHi'))
+        self.slot28 = TranscriptionSlot(28, '[EFHi]', list('EFHi'))
+        self.slot29 = TranscriptionSlot(29, '[EFHi]', list('EFHi'))
+
+        #FIELD 7 (Middle)
+        self.slot30 = TranscriptionSlot(30, '[{<=x(x+)(x-)\u2327]', ['{','<','=','x','x+','x-','\u2327'])
+        self.slot31 = TranscriptionSlot(31, '4', ['4'])
+        self.slot32 = TranscriptionSlot(32, '[EFHi]', list('EFHi'))
+        self.slot33 = TranscriptionSlot(33, '[EFHi]', list('EFHi'))
+        self.slot34 = TranscriptionSlot(34, '[EFHi]', list('EFHi'))
 
     def values(self):
         return [self.slot1.isChecked(), self.slot2.text(), self.slot3.text(), self.slot4.text(),
@@ -80,7 +138,6 @@ class TranscriptionLayout(QVBoxLayout):
         values.extend(value[1:])
         values = ';'.join(values)
         return values
-
 
 class TranscriptionData():
 
@@ -100,108 +157,81 @@ class TranscriptionHint(QToolTip):
         super().__init__()
         self.setText('The allowable symbols are:...')
 
-class TranscriptionSlot2Validator(QRegExpValidator):
-
-    def __init__(self, expression):
-        super().__init__(expression)
-
-    def validate(self, string, position):
-        prefix,suffix = string.split('\u2205/')
-
-class TranscriptionValidator(QRegExpValidator):
-
-    def __init__(self, expression):
-        super().__init__(expression)
-
-    def validate(self,string, position):
-        #string is the full string entered so far
-        #position is the position that was changed recently
-        #note that position starts counting at 1, not 0
-        if '/' in string:
-            print(self.regExp())
-            string = string.strip()
-            pass #this transcription slot can contain spaces, don't do anything
-        else:
-            string = string.strip()
-        result = super().validate(string, position)
-        print(result)
-        # if result[0] == 0:
-        #     return QRegExpValidator.Invalid
-        # elif result[0] == 1:
-        #     return QRegExpValidator.Intermediate
-        # else:
-        #     return QRegExpValidator.Acceptable
-    #     #result[0] == INVALID, INTERMEDIATE, ACCEPTABLE
-        return result
 
 class TranscriptionCompleter(QCompleter):
 
-    def __init__(self, options):
-        super().__init__(options)
+    def __init__(self, options, lineEditWidget):
+        super().__init__(options, lineEditWidget)
+        self.setCaseSensitivity(Qt.CaseSensitive)
+        self.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
 
+class TranscriptionSlot(QLineEdit):
 
-class TranscriptionLineEdit(QLineEdit):
-
-    slotSelectionChanged = Signal(int)
-
-    def __init__(self, slot_id, parent=None):
-        super().__init__(parent)
-        self.slot_id = slot_id
-        self.style = 'border:0px;background:#ffffff'
-        self.setStyleSheet(self.style)
+    def __init__(self, num, regex, completer_options):
+        super().__init__()
+        self.num = num
+        self.setValidator(QRegExpValidator(QRegExp(regex)))
+        self.setMaxLength(1)
+        self.setFixedWidth(30)
         self.setFocusPolicy(Qt.TabFocus)
-        for finger in Fingers:
-            if finger.num == slot_id:
-                self.regex = QRegExp(finger.symbols)
-                break
-        # else:
-        #     self.regex = QRegExp('.*')
-        validator = TranscriptionValidator(self.regex)# QRegExpValidator(self.regex)
-        self.setValidator(validator)
-        self.cursor
+        completer = TranscriptionCompleter(completer_options, self)
+        self.setCompleter(completer)
+        self.completer().activated.connect(self.setText)
+
+        if self.num == 10:
+            self.setText('\u2205')
+            self.setEnabled(False)
+        elif self.num == 11:
+            self.setText('/')
+            self.setEnabled(False)
+        elif self.num == 16:
+            self.setText('1')
+            self.setEnabled(False)
+        elif self.num == 21:
+            self.setText('2')
+            self.setEnabled(False)
+        elif self.num == 26:
+            self.setText('3')
+            self.setEnabled(False)
+        elif self.num == 31:
+            self.setText('4')
+            self.setEnabled(False)
 
     def focusInEvent(self, e):
-        self.slotSelectionChanged.emit(self.slot_id)
-    #     self.setStyleSheet('background: pink')
-    #
-    # def focusOutEvent(self, e):
-    #     self.setStyleSheet(self.style)
+        self.completer().complete()
 
     def mousePressEvent(self, e):
         self.setFocus(Qt.TabFocusReason)
-        #TranscriptionLineEdit objects don't allow you to set focus by with the mouse, since
-        #that has the side-effect that mousing away while typing can change the focus.
-        #the purpose of this method is to trick the application into thinking the user tabbed-in instead of clicking
 
+    def keyPressEvent(self, e):
+        self.completer().complete()
+        super().keyPressEvent(e)
 
-class TranscriptionSlot(QHBoxLayout):
+class TranscriptionField(QHBoxLayout):
 
     slotSelectionChanged = Signal(int)
-    #masks = {2: 'AXAA', 3: 'AAAA{}/dddd'.format('\u2205'), 4: '1AAA', 5: 'A2AA', 6: 'AA3A', 7: 'AAA4'}
     masks = {2: 'AXAA', 3: 'AAAA{}dddd'.format('\u2205'), 4: '1AAA', 5: 'A2AA', 6: 'AA3A', 7: 'AAA4'}
 
-    def __init__(self, number, max_length):
+    def __init__(self, number):
         super().__init__()
         self.number = number
-        self.name = 'slot{}'.format(self.number)
+        self.name = 'field{}'.format(self.number)
         self.left_bracket = QLabel('[')
         self.right_bracket = QLabel(']<font size="5"><b><sub>{}</sub></b></font>'.format(self.number))
-        self.transcription = TranscriptionLineEdit(self.number)
-        self.transcription.setMaxLength(max_length)
-        self.transcription.setFont(TranscriptionLayout.defaultFont)
-        width = TranscriptionLayout.fontMetric.boundingRect('_ ' * (self.transcription.maxLength() + 1)).width()
-        self.transcription.setFixedWidth(width)
+        self.transcription = QHBoxLayout()
+        # self.transcription = TranscriptionLineEdit(self.number)
+        # self.transcription.setMaxLength(max_length)
+        # self.transcription.setFont(TranscriptionLayout.defaultFont)
+        # width = TranscriptionLayout.fontMetric.boundingRect('_ ' * (self.transcription.maxLength() + 1)).width()
+        # self.transcription.setFixedWidth(width)
         #self.transcription.setPlaceholderText('_ ' * self.transcription.maxLength())
 
         self.addWidget(self.left_bracket)
-        self.addWidget(self.transcription)
+        self.addLayout(self.transcription)
         self.addWidget(self.right_bracket)
 
-        try:
-            mask = TranscriptionSlot.masks[self.number]
-            self.transcription.setInputMask(mask)
-        except KeyError:
-            pass #slot1 is a checkbox and doesn't have a mask
+    # def text(self):
+    #     return self.transcription.text()
 
-    def text(self):
-        return self.transcription.text()
+    def addSlot(self, slot):
+        self.transcription.addWidget(slot)
