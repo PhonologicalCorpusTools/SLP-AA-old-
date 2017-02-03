@@ -262,7 +262,6 @@ class HandConfigTab(QWidget):
         self.hand2Transcription = TranscriptionLayout(hand=2)
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
 
-
         self.setLayout(self.configLayout)
 
     def clearAll(self):
@@ -424,15 +423,13 @@ class MainWindow(QMainWindow):
         self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
         layout.addWidget(self.handImage)
 
-        # for k in [0,1]:
-        #     for slot in self.configTabs.widget(k).hand1Transcription.fields[1:]:
-        #         #slot = getattr(self.configTabs.widget(k).hand1Transcription, slot_id)
-        #         field.transcription.slotSelectionChanged.connect(self.handImage.useNormalImage)
-        #         field.transcription.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
-        #     for slot in self.configTabs.widget(k).hand2Transcription.fields[1:]:
-        #         #slot = getattr(self.configTabs.widget(k).hand2Transcription, slot_id)
-        #         field.transcription.slotSelectionChanged.connect(self.handImage.useReverseImage)
-        #         field.transcription.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+        for k in [0,1]:
+            for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
+                slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
+                slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+            for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
+                slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
+                slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
 
         self.featuresLayout = MajorFeatureLayout()
         layout.addLayout(self.featuresLayout)
