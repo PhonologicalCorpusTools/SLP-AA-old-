@@ -143,31 +143,13 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot34 = TranscriptionSlot(34, 7, '[EFHi]', list('EFHi'))
 
 
-    def values(self):
-        return [self.slot1.isChecked(), self.slot2.text(), self.slot3.text(), self.slot4.text(),
-                self.slot5.text(), self.slot6.text(), self.slot7.text()]
-
     def __str__(self):
-        value = self.values()
-        if value[0]:
-            values = ['Yes']
-        else:
-            values = ['No']
-        values.extend(value[1:])
-        values = ';'.join(values)
-        return values
+        return ','.join(self.values())
 
-class TranscriptionData():
-
-    def __init__(self, info):
-        for n in range(1,8):
-            setattr(self, 'slot{}'.format(n), info.pop())
-        self.slot1 = True if self.slot1 == 'Yes' else False
-
-    @property
-    def slots(self):
-        return ['slot1', 'slot2', 'slot3', 'slot4',
-                'slot5', 'slot6', 'slot7']
+    def values(self):
+        data = [self.slot1.isChecked()]
+        data.extend([slot.text() for slot in self.slots[1:]])
+        return data
 
 class TranscriptionCompleter(QCompleter):
 
@@ -216,7 +198,6 @@ class TranscriptionSlot(QLineEdit):
             self.setEnabled(False)
 
     def completerActivated(self, e):
-        print(e)
         self.setText(e)
         #add automatic tab to next widget
 
@@ -258,9 +239,6 @@ class TranscriptionField(QHBoxLayout):
         self.addWidget(self.left_bracket)
         self.addLayout(self.transcription)
         self.addWidget(self.right_bracket)
-
-    # def text(self):
-    #     return self.transcription.text()
 
     def addSlot(self, slot):
         self.transcription.addWidget(slot)

@@ -267,11 +267,20 @@ class HandConfigTab(QWidget):
     def clearAll(self):
         self.hand1Transcription.slot1.setChecked(False)
         for slot in self.hand1Transcription.slots[1:]:
-            slot.transcription.setText('')
+            slot.setText('')
 
         self.hand2Transcription.slot1.setChecked(False)
         for slot in self.hand2Transcription.slots[1:]:
-            slot.transcription.setText('')
+            slot.setText('')
+
+    def hand1(self):
+        return self.hand1Transcription.values()
+
+    def hand2(self):
+        return self.hand2Transcription.values()
+
+    def hands(self):
+        return [self.hand1(), self.hand2()]
 
 
 class VideoPlayer(QWidget):
@@ -466,7 +475,6 @@ class MainWindow(QMainWindow):
     def loadCorpus(self):
         file_path = QFileDialog.getOpenFileName(self,
                 'Open Corpus File', os.getcwd(), '*.corpus')
-        print(file_path)
         file_path = file_path[0]
         if not file_path:
             return
@@ -486,8 +494,8 @@ class MainWindow(QMainWindow):
             alert.exec_()
             return
 
+        kwargs = self.generateKwargs()
         if self.corpus is None:
-            kwargs = self.generateKwargs()
             alert = QMessageBox()
             alert.setWindowTitle('No corpus loaded')
             alert.setText('You must have a corpus loaded before you can save words. What would you like to do?')
@@ -497,7 +505,6 @@ class MainWindow(QMainWindow):
             role = alert.buttonRole(alert.clickedButton())
             if role ==  1:#create new corpus
                 savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.corpus')
-
                 path = savename[0]
                 if not path:
                     return
@@ -507,25 +514,11 @@ class MainWindow(QMainWindow):
                 kwargs['path'] = path
                 kwargs['name'] = os.path.split(path)[1].split('.')[0]
                 self.corpus = Corpus(kwargs)
-                #saveHandShape(kwargs)
-                self.addButtonToDock(kwargs)
-                self.corpus.addWord(Sign(kwargs))
-                save_binary(self.corpus,
-                            #os.path.join(self.settings['storage'], 'CORPUS', self.corpus.name + '.corpus'))
-                            kwargs['path'])
-                QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
-                #self.newGloss()
 
             elif role == 0: #load existing corpus and add to it
                 self.loadCorpus()
-                self.addButtonToDock(kwargs)
-                self.corpus.addWord(Sign(kwargs))
-                save_binary(self.corpus,
-                            #os.path.join(self.settings['storage'], 'CORPUS', self.corpus.name + '.corpus'))
-                            kwargs['path'])
 
         else: #corpus exists
-            kwargs = self.generateKwargs()
             kwargs['path'] = self.corpus.path
             kwargs['file_mode'] = 'a'
             if kwargs['gloss'] in self.corpus.wordlist:
@@ -542,11 +535,10 @@ class MainWindow(QMainWindow):
                 elif role == 1:#edit
                     return
 
-            #saveHandShape(kwargs)
-            self.addButtonToDock(kwargs)
-            self.corpus.addWord(Sign(kwargs))
-            QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
-            #self.newGloss()
+        self.addButtonToDock(kwargs)
+        self.corpus.addWord(Sign(kwargs))
+        save_binary(self.corpus, kwargs['path'])
+        QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
 
     def addButtonToDock(self, kwargs):
         button = DataButton(kwargs)
@@ -565,24 +557,32 @@ class MainWindow(QMainWindow):
         config2 = self.configTabs.widget(1)
 
         config1hand1 = buttonData['config1hand1']
-        config1.hand1Transcription.slot1.setChecked(config1hand1.slot1)
-        for slot in config1hand1.slots[1:]:
-            slot.transcription.setText(value)
+        for num, slot in enumerate(config1.hand1Transcription.slots):
+            if num == 0:
+                slot.setChecked(config1hand1[0])
+            else:
+                slot.setText(config1hand1[num])
 
         config1hand2 = buttonData['config1hand2']
-        config1.hand2Transcription.slot1.setChecked(config1hand2.slot1)
-        for slot in config1hand2.slots[1:]:
-            slot.transcription.setText(value)
+        for num, slot in enumerate(config1.hand2Transcription.slots):
+            if num == 0:
+                slot.setChecked(config1hand2[0])
+            else:
+                slot.setText(config1hand2[num])
 
         config2hand1 = buttonData['config2hand1']
-        config2.hand2Transcription.slot1.setChecked(config2hand1.slot1)
-        for slot in config2hand1.slots[1:]:
-            slot.transcription.setText(value)
+        for num, slot in enumerate(config2.hand1Transcription.slots):
+            if num == 0:
+                slot.setChecked(config2hand1[0])
+            else:
+                slot.setText(config2hand1[num])
 
         config2hand2 = buttonData['config2hand2']
-        config2.hand2Transcription.slot1.setChecked(config2hand2.slot1)
-        for slot in config2hand2.slots[1:]:
-            slot.transcription.setText(value)
+        for num, slot in enumerate(config2.hand2Transcription.slots):
+            if num == 0:
+                slot.setChecked(config2hand2[0])
+            else:
+                slot.setText(config2hand2[num])
 
         for name in ['major', 'minor', 'movement', 'orientation']:
             widget = getattr(self.featuresLayout, name)
@@ -594,8 +594,10 @@ class MainWindow(QMainWindow):
     def generateSign(self):
         data = {'config1': None, 'config2': None,
                 'major': None, 'minor': None, 'movement': None, 'orientation': None}
-        data['config1'] = self.configTabs.widget(0).findChildren(TranscriptionLayout)
-        data['config2'] = self.configTabs.widget(1).findChildren(TranscriptionLayout)
+        config1 = self.configTabs.widget(0).findChildren(TranscriptionLayout)
+        data['config1'] = [config1[0].text(), config1[1].text()]
+        config2 = self.configTabs.widget(1).findChildren(TranscriptionLayout)
+        data['config2'] = [config2[0].text(), config2[1].text()]
         gloss = self.gloss.glossEdit.text().strip()
         data['gloss'] = gloss
         major = self.featuresLayout.major.currentText()
@@ -612,8 +614,10 @@ class MainWindow(QMainWindow):
         kwargs = {'path': None, 'file_mode': None,
                 'config1': None, 'config2': None,
                 'major': None, 'minor': None, 'movement': None, 'orientation': None}
-        kwargs['config1'] = self.configTabs.widget(0).findChildren(TranscriptionLayout)
-        kwargs['config2'] = self.configTabs.widget(1).findChildren(TranscriptionLayout)
+        config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
+        kwargs['config1'] = [config1.hand1(), config1.hand2()]
+        config2 = self.configTabs.widget(1)#.findChildren(TranscriptionLayout)
+        kwargs['config2'] = [config2.hand1(), config2.hand2()]
         gloss = self.gloss.glossEdit.text().strip()
         kwargs['gloss'] = gloss
         major = self.featuresLayout.major.currentText()
@@ -626,23 +630,16 @@ class MainWindow(QMainWindow):
         kwargs['orientation'] = 'None' if orientation == 'Orientation' else orientation
         return kwargs
 
-    def printCorpusToConsole(self):
-        print(self.corpus.name, len(self.corpus))
-        for word in self.corpus:
-            print(word.gloss)
-
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&Menu")
         self.fileMenu.addAction(self.newCorpusAct)
         self.fileMenu.addAction(self.loadCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAct)
         self.fileMenu.addAction(self.newGlossAct)
-        self.fileMenu.addAction(self.printCorpusToConsoleAct)
+        self.fileMenu.addAction(self.exportCorpus)
         self.fileMenu.addAction(self.quitAct)
 
     def createActions(self):
-
-        self.printCorpusToConsoleAct = QAction('Print corpus to console', self, triggered=self.printCorpusToConsole)
 
         self.newCorpusAct = QAction('&New corpus...',
                                     self,
@@ -664,6 +661,28 @@ class MainWindow(QMainWindow):
         self.quitAct = QAction( "&Quit",
                 self,
                 statusTip="Quit", triggered=self.close)
+
+        self.exportCorpus = QAction('&Export corpus as csv',
+                                    self,
+                                    statusTip='Save corpus as csv for opening as a spreadsheet',
+                                    triggered=self.exportCorpus)
+
+    def exportCorpus(self):
+        savename = QFileDialog.getSaveFileName(self, 'Export Corpus as CSV', os.getcwd(), '*.csv')
+        path = savename[0]
+        if not path:
+            return
+        if not path.endswith('.csv'):
+            path = path + '.csv'
+
+        output = [word.export() for word in self.corpus]
+
+        with open(path, encoding='utf-8', mode='w') as f:
+            print(Sign.headers, file=f)
+            for word in output:
+                print(word, file=f)
+
+        QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
 
 
     def sizeHint(self):
@@ -712,23 +731,14 @@ class DataButton(QPushButton):
         QPushButton.__init__(self)
         self.gloss = data['gloss']
         self.setText(self.gloss)
-        self.config1 = data['config1']
-        self.parseConfiguration(self.config1, '1')
-        self.config2 = data['config2']
-        self.parseConfiguration(self.config2, '2')
+        self.config1hand1, self.config1hand2 = data['config1']
+        self.config2hand1, self.config2hand2 = data['config2']
         self.major = data['major']
         self.minor = data['minor']
         self.movement = data['movement']
         self.orientation = data['orientation']
         self.setData()
         self.clicked.connect(self.emitData)
-
-    def parseConfiguration(self, config, num):
-        hand1,hand2 = config
-        info = str(hand1).split(';')
-        setattr(self, 'config'+num+'hand1', TranscriptionData(info))
-        info = str(hand2).split(';')
-        setattr(self, 'config'+num+'hand2', TranscriptionData(info))
 
     def setData(self):
         self.data ={'major': self.major, 'minor': self.minor,
@@ -772,28 +782,6 @@ def sortData(data):
         return 5
     elif data == 'orientation':
         return 6
-
-def saveHandShape(kwargs):
-    #see MainWindow.generateKwargs() for where this data comes from in the first place
-    path = kwargs.pop('path')
-    file_mode = kwargs.pop('file_mode')
-    kwargs['config1'] = '&'.join([str(kw) for kw in kwargs['config1']])
-    kwargs['config2'] = '&'.join([str(kw) for kw in kwargs['config2']])
-    headers = sorted(list(kwargs.keys()), key=sortData)
-
-    with open(path, mode=file_mode, encoding='utf-8') as file:
-        if file_mode == 'w':
-            print(','.join(headers), file=file)
-        line = list()
-        for header in headers:
-            value = kwargs[header]
-            #print(header, value)
-            if value is None:
-                line.append('None')
-            else:
-                line.append(str(value))
-        line = ','.join(line)
-        print(line, file=file)
 
 def loadcsvCorpus(path):
     with open(path, mode='r', encoding='utf-8') as file:

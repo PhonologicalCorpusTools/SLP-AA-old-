@@ -1,5 +1,6 @@
 from enum import Enum
 import itertools
+from collections import OrderedDict
 
 class Fingers(Enum):
 
@@ -57,18 +58,23 @@ class Movements(Enum):
 
 class Sign():
 
-    sign_attributes = {'gloss': None, 'major': None, 'minor': None,
-                    'movement': None, 'orientation': None,
-                    'config1': None, 'config2': None,
-                       }
+    sign_attributes = ['gloss', 'config1', 'config2', 'major', 'minor', 'movement', 'orientation']
+
+    headers = ['gloss',
+                       'config1hand1', 'config1hand2',
+                       'config2hand1', 'config2hand2',
+                       'major', 'minor',
+                       'movement', 'orientation']
+    for config_num in [1, 2]:
+        for hand_num in [1, 2]:
+            for slot_num in range(1, 35):
+                headers.append('config{}hand{}slot{}'.format(config_num,hand_num, slot_num))
+    headers = ';'.join(headers)
 
     def __init__(self, data):
         self.attributes = list()
-        for key, default_value in Sign.sign_attributes.items():
-            try:
-                setattr(self, key, data[key])
-            except KeyError:
-                setattr(self, key, default_value)
+        for key,value in data:
+            setattr(self, key, value)
 
     def __eq__(self, other):
         if not isinstance(other, Sign):
@@ -83,4 +89,38 @@ class Sign():
         return self.__str__()
 
     def data(self):
-        return {key:getattr(self, key) for key in Sign.sign_attributes}
+        return OrderedDict([(key,getattr(self, key)) for key in Sign.sign_attributes])
+
+    def export(self):
+        output = list()
+        for key,value in self.data().items():
+
+            if 'config' in key:
+                for hand in value:
+                    if hand[0]:
+                        hand[0] = 'Y'
+                    else:
+                        hand[0] = 'N'
+                    output.append(''.join(hand))
+                continue
+
+            if key == 'major':
+                value = 'None' if not value else value
+            elif key == 'minor':
+                value = 'None' if not value else value
+            elif key == 'orientation':
+                value = 'None' if not value else value
+            elif key  == 'movement':
+                value = 'None' if not value else value
+            output.append(value)
+
+
+
+        for config_num in [1,2]:
+            for hand_num in [0,1]:
+                slot_list = getattr(self, 'config{}'.format(config_num))[hand_num]
+                for slot_num in range(34):
+                    output.append(slot_list[slot_num])
+        output = ';'.join(output)
+
+        return output
