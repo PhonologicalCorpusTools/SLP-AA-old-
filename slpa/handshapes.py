@@ -98,10 +98,10 @@ class Sign():
             if 'config' in key:
                 for hand in value:
                     if hand[0]:
-                        hand[0] = 'Y'
+                        hand[0] = 'V'
                     else:
-                        hand[0] = 'N'
-                    output.append(''.join(hand))
+                        hand[0] = '_'
+                    output.append(''.join([x if x else '_' for x in hand]))
                 continue
 
             if key == 'major':

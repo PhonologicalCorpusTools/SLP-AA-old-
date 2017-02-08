@@ -100,16 +100,16 @@ class TranscriptionLayout(QVBoxLayout):
         #FIELD 2 (Thumb)
         self.slot2 = TranscriptionSlot(2, 2, '[LUO]', list('LUO'))
         self.slot3 = TranscriptionSlot(3, 2, '[{<=]', list('{<='))
-        self.slot4 = TranscriptionSlot(4, 2, '[HEefF]', list('HEefF'))
-        self.slot5 = TranscriptionSlot(5, 2, '[HEefF]', list('HEefF'))
+        self.slot4 = TranscriptionSlot(4, 2, '[EFHi]', list('EFHi'))
+        self.slot5 = TranscriptionSlot(5, 2, '[EFHi]', list('EFHi'))
 
         #FIELD 3 (Thumb/Finger Contact)
         self.slot6 = TranscriptionSlot(6, 3, '[ftbru]', list('ftbru'))
         self.slot7 = TranscriptionSlot(7, 3, '[tdpM]', list('tdpM'))
-        self.slot8 = TranscriptionSlot(8, 3, '[fbru]', list('fbru'))
-        self.slot9 = TranscriptionSlot(9, 3, '[tdmpM]', list('tdmpM'))
-        self.slot10 = TranscriptionSlot(10, 3, NULL, [NULL])
-        self.slot11 = TranscriptionSlot(11, 3, '/', ['/'])
+        self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL])
+        self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
+        self.slot10 = TranscriptionSlot(10, 3, '[fbru]', list('fbru'))
+        self.slot11 = TranscriptionSlot(11, 3, '[tdmpM]', list('tdmpM'))
         self.slot12 = TranscriptionSlot(12, 3, '[-1\s]', ['-','1'])
         self.slot13 = TranscriptionSlot(13, 3, '[-2\s]', ['-','2'])
         self.slot14 = TranscriptionSlot(14, 3, '[-3\s]', ['-','3'])
@@ -178,10 +178,10 @@ class TranscriptionSlot(QLineEdit):
         self.setCompleter(completer)
         self.completer().activated.connect(self.completerActivated)
 
-        if self.num == 10:
+        if self.num == 8:
             self.setText(NULL)
             self.setEnabled(False)
-        elif self.num == 11:
+        elif self.num == 9:
             self.setText('/')
             self.setEnabled(False)
         elif self.num == 16:
@@ -203,7 +203,7 @@ class TranscriptionSlot(QLineEdit):
 
     def focusInEvent(self, e):
         self.completer().complete()
-        self.slotSelectionChanged.emit(self.field)
+        self.slotSelectionChanged.emit(self.num)
 
     def mousePressEvent(self, e):
         self.setFocus(Qt.TabFocusReason)
@@ -242,3 +242,135 @@ class TranscriptionField(QHBoxLayout):
 
     def addSlot(self, slot):
         self.transcription.addWidget(slot)
+
+class TranscriptionInfo(QGridLayout):
+
+    def __init__(self):
+        super().__init__()
+
+        titleFont = QFont('Arial', 15)
+        infoFont = QFont('Arial', 12)
+
+        self.fieldTitle = QLabel('Field type')
+        self.fieldTitle.setFont(titleFont)
+        self.fieldInfo = QLabel('Generic field')
+        self.fieldInfo.setFont(infoFont)
+
+        self.slotNumberTitle = QLabel('Slot number')
+        self.slotNumberTitle.setFont(titleFont)
+        self.slotNumberInfo = QLabel('Generic slot')
+        self.slotNumberInfo.setFont(infoFont)
+
+        self.slotPurposeTitle = QLabel('Slot purpose')
+        self.slotPurposeInfo = QLabel('Generic purpose')
+        self.slotPurposeTitle.setFont(titleFont)
+        self.slotPurposeInfo.setFont(infoFont)
+        self.slotPurposeInfo.setWordWrap(True)
+
+        self.slotOptionsTitle = QLabel('Permitted characters')
+        self.slotOptionsInfo = QLabel('Generic characters')
+        self.slotOptionsTitle.setFont(titleFont)
+        self.slotOptionsInfo.setFont(infoFont)
+        self.slotOptionsInfo.setWordWrap(True)
+
+        self.addWidget(self.fieldTitle, 0, 0)
+        self.addWidget(self.fieldInfo, 0, 1)
+        self.addWidget(self.slotNumberTitle, 1, 0)
+        self.addWidget(self.slotNumberInfo, 1, 1)
+        self.addWidget(self.slotPurposeTitle, 2, 0)
+        self.addWidget(self.slotPurposeInfo, 2, 1)
+        self.addWidget(self.slotOptionsTitle, 3, 0)
+        self.addWidget(self.slotOptionsInfo, 3, 1)
+
+        self.purposeDict = {1: 'Shows if forearm is involved',
+                            2: 'Thumb oppositional positions (CM rotation)',
+                            3: 'Thumb abduction/adduction(CM adduction)',
+                            4: 'Thumb DIP flexion',
+                            5: 'Thumb MCP flexion',
+                            6: 'Thumb surface options',
+                            7: 'Thumb bone options',
+                            #8 always null
+                            #9 always forward slash
+                            10: 'Finger surface options',
+                            11: 'Finger bone options',
+                            12: 'Index/thumb contact',
+                            13: 'Middle/thumb contact',
+                            14: 'Ring/thumb contact',
+                            15: 'Pinky/thumn contact',
+                            #16 always 1,
+                            17: 'Index MCP flexion',
+                            18: 'Index PIP flexion',
+                            19: 'Index DIP flexion',
+                            20: 'Index/middle contact',
+                            #21 always 2,
+                            22: 'Middle MCP flexion',
+                            23: 'Middle PIP flexion',
+                            24: 'Middle DIP flexion',
+                            25: 'Middle/ring contact',
+                            #26 always 3
+                            27: 'Ring MCP flexion',
+                            28: 'Ring PIP flexion',
+                            29: 'Ring DIP flexion',
+                            30: 'Ring/pinky contact',
+                            #31 always 4
+                            32: 'Pinky MCP flexion',
+                            33: 'Pinky PIP flexion',
+                            34: 'Pinky DIP flexion'}
+        self.optionsDict = {1: 'Either on or off (checkbox)',
+                              2: 'L (lateral)\nU (unopposed)\nO (opposed)',
+                              3: '{ (full abduction)\n< (neutral)\n= (adducted)',
+                              4: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              5: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              6: 'f (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
+                              7: 't (tip)\nd (distal)\np (proximal)\nM (meta-carpal)',
+                              #8 always null,
+                              #9 always forward slash,
+                              10: 'f (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
+                              11: 't (tip)\nd (distal)\np (proximal)\nM (meta-carpal)',
+                              12: '1 (if contact with index)\n- (if no contact)',
+                              13: '2 (if contact with middle)\n- (if no contact)',
+                              14: '3 (if contact with ring)\n- (if no contact)',
+                              15: '4 (if contact with pinky)\n- (if no contact)',
+                              #16 always 1,
+                              17: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              18: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              19: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              20: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
+                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
+                              #21 always 2,
+                              22: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              23: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              24: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              25: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
+                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
+                              #26 always 3,
+                              27: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              28: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              29: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              30: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
+                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
+                              #31 always 4,
+                              32: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              33: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              34: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)'
+                              }
+
+    @Slot(int)
+    def transcriptionSlotChanged(self, e):
+        if e == 1:
+            self.fieldInfo.setText('Forearm')
+        elif e < 6:
+            self.fieldInfo.setText('Thumb')
+        elif e < 16:
+            self.fieldInfo.setText('Thumb/finger contact')
+        elif e < 19:
+            self.fieldInfo.setText('Index finger')
+        elif e < 24:
+            self.fieldInfo.setText('Middle finger')
+        elif e < 30:
+            self.fieldInfo.setText('Ring finger')
+        else:
+            self.fieldInfo.setText('Pinky finger')
+        self.slotNumberInfo.setText(str(e))
+        self.slotPurposeInfo.setText(self.purposeDict[e])
+        self.slotOptionsInfo.setText(self.optionsDict[e])

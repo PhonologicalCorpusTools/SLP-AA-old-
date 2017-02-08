@@ -388,7 +388,8 @@ class HandShapeImage(QLabel):
 
     @Slot(int)
     def transcriptionSlotChanged(self, e):
-        self.setPixmap(QPixmap(getMediaFilePath(self.mappingChoice[e])))
+        file_name = 'hand_slot{}.png'.format(e)
+        self.setPixmap(QPixmap(getMediaFilePath(file_name)))
 
     @Slot(bool)
     def useReverseImage(self, e):
@@ -397,6 +398,7 @@ class HandShapeImage(QLabel):
     @Slot(bool)
     def useNormalImage(self, e):
         self.mappingChoice = self.mapping
+
 
 class MainWindow(QMainWindow):
     def __init__(self,app):
@@ -412,34 +414,50 @@ class MainWindow(QMainWindow):
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
         self.corpus = None
         self.globalLayout = QHBoxLayout()
+
+        #Make video player
         # self.videoPlayer = VideoPlayer()
         # self.globalLayout.addWidget(self.videoPlayer)
 
         layout = QVBoxLayout()
 
+        #Make save button
         self.saveButton = QPushButton('Add word to corpus')
         layout.addWidget(self.saveButton)
 
+        #Make gloss entry
         self.gloss = GlossLayout(parent=self)
         layout.addLayout(self.gloss)
 
+        #Make tabs for each configuration
         self.configTabs = QTabWidget()
         self.configTabs.addTab(HandConfigTab(1), 'Config 1')
         self.configTabs.addTab(HandConfigTab(2), 'Config 2')
-
         layout.addWidget(self.configTabs)
 
-        self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
-        layout.addWidget(self.handImage)
 
+        #Make hand image and accompanying info
+        self.infoPanel = QHBoxLayout()
+        self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
+        self.infoPanel.addWidget(self.handImage)
+        self.transcriptionInfo = TranscriptionInfo()
+        self.infoPanel.addLayout(self.transcriptionInfo)
+        layout.addLayout(self.infoPanel)
+
+
+        #Connect transcription signals to hand image and transcription info slots
         for k in [0,1]:
             for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+                slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
             for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+                slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
 
+
+        #Add major features (location, movement, orientation)
         self.featuresLayout = MajorFeatureLayout()
         layout.addLayout(self.featuresLayout)
 
