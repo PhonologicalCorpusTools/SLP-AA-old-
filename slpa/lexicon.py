@@ -1,4 +1,5 @@
 #from slpa import __version__ as currentSLPAversion
+from collections import OrderedDict
 
 class Corpus():
     corpus_attributes = {'name': 'corpus', 'wordlist': dict(), '_discourse': None,
@@ -30,3 +31,85 @@ class Corpus():
     def __str__(self):
         return 'Corpus object called "{}"'.format(self.name)
 
+
+class Sign():
+
+    sign_attributes = ['gloss', 'config1', 'config2', 'major', 'minor', 'movement', 'orientation']
+
+    headers = ['gloss',
+                       'config1hand1', 'config1hand2',
+                       'config2hand1', 'config2hand2',
+                       'major', 'minor',
+                       'movement', 'orientation']
+    for config_num in [1, 2]:
+        for hand_num in [1, 2]:
+            for slot_num in range(1, 35):
+                headers.append('config{}hand{}slot{}'.format(config_num,hand_num, slot_num))
+    headers = ';'.join(headers)
+
+    def __init__(self, data):
+        self.attributes = list()
+        for key,value in data.items():
+            setattr(self, key, value)
+
+    def __eq__(self, other):
+        if not isinstance(other, Sign):
+            return False
+        else:
+            return self.gloss == other.gloss
+
+    def __str__(self):
+        return self.gloss
+
+    def __repr__(self):
+        return self.__str__()
+
+    def data(self):
+        return OrderedDict([(key,getattr(self, key)) for key in Sign.sign_attributes])
+
+    def export(self, include_fields=True, blank_space = None):
+        if blank_space is None:
+            blank_space = '_'
+        output = list()
+        for key,value in self.data().items():
+
+            if 'config' in key:
+                for hand in value:
+                    if hand[0]:
+                        hand[0] = 'V'
+                    else:
+                        hand[0] = '_'
+                    transcription = [x if x else blank_space for x in hand]
+                    if include_fields:
+                        transcription = self.add_fields(transcription)
+                    output.append(''.join(transcription))
+                continue
+
+            if key == 'major':
+                value = 'None' if not value else value
+            elif key == 'minor':
+                value = 'None' if not value else value
+            elif key == 'orientation':
+                value = 'None' if not value else value
+            elif key  == 'movement':
+                value = 'None' if not value else value
+            output.append(value)
+
+        for config_num in [1,2]:
+            for hand_num in [0,1]:
+                slot_list = getattr(self, 'config{}'.format(config_num))[hand_num]
+                for slot_num in range(34):
+                    output.append(slot_list[slot_num])
+        output = ';'.join(output)
+
+        return output
+
+    def add_fields(self, transcription):
+        transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
+                                                                     ''.join(transcription[1:5]),
+                                                                     ''.join(transcription[5:15]),
+                                                                     ''.join(transcription[15:19]),
+                                                                     ''.join(transcription[19:24]),
+                                                                     ''.join(transcription[24:29]),
+                                                                     ''.join(transcription[29:34]))
+        return transcription

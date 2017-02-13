@@ -166,6 +166,7 @@ class TranscriptionSlot(QLineEdit):
         super().__init__()
         self.num = num
         self.field = field
+        self.regex = regex
         self.setValidator(QRegExpValidator(QRegExp(regex)))
         if self.num in [20,25,30]:
             self.setMaxLength(2)
@@ -202,6 +203,13 @@ class TranscriptionSlot(QLineEdit):
             self.setText('4')
             self.setEnabled(False)
             self.setToolTip('Slot 31. Represents pinky finger. Always marked as 4.')
+
+    @Slot(bool)
+    def changeValidatorState(self, unrestricted):
+        if unrestricted:
+            self.setValidator(QRegExpValidator(QRegExp('.*')))
+        else:
+            self.setValidator(QRegExpValidator(QRegExp(self.regex)))
 
     def completerActivated(self, e):
         self.setText(e)
@@ -257,21 +265,26 @@ class TranscriptionInfo(QGridLayout):
         titleFont = QFont('Arial', 15)
         infoFont = QFont('Arial', 12)
 
-        self.fieldTitle = QLabel('Field type')
-        self.fieldTitle.setFont(titleFont)
-        self.fieldInfo = QLabel('None selected')
-        self.fieldInfo.setFont(infoFont)
+        self.fieldTypeTitle = QLabel('Field type')
+        self.fieldTypeTitle.setFont(titleFont)
+        self.fieldTypeInfo = QLabel('None selected')
+        self.fieldTypeInfo.setFont(infoFont)
+
+        self.fieldNumberTitle = QLabel('Field number')
+        self.fieldNumberTitle.setFont(titleFont)
+        self.fieldNumberInfo = QLabel('None selected')
+        self.fieldNumberInfo.setFont(infoFont)
 
         self.slotNumberTitle = QLabel('Slot number')
         self.slotNumberTitle.setFont(titleFont)
         self.slotNumberInfo = QLabel('None selected')
         self.slotNumberInfo.setFont(infoFont)
 
-        self.slotPurposeTitle = QLabel('Slot purpose')
-        self.slotPurposeInfo = QLabel('None selected')
-        self.slotPurposeTitle.setFont(titleFont)
-        self.slotPurposeInfo.setFont(infoFont)
-        self.slotPurposeInfo.setWordWrap(True)
+        self.slotTypeTitle = QLabel('Slot type')
+        self.slotTypeInfo = QLabel('None selected')
+        self.slotTypeTitle.setFont(titleFont)
+        self.slotTypeInfo.setFont(infoFont)
+        self.slotTypeInfo.setWordWrap(True)
 
         self.slotOptionsTitle = QLabel('Permitted characters')
         self.slotOptionsInfo = QLabel('None selected')
@@ -279,14 +292,13 @@ class TranscriptionInfo(QGridLayout):
         self.slotOptionsInfo.setFont(infoFont)
         self.slotOptionsInfo.setWordWrap(True)
 
-        self.addWidget(self.fieldTitle, 0, 0)
-        self.addWidget(self.fieldInfo, 0, 1)
-        self.addWidget(self.slotNumberTitle, 1, 0)
-        self.addWidget(self.slotNumberInfo, 1, 1)
-        self.addWidget(self.slotPurposeTitle, 2, 0)
-        self.addWidget(self.slotPurposeInfo, 2, 1)
-        self.addWidget(self.slotOptionsTitle, 3, 0)
-        self.addWidget(self.slotOptionsInfo, 3, 1)
+        tuples = [(self.fieldNumberTitle, self.fieldNumberInfo), (self.fieldTypeTitle, self.fieldTypeInfo),
+                  (self.slotNumberTitle, self.slotNumberInfo), (self.slotTypeTitle, self.slotTypeInfo),
+                  (self.slotOptionsTitle, self.slotOptionsInfo)]
+        for row in range(5):
+            title,info = tuples.pop(0)
+            self.addWidget(title, row, 0)
+            self.addWidget(info, row, 1)
 
         self.purposeDict = {1: 'Shows if forearm is involved',
                             2: 'Thumb oppositional positions (CM rotation)',
@@ -364,19 +376,26 @@ class TranscriptionInfo(QGridLayout):
     @Slot(int)
     def transcriptionSlotChanged(self, e):
         if e == 1:
-            self.fieldInfo.setText('Forearm (1)')
+            self.fieldTypeInfo.setText('Forearm')
+            self.fieldNumberInfo.setText('1')
         elif e < 6:
-            self.fieldInfo.setText('Thumb (2)')
+            self.fieldTypeInfo.setText('Thumb')
+            self.fieldNumberInfo.setText('2')
         elif e < 16:
-            self.fieldInfo.setText('Thumb/finger contact (3)')
+            self.fieldTypeInfo.setText('Thumb/finger contact')
+            self.fieldNumberInfo.setText('3')
         elif e < 19:
-            self.fieldInfo.setText('Index finger (4)')
+            self.fieldTypeInfo.setText('Index finger')
+            self.fieldNumberInfo.setText('4')
         elif e < 25:
-            self.fieldInfo.setText('Middle finger (5)')
+            self.fieldTypeInfo.setText('Middle finger')
+            self.fieldNumberInfo.setText('5')
         elif e < 30:
-            self.fieldInfo.setText('Ring finger (6)')
+            self.fieldTypeInfo.setText('Ring finger')
+            self.fieldNumberInfo.setText('6')
         else:
-            self.fieldInfo.setText('Pinky finger (7)')
+            self.fieldTypeInfo.setText('Pinky finger')
+            self.fieldNumberInfo.setText('7')
         self.slotNumberInfo.setText(str(e))
-        self.slotPurposeInfo.setText(self.purposeDict[e])
+        self.slotTypeInfo.setText(self.purposeDict[e])
         self.slotOptionsInfo.setText(self.optionsDict[e])

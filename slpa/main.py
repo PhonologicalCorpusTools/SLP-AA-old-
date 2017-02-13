@@ -5,7 +5,7 @@ import sys
 from enum import Enum
 from .imports import *
 from .handshapes import *
-from .lexicon import Corpus
+from .lexicon import *
 from .binary import *
 from .transcriptions import *
 from .settings import Settings
@@ -285,12 +285,15 @@ class HandShapeImage(QLabel):
 
 
 class MainWindow(QMainWindow):
+    transcriptionRestrictionsChanged = Signal(bool)
+
     def __init__(self,app):
         app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
 
         self.settings = Settings()
+        self.restrictedTranscriptions = True
 
         self.createActions()
         self.createMenus()
@@ -335,11 +338,12 @@ class MainWindow(QMainWindow):
                 slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
+                self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
             for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
-
+                self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
         #Add major features (location, movement, orientation)
         self.featuresLayout = MajorFeatureLayout()
@@ -538,8 +542,10 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.loadCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAct)
         self.fileMenu.addAction(self.newGlossAct)
-        self.fileMenu.addAction(self.exportCorpus)
+        self.fileMenu.addAction(self.exportCorpusAct)
         self.fileMenu.addAction(self.quitAct)
+        self.settingsMenu = self.menuBar().addMenu('&Settings')
+        self.settingsMenu.addAction(self.setRestrictionsAct)
 
     def createActions(self):
 
@@ -564,27 +570,41 @@ class MainWindow(QMainWindow):
                 self,
                 statusTip="Quit", triggered=self.close)
 
-        self.exportCorpus = QAction('&Export corpus as csv',
+        self.exportCorpusAct = QAction('&Export corpus as csv',
                                     self,
                                     statusTip='Save corpus as csv for opening as a spreadsheet',
                                     triggered=self.exportCorpus)
 
+        self.setRestrictionsAct = QAction('Allow &unrestricted transcriptions',
+                                    self,
+                                    statusTip = 'If on, anything can be entered into transcriptions',
+                                    triggered = self.setTranscriptionRestrictions,
+                                    checkable = True)
+
+    def setTranscriptionRestrictions(self):
+        restricted = self.setRestrictionsAct.isChecked()
+        self.restrictedTranscriptions = restricted
+        self.transcriptionRestrictionsChanged.emit(restricted)
+
     def exportCorpus(self):
-        savename = QFileDialog.getSaveFileName(self, 'Export Corpus as CSV', os.getcwd(), '*.csv')
-        path = savename[0]
-        if not path:
-            return
-        if not path.endswith('.csv'):
-            path = path + '.csv'
 
-        output = [word.export() for word in self.corpus]
+        dialog = ExportCorpusDialog()
+        results = dialog.exec_()
 
-        with open(path, encoding='utf-8', mode='w') as f:
-            print(Sign.headers, file=f)
-            for word in output:
-                print(word, file=f)
+        if results:
+            path = dialog.fileNameEdit.text()
+            include_fields = dialog.includeFields.isChecked()
+            blank_space = dialog.blankSpaceEdit.text()
+            if not blank_space:
+                blank_space = ' '
+            output = [word.export(include_fields=include_fields, blank_space=blank_space) for word in self.corpus]
 
-        QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
+            with open(path, encoding='utf-8', mode='w') as f:
+                print(Sign.headers, file=f)
+                for word in output:
+                    print(word, file=f)
+
+            QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
 
 
     def sizeHint(self):
@@ -625,6 +645,72 @@ class MainWindow(QMainWindow):
         self.configTabs.widget(1).clearAll()
         self.featuresLayout.reset()
 
+class ExportCorpusDialog(QDialog):
+
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('Export Corpus')
+
+        layout = QVBoxLayout()
+
+        fileNameLayout = QHBoxLayout()
+        self.fileNameEdit = QLineEdit('')
+        self.fileNameEdit.setPlaceholderText('')
+        selectLocationButton = QPushButton('Select save location...')
+        selectLocationButton.clicked.connect(self.getSaveName)
+        fileNameLayout.addWidget(selectLocationButton)
+        fileNameLayout.addWidget(self.fileNameEdit)
+        layout.addLayout(fileNameLayout)
+
+        outputOptionsLayout = QVBoxLayout()
+        blankSpaceLabel = QLabel('\n\nWhich character should be used to represent empty transcription slots?\nLeave this '
+                                'blank if you actually want blank spaces to be output.')
+        blankSpaceLabel.setWordWrap(True)
+        self.blankSpaceEdit = QLineEdit('')
+        self.blankSpaceEdit.setMaximumWidth(100)
+
+        self.includeFields = QCheckBox('Include fields in transcription?')
+        self.includeFields.setToolTip('If checked, transcriptions will be delimited by square brackets '
+                                  'and numbers representing fields.\n'
+                                  'If not checked, transcriptions will be one long string.')
+        outputOptionsLayout.addWidget(self.includeFields)
+        outputOptionsLayout.addWidget(blankSpaceLabel)
+        outputOptionsLayout.addWidget(self.blankSpaceEdit)
+        layout.addLayout(outputOptionsLayout)
+
+        buttonLayout = QHBoxLayout()
+        self.okButton = QPushButton('OK')
+        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton.clicked.connect(self.reject)
+        self.okButton.clicked.connect(self.accept)
+        buttonLayout.addWidget(self.okButton)
+        buttonLayout.addWidget(self.cancelButton)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+    def getSaveName(self):
+        savename = QFileDialog.getSaveFileName(self, 'Export Corpus as CSV', os.getcwd(), '*.csv')
+        path = savename[0]
+        if not path:
+            return
+        if not path.endswith('.csv'):
+            path = path + '.csv'
+        self.fileNameEdit.setText(path)
+
+    def accept(self):
+        if os.path.exists(os.path.split(self.fileNameEdit.text())[0]):
+            super().accept()
+        else:
+            if not self.fileNameEdit.text():
+                text = 'Please enter a file name'
+            else:
+                text = ('The file name you supplied is not valid. Use the "Select save location..." '
+                          'button to select a folder on your computer, and then a enter a name for your output file.')
+            alert = QMessageBox()
+            alert.setWindowTitle('File name error')
+            alert.setText(text)
+            alert.exec_()
 
 class DataButton(QPushButton):
 
