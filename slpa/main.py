@@ -2,6 +2,7 @@ import traceback
 import itertools
 import os
 import sys
+import subprocess
 from enum import Enum
 from .imports import *
 from .handshapes import *
@@ -308,6 +309,10 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
+        self.openBlenderButton = QPushButton('Open Blender')
+        self.openBlenderButton.clicked.connect(self.launchBlender)
+        layout.addWidget(self.openBlenderButton)
+
         #Make save button
         self.saveButton = QPushButton('Add word to corpus')
         layout.addWidget(self.saveButton)
@@ -357,6 +362,18 @@ class MainWindow(QMainWindow):
         self.saveButton.clicked.connect(self.saveCorpus)
 
         self.makeCorpusDock()
+
+
+    def launchBlender(self):
+        blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
+        blenderFile = os.path.join(os.getcwd(), 'handForPCT.blend')
+
+        proc = subprocess.Popen([blenderPath, blenderFile, "--python"])#, "your_script.py"])
+        try:
+            outs, errs = proc.communicate(timeout=15)
+        except TimeoutExpired:
+            proc.kill()
+            outs, errs = proc.communicate()
 
     def clearLayout(self, layout):
         while layout.count():
