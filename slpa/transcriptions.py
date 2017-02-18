@@ -104,7 +104,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot5 = TranscriptionSlot(5, 2, '[EFHi]', list('EFHi'))
 
         #FIELD 3 (Thumb/Finger Contact)
-        self.slot6 = TranscriptionSlot(6, 3, '[ftbru]', list('ftbru'))
+        self.slot6 = TranscriptionSlot(6, 3, '[fbru]', list('fbru'))
         self.slot7 = TranscriptionSlot(7, 3, '[tdpM]', list('tdpM'))
         self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL])
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
@@ -203,6 +203,12 @@ class TranscriptionSlot(QLineEdit):
             self.setText('4')
             self.setEnabled(False)
             self.setToolTip('Slot 31. Represents pinky finger. Always marked as 4.')
+
+    def __eq__(self, other):
+        return self.text() == other.text()
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     @Slot(bool)
     def changeValidatorState(self, unrestricted):
@@ -337,40 +343,40 @@ class TranscriptionInfo(QGridLayout):
         self.optionsDict = {1: 'Either on or off (checkbox)',
                               2: 'L (lateral)\nU (unopposed)\nO (opposed)',
                               3: '{ (full abduction)\n< (neutral)\n= (adducted)',
-                              4: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              5: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              4: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              5: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
                               6: 'f (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
                               7: 't (tip)\nd (distal)\np (proximal)\nM (meta-carpal)',
                               #8 always null,
                               #9 always forward slash,
                               10: 'f (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
-                              11: 't (tip)\nd (distal)\np (proximal)\nM (meta-carpal)',
+                              11: 't (tip)\nd (distal)\nm (medial)\np (proximal)\nM (meta-carpal)',
                               12: '1 (if contact with index)\n- (if no contact)',
                               13: '2 (if contact with middle)\n- (if no contact)',
                               14: '3 (if contact with ring)\n- (if no contact)',
                               15: '4 (if contact with pinky)\n- (if no contact)',
                               #16 always 1,
-                              17: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              18: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              19: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              17: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              18: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              19: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
                               20: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
                                     'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
                               #21 always 2,
-                              22: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              23: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              24: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              22: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              23: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              24: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
                               25: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
                                     'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
                               #26 always 3,
-                              27: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              28: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              29: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
+                              27: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              28: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              29: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
                               30: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
                                     'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
                               #31 always 4,
-                              32: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              33: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)',
-                              34: 'H (hyperextended)\nE (extended)\ni (flexed)\nF (maximally flexed)'
+                              32: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              33: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              34: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)'
                               }
 
     @Slot(int)

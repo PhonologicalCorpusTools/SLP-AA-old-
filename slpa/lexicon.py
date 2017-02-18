@@ -1,5 +1,6 @@
 #from slpa import __version__ as currentSLPAversion
 from collections import OrderedDict
+X_IN_BOX = '\u2327'
 
 class Corpus():
     corpus_attributes = {'name': 'corpus', 'wordlist': dict(), '_discourse': None,
@@ -67,9 +68,7 @@ class Sign():
     def data(self):
         return OrderedDict([(key,getattr(self, key)) for key in Sign.sign_attributes])
 
-    def export(self, include_fields=True, blank_space = None):
-        if blank_space is None:
-            blank_space = '_'
+    def export(self, include_fields=True, blank_space = None, x_in_box=X_IN_BOX):
         output = list()
         for key,value in self.data().items():
 
@@ -78,8 +77,9 @@ class Sign():
                     if hand[0]:
                         hand[0] = 'V'
                     else:
-                        hand[0] = '_'
+                        hand[0] = blank_space
                     transcription = [x if x else blank_space for x in hand]
+                    transcription = [t if not t == X_IN_BOX else x_in_box for t in transcription]
                     if include_fields:
                         transcription = self.add_fields(transcription)
                     output.append(''.join(transcription))
@@ -99,6 +99,9 @@ class Sign():
             for hand_num in [0,1]:
                 slot_list = getattr(self, 'config{}'.format(config_num))[hand_num]
                 for slot_num in range(34):
+                    symbol = slot_list[slot_num]
+                    if symbol == X_IN_BOX:
+                        symbol = x_in_box
                     output.append(slot_list[slot_num])
         output = ';'.join(output)
 

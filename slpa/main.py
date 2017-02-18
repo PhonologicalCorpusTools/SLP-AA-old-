@@ -9,6 +9,7 @@ from .handshapes import *
 from .lexicon import *
 from .binary import *
 from .transcriptions import *
+from .constraints import *
 from .settings import Settings
 from slpa import __version__ as currentSLPAversion
 
@@ -284,7 +285,6 @@ class HandShapeImage(QLabel):
     def useNormalImage(self, e):
         self.mappingChoice = self.mapping
 
-
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
 
@@ -295,6 +295,8 @@ class MainWindow(QMainWindow):
 
         self.settings = Settings()
         self.restrictedTranscriptions = True
+        self.constraints = {'medialJointConstraint': False,
+                            'distalMedialCorrespondanceConstraint': False}
 
         self.createActions()
         self.createMenus()
@@ -309,13 +311,19 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        self.openBlenderButton = QPushButton('Open Blender')
-        self.openBlenderButton.clicked.connect(self.launchBlender)
-        layout.addWidget(self.openBlenderButton)
+        # Render handshape in Blender
+        # self.openBlenderButton = QPushButton('Open Blender')
+        # self.openBlenderButton.clicked.connect(self.launchBlender)
+        # layout.addWidget(self.openBlenderButton)
 
         #Make save button
         self.saveButton = QPushButton('Add word to corpus')
         layout.addWidget(self.saveButton)
+
+        # Make "check transcription" button
+        self.checkTranscriptionButton = QPushButton('Check transcription')
+        self.checkTranscriptionButton.clicked.connect(self.checkTranscription)
+        layout.addWidget(self.checkTranscriptionButton)
 
         #Make gloss entry
         self.gloss = GlossLayout(parent=self)
@@ -363,17 +371,81 @@ class MainWindow(QMainWindow):
 
         self.makeCorpusDock()
 
+        self.showMaximized()
+        #self.setFixedSize(self.size())
+
+    def checkTranscription(self):
+
+        alert = QMessageBox()
+        alert.setWindowTitle('Transcription verification complete')
+        if all([not value for value in self.constraints.values()]):
+            alert.setText('There are no problems with your transcription, because no constraints were selected. '
+                          '\nTo set constraints, go to the Settings menu.')
+            alert.exec_()
+            return
+
+        alert_text = list()
+        medial_joint_text = list()
+        if self.constraints['medialJointConstraint']:
+            for k in [0,1]:
+                transcription = self.configTabs.widget(k).hand1Transcription.slots
+                problems = MedialJointConstraint.check(transcription)
+                if problems:
+                    medial_joint_text.append('\nConfig {}, Hand 1: {}'.format(k+1, problems))
+
+                transcription = self.configTabs.widget(k).hand2Transcription.slots
+                problems = MedialJointConstraint.check(transcription)
+                if problems:
+                    medial_joint_text.append('\nConfig {}, Hand 2: {}'.format(k+1, problems))
+
+            if medial_joint_text:
+                alert_text.append('The following slots are in violation of the medial joint constraint '
+                                  '("no medial joints marked H")\n')
+
+                alert_text.append('\n'.join(medial_joint_text))
+
+        if self.constraints['distalMedialCorrespondanceConstraint']:
+            distal_medial_text = list()
+            for k in [0, 1]:
+                transcription = self.configTabs.widget(k).hand1Transcription.slots
+                problems = DistalMedialCorrespondanceConstraint.check(transcription)
+                if problems:
+                    distal_medial_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+
+                transcription = self.configTabs.widget(k).hand2Transcription.slots
+                problems = DistalMedialCorrespondanceConstraint.check(transcription)
+                if problems:
+                    distal_medial_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+
+            if distal_medial_text:
+                alert_text.append('\n\nThe following slots are in violation of the distal-medial joint constraint '
+                                  '("medial and distal joints must match in flexion")\n')
+                alert_text.append('\n'.join(distal_medial_text))
+
+        if not alert_text:
+            alert_text.append('Your transcription satisfies all selected constraints!')
+
+        alert_text = ''.join(alert_text)
+        alert.setText(alert_text)
+        alert.exec_()
+        return
 
     def launchBlender(self):
         blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
         blenderFile = os.path.join(os.getcwd(), 'handForPCT.blend')
-
-        proc = subprocess.Popen([blenderPath, blenderFile, "--python"])#, "your_script.py"])
-        try:
-            outs, errs = proc.communicate(timeout=15)
-        except TimeoutExpired:
-            proc.kill()
-            outs, errs = proc.communicate()
+        blenderScript = os.path.join(os.getcwd(), 'position_hand.py')
+        outputFile = '//output_hand.png'
+        proc = subprocess.Popen(
+            [blenderPath,
+             '-b', blenderFile,
+             #'-o', outputFile,])
+             "--python", "position_hand.py"])
+        proc.communicate()
+        # try:
+        #     outs, errs = proc.communicate(timeout=15)
+        # except TimeoutExpired:
+        #     proc.kill()
+        #     outs, errs = proc.communicate()
 
     def clearLayout(self, layout):
         while layout.count():
@@ -407,7 +479,7 @@ class MainWindow(QMainWindow):
         for sign in self.corpus:
             data = sign.data()
             self.addButtonToDock(data)
-
+        self.showMaximized()
 
     def saveCorpus(self):
         if not self.gloss.glossEdit.text():
@@ -563,6 +635,7 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.quitAct)
         self.settingsMenu = self.menuBar().addMenu('&Settings')
         self.settingsMenu.addAction(self.setRestrictionsAct)
+        self.settingsMenu.addAction(self.setConstraintsAct)
 
     def createActions(self):
 
@@ -597,6 +670,17 @@ class MainWindow(QMainWindow):
                                     statusTip = 'If on, anything can be entered into transcriptions',
                                     triggered = self.setTranscriptionRestrictions,
                                     checkable = True)
+        self.setConstraintsAct = QAction('Select anatomical/phonological constraints',
+                                    self,
+                                    statusTip = 'Select constraints on transcriptions',
+                                    triggered = self.setConstraints)
+
+    def setConstraints(self):
+        dialog = ConstraintsDialog(self.constraints)
+        constraints = dialog.exec_()
+        if constraints:
+            self.constraints['distalMedialCorrespondanceConstraint'] = dialog.distalMedialCorrespondanceConstraint.isChecked()
+            self.constraints['medialJointConstraint'] = dialog.medialJointConstraint.isChecked()
 
     def setTranscriptionRestrictions(self):
         restricted = self.setRestrictionsAct.isChecked()
@@ -612,9 +696,11 @@ class MainWindow(QMainWindow):
             path = dialog.fileNameEdit.text()
             include_fields = dialog.includeFields.isChecked()
             blank_space = dialog.blankSpaceEdit.text()
+            x_in_box = dialog.xInBoxEdit.text()
             if not blank_space:
-                blank_space = ' '
-            output = [word.export(include_fields=include_fields, blank_space=blank_space) for word in self.corpus]
+                blank_space = ''
+            output = [word.export(include_fields=include_fields, blank_space=blank_space, x_in_box=x_in_box)
+                      for word in self.corpus]
 
             with open(path, encoding='utf-8', mode='w') as f:
                 print(Sign.headers, file=f)
@@ -662,6 +748,50 @@ class MainWindow(QMainWindow):
         self.configTabs.widget(1).clearAll()
         self.featuresLayout.reset()
 
+class ConstraintsDialog(QDialog):
+
+    def __init__(self, constraints):
+        super().__init__()
+
+        self.setWindowTitle('Select constraints')
+
+        layout = QVBoxLayout()
+        self.medialJointConstraint = QCheckBox('No medial joint can be marked H')
+        if constraints['medialJointConstraint']:
+            self.medialJointConstraint.setChecked(True)
+        layout.addWidget(self.medialJointConstraint)
+        self.distalMedialCorrespondanceConstraint = QCheckBox('Distal and medial joints must match in flexion')
+        if constraints['distalMedialCorrespondanceConstraint']:
+            self.distalMedialCorrespondanceConstraint.setChecked(True)
+        layout.addWidget(self.distalMedialCorrespondanceConstraint)
+
+        buttonLayout = QHBoxLayout()
+        selectAllButton = QPushButton('Select all')
+        selectAllButton.clicked.connect(self.selectAll)
+        buttonLayout.addWidget(selectAllButton)
+        removeAllButton = QPushButton('Unselect all')
+        removeAllButton.clicked.connect(self.removeAll)
+        buttonLayout.addWidget(removeAllButton)
+        ok = QPushButton('OK')
+        cancel = QPushButton('Cancel')
+        ok.clicked.connect(self.accept)
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+        layout.addLayout(buttonLayout)
+
+        self.setLayout(layout)
+
+    def selectAll(self):
+        self.medialJointConstraint.setChecked(True)
+        self.distalMedialCorrespondanceConstraint.setChecked(True)
+
+    def removeAll(self):
+        self.medialJointConstraint.setChecked(False)
+        self.distalMedialCorrespondanceConstraint.setChecked(False)
+
+
+
 class ExportCorpusDialog(QDialog):
 
     def __init__(self):
@@ -681,19 +811,32 @@ class ExportCorpusDialog(QDialog):
         layout.addLayout(fileNameLayout)
 
         outputOptionsLayout = QVBoxLayout()
-        blankSpaceLabel = QLabel('\n\nWhich character should be used to represent empty transcription slots?\nLeave this '
-                                'blank if you actually want blank spaces to be output.')
+        blankSpaceLabel = QLabel('\n\nWhich character should be used to represent empty transcription slots?\n'
+                                 'Mouse over the text box for details.')
         blankSpaceLabel.setWordWrap(True)
         self.blankSpaceEdit = QLineEdit('')
         self.blankSpaceEdit.setMaximumWidth(100)
+        self.blankSpaceEdit.setToolTip('If you want empty slots to appear as blank spaces, then type one space.'
+                                  '\nIf you do not want empty slots represented at all in the output, type nothing.')
 
         self.includeFields = QCheckBox('Include fields in transcription?')
         self.includeFields.setToolTip('If checked, transcriptions will be delimited by square brackets '
                                   'and numbers representing fields.\n'
                                   'If not checked, transcriptions will be one long string.')
+
+        xinBoxLabel = QLabel('Some programs have trouble displaying the "ultracrossed" symbol (x-in-a-box). If you '
+                                  'would like to have an alternative symbol in the output file, enter it below.')
+        xinBoxLabel.setWordWrap(True)
+        self.xInBoxEdit = QLineEdit('')
+        self.xInBoxEdit.setMaximumWidth(100)
+
         outputOptionsLayout.addWidget(self.includeFields)
         outputOptionsLayout.addWidget(blankSpaceLabel)
+        # outputOptionsLayout.addWidget(blankSpaceLabel2)
         outputOptionsLayout.addWidget(self.blankSpaceEdit)
+
+        outputOptionsLayout.addWidget(xinBoxLabel)
+        outputOptionsLayout.addWidget(self.xInBoxEdit)
         layout.addLayout(outputOptionsLayout)
 
         buttonLayout = QHBoxLayout()
