@@ -293,14 +293,15 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
 
-        self.settings = Settings()
-        self.restrictedTranscriptions = True
-        self.constraints = {'medialJointConstraint': False,
-                            'distalMedialCorrespondanceConstraint': False,
-                            'noEmptySlotsConstraint': False}
-
         self.createActions()
         self.createMenus()
+
+        self.restrictedTranscriptions = True
+        # self.constraints = {'medialJointConstraint': False,
+        #                     'distalMedialCorrespondanceConstraint': False,
+        #                     'noEmptySlotsConstraint': False}
+        self.constraints = dict()
+        self.readSettings()
 
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
         self.corpus = None
@@ -375,81 +376,40 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         #self.setFixedSize(self.size())
 
-    def checkTranscription(self):
+    def writeSettings(self):
+        self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
+        self.settings.beginGroup('constraints')
+        self.settings.setValue('medialJointConstraint', self.constraints['medialJointConstraint'])
+        self.settings.setValue('noEmptySlotsConstraint', self.constraints['noEmptySlotsConstraint'])
+        self.settings.setValue('distalMedialCorrespondanceConstraint', self.constraints['distalMedialCorrespondanceConstraint'])
+        self.settings.endGroup()
 
+        self.settings.beginGroup('transcriptions')
+        self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
+        self.settings.endGroup()
+
+    def readSettings(self):
+        self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
+        self.settings.beginGroup('constraints')
+        self.constraints['medialJointConstraint'] = self.settings.value('medialJointConstraint', type=bool)
+        self.constraints['distalMedialCorrespondanceConstraint'] = self.settings.value('distalMedialCorrespondanceConstraint', type=bool)
+        self.constraints['noEmptySlotsConstraint'] = self.settings.value('noEmptySlotsConstraint', type=bool)
+        self.settings.endGroup()
+
+        self.settings.beginGroup('transcriptions')
+        self.restrictedTranscriptions = self.settings.value('restrictedTranscriptions', type=bool)
+        self.setRestrictionsAct.setChecked(self.restrictedTranscriptions)
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
+        self.settings.endGroup()
+
+    def closeEvent(self, e):
+        self.writeSettings()
+        super().closeEvent()
+
+    def checkTranscription(self):
         alert = TranscriptionMessageBox(self.constraints, self.configTabs)
         alert.exec_()
         return
-        # alert.setWindowTitle('Transcription verification complete')
-        # if all([not value for value in self.constraints.values()]):
-        #     alert.setText('There are no problems with your transcription, because no constraints were selected. '
-        #                   '\nTo set constraints, go to the Settings menu.')
-        #     alert.exec_()
-        #     return
-        #
-        # alert_text = list()
-        # medial_joint_text = list()
-        # if self.constraints['medialJointConstraint']:
-        #     for k in [0,1]:
-        #         transcription = self.configTabs.widget(k).hand1Transcription.slots
-        #         problems = MedialJointConstraint.check(transcription)
-        #         if problems:
-        #             medial_joint_text.append('\nConfig {}, Hand 1: {}'.format(k+1, problems))
-        #
-        #         transcription = self.configTabs.widget(k).hand2Transcription.slots
-        #         problems = MedialJointConstraint.check(transcription)
-        #         if problems:
-        #             medial_joint_text.append('\nConfig {}, Hand 2: {}'.format(k+1, problems))
-        #
-        #     if medial_joint_text:
-        #         alert_text.append('The following slots are in violation of the medial joint constraint '
-        #                           '("no medial joints marked H")\n')
-        #
-        #         alert_text.append('\n'.join(medial_joint_text))
-        #
-        # if self.constraints['distalMedialCorrespondanceConstraint']:
-        #     distal_medial_text = list()
-        #     for k in [0, 1]:
-        #         transcription = self.configTabs.widget(k).hand1Transcription.slots
-        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
-        #         if problems:
-        #             distal_medial_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
-        #
-        #         transcription = self.configTabs.widget(k).hand2Transcription.slots
-        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
-        #         if problems:
-        #             distal_medial_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
-        #
-        #     if distal_medial_text:
-        #         alert_text.append('\n\nThe following slots are in violation of the distal-medial joint constraint '
-        #                           '("medial and distal joints must match in flexion")\n')
-        #         alert_text.append('\n'.join(distal_medial_text))
-        #
-        # if self.constraints['noEmptySlotsConstraint']:
-        #     distal_medial_text = list()
-        #     for k in [0, 1]:
-        #         transcription = self.configTabs.widget(k).hand1Transcription.slots
-        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
-        #         if problems:
-        #             distal_medial_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
-        #
-        #         transcription = self.configTabs.widget(k).hand2Transcription.slots
-        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
-        #         if problems:
-        #             distal_medial_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
-        #
-        #     if distal_medial_text:
-        #         alert_text.append('\n\nThe following slots are in violation of the distal-medial joint constraint '
-        #                           '("medial and distal joints must match in flexion")\n')
-        #         alert_text.append('\n'.join(distal_medial_text))
-        #
-        # if not alert_text:
-        #     alert_text.append('Your transcription satisfies all selected constraints!')
-        #
-        # alert_text = ''.join(alert_text)
-        # alert.setText(alert_text)
-        # alert.exec_()
-        # return
 
     def launchBlender(self):
         blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
@@ -679,7 +639,7 @@ class MainWindow(QMainWindow):
 
         self.quitAct = QAction( "&Quit",
                 self,
-                statusTip="Quit", triggered=self.close)
+                statusTip="Quit", triggered=self.closeEvent)
 
         self.exportCorpusAct = QAction('&Export corpus as csv',
                                     self,
@@ -703,6 +663,7 @@ class MainWindow(QMainWindow):
             self.constraints['distalMedialCorrespondanceConstraint'] = dialog.distalMedialCorrespondanceConstraint.isChecked()
             self.constraints['medialJointConstraint'] = dialog.medialJointConstraint.isChecked()
             self.constraints['noEmptySlotsConstraint'] = dialog.noEmptySlotsConstraint.isChecked()
+            print('after closing dialog...{}'.format(self.constraints['medialJointConstraint']))
 
     def setTranscriptionRestrictions(self):
         restricted = self.setRestrictionsAct.isChecked()

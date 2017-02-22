@@ -6,8 +6,10 @@ class Settings(object):
     key_to_ini = {'storage': ('storage/directory',os.path.normpath(os.path.join(
                                             os.path.expanduser('~/Documents'),'SLP-A','Annotator')))}
 
+
+
     def __init__(self):
-        self.qs = QSettings("SLP-A","Sign Language Phonetic Annotator")
+        self.qs = QSettings("UBC Phonology Tools","Sign Language Phonetic Annotator")
         self.check_storage()
 
     def error_directory(self):
