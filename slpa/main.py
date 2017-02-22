@@ -296,7 +296,8 @@ class MainWindow(QMainWindow):
         self.settings = Settings()
         self.restrictedTranscriptions = True
         self.constraints = {'medialJointConstraint': False,
-                            'distalMedialCorrespondanceConstraint': False}
+                            'distalMedialCorrespondanceConstraint': False,
+                            'noEmptySlotsConstraint': False}
 
         self.createActions()
         self.createMenus()
@@ -376,59 +377,79 @@ class MainWindow(QMainWindow):
 
     def checkTranscription(self):
 
-        alert = QMessageBox()
-        alert.setWindowTitle('Transcription verification complete')
-        if all([not value for value in self.constraints.values()]):
-            alert.setText('There are no problems with your transcription, because no constraints were selected. '
-                          '\nTo set constraints, go to the Settings menu.')
-            alert.exec_()
-            return
-
-        alert_text = list()
-        medial_joint_text = list()
-        if self.constraints['medialJointConstraint']:
-            for k in [0,1]:
-                transcription = self.configTabs.widget(k).hand1Transcription.slots
-                problems = MedialJointConstraint.check(transcription)
-                if problems:
-                    medial_joint_text.append('\nConfig {}, Hand 1: {}'.format(k+1, problems))
-
-                transcription = self.configTabs.widget(k).hand2Transcription.slots
-                problems = MedialJointConstraint.check(transcription)
-                if problems:
-                    medial_joint_text.append('\nConfig {}, Hand 2: {}'.format(k+1, problems))
-
-            if medial_joint_text:
-                alert_text.append('The following slots are in violation of the medial joint constraint '
-                                  '("no medial joints marked H")\n')
-
-                alert_text.append('\n'.join(medial_joint_text))
-
-        if self.constraints['distalMedialCorrespondanceConstraint']:
-            distal_medial_text = list()
-            for k in [0, 1]:
-                transcription = self.configTabs.widget(k).hand1Transcription.slots
-                problems = DistalMedialCorrespondanceConstraint.check(transcription)
-                if problems:
-                    distal_medial_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
-
-                transcription = self.configTabs.widget(k).hand2Transcription.slots
-                problems = DistalMedialCorrespondanceConstraint.check(transcription)
-                if problems:
-                    distal_medial_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
-
-            if distal_medial_text:
-                alert_text.append('\n\nThe following slots are in violation of the distal-medial joint constraint '
-                                  '("medial and distal joints must match in flexion")\n')
-                alert_text.append('\n'.join(distal_medial_text))
-
-        if not alert_text:
-            alert_text.append('Your transcription satisfies all selected constraints!')
-
-        alert_text = ''.join(alert_text)
-        alert.setText(alert_text)
+        alert = TranscriptionMessageBox(self.constraints, self.configTabs)
         alert.exec_()
         return
+        # alert.setWindowTitle('Transcription verification complete')
+        # if all([not value for value in self.constraints.values()]):
+        #     alert.setText('There are no problems with your transcription, because no constraints were selected. '
+        #                   '\nTo set constraints, go to the Settings menu.')
+        #     alert.exec_()
+        #     return
+        #
+        # alert_text = list()
+        # medial_joint_text = list()
+        # if self.constraints['medialJointConstraint']:
+        #     for k in [0,1]:
+        #         transcription = self.configTabs.widget(k).hand1Transcription.slots
+        #         problems = MedialJointConstraint.check(transcription)
+        #         if problems:
+        #             medial_joint_text.append('\nConfig {}, Hand 1: {}'.format(k+1, problems))
+        #
+        #         transcription = self.configTabs.widget(k).hand2Transcription.slots
+        #         problems = MedialJointConstraint.check(transcription)
+        #         if problems:
+        #             medial_joint_text.append('\nConfig {}, Hand 2: {}'.format(k+1, problems))
+        #
+        #     if medial_joint_text:
+        #         alert_text.append('The following slots are in violation of the medial joint constraint '
+        #                           '("no medial joints marked H")\n')
+        #
+        #         alert_text.append('\n'.join(medial_joint_text))
+        #
+        # if self.constraints['distalMedialCorrespondanceConstraint']:
+        #     distal_medial_text = list()
+        #     for k in [0, 1]:
+        #         transcription = self.configTabs.widget(k).hand1Transcription.slots
+        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
+        #         if problems:
+        #             distal_medial_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+        #
+        #         transcription = self.configTabs.widget(k).hand2Transcription.slots
+        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
+        #         if problems:
+        #             distal_medial_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+        #
+        #     if distal_medial_text:
+        #         alert_text.append('\n\nThe following slots are in violation of the distal-medial joint constraint '
+        #                           '("medial and distal joints must match in flexion")\n')
+        #         alert_text.append('\n'.join(distal_medial_text))
+        #
+        # if self.constraints['noEmptySlotsConstraint']:
+        #     distal_medial_text = list()
+        #     for k in [0, 1]:
+        #         transcription = self.configTabs.widget(k).hand1Transcription.slots
+        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
+        #         if problems:
+        #             distal_medial_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+        #
+        #         transcription = self.configTabs.widget(k).hand2Transcription.slots
+        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
+        #         if problems:
+        #             distal_medial_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+        #
+        #     if distal_medial_text:
+        #         alert_text.append('\n\nThe following slots are in violation of the distal-medial joint constraint '
+        #                           '("medial and distal joints must match in flexion")\n')
+        #         alert_text.append('\n'.join(distal_medial_text))
+        #
+        # if not alert_text:
+        #     alert_text.append('Your transcription satisfies all selected constraints!')
+        #
+        # alert_text = ''.join(alert_text)
+        # alert.setText(alert_text)
+        # alert.exec_()
+        # return
 
     def launchBlender(self):
         blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
@@ -681,6 +702,7 @@ class MainWindow(QMainWindow):
         if constraints:
             self.constraints['distalMedialCorrespondanceConstraint'] = dialog.distalMedialCorrespondanceConstraint.isChecked()
             self.constraints['medialJointConstraint'] = dialog.medialJointConstraint.isChecked()
+            self.constraints['noEmptySlotsConstraint'] = dialog.noEmptySlotsConstraint.isChecked()
 
     def setTranscriptionRestrictions(self):
         restricted = self.setRestrictionsAct.isChecked()
@@ -760,10 +782,17 @@ class ConstraintsDialog(QDialog):
         if constraints['medialJointConstraint']:
             self.medialJointConstraint.setChecked(True)
         layout.addWidget(self.medialJointConstraint)
+
         self.distalMedialCorrespondanceConstraint = QCheckBox('Distal and medial joints must match in flexion')
         if constraints['distalMedialCorrespondanceConstraint']:
             self.distalMedialCorrespondanceConstraint.setChecked(True)
         layout.addWidget(self.distalMedialCorrespondanceConstraint)
+
+        self.noEmptySlotsConstraint = QCheckBox('All transcription slots must contain a value')
+        if constraints['noEmptySlotsConstraint']:
+            self.noEmptySlotsConstraint.setChecked(True)
+        layout.addWidget(self.noEmptySlotsConstraint)
+
 
         buttonLayout = QHBoxLayout()
         selectAllButton = QPushButton('Select all')
@@ -785,10 +814,12 @@ class ConstraintsDialog(QDialog):
     def selectAll(self):
         self.medialJointConstraint.setChecked(True)
         self.distalMedialCorrespondanceConstraint.setChecked(True)
+        self.noEmptySlotsConstraint.setChecked(True)
 
     def removeAll(self):
         self.medialJointConstraint.setChecked(False)
         self.distalMedialCorrespondanceConstraint.setChecked(False)
+        self.noEmptySlotsConstraint.setChecked(False)
 
 
 
