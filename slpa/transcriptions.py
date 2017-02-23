@@ -144,14 +144,16 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot33 = TranscriptionSlot(33, 7, '[EFHi]', list('EFHi'))
         self.slot34 = TranscriptionSlot(34, 7, '[EFHi]', list('EFHi'))
 
-
-    def __str__(self):
-        return ','.join(self.values())
-
     def values(self):
         data = [self.slot1.isChecked()]
         data.extend([slot.text() for slot in self.slots[1:]])
         return data
+
+    def __str__(self):
+        return ','.join(self.values())
+
+    def __getitem__(self, num):
+        return self.slots[num]
 
 class TranscriptionCompleter(QCompleter):
 

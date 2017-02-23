@@ -337,7 +337,6 @@ class MainWindow(QMainWindow):
         self.configTabs.addTab(HandConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
 
-
         #Make hand image and accompanying info
         self.infoPanel = QHBoxLayout()
         self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
@@ -375,6 +374,58 @@ class MainWindow(QMainWindow):
 
         self.showMaximized()
         #self.setFixedSize(self.size())
+        self.defineTabOrder()
+
+    def defineTabOrder(self):
+        self.setTabOrder(self.saveButton, self.checkTranscriptionButton)
+        self.setTabOrder(self.checkTranscriptionButton, self.gloss.glossEdit)
+        self.setTabOrder(self.gloss.glossEdit, self.configTabs.widget(0))
+        self.setTabOrder(self.configTabs.widget(0), self.configTabs.widget(0).hand1Transcription[0])
+        for k in range(1,35):
+            try:
+                self.setTabOrder(self.configTabs.widget(0).hand1Transcription[k],
+                                 self.configTabs.widget(0).hand1Transcription[k+1])
+            except IndexError:
+                pass
+        self.setTabOrder(self.configTabs.widget(0).hand1Transcription[-2],
+                         self.configTabs.widget(0).hand1Transcription[-1])
+        self.setTabOrder(self.configTabs.widget(0).hand1Transcription[-1],
+                         self.configTabs.widget(0).hand2Transcription[0])
+        for k in range(1,35):
+            try:
+                self.setTabOrder(self.configTabs.widget(0).hand2Transcription[k],
+                                 self.configTabs.widget(0).hand2Transcription[k+1])
+            except IndexError:
+                pass
+        self.setTabOrder(self.configTabs.widget(0).hand2Transcription[-2],
+                         self.configTabs.widget(0).hand2Transcription[-1])
+        self.setTabOrder(self.configTabs.widget(0).hand2Transcription[-1],
+                         self.configTabs.widget(1))
+        self.setTabOrder(self.configTabs.widget(1),
+                         self.configTabs.widget(1).hand1Transcription[0])
+        for k in range(1,35):
+            try:
+                self.setTabOrder(self.configTabs.widget(1).hand1Transcription[k],
+                         self.configTabs.widget(1).hand1Transcription[k+1])
+            except IndexError:
+                pass
+        self.setTabOrder(self.configTabs.widget(1).hand1Transcription[-2],
+                         self.configTabs.widget(1).hand1Transcription[-1])
+        self.setTabOrder(self.configTabs.widget(1).hand1Transcription[-1],
+                         self.configTabs.widget(1).hand2Transcription[0])
+        for k in range(1,35):
+            try:
+                self.setTabOrder(self.configTabs.widget(1).hand2Transcription[k],
+                                self.configTabs.widget(1).hand2Transcription[k+1])
+            except IndexError:
+                pass
+        self.setTabOrder(self.configTabs.widget(1).hand2Transcription[-2],
+                         self.configTabs.widget(1).hand2Transcription[-1])
+        self.setTabOrder(self.configTabs.widget(1).hand2Transcription[-1],
+                         self.featuresLayout.major)
+        self.setTabOrder(self.featuresLayout.major, self.featuresLayout.minor)
+        self.setTabOrder(self.featuresLayout.minor, self.featuresLayout.movement)
+        self.setTabOrder(self.featuresLayout.movement, self.featuresLayout.orientation)
 
     def writeSettings(self):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
