@@ -314,9 +314,9 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
 
         # Render handshape in Blender
-        # self.openBlenderButton = QPushButton('Open Blender')
-        # self.openBlenderButton.clicked.connect(self.launchBlender)
-        # layout.addWidget(self.openBlenderButton)
+        self.openBlenderButton = QPushButton('Open Blender')
+        self.openBlenderButton.clicked.connect(self.launchBlender)
+        layout.addWidget(self.openBlenderButton)
 
         #Make save button
         self.saveButton = QPushButton('Add word to corpus')
@@ -464,14 +464,22 @@ class MainWindow(QMainWindow):
 
     def launchBlender(self):
         blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
+        if not os.path.exists(blenderPath):
+            blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
+        if not os.path.exists(blenderPath):
+            blenderPath = '~/Application/blender.app'
         blenderFile = os.path.join(os.getcwd(), 'handForPCT.blend')
         blenderScript = os.path.join(os.getcwd(), 'position_hand.py')
-        outputFile = '//output_hand.png'
+
+        code = self.configTabs.widget(0).hand1Transcription.blenderCode()
+        with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
+            f.write(code)
+
         proc = subprocess.Popen(
             [blenderPath,
-             '-b', blenderFile,
-             #'-o', outputFile,])
-             "--python", "position_hand.py"])
+              blenderFile,
+             #'--background',
+              "--python", blenderScript])
         proc.communicate()
         # try:
         #     outs, errs = proc.communicate(timeout=15)
@@ -714,7 +722,6 @@ class MainWindow(QMainWindow):
             self.constraints['distalMedialCorrespondanceConstraint'] = dialog.distalMedialCorrespondanceConstraint.isChecked()
             self.constraints['medialJointConstraint'] = dialog.medialJointConstraint.isChecked()
             self.constraints['noEmptySlotsConstraint'] = dialog.noEmptySlotsConstraint.isChecked()
-            print('after closing dialog...{}'.format(self.constraints['medialJointConstraint']))
 
     def setTranscriptionRestrictions(self):
         restricted = self.setRestrictionsAct.isChecked()

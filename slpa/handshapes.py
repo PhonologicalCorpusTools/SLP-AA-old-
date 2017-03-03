@@ -17,24 +17,6 @@ class Fingers(Enum):
         self.num = num
         self.symbols = symbols
 
-    @property
-    def features(self):
-        if self.symbols is None:
-            return None
-        triples = [triple for triple in itertools.product(self.symbols, repeat=3)]
-        marked = list()
-        for n in range(len(triples)):
-            # Constraint - no medial joint can be 'H'
-            if triples[n][1] == 'H':
-                marked.append(n)
-            # Constraint - distal joint must match medial join in flexion
-            # distal = triples[n][2]
-            # medial = triples[n][1]
-            # if (distal == 'f' and medial=='F') or (distal =='F' and medial == 'f'):
-            #     marked.append(n)
-        triples = [triples[n] for n in range(len(triples)) if not n in marked]
-        return triples
-
 class Locations(Enum):
 
     Head = ['CheekNose', 'Chin', 'Eye', 'Forehead', 'HeadTop', 'Mouth', 'UnderChin', 'UpperLip', 'Other']

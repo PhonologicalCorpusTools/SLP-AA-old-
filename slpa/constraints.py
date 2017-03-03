@@ -4,7 +4,7 @@ class DistalMedialCorrespondanceConstraint():
     Slots to compare are 18/19,23/24,28/29,33/34
     """
     name = 'Distal Medial Constraint'
-    explanation = 'Medial and distal joins must match in flexion'
+    explanation = 'Medial and distal joints must match in flexion'
     def __init__(self):
         pass
 
@@ -51,8 +51,8 @@ class MedialJointConstraint():
 
 class NoEmptySlotsConstraint():
     """
-    Every transcription slot must be filled. For Field , where emtpy slots are possible, this constraint
-    demands that some symbol be used to represent empyt slots (the default option is to use dashes)
+    Every transcription slot must be filled. For Field 3, where emtpy slots are possible, this constraint
+    demands that some symbol be used to represent empty slots (the default option is to use dashes)
     """
     name = 'No Empty Slots Constraint'
     explanation = 'Every transcription slot must have a value'

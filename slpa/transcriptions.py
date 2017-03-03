@@ -145,9 +145,19 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot34 = TranscriptionSlot(34, 7, '[EFHi]', list('EFHi'))
 
     def values(self):
-        data = [self.slot1.isChecked()]
-        data.extend([slot.text() for slot in self.slots[1:]])
+        data = ['V' if self.slot1.isChecked() else '_']
+        data.extend([slot.text() if slot.text() else '_' for slot in self.slots[1:]])
         return data
+
+    def blenderCode(self):
+        transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format('V' if self.slot1.isChecked() else '_',
+                                                                     ''.join([self[n].getText() for n in range(1,5)]),
+                                                                     ''.join([self[n].getText() for n in range(5,15)]),
+                                                                     ''.join([self[n].getText() for n in range(15,19)]),
+                                                                     ''.join([self[n].getText() for n in range(19,24)]),
+                                                                     ''.join([self[n].getText() for n in range(24,29)]),
+                                                                     ''.join([self[n].getText() for n in range(29,34)]))
+        return transcription
 
     def __str__(self):
         return ','.join(self.values())
@@ -213,6 +223,9 @@ class TranscriptionSlot(QLineEdit):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def getText(self):
+        return self.text() if self.text() else '_'
 
     @Slot(bool)
     def changeValidatorState(self, unrestricted):
@@ -421,7 +434,7 @@ class TranscriptionMessageBox(QDialog):
 
     def  __init__(self, constraints, configTabs):
         super().__init__()
-        self.setWindowTitle('Transcription verification complete')
+        self.setWindowTitle('Transcription verification')
         self.layout = QVBoxLayout()
         if all([not value for value in constraints.values()]):
             self.layout.addWidget(QLabel('There are no problems with your transcription, because no constraints were selected. '
@@ -430,7 +443,7 @@ class TranscriptionMessageBox(QDialog):
             self.makeButtons()
             return
 
-        self.satified_message = 'This constraint is fully satisfied'
+        self.satisfied_message = 'This constraint is fully satisfied ("{}").'
 
         layout = QHBoxLayout()
         self.constraintTabs = QTabWidget()
@@ -460,7 +473,7 @@ class TranscriptionMessageBox(QDialog):
                     alert_text.append('\n'.join(medial_joint_text))
                     medialJointTab.layout.addWidget(QLabel(''.join(alert_text)))
                 else:
-                    medialJointTab.layout.addWidget(QLabel(self.satified_message))
+                    medialJointTab.layout.addWidget(QLabel(self.satisfied_message.format(MedialJointConstraint.explanation)))
 
         if constraints['distalMedialCorrespondanceConstraint']:
             no_problems = False
@@ -486,7 +499,7 @@ class TranscriptionMessageBox(QDialog):
                 alert_text.append('\n'.join(distal_medial_text))
                 distalMedialTab.layout.addWidget(QLabel(''.join(alert_text)))
             else:
-                distalMedialTab.layout.addWidget(QLabel(self.satified_message))
+                distalMedialTab.layout.addWidget(QLabel(self.satisfied_message.format(DistalMedialCorrespondanceConstraint.explanation)))
 
         if constraints['noEmptySlotsConstraint']:
             no_problems = False
@@ -501,7 +514,7 @@ class TranscriptionMessageBox(QDialog):
                     no_empty_slot_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
 
                 transcription = configTabs.widget(k).hand2Transcription.slots
-                problems = DistalMedialCorrespondanceConstraint.check(transcription)
+                problems = NoEmptySlotsConstraint.check(transcription)
                 if problems:
                     no_empty_slot_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
             if no_empty_slot_text:
@@ -511,7 +524,7 @@ class TranscriptionMessageBox(QDialog):
                 alert_text.append('\n'.join(no_empty_slot_text))
                 noEmptySlotsTab.layout.addWidget(QLabel(''.join(alert_text)))
             else:
-                noEmptySlotsTab.layout.addWidget(QLabel(self.satified_message))
+                noEmptySlotsTab.layout.addWidget(QLabel(self.satisfied_message.format(NoEmptySlotsConstraint.explanation)))
 
         if no_problems:
             self.layout.addWidget(QLabel('All constraints are satisfied!'))
