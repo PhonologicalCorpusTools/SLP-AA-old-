@@ -62,23 +62,181 @@ class QApplicationMessaging(QApplication):
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
 
-class MajorFeatureLayout(QVBoxLayout):
+class FeaturesDialog(QDialog):
+
+    def __init__(self, settings, parent=None):
+        super().__init__()
+        self.setWindowTitle('Define major feature values')
+        self.majorLocations, self.minorLocations, movements, orientations = settings
+
+        layout = QVBoxLayout()
+
+        listLayout = QHBoxLayout()
+
+        majorLocationLayout = QVBoxLayout()
+        self.majorLocationList = QListWidget()
+        self.majorLocationList.clicked.connect(self.changeMinorList)
+        for location in self.majorLocations:
+            self.majorLocationList.addItem(location)
+        addMajorLocationButton = QPushButton('Add major location')
+        addMajorLocationButton.clicked.connect(self.addMajorLocation)
+        removeMajorLocationButton = QPushButton('Remove major location')
+        removeMajorLocationButton.clicked.connect(self.removeMajorLocation)
+        majorLocationLayout.addWidget(self.majorLocationList)
+        majorLocationLayout.addWidget(addMajorLocationButton)
+        majorLocationLayout.addWidget(removeMajorLocationButton)
+
+        minorLocationLayout = QVBoxLayout()
+        self.minorLocationList = QListWidget()
+        for location in self.minorLocations[self.majorLocations[0]]:
+            self.minorLocationList.addItem(location)
+        addMinorLocationButton = QPushButton('Add minor location')
+        addMinorLocationButton.clicked.connect(self.addMinorLocation)
+        removeMinorLocationButton = QPushButton('Remove minor location')
+        removeMinorLocationButton.clicked.connect(self.removeMinorLocation)
+        minorLocationLayout.addWidget(self.minorLocationList)
+        minorLocationLayout.addWidget(addMinorLocationButton)
+        minorLocationLayout.addWidget(removeMinorLocationButton)
+
+        movementLayout = QVBoxLayout()
+        self.movementList = QListWidget()
+        for movement in movements:
+            self.movementList.addItem(movement)
+        addMovementButton = QPushButton('Add movement')
+        addMovementButton.clicked.connect(self.addMovement)
+        removeMovementButton = QPushButton('Remove movement')
+        removeMovementButton.clicked.connect(self.removeMovement)
+        movementLayout.addWidget(self.movementList)
+        movementLayout.addWidget(addMovementButton)
+        movementLayout.addWidget(removeMovementButton)
+
+        orientationLayout = QVBoxLayout()
+        self.orientationList = QListWidget()
+        for orientation in orientations:
+            self.orientationList.addItem(orientation)
+        addOrientationButton = QPushButton('Add orientation')
+        addOrientationButton.clicked.connect(self.addOrientation)
+        removeOrientationButton = QPushButton('Remove orientation')
+        removeOrientationButton.clicked.connect(self.removeOrientation)
+        orientationLayout.addWidget(self.orientationList)
+        orientationLayout.addWidget(addOrientationButton)
+        orientationLayout.addWidget(removeOrientationButton)
+
+        listLayout.addLayout(majorLocationLayout)
+        listLayout.addLayout(minorLocationLayout)
+        listLayout.addLayout(movementLayout)
+        listLayout.addLayout(orientationLayout)
+
+        layout.addLayout(listLayout)
+
+        buttonLayout = QHBoxLayout()
+        okButton = QPushButton('OK')
+        cancelButton = QPushButton('Cancel')
+        buttonLayout.addWidget(okButton)
+        buttonLayout.addWidget(cancelButton)
+        okButton.clicked.connect(self.accept)
+        cancelButton.clicked.connect(self.reject)
+        layout.addLayout(buttonLayout)
+
+        self.setLayout(layout)
+
+    def changeMinorList(self):
+        selectedMajorFeature = self.majorLocationList.currentItem()
+        name = selectedMajorFeature.text()
+        self.minorLocationList.clear()
+        try:
+            for location in self.minorLocations[name]:
+                self.minorLocationList.addItem(location)
+        except KeyError:
+            pass
+
+    def addMajorLocation(self):
+        dialog = FeatureEntryDialog()
+        result = dialog.exec_()
+        if result:
+            name = dialog.featureNameEdit.text()
+            if name:
+                self.majorLocationList.addItem(name)
+
+    def removeMajorLocation(self):
+        listItems = self.majorLocationList.selectedItems()
+        for item in listItems:
+            self.majorLocationList.takeItem(self.majorLocationList.row(item))
+
+    def addMinorLocation(self):
+        dialog = FeatureEntryDialog()
+        result = dialog.exec_()
+        if result:
+            name = dialog.featureNameEdit.text()
+            if name:
+                self.minorLocationList.addItem(name)
+
+    def removeMinorLocation(self):
+        listItems = self.minorLocationList.selectedItems()
+        for item in listItems:
+            self.minorLocationList.takeItem(self.minorLocationList.row(item))
+
+    def addMovement(self):
+        dialog = FeatureEntryDialog()
+        result = dialog.exec_()
+        if result:
+            name = dialog.featureNameEdit.text()
+            if name:
+                self.movementList.addItem(name)
+
+    def removeMovement(self):
+        pass
+
+
+    def addOrientation(self):
+        dialog = FeatureEntryDialog()
+        result = dialog.exec_()
+        if result:
+            name = dialog.featureNameEdit.text()
+            if name:
+                self.orientationList.addItem(name)
+
+    def removeOrientation(self):
+        pass
+
+
+class FeatureEntryDialog(QDialog):
 
     def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Enter new feature name')
+        layout = QHBoxLayout()
+        self.featureNameEdit = QLineEdit()
+        self.okButton = QPushButton('OK')
+        self.cancelButton = QPushButton('Cancel')
+        self.okButton.clicked.connect(self.accept)
+        self.cancelButton.clicked.connect(self.reject)
+        layout.addWidget(self.featureNameEdit)
+        layout.addWidget(self.okButton)
+        layout.addWidget(self.cancelButton)
+        self.setLayout(layout)
+
+
+class MajorFeatureLayout(QVBoxLayout):
+
+    def __init__(self, settings):
         QVBoxLayout.__init__(self)
+        self.majorLocations, self.minorLocations, self.movements, self.orientations = settings
         self.major = QComboBox()
         self.major.addItem('Major Location')
-        for location in Locations:
-            self.major.addItem(location.name)
+        for location in self.majorLocations:
+            self.major.addItem(location)
         self.major.currentIndexChanged.connect(self.changeMinorLocation)
         self.minor = QComboBox()
         self.minor.addItem('Minor Location')
         self.movement = QComboBox()
         self.movement.addItem('Movement')
-        for movement in Movements:
-            self.movement.addItem(movement.name)
+        for movement in self.movements:
+            self.movement.addItem(movement)
         self.orientation = QComboBox()
         self.orientation.addItem('Orientation')
+        for orientation in self.orientations:
+            self.orientation.addItem(orientation)
         self.addWidget(self.major)
         self.addWidget(self.minor)
         self.addWidget(self.movement)
@@ -87,12 +245,8 @@ class MajorFeatureLayout(QVBoxLayout):
     def changeMinorLocation(self):
         majorText = self.major.currentText()
         self.minor.clear()
-        try:
-            minors = Locations[majorText].value
-            for location in minors:
-                self.minor.addItem(location)
-        except KeyError:
-            self.minor.addItem('Minor Location')
+        for location in self.minorLocations[majorText]:
+            self.minor.addItem(location)
 
     def reset(self):
         self.major.setCurrentIndex(0)
@@ -285,6 +439,7 @@ class HandShapeImage(QLabel):
     def useNormalImage(self, e):
         self.mappingChoice = self.mapping
 
+
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
 
@@ -297,9 +452,6 @@ class MainWindow(QMainWindow):
         self.createMenus()
 
         self.restrictedTranscriptions = True
-        # self.constraints = {'medialJointConstraint': False,
-        #                     'distalMedialCorrespondanceConstraint': False,
-        #                     'noEmptySlotsConstraint': False}
         self.constraints = dict()
         self.readSettings()
 
@@ -360,7 +512,7 @@ class MainWindow(QMainWindow):
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
         #Add major features (location, movement, orientation)
-        self.featuresLayout = MajorFeatureLayout()
+        self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations, self.movements, self.orientations])
         layout.addLayout(self.featuresLayout)
 
         self.globalLayout.addLayout(layout)
@@ -439,8 +591,28 @@ class MainWindow(QMainWindow):
         self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
         self.settings.endGroup()
 
+        self.settings.beginGroup('features')
+        self.settings.setValue('majorLocations',
+                                        ['Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral'])
+        self.settings.setValue('minorLocations',
+                                        {'Head': ['Cheek nose', 'Chin', 'Eye', 'Forehead',
+                                                    'Head top', 'Mouth', 'Under chin', 'Upper lip'],
+                                        'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)',
+                                                    'Forearm (ulnar)', 'Upper arm','Wrist (back)', 'Wrist (front)'],
+                                        'Trunk': ['Clavicle', 'Hips', 'Neck', 'Neutral', 'Shoulder',
+                                                    'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist'],
+                                        'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)',
+                                                         'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)'],
+                                        'Neutral': ['FingerRadial', 'Neutral', 'Palm']})
+        self.settings.setValue('movements',
+                                        ['Arc', 'Circular', 'Straight', 'Back and forth', 'No movement', 'Multiple'])
+        self.settings.setValue('orientations',
+                                        ['Front', 'Back', 'Side', 'Up', 'Down'])
+        self.settings.endGroup()
+
     def readSettings(self):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
+
         self.settings.beginGroup('constraints')
         self.constraints['medialJointConstraint'] = self.settings.value('medialJointConstraint', type=bool)
         self.constraints['distalMedialCorrespondanceConstraint'] = self.settings.value('distalMedialCorrespondanceConstraint', type=bool)
@@ -451,6 +623,26 @@ class MainWindow(QMainWindow):
         self.restrictedTranscriptions = self.settings.value('restrictedTranscriptions', type=bool)
         self.setRestrictionsAct.setChecked(self.restrictedTranscriptions)
         self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
+        self.settings.endGroup()
+
+        self.settings.beginGroup('features')
+        self.majorLocations = self.settings.value('majorLocations',
+                                                  defaultValue=['Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral'])
+        self.minorLocations = self.settings.value('minorLocations',
+                                                  defaultValue={'Head': ['Cheek nose', 'Chin', 'Eye', 'Forehead',
+                                                    'Head top', 'Mouth', 'Under chin', 'Upper lip'],
+                                        'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)',
+                                                    'Forearm (ulnar)', 'Upper arm','Wrist (back)', 'Wrist (front)'],
+                                        'Trunk': ['Clavicle', 'Hips', 'Neck', 'Neutral', 'Shoulder',
+                                                    'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist'],
+                                        'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)',
+                                                         'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)'],
+                                        'Neutral': ['FingerRadial', 'Neutral', 'Palm']})
+        self.movements = self.settings.value('movements',
+                                             defaultValue=['Arc', 'Circular', 'Straight', 'Back and forth',
+                                                           'No movement', 'Multiple'])
+        self.orientations = self.settings.value('orientations',
+                                                defaultValue=['Front', 'Back', 'Side', 'Up', 'Down'])
         self.settings.endGroup()
 
     def closeEvent(self, e):
@@ -676,6 +868,8 @@ class MainWindow(QMainWindow):
         self.settingsMenu = self.menuBar().addMenu('&Settings')
         self.settingsMenu.addAction(self.setRestrictionsAct)
         self.settingsMenu.addAction(self.setConstraintsAct)
+        self.featuresMenu = self.menuBar().addMenu('&Features')
+        self.featuresMenu.addAction(self.defineFeaturesAct)
 
     def createActions(self):
 
@@ -714,6 +908,28 @@ class MainWindow(QMainWindow):
                                     self,
                                     statusTip = 'Select constraints on transcriptions',
                                     triggered = self.setConstraints)
+        self.defineFeaturesAct = QAction('View/edit major feature values...',
+                                        self,
+                                        statusTip = 'View/edit major feature values',
+                                        triggered = self.defineFeatures)
+
+    def defineFeatures(self):
+        dialog = FeaturesDialog([self.majorLocations, self.minorLocations, self.movements, self.orientations])
+        results = dialog.exec_()
+        if results:
+            self.featuresLayout.major.clear()
+            for item in dialog.majorLocationList:
+                self.featuresLayout.major.addItem(item)
+                print(item)
+            self.featuresLayout.minor.clear()
+            for item in dialog.minorLocationList:
+                self.featuresLayout.minor.addItem(item)
+            self.featuresLayout.movement.clear()
+            for item in dialog.movementList:
+                self.featuresLayout.movement.addItem(item)
+            self.featuresLayout.orientation.clear()
+            for item in dialog.orientationList:
+                self.featuresLayout.orientation.addItem(item)
 
     def setConstraints(self):
         dialog = ConstraintsDialog(self.constraints)
