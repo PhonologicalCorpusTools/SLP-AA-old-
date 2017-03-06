@@ -129,11 +129,12 @@ def position_hand():
     # List of Bones: ['hand.L', 'palm.02.L.001', 'palm.02.L', 'finger_middle.01.L', 'finger_middle.02.L', 'finger_middle.03.L', 'palm.03.L.001', 'palm.03.L', 'finger_ring.01.L', 'finger_ring.02.L', 'finger_ring.03.L', 'palm.04.L.001', 'palm.04.L', 'finger_pinky.01.L', 'finger_pinky.02.L', 'finger_pinky.03.L', 'palm.01.L.001', 'palm.01.L', 'thumb.01.L.001', 'thumb.01.L', 'thumb.02.L', 'thumb.03.L', 'finger_index.01.L', 'finger_index.02.L', 'finger_index.03.L', 'shoulder.R', 'upper_arm.R', 'forearm.R', 'forearm.R.003', 'hand.R', 'palm.01.R.001', 'palm.01.R', 'thumb.01.R.001', 'thumb.01.R', 'thumb.02.R', 'thumb.03.R', 'finger_index.01.R', 'finger_index.02.R', 'finger_index.03.R', 'palm.02.R.001', 'palm.02.R', 'finger_middle.01.R', 'finger_middle.02.R', 'finger_middle.03.R', 'palm.03.R.001', 'palm.03.R', 'finger_ring.01.R', 'finger_ring.02.R', 'finger_ring.03.R', 'palm.04.R.001', 'palm.04.R', 'finger_pinky.01.R', 'finger_pinky.02.R', 'finger_pinky.03.R']
     # Template: finger_index/middle/ring/pinky.joint.L/R
 
-
     scene = bpy.context.scene
     scene.render.image_settings.file_format = 'PNG' # set output format to .png
     scene.frame_set(1)
-    scene.render.filepath = os.path.join(os.getcwd(), 'hand_output.png')
+    # scene.render.filepath = os.path.join(os.getcwd(), 'hand_output.png')
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', 'hand_output.png')
+    scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
 
     # frames = 5, 9, 17
