@@ -10,7 +10,6 @@ from .lexicon import *
 from .binary import *
 from .transcriptions import *
 from .constraints import *
-from .settings import Settings
 from slpa import __version__ as currentSLPAversion
 
 FONT_NAME = 'Arial'
@@ -799,6 +798,7 @@ class MainWindow(QMainWindow):
         file_path = file_path[0]
         if not file_path:
             return
+        self.askSaveChanges = False
         self.corpusList.clear()
         self.newGloss(giveWarning=False)
         self.corpus = load_binary(file_path)
@@ -877,16 +877,18 @@ class MainWindow(QMainWindow):
 
     def loadHandShape(self, gloss):
 
-        alert = QMessageBox()
-        alert.setWindowTitle('Warning')
-        alert.setText('Save changes to current entry?')
-        alert.addButton('Save', QMessageBox.AcceptRole)
-        alert.addButton('Continue without saving', QMessageBox.RejectRole)
-        result = alert.exec_()
-        if alert.clickedButton().text() == 'Save':
-            self.saveCorpus()
-        else:
-            return
+        if self.askSaveChanges:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('Save changes to current entry?')
+            alert.addButton('Save', QMessageBox.AcceptRole)
+            alert.addButton('Continue without saving', QMessageBox.RejectRole)
+            result = alert.exec_()
+            if alert.clickedButton().text() == 'Save':
+                self.saveCorpus()
+                self.askSaveChanges = False
+            else:
+                return
 
         signData = self.corpus[gloss]
 
