@@ -118,7 +118,7 @@ class RingPinkyAnatomicalContstraint():
     """
     name = 'Ring-Pinky Constraint'
     explanation = ('If the ring medial and distal joints are extended, '
-                    'the pinky medial and distal joints cannot be flexed (unless slot 15 is a "4")')
+                    'the pinky medial and distal joints cannot be flexed (unless thumb is in contact with pinky)')
     def __init__(self):
         pass
 

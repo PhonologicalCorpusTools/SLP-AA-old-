@@ -448,83 +448,111 @@ class TranscriptionMessageBox(QDialog):
         layout = QHBoxLayout()
         self.constraintTabs = QTabWidget()
         no_problems = True
-        if constraints['medialJointConstraint']:
-            no_problems = False
-            medialJointTab = TranscriptionConstraintTab()
-            self.constraintTabs.addTab(medialJointTab, 'Medial Joint Constraint')
-            alert_text = list()
-            medial_joint_text = list()
-            if constraints['medialJointConstraint']:
-                for k in [0, 1]:
+        alert_text = list()
+        for c in MasterConstraintList:
+            constraint_text = list()
+            if constraints[c[0]]:
+                no_problems = False
+                tab = TranscriptionConstraintTab()
+                self.constraintTabs.addTab(tab, c[1].name)
+
+                for k in [0,1]:
                     transcription = configTabs.widget(k).hand1Transcription.slots
-                    problems = MedialJointConstraint.check(transcription)
+                    problems = c[1].check(transcription)
                     if problems:
-                        medial_joint_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+                        constraint_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
 
                     transcription = configTabs.widget(k).hand2Transcription.slots
-                    problems = MedialJointConstraint.check(transcription)
+                    problems = c[1].check(transcription)
                     if problems:
-                        medial_joint_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
-
-                if medial_joint_text:
+                        constraint_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+                if constraint_text:
                     alert_text.append('The following slots are in violation of the {} '
-                                      '("{}")\n'.format(MedialJointConstraint.name, MedialJointConstraint.explanation))
+                                      '("{}")\n'.format(c[1].name, c[1].explanation))
 
-                    alert_text.append('\n'.join(medial_joint_text))
-                    medialJointTab.layout.addWidget(QLabel(''.join(alert_text)))
+                    alert_text.append('\n'.join(constraint_text))
+                    tab.layout.addWidget(QLabel(''.join(alert_text)))
                 else:
-                    medialJointTab.layout.addWidget(QLabel(self.satisfied_message.format(MedialJointConstraint.explanation)))
+                    tab.layout.addWidget(QLabel(self.satisfied_message.format(c[1].explanation)))
 
-        if constraints['distalMedialCorrespondanceConstraint']:
-            no_problems = False
-            distalMedialTab = TranscriptionConstraintTab()
-            self.constraintTabs.addTab(distalMedialTab, 'Distal-medial Correspondence Constraint')
-            alert_text = list()
-            distal_medial_text = list()
-            for k in [0, 1]:
-                transcription = configTabs.widget(k).hand1Transcription.slots
-                problems = DistalMedialCorrespondanceConstraint.check(transcription)
-                if problems:
-                    distal_medial_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
 
-                transcription = configTabs.widget(k).hand2Transcription.slots
-                problems = DistalMedialCorrespondanceConstraint.check(transcription)
-                if problems:
-                    distal_medial_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
-            if distal_medial_text:
-                alert_text.append('The following slots are in violation of the {} '
-                                  '("{}")\n'.format(DistalMedialCorrespondanceConstraint.name,
-                                                  DistalMedialCorrespondanceConstraint.explanation))
-
-                alert_text.append('\n'.join(distal_medial_text))
-                distalMedialTab.layout.addWidget(QLabel(''.join(alert_text)))
-            else:
-                distalMedialTab.layout.addWidget(QLabel(self.satisfied_message.format(DistalMedialCorrespondanceConstraint.explanation)))
-
-        if constraints['noEmptySlotsConstraint']:
-            no_problems = False
-            noEmptySlotsTab = TranscriptionConstraintTab()
-            self.constraintTabs.addTab(noEmptySlotsTab, 'No Empty Slots Constraint')
-            alert_text = list()
-            no_empty_slot_text = list()
-            for k in [0, 1]:
-                transcription = configTabs.widget(k).hand1Transcription.slots
-                problems = NoEmptySlotsConstraint.check(transcription)
-                if problems:
-                    no_empty_slot_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
-
-                transcription = configTabs.widget(k).hand2Transcription.slots
-                problems = NoEmptySlotsConstraint.check(transcription)
-                if problems:
-                    no_empty_slot_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
-            if no_empty_slot_text:
-                alert_text.append('The following slots are in violation of the {} '
-                                  '("{}")\n'.format(NoEmptySlotsConstraint.name, NoEmptySlotsConstraint.explanation))
-
-                alert_text.append('\n'.join(no_empty_slot_text))
-                noEmptySlotsTab.layout.addWidget(QLabel(''.join(alert_text)))
-            else:
-                noEmptySlotsTab.layout.addWidget(QLabel(self.satisfied_message.format(NoEmptySlotsConstraint.explanation)))
+        # if constraints['medialJointConstraint']:
+        #     no_problems = False
+        #     medialJointTab = TranscriptionConstraintTab()
+        #     self.constraintTabs.addTab(medialJointTab, 'Medial Joint Constraint')
+        #     alert_text = list()
+        #     medial_joint_text = list()
+        #     if constraints['medialJointConstraint']:
+        #         for k in [0, 1]:
+        #             transcription = configTabs.widget(k).hand1Transcription.slots
+        #             problems = MedialJointConstraint.check(transcription)
+        #             if problems:
+        #                 medial_joint_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+        #
+        #             transcription = configTabs.widget(k).hand2Transcription.slots
+        #             problems = MedialJointConstraint.check(transcription)
+        #             if problems:
+        #                 medial_joint_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+        #
+        #         if medial_joint_text:
+        #             alert_text.append('The following slots are in violation of the {} '
+        #                               '("{}")\n'.format(MedialJointConstraint.name, MedialJointConstraint.explanation))
+        #
+        #             alert_text.append('\n'.join(medial_joint_text))
+        #             medialJointTab.layout.addWidget(QLabel(''.join(alert_text)))
+        #         else:
+        #             medialJointTab.layout.addWidget(QLabel(self.satisfied_message.format(MedialJointConstraint.explanation)))
+        #
+        # if constraints['distalMedialCorrespondanceConstraint']:
+        #     no_problems = False
+        #     distalMedialTab = TranscriptionConstraintTab()
+        #     self.constraintTabs.addTab(distalMedialTab, 'Distal-medial Correspondence Constraint')
+        #     alert_text = list()
+        #     distal_medial_text = list()
+        #     for k in [0, 1]:
+        #         transcription = configTabs.widget(k).hand1Transcription.slots
+        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
+        #         if problems:
+        #             distal_medial_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+        #
+        #         transcription = configTabs.widget(k).hand2Transcription.slots
+        #         problems = DistalMedialCorrespondanceConstraint.check(transcription)
+        #         if problems:
+        #             distal_medial_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+        #     if distal_medial_text:
+        #         alert_text.append('The following slots are in violation of the {} '
+        #                           '("{}")\n'.format(DistalMedialCorrespondanceConstraint.name,
+        #                                           DistalMedialCorrespondanceConstraint.explanation))
+        #
+        #         alert_text.append('\n'.join(distal_medial_text))
+        #         distalMedialTab.layout.addWidget(QLabel(''.join(alert_text)))
+        #     else:
+        #         distalMedialTab.layout.addWidget(QLabel(self.satisfied_message.format(DistalMedialCorrespondanceConstraint.explanation)))
+        #
+        # if constraints['noEmptySlotsConstraint']:
+        #     no_problems = False
+        #     noEmptySlotsTab = TranscriptionConstraintTab()
+        #     self.constraintTabs.addTab(noEmptySlotsTab, 'No Empty Slots Constraint')
+        #     alert_text = list()
+        #     no_empty_slot_text = list()
+        #     for k in [0, 1]:
+        #         transcription = configTabs.widget(k).hand1Transcription.slots
+        #         problems = NoEmptySlotsConstraint.check(transcription)
+        #         if problems:
+        #             no_empty_slot_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+        #
+        #         transcription = configTabs.widget(k).hand2Transcription.slots
+        #         problems = NoEmptySlotsConstraint.check(transcription)
+        #         if problems:
+        #             no_empty_slot_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+        #     if no_empty_slot_text:
+        #         alert_text.append('The following slots are in violation of the {} '
+        #                           '("{}")\n'.format(NoEmptySlotsConstraint.name, NoEmptySlotsConstraint.explanation))
+        #
+        #         alert_text.append('\n'.join(no_empty_slot_text))
+        #         noEmptySlotsTab.layout.addWidget(QLabel(''.join(alert_text)))
+        #     else:
+        #         noEmptySlotsTab.layout.addWidget(QLabel(self.satisfied_message.format(NoEmptySlotsConstraint.explanation)))
 
         if no_problems:
             self.layout.addWidget(QLabel('All constraints are satisfied!'))

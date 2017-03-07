@@ -538,7 +538,7 @@ class MainWindow(QMainWindow):
 
         topLayout = QHBoxLayout()
         #Make save button
-        self.saveButton = QPushButton('Add word to corpus')
+        self.saveButton = QPushButton('Save word to corpus')
         topLayout.addWidget(self.saveButton)
 
         # Make "check transcription" button
@@ -706,22 +706,21 @@ class MainWindow(QMainWindow):
 
         self.settings.beginGroup('features')
         self.majorLocations = self.settings.value('majorLocations',
-                                                  defaultValue=['Neutral', 'Head', 'Arm', 'Trunk', 'Non-dominant'])
+                                                  defaultValue=['None specified', 'Head', 'Arm', 'Trunk', 'Non-dominant'])
         self.minorLocations = self.settings.value('minorLocations',
                                                   defaultValue={'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead',
                                                     'Head top', 'Mouth', 'Under chin', 'Upper lip'],
                                         'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)',
                                                     'Forearm (ulnar)', 'Upper arm','Wrist (back)', 'Wrist (front)'],
-                                        'Trunk': ['Clavicle', 'Hips', 'Neck', 'Neutral', 'Shoulder',
+                                        'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder',
                                                     'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist'],
                                         'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)',
-                                                         'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)'],
-                                        'Neutral': ['Neutral', 'Palm']})
+                                                         'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)']})
         self.movements = self.settings.value('movements',
-                                             defaultValue=['Neutral', 'Arc', 'Circular', 'Straight', 'Back and forth',
+                                             defaultValue=['None specified', 'Arc', 'Circular', 'Straight', 'Back and forth',
                                                            'No movement', 'Multiple'])
         self.orientations = self.settings.value('orientations',
-                                                defaultValue=['Neutral', 'Front', 'Back', 'Side', 'Up', 'Down'])
+                                                defaultValue=['None specified', 'Front', 'Back', 'Side', 'Up', 'Down'])
         self.settings.endGroup()
 
     def closeEvent(self, e):
@@ -742,7 +741,7 @@ class MainWindow(QMainWindow):
         if not os.path.exists(blenderPath):
             blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
         if not os.path.exists(blenderPath):
-            blenderPath = '~/Application/blender.app'
+            blenderPath = '~/Applications/blender.app'
         blenderFile = os.path.join(os.getcwd(), 'handForPCT.blend')
         blenderScript = os.path.join(os.getcwd(), 'position_hand.py')
 
