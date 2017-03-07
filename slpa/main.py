@@ -245,6 +245,8 @@ class MajorFeatureLayout(QVBoxLayout):
     def changeMinorLocation(self):
         majorText = self.major.currentText()
         self.minor.clear()
+        if not majorText:
+            return
         for location in self.minorLocations[majorText]:
             self.minor.addItem(location)
 
@@ -922,19 +924,42 @@ class MainWindow(QMainWindow):
         dialog = FeaturesDialog([self.majorLocations, self.minorLocations, self.movements, self.orientations])
         results = dialog.exec_()
         if results:
-            self.featuresLayout.major.clear()
-            for item in dialog.majorLocationList:
-                self.featuresLayout.major.addItem(item)
-                print(item)
             self.featuresLayout.minor.clear()
-            for item in dialog.minorLocationList:
-                self.featuresLayout.minor.addItem(item)
+            self.minorLocations = dialog.minorLocations
+
+            self.featuresLayout.major.clear()
+            self.majorLocations = list()
+            for index in range(dialog.majorLocationList.count()):
+                item = dialog.majorLocationList.item(index)
+                self.majorLocations.append(item.text())
+                self.featuresLayout.major.addItem(item.text())
+            self.featuresLayout.major.setCurrentIndex(0)
+
             self.featuresLayout.movement.clear()
-            for item in dialog.movementList:
-                self.featuresLayout.movement.addItem(item)
+            self.movements = list()
+            for index in range(dialog.movementList.count()):
+                item = dialog.movementList.item(index)
+                self.movements.append(item.text())
+                self.featuresLayout.movement.addItem(item.text())
+
             self.featuresLayout.orientation.clear()
-            for item in dialog.orientationList:
-                self.featuresLayout.orientation.addItem(item)
+            self.orientations = list()
+            for index in range(dialog.orientationList.count()):
+                item = dialog.orientationList.item(index)
+                self.orientations.append(item.text())
+                self.featuresLayout.orientation.addItem(item.text())
+            # self.featuresLayout.major.clear()
+            # for item in dialog.majorLocationList:
+            #     self.featuresLayout.major.addItem(item)
+            # self.featuresLayout.minor.clear()
+            # for item in dialog.minorLocationList:
+            #     self.featuresLayout.minor.addItem(item)
+            # self.featuresLayout.movement.clear()
+            # for item in dialog.movementList:
+            #     self.featuresLayout.movement.addItem(item)
+            # self.featuresLayout.orientation.clear()
+            # for item in dialog.orientationList:
+            #     self.featuresLayout.orientation.addItem(item)
 
     def setConstraints(self):
         dialog = ConstraintsDialog(self.constraints)
