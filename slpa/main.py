@@ -10,7 +10,6 @@ from .lexicon import *
 from .binary import *
 from .transcriptions import *
 from .constraints import *
-from .settings import Settings
 from slpa import __version__ as currentSLPAversion
 
 FONT_NAME = 'Arial'
@@ -78,6 +77,7 @@ class FeaturesDialog(QDialog):
         self.majorLocationList.clicked.connect(self.changeMinorList)
         for location in self.majorLocations:
             self.majorLocationList.addItem(location)
+        self.majorLocationList.setCurrentRow(0)
         addMajorLocationButton = QPushButton('Add major location')
         addMajorLocationButton.clicked.connect(self.addMajorLocation)
         removeMajorLocationButton = QPushButton('Remove major location')
@@ -90,6 +90,7 @@ class FeaturesDialog(QDialog):
         self.minorLocationList = QListWidget()
         for location in self.minorLocations[self.majorLocations[0]]:
             self.minorLocationList.addItem(location)
+        self.minorLocationList.setCurrentRow(0)
         addMinorLocationButton = QPushButton('Add minor location')
         addMinorLocationButton.clicked.connect(self.addMinorLocation)
         removeMinorLocationButton = QPushButton('Remove minor location')
@@ -102,6 +103,7 @@ class FeaturesDialog(QDialog):
         self.movementList = QListWidget()
         for movement in movements:
             self.movementList.addItem(movement)
+        self.movementList.setCurrentRow(0)
         addMovementButton = QPushButton('Add movement')
         addMovementButton.clicked.connect(self.addMovement)
         removeMovementButton = QPushButton('Remove movement')
@@ -114,6 +116,7 @@ class FeaturesDialog(QDialog):
         self.orientationList = QListWidget()
         for orientation in orientations:
             self.orientationList.addItem(orientation)
+        self.orientationList.setCurrentRow(0)
         addOrientationButton = QPushButton('Add orientation')
         addOrientationButton.clicked.connect(self.addOrientation)
         removeOrientationButton = QPushButton('Remove orientation')
@@ -140,6 +143,11 @@ class FeaturesDialog(QDialog):
 
         self.setLayout(layout)
 
+        self.emptyListWarning = QMessageBox()
+        self.emptyListWarning.setWindowTitle('Warning')
+        self.emptyListWarning.setText(('This feature cannot be deleted. '
+                                      'You must have at least one feature in each list.'))
+
     def changeMinorList(self):
         selectedMajorFeature = self.majorLocationList.currentItem()
         name = selectedMajorFeature.text()
@@ -148,7 +156,7 @@ class FeaturesDialog(QDialog):
             for location in self.minorLocations[name]:
                 self.minorLocationList.addItem(location)
         except KeyError:
-            pass
+            self.minorLocationList.clear()
 
     def addMajorLocation(self):
         dialog = FeatureEntryDialog()
@@ -157,11 +165,17 @@ class FeaturesDialog(QDialog):
             name = dialog.featureNameEdit.text()
             if name:
                 self.majorLocationList.addItem(name)
+                self.minorLocations[name] = list()
+                self.majorLocationList.setCurrentRow(len(self.majorLocationList)-1)
 
     def removeMajorLocation(self):
+        if len(self.majorLocationList) == 1:
+            self.emptyListWarning.exec_()
+            return
         listItems = self.majorLocationList.selectedItems()
         for item in listItems:
             self.majorLocationList.takeItem(self.majorLocationList.row(item))
+        self.majorLocationList.setCurrentRow(0)
 
     def addMinorLocation(self):
         dialog = FeatureEntryDialog()
@@ -170,11 +184,22 @@ class FeaturesDialog(QDialog):
             name = dialog.featureNameEdit.text()
             if name:
                 self.minorLocationList.addItem(name)
+                major = self.majorLocationList.currentItem().text()
+                self.minorLocations[major].append(name)
+                self.minorLocationList.setCurrentRow(len(self.minorLocationList) - 1)
+
 
     def removeMinorLocation(self):
+        if len(self.minorLocationList) == 1:
+            self.emptyListWarning.exec_()
+            return
         listItems = self.minorLocationList.selectedItems()
+        major = selectedMajorFeature = self.majorLocationList.currentItem().text()
         for item in listItems:
             self.minorLocationList.takeItem(self.minorLocationList.row(item))
+            self.minorLocations[major].remove(item.text())
+        self.minorLocationList.setCurrentRow(0)
+
 
     def addMovement(self):
         dialog = FeatureEntryDialog()
@@ -183,10 +208,16 @@ class FeaturesDialog(QDialog):
             name = dialog.featureNameEdit.text()
             if name:
                 self.movementList.addItem(name)
+                self.movementList.setCurrentRow(len(self.movementList) - 1)
 
     def removeMovement(self):
-        pass
-
+        if len(self.movementList) == 1:
+            self.emptyListWarning.exec_()
+            return
+        listItems = self.movementList.selectedItems()
+        for item in listItems:
+            self.movementList.takeItem(self.movementList.row(item))
+        self.movementList.setCurrentRow(0)
 
     def addOrientation(self):
         dialog = FeatureEntryDialog()
@@ -195,9 +226,16 @@ class FeaturesDialog(QDialog):
             name = dialog.featureNameEdit.text()
             if name:
                 self.orientationList.addItem(name)
+                self.orientationList.setCurrentRow(len(self.orientationList) - 1)
 
     def removeOrientation(self):
-        pass
+        if len(self.orientationList) == 1:
+            self.emptyListWarning.exec_()
+            return
+        listItems = self.orientationList.selectedItems()
+        for item in listItems:
+            self.orientationList.takeItem(self.orientationList.row(item))
+        self.orientationList.setCurrentRow(0)
 
 
 class FeatureEntryDialog(QDialog):
@@ -217,36 +255,52 @@ class FeatureEntryDialog(QDialog):
         self.setLayout(layout)
 
 
-class MajorFeatureLayout(QVBoxLayout):
+class MajorFeatureLayout(QGridLayout):
 
     def __init__(self, settings):
-        QVBoxLayout.__init__(self)
+        super().__init__()
+
         self.majorLocations, self.minorLocations, self.movements, self.orientations = settings
         self.major = QComboBox()
-        self.major.addItem('Major Location')
+        #self.major.addItem('Major Location')
         for location in self.majorLocations:
             self.major.addItem(location)
-        self.major.currentIndexChanged.connect(self.changeMinorLocation)
         self.minor = QComboBox()
-        self.minor.addItem('Minor Location')
+        #self.minor.addItem('Minor Location')
         self.movement = QComboBox()
-        self.movement.addItem('Movement')
+        #self.movement.addItem('Movement')
         for movement in self.movements:
             self.movement.addItem(movement)
         self.orientation = QComboBox()
-        self.orientation.addItem('Orientation')
+        #self.orientation.addItem('Orientation')
         for orientation in self.orientations:
             self.orientation.addItem(orientation)
-        self.addWidget(self.major)
-        self.addWidget(self.minor)
-        self.addWidget(self.movement)
-        self.addWidget(self.orientation)
+
+        self.major.currentIndexChanged.connect(self.changeMinorLocation)
+        self.major.setCurrentIndex(0) #not working?
+        self.changeMinorLocation()
+        #not sure why this call is needed, since .setCurrentIndex should fire the signal, but it doesn't seem to work
+
+        self.addWidget(QLabel('Major Location'), 0, 0)
+        self.addWidget(self.major,0,1)
+        self.addWidget(QLabel('Minor Location'), 1, 0)
+        self.addWidget(self.minor,1,1)
+        self.addWidget(QLabel('Movement'), 2, 0)
+        self.addWidget(self.movement,2,1)
+        self.addWidget(QLabel('Orientation'), 3, 0)
+        self.addWidget(self.orientation,3,1)
+
+        self.addWidget(QLabel(), 0, 2) #adds a filler item for spacing
+        self.setColumnStretch(2,1)
 
     def changeMinorLocation(self):
         majorText = self.major.currentText()
-        self.minor.clear()
         if not majorText:
+            #this is an empty string if the major box has just been cleared because the user
+            #updated the FeaturesDialog options
+            #this function is incidentally called during this process because the combo boxes are cleared
             return
+        self.minor.clear()
         for location in self.minorLocations[majorText]:
             self.minor.addItem(location)
 
@@ -441,6 +495,20 @@ class HandShapeImage(QLabel):
     def useNormalImage(self, e):
         self.mappingChoice = self.mapping
 
+class BlenderOutputWindow(QDialog):
+
+    def __init__(self, image_name, gloss):
+        super().__init__()
+        self.setModal(False)
+        title = gloss if gloss else 'Transcription visualization'
+        self.setWindowTitle(title)
+        self.image = QPixmap(getMediaFilePath(image_name))
+        self.imageLabel = QLabel()
+        self.imageLabel.setPixmap(self.image)
+        layout = QHBoxLayout()
+        layout.addWidget(self.imageLabel)
+        self.setLayout(layout)
+
 
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
@@ -449,10 +517,12 @@ class MainWindow(QMainWindow):
         app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
+
         self.createActions()
         self.createMenus()
 
         self.restrictedTranscriptions = True
+        self.askSaveChanges = False
         self.constraints = dict()
         self.readSettings()
 
@@ -466,22 +536,27 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        # Render handshape in Blender
-        self.openBlenderButton = QPushButton('Open Blender')
-        self.openBlenderButton.clicked.connect(self.launchBlender)
-        layout.addWidget(self.openBlenderButton)
-
+        topLayout = QHBoxLayout()
         #Make save button
         self.saveButton = QPushButton('Add word to corpus')
-        layout.addWidget(self.saveButton)
+        topLayout.addWidget(self.saveButton)
 
         # Make "check transcription" button
         self.checkTranscriptionButton = QPushButton('Check transcription')
         self.checkTranscriptionButton.clicked.connect(self.checkTranscription)
-        layout.addWidget(self.checkTranscriptionButton)
+        topLayout.addWidget(self.checkTranscriptionButton)
+
+        # Render handshape in Blender
+        self.openBlenderButton = QPushButton('Visualize transcription')
+        self.openBlenderButton.clicked.connect(self.launchBlender)
+        topLayout.addWidget(self.openBlenderButton)
+
+
+        layout.addLayout(topLayout)
 
         #Make gloss entry
         self.gloss = GlossLayout(parent=self)
+        self.gloss.glossEdit.textChanged.connect(self.userMadeChanges)
         layout.addLayout(self.gloss)
 
         #Make tabs for each configuration
@@ -499,21 +574,27 @@ class MainWindow(QMainWindow):
         layout.addLayout(self.infoPanel)
 
 
-        #Connect transcription signals to hand image and transcription info slots
+        #Connect transcription signals to various main window slots
         for k in [0,1]:
             for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
+                slot.textChanged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
             for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
+                slot.textChanged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
         #Add major features (location, movement, orientation)
         self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations, self.movements, self.orientations])
+        self.featuresLayout.major.currentTextChanged.connect(self.userMadeChanges)
+        self.featuresLayout.minor.currentTextChanged.connect(self.userMadeChanges)
+        self.featuresLayout.movement.currentTextChanged.connect(self.userMadeChanges)
+        self.featuresLayout.orientation.currentTextChanged.connect(self.userMadeChanges)
         layout.addLayout(self.featuresLayout)
 
         self.globalLayout.addLayout(layout)
@@ -526,8 +607,11 @@ class MainWindow(QMainWindow):
         self.makeCorpusDock()
 
         self.showMaximized()
-
+        #self.setFixedSize(self.size())
         self.defineTabOrder()
+
+    def userMadeChanges(self, e):
+        self.askSaveChanges = True
 
     def defineTabOrder(self):
         self.setTabOrder(self.saveButton, self.checkTranscriptionButton)
@@ -596,22 +680,10 @@ class MainWindow(QMainWindow):
         self.settings.endGroup()
 
         self.settings.beginGroup('features')
-        self.settings.setValue('majorLocations',
-                                        ['Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral'])
-        self.settings.setValue('minorLocations',
-                                        {'Head': ['Cheek nose', 'Chin', 'Eye', 'Forehead',
-                                                    'Head top', 'Mouth', 'Under chin', 'Upper lip'],
-                                        'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)',
-                                                    'Forearm (ulnar)', 'Upper arm','Wrist (back)', 'Wrist (front)'],
-                                        'Trunk': ['Clavicle', 'Hips', 'Neck', 'Neutral', 'Shoulder',
-                                                    'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist'],
-                                        'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)',
-                                                         'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)'],
-                                        'Neutral': ['FingerRadial', 'Neutral', 'Palm']})
-        self.settings.setValue('movements',
-                                        ['Arc', 'Circular', 'Straight', 'Back and forth', 'No movement', 'Multiple'])
-        self.settings.setValue('orientations',
-                                        ['Front', 'Back', 'Side', 'Up', 'Down'])
+        self.settings.setValue('majorLocations', self.majorLocations)
+        self.settings.setValue('minorLocations', self.minorLocations)
+        self.settings.setValue('movements', self.movements)
+        self.settings.setValue('orientations', self.orientations)
         self.settings.endGroup()
 
     def readSettings(self):
@@ -634,9 +706,9 @@ class MainWindow(QMainWindow):
 
         self.settings.beginGroup('features')
         self.majorLocations = self.settings.value('majorLocations',
-                                                  defaultValue=['Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral'])
+                                                  defaultValue=['Neutral', 'Head', 'Arm', 'Trunk', 'Non-dominant'])
         self.minorLocations = self.settings.value('minorLocations',
-                                                  defaultValue={'Head': ['Cheek nose', 'Chin', 'Eye', 'Forehead',
+                                                  defaultValue={'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead',
                                                     'Head top', 'Mouth', 'Under chin', 'Upper lip'],
                                         'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)',
                                                     'Forearm (ulnar)', 'Upper arm','Wrist (back)', 'Wrist (front)'],
@@ -644,16 +716,20 @@ class MainWindow(QMainWindow):
                                                     'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist'],
                                         'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)',
                                                          'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)'],
-                                        'Neutral': ['FingerRadial', 'Neutral', 'Palm']})
+                                        'Neutral': ['Neutral', 'Palm']})
         self.movements = self.settings.value('movements',
-                                             defaultValue=['Arc', 'Circular', 'Straight', 'Back and forth',
+                                             defaultValue=['Neutral', 'Arc', 'Circular', 'Straight', 'Back and forth',
                                                            'No movement', 'Multiple'])
         self.orientations = self.settings.value('orientations',
-                                                defaultValue=['Front', 'Back', 'Side', 'Up', 'Down'])
+                                                defaultValue=['Neutral', 'Front', 'Back', 'Side', 'Up', 'Down'])
         self.settings.endGroup()
 
     def closeEvent(self, e):
         self.writeSettings()
+        try:
+            os.remove(os.path.join(os.getcwd(),'handCode.txt'))
+        except FileNotFoundError:
+            pass
         super().closeEvent()
 
     def checkTranscription(self):
@@ -671,20 +747,33 @@ class MainWindow(QMainWindow):
         blenderScript = os.path.join(os.getcwd(), 'position_hand.py')
 
         code = self.configTabs.widget(0).hand1Transcription.blenderCode()
+
+        # if os.path.exists(os.path.join(os.getcwd(), 'handCode.txt')):
+        #     #check if the existing code matches the current transcription
+        #     #if so, just load the most recent image, don't render a second time
+        #     with open(os.path.join(os.getcwd(), 'handCode.txt'), encoding='utf-8') as file:
+        #         old_code = file.read()
+        #         old_code = old_code.strip()
+        #         print(code)
+        #         print(old_code)
+        #     if old_code == code:
+        #         self.blenderDialog = BlenderOutputWindow('hand_output.png')
+        #         self.blenderDialog.show()
+        #         self.blenderDialog.raise_()
+        #         return
+
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
         proc = subprocess.Popen(
             [blenderPath,
               blenderFile,
-             #'--background',
+             '--background',
               "--python", blenderScript])
         proc.communicate()
-        # try:
-        #     outs, errs = proc.communicate(timeout=15)
-        # except TimeoutExpired:
-        #     proc.kill()
-        #     outs, errs = proc.communicate()
+        self.blenderDialog = BlenderOutputWindow('hand_output.png', self.gloss.glossEdit.text())
+        self.blenderDialog.show()
+        self.blenderDialog.raise_()
 
     def clearLayout(self, layout):
         while layout.count():
@@ -703,6 +792,9 @@ class MainWindow(QMainWindow):
         self.dockWrapper = QWidget()
         self.dockLayout = QVBoxLayout()
         self.dockWrapper.setLayout(self.dockLayout)
+        self.corpusList = QListWidget(self)
+        self.corpusList.currentTextChanged.connect(self.loadHandShape)
+        self.dockLayout.addWidget(self.corpusList)
         self.corpusDock.setWidget(self.dockWrapper)
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
@@ -712,15 +804,17 @@ class MainWindow(QMainWindow):
         file_path = file_path[0]
         if not file_path:
             return
-        self.clearLayout(self.dockLayout)
+        self.askSaveChanges = False
+        self.corpusList.clear()
         self.newGloss(giveWarning=False)
         self.corpus = load_binary(file_path)
         for sign in self.corpus:
-            data = sign.data()
-            self.addButtonToDock(data)
-        self.showMaximized()
+            self.corpusList.addItem(sign.gloss)
+
+        #self.showMaximized()
 
     def saveCorpus(self):
+        isDuplicate = False
         if not self.gloss.glossEdit.text():
             alert = QMessageBox()
             alert.setWindowTitle('Missing gloss')
@@ -756,6 +850,7 @@ class MainWindow(QMainWindow):
             kwargs['path'] = self.corpus.path
             kwargs['file_mode'] = 'a'
             if kwargs['gloss'] in self.corpus.wordlist:
+                isDuplicate = True
                 alert = QMessageBox()
                 alert.setWindowTitle('Duplicate entry')
                 alert.setText('A word with the gloss {} already exists in your corpus. '
@@ -769,58 +864,91 @@ class MainWindow(QMainWindow):
                 elif role == 1:#edit
                     return
 
-        self.addButtonToDock(kwargs)
-        self.corpus.addWord(Sign(kwargs))
-        save_binary(self.corpus, kwargs['path'])
+        self.updateCorpus(kwargs, isDuplicate)
         QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
 
-    def addButtonToDock(self, kwargs):
-        button = DataButton(kwargs)
-        button.sendData.connect(self.loadHandShape)
-        self.corpusDock.widget().layout().addWidget(button)
+    def updateCorpus(self, kwargs, isDuplicate):
+        self.corpus.addWord(Sign(kwargs))
+        if not isDuplicate:
+            self.corpusList.addItem(kwargs['gloss'])
+            self.corpusList.setCurrentRow(-1)
+        save_binary(self.corpus, kwargs['path'])
+        self.askSaveChanges = False
 
     def newCorpus(self):
         self.corpus = None
         self.newGloss()
-        self.clearLayout(self.dockLayout)
+        self.corpusList.clear()
+        self.askSaveChanges = False
 
-    def loadHandShape(self, buttonData):
+    def loadHandShape(self, gloss):
 
-        self.gloss.glossEdit.setText(buttonData['gloss'])
+        if self.askSaveChanges:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('Save changes to current entry?')
+            alert.addButton('Save', QMessageBox.AcceptRole)
+            alert.addButton('Continue without saving', QMessageBox.RejectRole)
+            result = alert.exec_()
+            if alert.clickedButton().text() == 'Save':
+                self.saveCorpus()
+                self.askSaveChanges = False
+            else:
+                return
+
+        signData = self.corpus[gloss]
+
+        self.gloss.glossEdit.setText(signData['gloss'])
         config1 = self.configTabs.widget(0)
         config2 = self.configTabs.widget(1)
 
-        config1hand1 = buttonData['config1hand1']
+        config1hand1 = signData['config1hand1']
         for num, slot in enumerate(config1.hand1Transcription.slots):
             if num == 0:
-                slot.setChecked(config1hand1[0])
+                if config1hand1[0] == '_':
+                    slot.setChecked(False)
+                else:
+                    slot.setChecked(True)
             else:
-                slot.setText(config1hand1[num])
+                text = config1hand1[num]
+                slot.setText('' if text == '_' else text)
 
-        config1hand2 = buttonData['config1hand2']
+        config1hand2 = signData['config1hand2']
         for num, slot in enumerate(config1.hand2Transcription.slots):
             if num == 0:
-                slot.setChecked(config1hand2[0])
+                if config1hand2[0] == '_' or not config1hand2[0]:
+                    slot.setChecked(False)
+                else:
+                    slot.setChecked(True)
             else:
-                slot.setText(config1hand2[num])
+                text = config1hand2[num]
+                slot.setText('' if text == '_' else text)
 
-        config2hand1 = buttonData['config2hand1']
+        config2hand1 = signData['config2hand1']
         for num, slot in enumerate(config2.hand1Transcription.slots):
             if num == 0:
-                slot.setChecked(config2hand1[0])
+                if config2hand1[0] == '_' or not config2hand1[0]:
+                    slot.setChecked(False)
+                else:
+                    slot.setChecked(True)
             else:
-                slot.setText(config2hand1[num])
+                text = config2hand1[num]
+                slot.setText('' if text == '_' else text)
 
-        config2hand2 = buttonData['config2hand2']
+        config2hand2 = signData['config2hand2']
         for num, slot in enumerate(config2.hand2Transcription.slots):
             if num == 0:
-                slot.setChecked(config2hand2[0])
+                if config2hand2[0] == '_' or not config2hand2[0]:
+                    slot.setChecked(False)
+                else:
+                    slot.setChecked(True)
             else:
-                slot.setText(config2hand2[num])
+                text = config2hand2[num]
+                slot.setText('' if text == '_' else text)
 
         for name in ['major', 'minor', 'movement', 'orientation']:
             widget = getattr(self.featuresLayout, name)
-            index = widget.findText(buttonData[name])
+            index = widget.findText(signData[name])
             if index == -1:
                 index = 0
             widget.setCurrentIndex(index)
@@ -924,6 +1052,7 @@ class MainWindow(QMainWindow):
         dialog = FeaturesDialog([self.majorLocations, self.minorLocations, self.movements, self.orientations])
         results = dialog.exec_()
         if results:
+
             self.featuresLayout.minor.clear()
             self.minorLocations = dialog.minorLocations
 
@@ -948,18 +1077,6 @@ class MainWindow(QMainWindow):
                 item = dialog.orientationList.item(index)
                 self.orientations.append(item.text())
                 self.featuresLayout.orientation.addItem(item.text())
-            # self.featuresLayout.major.clear()
-            # for item in dialog.majorLocationList:
-            #     self.featuresLayout.major.addItem(item)
-            # self.featuresLayout.minor.clear()
-            # for item in dialog.minorLocationList:
-            #     self.featuresLayout.minor.addItem(item)
-            # self.featuresLayout.movement.clear()
-            # for item in dialog.movementList:
-            #     self.featuresLayout.movement.addItem(item)
-            # self.featuresLayout.orientation.clear()
-            # for item in dialog.orientationList:
-            #     self.featuresLayout.orientation.addItem(item)
 
     def setConstraints(self):
         dialog = ConstraintsDialog(self.constraints)
@@ -1045,14 +1162,12 @@ class ConstraintsDialog(QDialog):
         self.setWindowTitle('Select constraints')
 
         layout = QVBoxLayout()
-
         for c in MasterConstraintList:
             checkBox = QCheckBox(c[1].explanation)
             setattr(self, c[0], checkBox)
             if constraints[c[0]]:
                 checkBox.setChecked(True)
             layout.addWidget(checkBox)
-
 
         # self.medialJointConstraint = QCheckBox('No medial joint can be marked H')
         # if constraints['medialJointConstraint']:
@@ -1182,34 +1297,6 @@ class ExportCorpusDialog(QDialog):
             alert.setWindowTitle('File name error')
             alert.setText(text)
             alert.exec_()
-
-class DataButton(QPushButton):
-
-    sendData = Signal(dict)
-    def __init__(self, data):
-        QPushButton.__init__(self)
-        self.gloss = data['gloss']
-        self.setText(self.gloss)
-        self.config1hand1, self.config1hand2 = data['config1']
-        self.config2hand1, self.config2hand2 = data['config2']
-        self.major = data['major']
-        self.minor = data['minor']
-        self.movement = data['movement']
-        self.orientation = data['orientation']
-        self.setData()
-        self.clicked.connect(self.emitData)
-
-    def setData(self):
-        self.data ={'major': self.major, 'minor': self.minor,
-                    'movement':self.movement, 'orientation': self.orientation,
-                    'config1hand1': self.config1hand1, 'config1hand2': self.config1hand2,
-                    'config2hand1': self.config2hand1, 'config2hand2': self.config2hand2,
-                    'gloss': self.gloss}
-
-    def emitData(self):
-        self.sendData.emit(self.data)
-
-
 
 def clean(item):
     """Clean up the memory by closing and deleting the item if possible."""

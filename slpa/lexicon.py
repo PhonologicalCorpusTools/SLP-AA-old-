@@ -22,6 +22,9 @@ class Corpus():
     def __contains__(self, item):
         return item.gloss in self.wordlist
 
+    def __getitem__(self, key):
+        return self.wordlist[key]
+
     def __iter__(self):
         for item in self.wordlist.values():
             yield item
@@ -52,6 +55,8 @@ class Sign():
         self.attributes = list()
         for key,value in data.items():
             setattr(self, key, value)
+        self.config1hand1, self.config1hand2 = self.config1
+        self.config2hand1, self.config2hand2 = self.config2
 
     def __eq__(self, other):
         if not isinstance(other, Sign):
@@ -62,13 +67,16 @@ class Sign():
     def __str__(self):
         return self.gloss
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+
     def __repr__(self):
         return self.__str__()
 
     def data(self):
         return OrderedDict([(key,getattr(self, key)) for key in Sign.sign_attributes])
 
-    def export(self, include_fields=True, blank_space = None, x_in_box=X_IN_BOX):
+    def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX):
         output = list()
         for key,value in self.data().items():
 
