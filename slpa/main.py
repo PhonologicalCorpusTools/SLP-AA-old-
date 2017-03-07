@@ -447,7 +447,6 @@ class MainWindow(QMainWindow):
         app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
-
         self.createActions()
         self.createMenus()
 
@@ -525,7 +524,7 @@ class MainWindow(QMainWindow):
         self.makeCorpusDock()
 
         self.showMaximized()
-        #self.setFixedSize(self.size())
+
         self.defineTabOrder()
 
     def defineTabOrder(self):
@@ -582,9 +581,12 @@ class MainWindow(QMainWindow):
     def writeSettings(self):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
         self.settings.beginGroup('constraints')
-        self.settings.setValue('medialJointConstraint', self.constraints['medialJointConstraint'])
-        self.settings.setValue('noEmptySlotsConstraint', self.constraints['noEmptySlotsConstraint'])
-        self.settings.setValue('distalMedialCorrespondanceConstraint', self.constraints['distalMedialCorrespondanceConstraint'])
+        for c in MasterConstraintList:
+            name = c[0]
+            self.settings.setValue(name, self.constraints[name])
+        # self.settings.setValue('medialJointConstraint', self.constraints['medialJointConstraint'])
+        # self.settings.setValue('noEmptySlotsConstraint', self.constraints['noEmptySlotsConstraint'])
+        # self.settings.setValue('distalMedialCorrespondanceConstraint', self.constraints['distalMedialCorrespondanceConstraint'])
         self.settings.endGroup()
 
         self.settings.beginGroup('transcriptions')
@@ -614,9 +616,12 @@ class MainWindow(QMainWindow):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
 
         self.settings.beginGroup('constraints')
-        self.constraints['medialJointConstraint'] = self.settings.value('medialJointConstraint', type=bool)
-        self.constraints['distalMedialCorrespondanceConstraint'] = self.settings.value('distalMedialCorrespondanceConstraint', type=bool)
-        self.constraints['noEmptySlotsConstraint'] = self.settings.value('noEmptySlotsConstraint', type=bool)
+        for c in MasterConstraintList:
+            name = c[0]
+            self.constraints[name] = self.settings.value(name, type=bool)
+        # self.constraints['medialJointConstraint'] = self.settings.value('medialJointConstraint', type=bool)
+        # self.constraints['distalMedialCorrespondanceConstraint'] = self.settings.value('distalMedialCorrespondanceConstraint', type=bool)
+        # self.constraints['noEmptySlotsConstraint'] = self.settings.value('noEmptySlotsConstraint', type=bool)
         self.settings.endGroup()
 
         self.settings.beginGroup('transcriptions')
@@ -935,9 +940,11 @@ class MainWindow(QMainWindow):
         dialog = ConstraintsDialog(self.constraints)
         constraints = dialog.exec_()
         if constraints:
-            self.constraints['distalMedialCorrespondanceConstraint'] = dialog.distalMedialCorrespondanceConstraint.isChecked()
-            self.constraints['medialJointConstraint'] = dialog.medialJointConstraint.isChecked()
-            self.constraints['noEmptySlotsConstraint'] = dialog.noEmptySlotsConstraint.isChecked()
+            for c in MasterConstraintList:
+                self.constraints[c[0]] = getattr(dialog, c[0]).isChecked()
+            # self.constraints['distalMedialCorrespondanceConstraint'] = dialog.distalMedialCorrespondanceConstraint.isChecked()
+            # self.constraints['medialJointConstraint'] = dialog.medialJointConstraint.isChecked()
+            # self.constraints['noEmptySlotsConstraint'] = dialog.noEmptySlotsConstraint.isChecked()
 
     def setTranscriptionRestrictions(self):
         restricted = self.setRestrictionsAct.isChecked()
@@ -1013,20 +1020,29 @@ class ConstraintsDialog(QDialog):
         self.setWindowTitle('Select constraints')
 
         layout = QVBoxLayout()
-        self.medialJointConstraint = QCheckBox('No medial joint can be marked H')
-        if constraints['medialJointConstraint']:
-            self.medialJointConstraint.setChecked(True)
-        layout.addWidget(self.medialJointConstraint)
 
-        self.distalMedialCorrespondanceConstraint = QCheckBox('Distal and medial joints must match in flexion')
-        if constraints['distalMedialCorrespondanceConstraint']:
-            self.distalMedialCorrespondanceConstraint.setChecked(True)
-        layout.addWidget(self.distalMedialCorrespondanceConstraint)
+        for c in MasterConstraintList:
+            checkBox = QCheckBox(c[1].explanation)
+            setattr(self, c[0], checkBox)
+            if constraints[c[0]]:
+                checkBox.setChecked(True)
+            layout.addWidget(checkBox)
 
-        self.noEmptySlotsConstraint = QCheckBox('All transcription slots must contain a value')
-        if constraints['noEmptySlotsConstraint']:
-            self.noEmptySlotsConstraint.setChecked(True)
-        layout.addWidget(self.noEmptySlotsConstraint)
+
+        # self.medialJointConstraint = QCheckBox('No medial joint can be marked H')
+        # if constraints['medialJointConstraint']:
+        #     self.medialJointConstraint.setChecked(True)
+        # layout.addWidget(self.medialJointConstraint)
+        #
+        # self.distalMedialCorrespondanceConstraint = QCheckBox('Distal and medial joints must match in flexion')
+        # if constraints['distalMedialCorrespondanceConstraint']:
+        #     self.distalMedialCorrespondanceConstraint.setChecked(True)
+        # layout.addWidget(self.distalMedialCorrespondanceConstraint)
+        #
+        # self.noEmptySlotsConstraint = QCheckBox('All transcription slots must contain a value')
+        # if constraints['noEmptySlotsConstraint']:
+        #     self.noEmptySlotsConstraint.setChecked(True)
+        # layout.addWidget(self.noEmptySlotsConstraint)
 
 
         buttonLayout = QHBoxLayout()
@@ -1047,14 +1063,18 @@ class ConstraintsDialog(QDialog):
         self.setLayout(layout)
 
     def selectAll(self):
-        self.medialJointConstraint.setChecked(True)
-        self.distalMedialCorrespondanceConstraint.setChecked(True)
-        self.noEmptySlotsConstraint.setChecked(True)
+        for c in MasterConstraintList:
+            getattr(self, c[0]).setChecked(True)
+        # self.medialJointConstraint.setChecked(True)
+        # self.distalMedialCorrespondanceConstraint.setChecked(True)
+        # self.noEmptySlotsConstraint.setChecked(True)
 
     def removeAll(self):
-        self.medialJointConstraint.setChecked(False)
-        self.distalMedialCorrespondanceConstraint.setChecked(False)
-        self.noEmptySlotsConstraint.setChecked(False)
+        for c in MasterConstraintList:
+            getattr(self, c[0]).setChecked(False)
+        # self.medialJointConstraint.setChecked(False)
+        # self.distalMedialCorrespondanceConstraint.setChecked(False)
+        # self.noEmptySlotsConstraint.setChecked(False)
 
 
 

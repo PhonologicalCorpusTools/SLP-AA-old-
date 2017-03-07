@@ -1,3 +1,6 @@
+import sys
+import inspect
+
 class DistalMedialCorrespondanceConstraint():
     """
     Medial and distal joints must match in flexion.
@@ -67,3 +70,70 @@ class NoEmptySlotsConstraint():
             if not slot.text():
                 output.append(str(slot.num))
         return ','.join(output)
+
+
+class IndexRingPinkySelectionConstraint():
+    """
+    Slots 17 and 27 can't be E, H, or i while slots 22 and 32 are F
+    """
+    name = 'Index-Ring-Pinky Selection Constraint'
+    explanation = 'If the middle and pinky proximal joints are flexed, the index and ring proximal joints cannot be extended'
+    def __init__(self):
+        pass
+
+    @classmethod
+    def check(cls, transcription):
+        output = list()
+        if transcription[21].text() == 'F' or transcription[31].text() == 'F':
+            if transcription[16].text() in 'EHi':
+                output.append('17')
+            if transcription[26].text() in 'EHi':
+                output.append('27')
+        return output
+
+class IndexMiddlePinkySelectionConstraint():
+    """
+    Slots 17, 22, and 32 can't be E, H, or i while 27 is F
+    """
+    name = 'Index-Middle-Pinky Selection Constraint'
+    explanation = 'If the ring proximal joint is flexed, the index, middle, and pinky proximal joints cannot be extended'
+    def __init__(self):
+        pass
+
+    @classmethod
+    def check(cls, transcription):
+        output = list()
+        if transcription[26].text() == 'F':
+            if transcription[16].text() in 'EHi':
+                output.append('17')
+            if transcription[21].text() in 'EHi':
+                output.append('22')
+            if transcription[31].text() in 'EHi':
+                output.append('32')
+        return output
+
+class RingPinkyAnatomicalContstraint():
+    """
+    Slots 33 and 34 can't be F and F while slots 28 and slot 29 are E, H, or i (unless slot 15 is a 4)
+    """
+    name = 'Ring-Pinky Constraint'
+    explanation = ('If the ring medial and distal joints are extended, '
+                    'the pinky medial and distal joints cannot be flexed (unless slot 15 is a "4")')
+    def __init__(self):
+        pass
+
+    @classmethod
+    def check(cls, transcription):
+        output = list()
+        if (transcription[32].text()=='F' or transcription[33].text()=='F'):
+            if transcription[14].text() != '4':
+                if transcription[27].text() in 'EHi':
+                    output.append('28')
+                if transcription[28].text() in 'EHi':
+                    output.append('29')
+        return output
+
+
+MasterConstraintList = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+
+
