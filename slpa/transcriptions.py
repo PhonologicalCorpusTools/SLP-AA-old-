@@ -7,7 +7,7 @@ NULL = '\u2205'
 
 class TranscriptionCheckBox(QCheckBox):
 
-    slotSelectionChanged = Signal(bool)
+    slotSelectionChanged = Signal(int)
 
     def __init__(self, num, parent=None):
         super().__init__(parent)

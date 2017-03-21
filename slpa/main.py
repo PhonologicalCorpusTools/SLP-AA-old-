@@ -487,11 +487,11 @@ class HandShapeImage(QLabel):
         file_name = 'hand_slot{}.png'.format(e)
         self.setPixmap(QPixmap(getMediaFilePath(file_name)))
 
-    @Slot(bool)
+    @Slot(int)
     def useReverseImage(self, e):
         self.mappingChoice = self.reversed_mapping
 
-    @Slot(bool)
+    @Slot(int)
     def useNormalImage(self, e):
         self.mappingChoice = self.mapping
 
