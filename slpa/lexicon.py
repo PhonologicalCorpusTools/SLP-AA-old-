@@ -50,7 +50,7 @@ class Sign():
         for hand_num in [1, 2]:
             for slot_num in range(1, 35):
                 headers.append('config{}hand{}slot{}'.format(config_num,hand_num, slot_num))
-    headers = ';'.join(headers)
+    headers = ','.join(headers)
 
     def __init__(self, data):
         self.attributes = list()
@@ -112,7 +112,7 @@ class Sign():
                     if symbol == X_IN_BOX:
                         symbol = x_in_box
                     output.append(slot_list[slot_num])
-        output = ';'.join(output)
+        output = ','.join(output)
 
         return output
 

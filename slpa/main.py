@@ -897,7 +897,11 @@ class MainWindow(QMainWindow):
         self.corpus.addWord(Sign(kwargs))
         if not isDuplicate:
             self.corpusList.addItem(kwargs['gloss'])
-            self.corpusList.setCurrentRow(-1)
+            self.corpusList.sortItems()
+            for row in range(self.corpusList.count()):
+                if self.corpusList.item(row).text() == kwargs['gloss']:
+                    self.corpusList.setCurrentRow(row)
+            # self.corpusList.setCurrentRow(-1)
         save_binary(self.corpus, kwargs['path'])
         self.askSaveChanges = False
 
