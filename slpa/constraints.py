@@ -8,6 +8,7 @@ class DistalMedialCorrespondanceConstraint():
     """
     name = 'Distal Medial Constraint'
     explanation = 'Medial and distal joints must match in flexion'
+    constraint_type = 'simple'
     def __init__(self):
         pass
 
@@ -33,6 +34,7 @@ class MedialJointConstraint():
     """
     name = 'Medial Joint Constraint'
     explanation = 'Medial joints cannot be marked \'H\''
+    constraint_type = 'simple'
 
     def __init__(self):
         pass
@@ -59,6 +61,7 @@ class NoEmptySlotsConstraint():
     """
     name = 'No Empty Slots Constraint'
     explanation = 'Every transcription slot must have a value'
+    constraint_type = 'transcription'
 
     def __init__(self):
         pass
@@ -78,6 +81,7 @@ class IndexRingPinkySelectionConstraint():
     """
     name = 'Index-Ring-Pinky Selection Constraint'
     explanation = 'If the middle and pinky proximal joints are flexed, the index and ring proximal joints cannot be extended'
+    constraint_type = 'conditional'
     def __init__(self):
         pass
 
@@ -97,6 +101,7 @@ class IndexMiddlePinkySelectionConstraint():
     """
     name = 'Index-Middle-Pinky Selection Constraint'
     explanation = 'If the ring proximal joint is flexed, the index, middle, and pinky proximal joints cannot be extended'
+    constraint_type = 'conditional'
     def __init__(self):
         pass
 
@@ -119,6 +124,8 @@ class RingPinkyAnatomicalContstraint():
     name = 'Ring-Pinky Constraint'
     explanation = ('If the ring medial and distal joints are extended, '
                     'the pinky medial and distal joints cannot be flexed (unless thumb is in contact with pinky)')
+    constraint_type = 'conditional'
+
     def __init__(self):
         pass
 
@@ -133,7 +140,20 @@ class RingPinkyAnatomicalContstraint():
                     output.append('29')
         return output
 
+def sortMasterList(listItem):
+    if listItem[1].constraint_type == 'transcription':
+        return 0
+    elif listItem[1].constraint_type == 'simple':
+        return 1
+    elif listItem[1].constraint_type == 'conditional':
+        return 2
+    else:
+        return 3
+
 
 MasterConstraintList = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+MasterConstraintList.sort(key=lambda x:x[1].name)
+MasterConstraintList.sort(key=sortMasterList)
+
 
 

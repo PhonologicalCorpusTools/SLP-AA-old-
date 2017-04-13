@@ -509,6 +509,33 @@ class BlenderOutputWindow(QDialog):
         layout.addWidget(self.imageLabel)
         self.setLayout(layout)
 
+class CorpusList(QListWidget):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self.parent.askSaveChanges:
+            # if self.askSaveChanges:
+                alert = QMessageBox()
+                alert.setWindowTitle('Warning')
+                alert.setText('Save changes to current entry?')
+                alert.addButton('Continue and save', QMessageBox.YesRole)
+                alert.addButton('Continue but don\'t save', QMessageBox.NoRole)
+                alert.addButton('Go back', QMessageBox.RejectRole)
+                result = alert.exec_()
+                if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole:
+                    self.parent.saveCorpus()
+                    self.parent.askSaveChanges = False
+                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
+                    # self.parent().askSaveChanges = False
+                    # index = self.indexFromItem(previous_gloss)
+                    # self.corpusList.setCurrentIndex(index)
+                    return
+        super().mousePressEvent(event)
+
 
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
@@ -517,6 +544,7 @@ class MainWindow(QMainWindow):
         app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
+        self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
 
         self.createActions()
         self.createMenus()
@@ -670,9 +698,6 @@ class MainWindow(QMainWindow):
         for c in MasterConstraintList:
             name = c[0]
             self.settings.setValue(name, self.constraints[name])
-        # self.settings.setValue('medialJointConstraint', self.constraints['medialJointConstraint'])
-        # self.settings.setValue('noEmptySlotsConstraint', self.constraints['noEmptySlotsConstraint'])
-        # self.settings.setValue('distalMedialCorrespondanceConstraint', self.constraints['distalMedialCorrespondanceConstraint'])
         self.settings.endGroup()
 
         self.settings.beginGroup('transcriptions')
@@ -693,9 +718,6 @@ class MainWindow(QMainWindow):
         for c in MasterConstraintList:
             name = c[0]
             self.constraints[name] = self.settings.value(name, type=bool)
-        # self.constraints['medialJointConstraint'] = self.settings.value('medialJointConstraint', type=bool)
-        # self.constraints['distalMedialCorrespondanceConstraint'] = self.settings.value('distalMedialCorrespondanceConstraint', type=bool)
-        # self.constraints['noEmptySlotsConstraint'] = self.settings.value('noEmptySlotsConstraint', type=bool)
         self.settings.endGroup()
 
         self.settings.beginGroup('transcriptions')
@@ -782,7 +804,6 @@ class MainWindow(QMainWindow):
             elif child.layout() is not None:
                 self.clearLayout(child.layout())
 
-
     def makeCorpusDock(self):
         self.corpusDock = QDockWidget()
         self.corpusDock.setWindowTitle('Corpus')
@@ -791,8 +812,8 @@ class MainWindow(QMainWindow):
         self.dockWrapper = QWidget()
         self.dockLayout = QVBoxLayout()
         self.dockWrapper.setLayout(self.dockLayout)
-        self.corpusList = QListWidget(self)
-        self.corpusList.currentTextChanged.connect(self.loadHandShape)
+        self.corpusList = CorpusList(self) #QListWidget(self)
+        self.corpusList.currentItemChanged.connect(self.loadHandShape)
         self.dockLayout.addWidget(self.corpusList)
         self.corpusDock.setWidget(self.dockWrapper)
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
@@ -802,7 +823,7 @@ class MainWindow(QMainWindow):
                 'Open Corpus File', os.getcwd(), '*.corpus')
         file_path = file_path[0]
         if not file_path:
-            return
+            return None
         self.askSaveChanges = False
         self.corpusList.clear()
         self.newGloss(giveWarning=False)
@@ -844,6 +865,9 @@ class MainWindow(QMainWindow):
 
             elif role == 0: #load existing corpus and add to it
                 self.loadCorpus()
+                if self.corpus is None:
+                    # corpus will be None if the user opened a file dialog, then changed their mind and cancelled
+                    return
 
         else: #corpus exists
             kwargs['path'] = self.corpus.path
@@ -858,9 +882,9 @@ class MainWindow(QMainWindow):
                 alert.addButton('Go back and edit the gloss', QMessageBox.RejectRole)
                 alert.exec_()
                 role = alert.buttonRole(alert.clickedButton())
-                if role == 0:#overwrite
+                if role == QMessageBox.AcceptRole:#overwrite
                     pass
-                elif role == 1:#edit
+                elif role == QMessageBox.RejectRole:#edit
                     return
 
         self.updateCorpus(kwargs, isDuplicate)
@@ -880,21 +904,8 @@ class MainWindow(QMainWindow):
         self.corpusList.clear()
         self.askSaveChanges = False
 
-    def loadHandShape(self, gloss):
-
-        if self.askSaveChanges:
-            alert = QMessageBox()
-            alert.setWindowTitle('Warning')
-            alert.setText('Save changes to current entry?')
-            alert.addButton('Save', QMessageBox.AcceptRole)
-            alert.addButton('Continue without saving', QMessageBox.RejectRole)
-            result = alert.exec_()
-            if alert.clickedButton().text() == 'Save':
-                self.saveCorpus()
-                self.askSaveChanges = False
-            else:
-                return
-
+    def loadHandShape(self, gloss, previous_gloss=None):
+        gloss = gloss.text()
         signData = self.corpus[gloss]
 
         self.gloss.glossEdit.setText(signData['gloss'])
@@ -951,6 +962,7 @@ class MainWindow(QMainWindow):
             if index == -1:
                 index = 0
             widget.setCurrentIndex(index)
+        self.askSaveChanges = False
 
     def generateSign(self):
         data = {'config1': None, 'config2': None,
@@ -1007,7 +1019,7 @@ class MainWindow(QMainWindow):
 
     def createActions(self):
 
-        self.newCorpusAct = QAction('&New corpus...',
+        self.newCorpusAct = QAction('&New corpus',
                                     self,
                                     statusTip="Start a new corpus", triggered = self.newCorpus)
 
@@ -1022,7 +1034,7 @@ class MainWindow(QMainWindow):
         self.newGlossAct = QAction('&New gloss',
                 self,
                 statusTip='Clear current info and make a new gloss',
-                triggered=self.newGloss)
+                triggered=lambda:self.newGloss(giveWarning=True))
 
         self.quitAct = QAction( "&Quit",
                 self,
@@ -1152,6 +1164,7 @@ class MainWindow(QMainWindow):
         self.configTabs.widget(0).clearAll()
         self.configTabs.widget(1).clearAll()
         self.featuresLayout.reset()
+        self.askSaveChanges = False
 
 class ConstraintsDialog(QDialog):
 

@@ -26,8 +26,9 @@ class Corpus():
         return self.wordlist[key]
 
     def __iter__(self):
-        for item in self.wordlist.values():
-            yield item
+        wordlist = sorted(self.wordlist.keys())
+        for item in wordlist:
+            yield self.wordlist[item]
 
     def addWord(self, hs):
         self.wordlist[hs.gloss] = hs

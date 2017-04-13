@@ -1,5 +1,6 @@
 import os
 import sys
+from PyQt5.QtGui import QIcon
 base = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0,base)
 import slpa.main as Main
