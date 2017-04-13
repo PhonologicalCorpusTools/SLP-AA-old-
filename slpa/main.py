@@ -369,6 +369,9 @@ class HandConfigTab(QWidget):
         for slot in self.hand2Transcription.slots[1:]:
             slot.setText('')
 
+        self.hand1Transcription.fillPredeterminedSlots()
+        self.hand2Transcription.fillPredeterminedSlots()
+
     def hand1(self):
         return self.hand1Transcription.values()
 
@@ -1147,7 +1150,7 @@ class MainWindow(QMainWindow):
             clean(item)
 
     def newGloss(self, giveWarning=True):
-        if giveWarning:
+        if giveWarning and self.askSaveChanges:
             alert = QMessageBox()
             alert.setWindowTitle('Warning')
             alert.setText('This will erase the information for the current word, '

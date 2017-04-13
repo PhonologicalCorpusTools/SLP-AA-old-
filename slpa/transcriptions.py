@@ -94,6 +94,14 @@ class TranscriptionLayout(QVBoxLayout):
         self.lineLayout.addLayout(self.field7)
         self.fields.append(self.field7)
 
+    def fillPredeterminedSlots(self):
+        self.slot8.setText(NULL)
+        self.slot9.setText('/')
+        self.slot16.setText('1')
+        self.slot21.setText('2')
+        self.slot26.setText('3')
+        self.slot31.setText('4')
+
     def generateSlots(self):
         #FIELD 1 (Forearm)
         #This field is a check box, and does not contain any slots
