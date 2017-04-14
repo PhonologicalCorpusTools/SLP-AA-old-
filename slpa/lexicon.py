@@ -1,6 +1,7 @@
 #from slpa import __version__ as currentSLPAversion
 from collections import OrderedDict
 X_IN_BOX = '\u2327'
+NULL = '\u2205'
 
 class Corpus():
     corpus_attributes = {'name': 'corpus', 'wordlist': dict(), '_discourse': None,
@@ -77,18 +78,25 @@ class Sign():
     def data(self):
         return OrderedDict([(key,getattr(self, key)) for key in Sign.sign_attributes])
 
-    def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX):
+    def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL):
         output = list()
         for key,value in self.data().items():
 
             if 'config' in key:
                 for hand in value:
-                    if hand[0]:
-                        hand[0] = 'V'
-                    else:
+                    if hand[0] == '_' or not hand[0]:
                         hand[0] = blank_space
+                    else:
+                        hand[0] = 'V'
                     transcription = [x if x else blank_space for x in hand]
-                    transcription = [t if not t == X_IN_BOX else x_in_box for t in transcription]
+                    transcription[7] = null
+                    # transcription = [t if not t == X_IN_BOX else x_in_box for t in transcription]
+                    if transcription[19] == X_IN_BOX:
+                        transcription[19] = x_in_box
+                    if transcription[24] == X_IN_BOX:
+                        transcription[24] = x_in_box
+                    if transcription[29] == X_IN_BOX:
+                        transcription[29] = x_in_box
                     if include_fields:
                         transcription = self.add_fields(transcription)
                     output.append(''.join(transcription))
@@ -111,7 +119,9 @@ class Sign():
                     symbol = slot_list[slot_num]
                     if symbol == X_IN_BOX:
                         symbol = x_in_box
-                    output.append(slot_list[slot_num])
+                    if symbol == NULL:
+                        symbol = null
+                    output.append(symbol)#slot_list[slot_num])
         output = ','.join(output)
 
         return output

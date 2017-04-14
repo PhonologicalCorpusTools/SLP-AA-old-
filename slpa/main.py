@@ -566,10 +566,16 @@ class MainWindow(QMainWindow):
         # self.globalLayout.addWidget(self.videoPlayer)
 
         layout = QVBoxLayout()
-
         topLayout = QHBoxLayout()
+
+        #New gloss button
+        self.newGlossButton = QPushButton('New gloss')
+        self.newGlossButton.clicked.connect(self.newGloss)
+        topLayout.addWidget(self.newGlossButton)
+
         #Make save button
         self.saveButton = QPushButton('Save word to corpus')
+        self.saveButton.clicked.connect(self.saveCorpus)
         topLayout.addWidget(self.saveButton)
 
         # Make "check transcription" button
@@ -607,12 +613,15 @@ class MainWindow(QMainWindow):
 
         #Connect transcription signals to various main window slots
         for k in [0,1]:
+            self.configTabs.widget(k).hand1Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
             for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
                 slot.textChanged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
+
+            self.configTabs.widget(k).hand2Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
             for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
@@ -632,8 +641,6 @@ class MainWindow(QMainWindow):
 
         self.wrapper.setLayout(self.globalLayout)
         self.setCentralWidget(self.wrapper)
-
-        self.saveButton.clicked.connect(self.saveCorpus)
 
         self.makeCorpusDock()
 
@@ -749,6 +756,21 @@ class MainWindow(QMainWindow):
         self.settings.endGroup()
 
     def closeEvent(self, e):
+        if self.askSaveChanges:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('You have unsaved changes that will be lost if you quit.\n What would you like to do?')
+            alert.addButton('Save and quit', QMessageBox.AcceptRole)
+            alert.addButton('Quit without saving' , QMessageBox.RejectRole)
+            alert.addButton('Go back', QMessageBox.NoRole)
+            alert.exec_()
+            role = alert.buttonRole(alert.clickedButton())
+            if role == Qt.AcceptRole:
+                self.saveCorpus()
+            elif role == Qt.RejectRole:
+                pass
+            elif role == Qt.NoRole:
+                return
         self.writeSettings()
         try:
             os.remove(os.path.join(os.getcwd(),'handCode.txt'))
@@ -829,7 +851,7 @@ class MainWindow(QMainWindow):
             return None
         self.askSaveChanges = False
         self.corpusList.clear()
-        self.newGloss(giveWarning=False)
+        self.newGloss()
         self.corpus = load_binary(file_path)
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
@@ -901,7 +923,7 @@ class MainWindow(QMainWindow):
             for row in range(self.corpusList.count()):
                 if self.corpusList.item(row).text() == kwargs['gloss']:
                     self.corpusList.setCurrentRow(row)
-            # self.corpusList.setCurrentRow(-1)
+                    break
         save_binary(self.corpus, kwargs['path'])
         self.askSaveChanges = False
 
@@ -922,7 +944,7 @@ class MainWindow(QMainWindow):
         config1hand1 = signData['config1hand1']
         for num, slot in enumerate(config1.hand1Transcription.slots):
             if num == 0:
-                if config1hand1[0] == '_':
+                if config1hand1[0] == '_' or not config1hand1[0]:
                     slot.setChecked(False)
                 else:
                     slot.setChecked(True)
@@ -1041,7 +1063,7 @@ class MainWindow(QMainWindow):
         self.newGlossAct = QAction('&New gloss',
                 self,
                 statusTip='Clear current info and make a new gloss',
-                triggered=lambda:self.newGloss(giveWarning=True))
+                triggered=self.newGloss)
 
         self.quitAct = QAction( "&Quit",
                 self,
@@ -1120,18 +1142,32 @@ class MainWindow(QMainWindow):
             path = dialog.fileNameEdit.text()
             include_fields = dialog.includeFields.isChecked()
             blank_space = dialog.blankSpaceEdit.text()
-            x_in_box = dialog.xInBoxEdit.text()
+            x_in_box = dialog.xinboxEdit.text()
+            null = dialog.nullEdit.text()
             if not blank_space:
                 blank_space = ''
-            output = [word.export(include_fields=include_fields, blank_space=blank_space, x_in_box=x_in_box)
-                      for word in self.corpus]
+            kwargs = {'include_fields': include_fields, 'blank_space': blank_space}
+            if x_in_box:
+                kwargs['x_in_box'] = x_in_box
+            if null:
+                kwargs['null'] = null
+            # output = [word.export(include_fields=include_fields, blank_space=blank_space, x_in_box=x_in_box, null=null)
+            #           for word in self.corpus]
+            output = [word.export(**kwargs) for word in self.corpus]
 
-            with open(path, encoding='utf-8', mode='w') as f:
-                print(Sign.headers, file=f)
-                for word in output:
-                    print(word, file=f)
-
-            QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
+            try:
+                with open(path, encoding='utf-8', mode='w') as f:
+                    print(Sign.headers, file=f)
+                    for word in output:
+                        print(word, file=f)
+                QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
+            except PermissionError:
+                filename = os.path.split(path)[-1]
+                alert = QMessageBox()
+                alert.setWindowTitle('Error encountered')
+                alert.setText('The file {} is already open in a program on your computer. Please close the file before '
+                              'saving, or choose a different file name.'.format(filename))
+                alert.exec_()
 
 
     def sizeHint(self):
@@ -1153,8 +1189,8 @@ class MainWindow(QMainWindow):
             item = self.__dict__[i]
             clean(item)
 
-    def newGloss(self, giveWarning=True):
-        if giveWarning and self.askSaveChanges:
+    def newGloss(self):
+        if self.askSaveChanges:
             alert = QMessageBox()
             alert.setWindowTitle('Warning')
             alert.setText('This will erase the information for the current word, '
@@ -1269,19 +1305,25 @@ class ExportCorpusDialog(QDialog):
                                   'and numbers representing fields.\n'
                                   'If not checked, transcriptions will be one long string.')
 
-        xinBoxLabel = QLabel('Some programs have trouble displaying the "ultracrossed" symbol (x-in-a-box). If you '
-                                  'would like to have an alternative symbol in the output file, enter it below.')
-        xinBoxLabel.setWordWrap(True)
-        self.xInBoxEdit = QLineEdit('')
-        self.xInBoxEdit.setMaximumWidth(100)
+        altSymbolsLabel = QLabel('Some programs have trouble displaying the "ultracrossed" symbol (x-in-a-box) and the '
+                            'empty set symbol. If you would like to use alternatives in the output file, you can '
+                            'enter them below.')
+        altSymbolsLabel.setWordWrap(True)
+        self.xinboxEdit = QLineEdit('')
+        self.xinboxEdit.setMaximumWidth(170)
+        self.xinboxEdit.setPlaceholderText('Alternative ultracrossed symbol')
+
+        self.nullEdit = QLineEdit('')
+        self.nullEdit.setMaximumWidth(170)
+        self.nullEdit.setPlaceholderText('Alternative empty set symbol')
 
         outputOptionsLayout.addWidget(self.includeFields)
         outputOptionsLayout.addWidget(blankSpaceLabel)
-        # outputOptionsLayout.addWidget(blankSpaceLabel2)
         outputOptionsLayout.addWidget(self.blankSpaceEdit)
 
-        outputOptionsLayout.addWidget(xinBoxLabel)
-        outputOptionsLayout.addWidget(self.xInBoxEdit)
+        outputOptionsLayout.addWidget(altSymbolsLabel)
+        outputOptionsLayout.addWidget(self.xinboxEdit)
+        outputOptionsLayout.addWidget(self.nullEdit)
         layout.addLayout(outputOptionsLayout)
 
         buttonLayout = QHBoxLayout()

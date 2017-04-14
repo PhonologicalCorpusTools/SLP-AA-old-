@@ -152,8 +152,8 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot34 = TranscriptionSlot(34, 7, '[EFHi]', list('EFHi'))
 
     def values(self):
-        data = ['V' if self.slot1.isChecked() else '_']
-        data.extend([slot.text() if slot.text() else '_' for slot in self.slots[1:]])
+        data = ['V' if self.slot1.isChecked() else '']
+        data.extend([slot.text() if slot.text() else '' for slot in self.slots[1:]])
         return data
 
     def blenderCode(self):
