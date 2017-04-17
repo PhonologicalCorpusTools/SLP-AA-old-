@@ -779,7 +779,7 @@ class MainWindow(QMainWindow):
         super().closeEvent()
 
     def checkTranscription(self):
-        alert = TranscriptionMessageBox(self.constraints, self.configTabs)
+        alert = ConstraintCheckMessageBox(self.constraints, self.configTabs)
         alert.exec_()
         return
 
@@ -1124,9 +1124,7 @@ class MainWindow(QMainWindow):
         if constraints:
             for c in MasterConstraintList:
                 self.constraints[c[0]] = getattr(dialog, c[0]).isChecked()
-            # self.constraints['distalMedialCorrespondanceConstraint'] = dialog.distalMedialCorrespondanceConstraint.isChecked()
-            # self.constraints['medialJointConstraint'] = dialog.medialJointConstraint.isChecked()
-            # self.constraints['noEmptySlotsConstraint'] = dialog.noEmptySlotsConstraint.isChecked()
+
 
     def setTranscriptionRestrictions(self):
         restricted = self.setRestrictionsAct.isChecked()
@@ -1209,42 +1207,133 @@ class MainWindow(QMainWindow):
         self.featuresLayout.reset()
         self.askSaveChanges = False
 
-class ConstraintsDialog(QDialog):
 
-    def __init__(self, constraints):
+class ConstraintCheckMessageBox(QDialog):
+
+    def  __init__(self, constraints, configTabs):
         super().__init__()
+        self.setWindowTitle('Transcription verification')
+        layout = QVBoxLayout()
+        if all([not value for value in constraints.values()]):
+            layout.addWidget(QLabel('There were no problems detected with your transcription, '
+                            'because no constraints have been selected. '
+                          '\nTo set constraints, go to the Settings menu.'))
+            buttonLayout = QHBoxLayout()
+            ok = QPushButton('OK')
+            ok.clicked.connect(self.accept)
+            buttonLayout.addWidget(ok)
+            layout.addLayout(buttonLayout)
+            self.setLayout(layout)
+            return
 
-        self.setWindowTitle('Select constraints')
+        self.satisfied_message = 'This constraint is fully satisfied\n("{}").'
 
         layout = QVBoxLayout()
+
+        self.pageSelection = QComboBox()
+        self.pageSelection.addItem('Transcription constraints')
+        self.pageSelection.addItem('Simple constraints')
+        self.pageSelection.addItem('Conditional constraints')
+        layout.addWidget(self.pageSelection)
+
+        self.pages = QStackedWidget()
+        self.transcriptionsConstraintsTab = QTabWidget()
+        self.pages.addWidget(self.transcriptionsConstraintsTab)
+        self.simpleConstraintsTab = QTabWidget()
+        self.pages.addWidget(self.simpleConstraintsTab)
+        self.conditionalConstraintsTab = QTabWidget()
+        self.pages.addWidget(self.conditionalConstraintsTab)
+        self.pageSelection.currentIndexChanged.connect(self.pages.setCurrentIndex)
+
+        no_problems = True
+
         for c in MasterConstraintList:
-            checkBox = QCheckBox(c[1].explanation)
-            setattr(self, c[0], checkBox)
+            alert_text = list()
+            constraint_text = list()
             if constraints[c[0]]:
-                checkBox.setChecked(True)
-            layout.addWidget(checkBox)
+                no_problems = False
+                tab = TranscriptionConstraintTab()
+                if c[1].constraint_type == 'transcription':
+                    self.transcriptionsConstraintsTab.addTab(tab, c[1].name)
+                elif c[1].constraint_type == 'simple':
+                    self.simpleConstraintsTab.addTab(tab, c[1].name)
+                elif c[1].constraint_type == 'conditional':
+                    self.conditionalConstraintsTab.addTab(tab, c[1].name)
 
-        # self.medialJointConstraint = QCheckBox('No medial joint can be marked H')
-        # if constraints['medialJointConstraint']:
-        #     self.medialJointConstraint.setChecked(True)
-        # layout.addWidget(self.medialJointConstraint)
-        #
-        # self.distalMedialCorrespondanceConstraint = QCheckBox('Distal and medial joints must match in flexion')
-        # if constraints['distalMedialCorrespondanceConstraint']:
-        #     self.distalMedialCorrespondanceConstraint.setChecked(True)
-        # layout.addWidget(self.distalMedialCorrespondanceConstraint)
-        #
-        # self.noEmptySlotsConstraint = QCheckBox('All transcription slots must contain a value')
-        # if constraints['noEmptySlotsConstraint']:
-        #     self.noEmptySlotsConstraint.setChecked(True)
-        # layout.addWidget(self.noEmptySlotsConstraint)
+                for k in [0,1]:
+                    transcription = configTabs.widget(k).hand1Transcription.slots
+                    problems = c[1].check(transcription)
+                    if problems:
+                        constraint_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
 
+                    transcription = configTabs.widget(k).hand2Transcription.slots
+                    problems = c[1].check(transcription)
+                    if problems:
+                        constraint_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+                if constraint_text:
+                    alert_text.append('The following slots are in violation of the {}\n'
+                                      '("{}")\n'.format(c[1].name, c[1].explanation))
+
+                    alert_text.append('\n'.join(constraint_text))
+                    tab.layout.addWidget(QLabel(''.join(alert_text)))
+                else:
+                    tab.layout.addWidget(QLabel(self.satisfied_message.format(c[1].explanation)))
+
+        if no_problems:
+            layout.addWidget(QLabel('All constraints are satisfied!'))
+        else:
+            layout.addWidget(self.pages)
 
         buttonLayout = QHBoxLayout()
-        selectAllButton = QPushButton('Select all')
+        ok = QPushButton('OK')
+        ok.clicked.connect(self.accept)
+        buttonLayout.addWidget(ok)
+
+        layout.addLayout(buttonLayout)
+
+        self.setLayout(layout)
+
+
+
+class ConstraintsDialog(QDialog):
+    def __init__(self, constraints):
+        super().__init__()
+        self.setWindowTitle('Select constraints')
+        self.constraints = constraints
+        layout = QVBoxLayout()
+
+        self.transcriptionPage = QWidget()
+        self.populateTranscriptionPage()
+        self.simplePage = QWidget()
+        self.populateSimplePage()
+        self.conditionalPage = QWidget()
+        self.populateConditionalPage()
+
+        self.pageSelection = QComboBox()
+        self.pageSelection.addItem('Transcription Constraints')
+        self.pageSelection.addItem('Simple Constraints')
+        self.pageSelection.addItem('Conditional Constraints')
+        layout.addWidget(self.pageSelection)
+
+        self.pages = QStackedWidget()
+        self.pages.addWidget(self.transcriptionPage)
+        self.pages.addWidget(self.simplePage)
+        self.pages.addWidget(self.conditionalPage)
+        self.pageSelection.currentIndexChanged.connect(self.pages.setCurrentIndex)
+        self.pages.setCurrentIndex(0)
+        layout.addWidget(self.pages)
+
+        buttonLayout = QHBoxLayout()
+        selectThisPageButton = QPushButton('Select all (this page)')
+        selectThisPageButton.clicked.connect(self.selectThisPage)
+        buttonLayout.addWidget(selectThisPageButton)
+        selectAllButton = QPushButton('Select all (global)')
         selectAllButton.clicked.connect(self.selectAll)
         buttonLayout.addWidget(selectAllButton)
-        removeAllButton = QPushButton('Unselect all')
+        removeThisPageButton = QPushButton('Unselect all (this page)')
+        removeThisPageButton.clicked.connect(self.removeThisPage)
+        buttonLayout.addWidget(removeThisPageButton)
+        removeAllButton = QPushButton('Unselect all (global)')
         removeAllButton.clicked.connect(self.removeAll)
         buttonLayout.addWidget(removeAllButton)
         ok = QPushButton('OK')
@@ -1257,21 +1346,69 @@ class ConstraintsDialog(QDialog):
 
         self.setLayout(layout)
 
+    def populateTranscriptionPage(self):
+        layout = QVBoxLayout()
+        for c in MasterConstraintList:
+            if c[1].constraint_type == 'transcription':
+                checkBox = QCheckBox(c[1].explanation)
+                setattr(self, c[0], checkBox)
+                if self.constraints[c[0]]:
+                    checkBox.setChecked(True)
+                layout.addWidget(checkBox)
+        self.transcriptionPage.setLayout(layout)
+
+    def populateSimplePage(self):
+        layout = QVBoxLayout()
+        for c in MasterConstraintList:
+            if c[1].constraint_type == 'simple':
+                checkBox = QCheckBox(c[1].explanation)
+                setattr(self, c[0], checkBox)
+                if self.constraints[c[0]]:
+                    checkBox.setChecked(True)
+                layout.addWidget(checkBox)
+        self.simplePage.setLayout(layout)
+
+    def populateConditionalPage(self):
+        layout = QVBoxLayout()
+        for c in MasterConstraintList:
+            if c[1].constraint_type == 'conditional':
+                checkBox = QCheckBox(c[1].explanation)
+                setattr(self, c[0], checkBox)
+                if self.constraints[c[0]]:
+                    checkBox.setChecked(True)
+                layout.addWidget(checkBox)
+        self.conditionalPage.setLayout(layout)
+
+    def selectThisPage(self):
+        thisPage = self.pages.currentIndex()
+        if thisPage == 0:
+            constraints = [c for c in MasterConstraintList if c[1].constraint_type == 'transcription']
+        elif thisPage == 1:
+            constraints = [c for c in MasterConstraintList if c[1].constraint_type == 'simple']
+        elif thisPage == 2:
+            constraints = [c for c in MasterConstraintList if c[1].constraint_type == 'conditional']
+        for c in constraints:
+            getattr(self, c[0]).setChecked(True)
+
+
+    def removeThisPage(self):
+        thisPage = self.pages.currentIndex()
+        if thisPage == 0:
+            constraints = [c for c in MasterConstraintList if c[1].constraint_type == 'transcription']
+        elif thisPage == 1:
+            constraints = [c for c in MasterConstraintList if c[1].constraint_type == 'simple']
+        elif thisPage == 2:
+            constraints = [c for c in MasterConstraintList if c[1].constraint_type == 'conditional']
+        for c in constraints:
+            getattr(self, c[0]).setChecked(False)
+
     def selectAll(self):
         for c in MasterConstraintList:
             getattr(self, c[0]).setChecked(True)
-        # self.medialJointConstraint.setChecked(True)
-        # self.distalMedialCorrespondanceConstraint.setChecked(True)
-        # self.noEmptySlotsConstraint.setChecked(True)
 
     def removeAll(self):
         for c in MasterConstraintList:
             getattr(self, c[0]).setChecked(False)
-        # self.medialJointConstraint.setChecked(False)
-        # self.distalMedialCorrespondanceConstraint.setChecked(False)
-        # self.noEmptySlotsConstraint.setChecked(False)
-
-
 
 class ExportCorpusDialog(QDialog):
 

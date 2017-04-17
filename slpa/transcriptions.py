@@ -138,14 +138,14 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot24 = TranscriptionSlot(24, 5, '[EFHi]', list('EFHi'))
 
         #FIELD 6 (Ring)
-        self.slot25 = TranscriptionSlot(25, 6, '[{<=x(x+)(x-)\u2327]', ['{','<','=','x','x+','x-','\u2327'])
+        self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)]', ['{','<','=','x','x+','x-','\u2327'])
         self.slot26 = TranscriptionSlot(26, 6, '3', ['3'])
         self.slot27 = TranscriptionSlot(27, 6, '[EFHi]', list('EFHi'))
         self.slot28 = TranscriptionSlot(28, 6, '[EFHi]', list('EFHi'))
         self.slot29 = TranscriptionSlot(29, 6, '[EFHi]', list('EFHi'))
 
         #FIELD 7 (Middle)
-        self.slot30 = TranscriptionSlot(30, 7, '[{<=x(x+)(x-)\u2327]', ['{','<','=','x','x+','x-','\u2327'])
+        self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)]', ['{','<','=','x','x+','x-','\u2327'])
         self.slot31 = TranscriptionSlot(31, 7, '4', ['4'])
         self.slot32 = TranscriptionSlot(32, 7, '[EFHi]', list('EFHi'))
         self.slot33 = TranscriptionSlot(33, 7, '[EFHi]', list('EFHi'))
@@ -176,7 +176,8 @@ class TranscriptionCompleter(QCompleter):
 
     def __init__(self, options, lineEditWidget):
         super().__init__(options, lineEditWidget)
-        self.setCaseSensitivity(Qt.CaseSensitive)
+        #self.setCaseSensitivity(Qt.CaseSensitive)
+        self.setCaseSensitivity(Qt.CaseInsensitive)
         self.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
 
 class TranscriptionSlot(QLineEdit):
@@ -188,7 +189,9 @@ class TranscriptionSlot(QLineEdit):
         self.num = num
         self.field = field
         self.regex = regex
-        self.setValidator(QRegExpValidator(QRegExp(regex)))
+        qregexp = QRegExp(regex)
+        qregexp.setCaseSensitivity(Qt.CaseInsensitive)
+        self.setValidator(QRegExpValidator(qregexp))
         if self.num in [20,25,30]:
             self.setMaxLength(2)
             #these slots are the only ones that can contain digraphs, namely 'x+' and 'x-'
@@ -437,64 +440,4 @@ class TranscriptionConstraintTab(QWidget):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
-class TranscriptionMessageBox(QDialog):
 
-    def  __init__(self, constraints, configTabs):
-        super().__init__()
-        self.setWindowTitle('Transcription verification')
-        self.layout = QVBoxLayout()
-        if all([not value for value in constraints.values()]):
-            self.layout.addWidget(QLabel('There are no problems with your transcription, because no constraints were selected. '
-                          '\nTo set constraints, go to the Settings menu.'))
-            self.setLayout(self.layout)
-            self.makeButtons()
-            return
-
-        self.satisfied_message = 'This constraint is fully satisfied ("{}").'
-
-        layout = QHBoxLayout()
-        self.constraintTabs = QTabWidget()
-        no_problems = True
-        alert_text = list()
-        for c in MasterConstraintList:
-            constraint_text = list()
-            if constraints[c[0]]:
-                no_problems = False
-                tab = TranscriptionConstraintTab()
-                self.constraintTabs.addTab(tab, c[1].name)
-
-                for k in [0,1]:
-                    transcription = configTabs.widget(k).hand1Transcription.slots
-                    problems = c[1].check(transcription)
-                    if problems:
-                        constraint_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
-
-                    transcription = configTabs.widget(k).hand2Transcription.slots
-                    problems = c[1].check(transcription)
-                    if problems:
-                        constraint_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
-                if constraint_text:
-                    alert_text.append('The following slots are in violation of the {} '
-                                      '("{}")\n'.format(c[1].name, c[1].explanation))
-
-                    alert_text.append('\n'.join(constraint_text))
-                    tab.layout.addWidget(QLabel(''.join(alert_text)))
-                else:
-                    tab.layout.addWidget(QLabel(self.satisfied_message.format(c[1].explanation)))
-
-
-        if no_problems:
-            self.layout.addWidget(QLabel('All constraints are satisfied!'))
-        else:
-            self.layout.addWidget(self.constraintTabs)
-        self.makeButtons()
-        self.setLayout(self.layout)
-
-    def makeButtons(self):
-        buttonLayout = QHBoxLayout()
-
-        ok = QPushButton('OK')
-        ok.clicked.connect(self.accept)
-        buttonLayout.addWidget(ok)
-
-        self.layout.addLayout(buttonLayout)

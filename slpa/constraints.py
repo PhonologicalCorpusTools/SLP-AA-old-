@@ -93,7 +93,7 @@ class IndexRingPinkySelectionConstraint():
                 output.append('17')
             if transcription[26].text() in 'EHi':
                 output.append('27')
-        return output
+        return ', '.join(output)
 
 class IndexMiddlePinkySelectionConstraint():
     """
@@ -115,7 +115,7 @@ class IndexMiddlePinkySelectionConstraint():
                 output.append('22')
             if transcription[31].text() in 'EHi':
                 output.append('32')
-        return output
+        return ', '.join(output)
 
 class RingPinkyAnatomicalContstraint():
     """
@@ -132,13 +132,19 @@ class RingPinkyAnatomicalContstraint():
     @classmethod
     def check(cls, transcription):
         output = list()
-        if (transcription[32].text()=='F' or transcription[33].text()=='F'):
+        if transcription[32].text() == 'F':
+            output.append('32')
+        if transcription[33].text() == 'F':
+            output.append('33')
+        if output == ['32', '33']:
             if transcription[14].text() != '4':
                 if transcription[27].text() in 'EHi':
                     output.append('28')
                 if transcription[28].text() in 'EHi':
                     output.append('29')
-        return output
+                output.sort()
+                return ', '.join(output)
+
 
 def sortMasterList(listItem):
     if listItem[1].constraint_type == 'transcription':
