@@ -3,6 +3,7 @@ import itertools
 import os
 import sys
 import subprocess
+import collections
 from enum import Enum
 from .imports import *
 from .handshapes import *
@@ -779,8 +780,42 @@ class MainWindow(QMainWindow):
         super().closeEvent()
 
     def checkTranscription(self):
-        alert = ConstraintCheckMessageBox(self.constraints, self.configTabs)
-        alert.exec_()
+        dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs)
+        dialog.exec_()
+        # self.violations = {'config1hand1': {n: list() for n in range(35)},
+        #                    'config2hand1': {n: list() for n in range(35)},
+        #                    'config1hand2': {n: list() for n in range(35)},
+        #                    'config2hand2': {n: list() for n in range(35)}}
+
+        for j in [1,2]:
+            for k in [1,2]:
+                for slot,violation in dialog.violations['config{}hand{}'.format(j,k)].items():
+                    print(slot,violation)
+                    # transcription = getattr(self.configTabs.widget(j-1), 'hand{}Transcription'.format(k))
+                    # transcription.slots[slot].setStyleSheet('color: red')
+
+        # for config_hand in dialog.violations:
+        #     print(config_hand)
+        #     for slot,violation in dialog.violations[config_hand].items():
+        #         print(slot, violation)
+
+        # for k in [0,1]:
+        #     self.configTabs.widget(k).hand1Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
+        #     for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
+        #         slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
+        #         slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+        #         slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
+        #         slot.textChanged.connect(self.userMadeChanges)
+        #         self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
+        #
+        #     self.configTabs.widget(k).hand2Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
+        #     for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
+        #         slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
+        #         slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+        #         slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
+        #         slot.textChanged.connect(self.userMadeChanges)
+        #         self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
+
         return
 
     def launchBlender(self):
@@ -1210,7 +1245,7 @@ class MainWindow(QMainWindow):
 
 class ConstraintCheckMessageBox(QDialog):
 
-    def  __init__(self, constraints, configTabs):
+    def __init__(self, constraints, configTabs):
         super().__init__()
         self.setWindowTitle('Transcription verification')
         layout = QVBoxLayout()
@@ -1227,6 +1262,8 @@ class ConstraintCheckMessageBox(QDialog):
             return
 
         self.satisfied_message = 'This constraint is fully satisfied\n("{}").'
+        self.violations = {'config1hand1': {n:set() for n in range(35)}, 'config2hand1': {n:set() for n in range(35)},
+                           'config1hand2': {n:set() for n in range(35)}, 'config2hand2': {n:set() for n in range(35)}}
 
         layout = QVBoxLayout()
 
@@ -1265,11 +1302,20 @@ class ConstraintCheckMessageBox(QDialog):
                     problems = c[1].check(transcription)
                     if problems:
                         constraint_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+                        slots = [int(x) for x in problems.split(', ')]
+                        handconfig = 'config{}hand1'.format(k+1)
+                        for s in slots:
+                            self.violations[handconfig][s].add(c[1].name)
 
                     transcription = configTabs.widget(k).hand2Transcription.slots
                     problems = c[1].check(transcription)
                     if problems:
                         constraint_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+                        slots = [int(x) for x in problems.split(', ')]
+                        handconfig = 'config{}hand2'.format(k+1)
+                        for s in slots:
+                            self.violations[handconfig][s].add(c[1].name)
+
                 if constraint_text:
                     alert_text.append('The following slots are in violation of the {}\n'
                                       '("{}")\n'.format(c[1].name, c[1].explanation))

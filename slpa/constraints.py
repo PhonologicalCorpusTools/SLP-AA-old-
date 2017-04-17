@@ -16,13 +16,13 @@ class DistalMedialCorrespondanceConstraint():
     def check(cls, transcription):
         output = list()
         if transcription[17] != transcription[18]:
-            output.append('18/19')
+            output.append('18, 19')
         if transcription[22] != transcription[23]:
-            output.append('23/24')
+            output.append('23, 24')
         if transcription[27] != transcription[28]:
-            output.append('28/29')
+            output.append('28, 29')
         if transcription[32] != transcription[33]:
-            output.append('33/34')
+            output.append('33, 34')
 
         output = ', '.join(output)
         return output
@@ -72,7 +72,7 @@ class NoEmptySlotsConstraint():
         for slot in transcription[1:]:
             if not slot.text():
                 output.append(str(slot.num))
-        return ','.join(output)
+        return ', '.join(output)
 
 
 class IndexRingPinkySelectionConstraint():

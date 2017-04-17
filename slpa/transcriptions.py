@@ -25,9 +25,14 @@ class TranscriptionLayout(QVBoxLayout):
         self.hand = hand
         self.fields = list()
         self.slots = list()
+        self.violations = list()
+        self.metaLayout = QVBoxLayout()
         self.lineLayout = QHBoxLayout()
-        self.lineLayout.setContentsMargins(-1,0,-1,-1)
-
+        # self.lineLayout.setContentsMargins(-1,0,-1,-1)
+        self.violationsLayout = QHBoxLayout()
+        self.addLayout(self.metaLayout)
+        self.metaLayout.addLayout(self.lineLayout)
+        self.metaLayout.addLayout(self.violationsLayout)
         self.generateSlots()
 
         #FIELD 1 (Forearm)
