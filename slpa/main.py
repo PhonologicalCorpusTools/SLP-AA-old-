@@ -362,15 +362,12 @@ class HandConfigTab(QWidget):
         self.setLayout(self.configLayout)
 
     def clearAll(self):
-        self.hand1Transcription.slot1.setChecked(False)
-        for slot in self.hand1Transcription.slots[1:]:
-            slot.setText('')
-
-        self.hand2Transcription.slot1.setChecked(False)
-        for slot in self.hand2Transcription.slots[1:]:
-            slot.setText('')
-
+        self.hand1Transcription.clearTranscriptionSlots()
+        self.hand1Transcription.clearViolationLabels()
         self.hand1Transcription.fillPredeterminedSlots()
+
+        self.hand2Transcription.clearTranscriptionSlots()
+        self.hand2Transcription.clearViolationLabels()
         self.hand2Transcription.fillPredeterminedSlots()
 
     def hand1(self):
@@ -782,40 +779,31 @@ class MainWindow(QMainWindow):
     def checkTranscription(self):
         dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs)
         dialog.exec_()
-        # self.violations = {'config1hand1': {n: list() for n in range(35)},
-        #                    'config2hand1': {n: list() for n in range(35)},
-        #                    'config1hand2': {n: list() for n in range(35)},
-        #                    'config2hand2': {n: list() for n in range(35)}}
+
 
         for j in [1,2]:
             for k in [1,2]:
-                for slot,violation in dialog.violations['config{}hand{}'.format(j,k)].items():
-                    print(slot,violation)
-                    # transcription = getattr(self.configTabs.widget(j-1), 'hand{}Transcription'.format(k))
-                    # transcription.slots[slot].setStyleSheet('color: red')
+                transcription = getattr(self.configTabs.widget(j - 1), 'hand{}Transcription'.format(k))
+                results = [(s,v) for (s,v) in dialog.violations['config{}hand{}'.format(j,k)].items() if v]
+                slots = [x[0] for x in results]
+                violations = [x[1] for x in results]
+                tooltips = collections.defaultdict(set)
+                for slot in transcription.slots:
+                    n = slot.num
+                    violationLabel = getattr(transcription, 'violation{}'.format(n))
+                    if n in slots:
+                        violationLabel.setText('   *')
+                        violation_names = violations[slots.index(slot.num)]
+                        tooltips[slot.num].update(violation_names)
+                    else:
+                        violationLabel.setText(' ')
+                        violationLabel.setToolTip('')
 
-        # for config_hand in dialog.violations:
-        #     print(config_hand)
-        #     for slot,violation in dialog.violations[config_hand].items():
-        #         print(slot, violation)
-
-        # for k in [0,1]:
-        #     self.configTabs.widget(k).hand1Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
-        #     for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
-        #         slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
-        #         slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
-        #         slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
-        #         slot.textChanged.connect(self.userMadeChanges)
-        #         self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
-        #
-        #     self.configTabs.widget(k).hand2Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
-        #     for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
-        #         slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
-        #         slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
-        #         slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
-        #         slot.textChanged.connect(self.userMadeChanges)
-        #         self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
-
+                for slot in tooltips:
+                    violationLabel = getattr(transcription, 'violation{}'.format(slot))
+                    tip = ['Slot {}'.format(slot)]
+                    tip.extend(sorted(tooltips[slot]))
+                    violationLabel.setToolTip('\n'.join(tip))
         return
 
     def launchBlender(self):
@@ -975,6 +963,8 @@ class MainWindow(QMainWindow):
         self.gloss.glossEdit.setText(signData['gloss'])
         config1 = self.configTabs.widget(0)
         config2 = self.configTabs.widget(1)
+        config1.clearAll()
+        config2.clearAll()
 
         config1hand1 = signData['config1hand1']
         for num, slot in enumerate(config1.hand1Transcription.slots):
@@ -1297,22 +1287,22 @@ class ConstraintCheckMessageBox(QDialog):
                 elif c[1].constraint_type == 'conditional':
                     self.conditionalConstraintsTab.addTab(tab, c[1].name)
 
-                for k in [0,1]:
-                    transcription = configTabs.widget(k).hand1Transcription.slots
+                for k in [1,2]:
+                    transcription = configTabs.widget(k-1).hand1Transcription.slots
                     problems = c[1].check(transcription)
                     if problems:
-                        constraint_text.append('\nConfig {}, Hand 1: {}'.format(k + 1, problems))
+                        constraint_text.append('\nConfig {}, Hand 1: {}'.format(k, problems))
                         slots = [int(x) for x in problems.split(', ')]
-                        handconfig = 'config{}hand1'.format(k+1)
+                        handconfig = 'config{}hand1'.format(k)
                         for s in slots:
                             self.violations[handconfig][s].add(c[1].name)
 
-                    transcription = configTabs.widget(k).hand2Transcription.slots
+                    transcription = configTabs.widget(k-1).hand2Transcription.slots
                     problems = c[1].check(transcription)
                     if problems:
-                        constraint_text.append('\nConfig {}, Hand 2: {}'.format(k + 1, problems))
+                        constraint_text.append('\nConfig {}, Hand 2: {}'.format(k, problems))
                         slots = [int(x) for x in problems.split(', ')]
-                        handconfig = 'config{}hand2'.format(k+1)
+                        handconfig = 'config{}hand2'.format(k)
                         for s in slots:
                             self.violations[handconfig][s].add(c[1].name)
 

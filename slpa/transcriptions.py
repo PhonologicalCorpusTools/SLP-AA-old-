@@ -26,24 +26,23 @@ class TranscriptionLayout(QVBoxLayout):
         self.fields = list()
         self.slots = list()
         self.violations = list()
-        self.metaLayout = QVBoxLayout()
-        self.lineLayout = QHBoxLayout()
-        # self.lineLayout.setContentsMargins(-1,0,-1,-1)
-        self.violationsLayout = QHBoxLayout()
-        self.addLayout(self.metaLayout)
-        self.metaLayout.addLayout(self.lineLayout)
-        self.metaLayout.addLayout(self.violationsLayout)
-        self.generateSlots()
 
-        #FIELD 1 (Forearm)
-        self.lineLayout.addWidget(QLabel('['))
-        self.field1 = TranscriptionCheckBox(1)
-        self.slot1 = self.field1
-        self.slots.append(self.slot1)
-        self.lineLayout.addWidget(self.field1)
-        self.fields.append(self.field1)
-        self.lineLayout.addWidget(QLabel(']<font size="5"><b><sub>1</sub></b></font>'))
+        self.lineLayout = QHBoxLayout()
+        self.lineLayout.setContentsMargins(-1,0,-1,-1)
         self.addLayout(self.lineLayout)
+
+        self.generateSlots()
+        self.generateViolationLabels()
+        self.generateFields()
+
+
+    def generateFields(self):
+        #FIELD 1 (Forearm)
+        self.field1 = TranscriptionField(number=1)
+        self.field1.addSlot(self.slot1)
+        self.field1.addViolationLabel(self.violation1)
+        self.lineLayout.addLayout(self.field1)
+        self.fields.append(self.field1)
 
         #FIELD 2 (Thumb)
         self.field2 = TranscriptionField(number=2)
@@ -51,6 +50,8 @@ class TranscriptionLayout(QVBoxLayout):
             slot = getattr(self, 'slot{}'.format(j))
             self.field2.addSlot(slot)
             self.slots.append(slot)
+            violation = getattr(self, 'violation{}'.format(j))
+            self.field2.addViolationLabel(violation)
         self.lineLayout.addLayout(self.field2)
         self.fields.append(self.field2)
 
@@ -60,6 +61,8 @@ class TranscriptionLayout(QVBoxLayout):
             slot = getattr(self, 'slot{}'.format(j))
             self.field3.addSlot(slot)
             self.slots.append(slot)
+            violation = getattr(self, 'violation{}'.format(j))
+            self.field3.addViolationLabel(violation)
         self.lineLayout.addLayout(self.field3)
         self.fields.append(self.field3)
 
@@ -69,6 +72,8 @@ class TranscriptionLayout(QVBoxLayout):
             slot = getattr(self, 'slot{}'.format(j))
             self.field4.addSlot(slot)
             self.slots.append(slot)
+            violation = getattr(self, 'violation{}'.format(j))
+            self.field4.addViolationLabel(violation)
         self.lineLayout.addLayout(self.field4)
         self.fields.append(self.field4)
 
@@ -78,6 +83,8 @@ class TranscriptionLayout(QVBoxLayout):
             slot = getattr(self, 'slot{}'.format(j))
             self.field5.addSlot(slot)
             self.slots.append(slot)
+            violation = getattr(self, 'violation{}'.format(j))
+            self.field5.addViolationLabel(violation)
         self.lineLayout.addLayout(self.field5)
         self.fields.append(self.field5)
 
@@ -87,6 +94,8 @@ class TranscriptionLayout(QVBoxLayout):
             slot = getattr(self, 'slot{}'.format(j))
             self.field6.addSlot(slot)
             self.slots.append(slot)
+            violation = getattr(self, 'violation{}'.format(j))
+            self.field6.addViolationLabel(violation)
         self.lineLayout.addLayout(self.field6)
         self.fields.append(self.field6)
 
@@ -96,6 +105,8 @@ class TranscriptionLayout(QVBoxLayout):
             slot = getattr(self, 'slot{}'.format(j))
             self.field7.addSlot(slot)
             self.slots.append(slot)
+            violation = getattr(self, 'violation{}'.format(j))
+            self.field7.addViolationLabel(violation)
         self.lineLayout.addLayout(self.field7)
         self.fields.append(self.field7)
 
@@ -109,7 +120,8 @@ class TranscriptionLayout(QVBoxLayout):
 
     def generateSlots(self):
         #FIELD 1 (Forearm)
-        #This field is a check box, and does not contain any slots
+        self.slot1 = TranscriptionCheckBox(1)
+        self.slots.append(self.slot1)
 
         #FIELD 2 (Thumb)
         self.slot2 = TranscriptionSlot(2, 2, '[LUO]', list('LUO'))
@@ -155,6 +167,22 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot32 = TranscriptionSlot(32, 7, '[EFHi]', list('EFHi'))
         self.slot33 = TranscriptionSlot(33, 7, '[EFHi]', list('EFHi'))
         self.slot34 = TranscriptionSlot(34, 7, '[EFHi]', list('EFHi'))
+
+    def generateViolationLabels(self):
+        for j in range(1,35):
+            setattr(self, 'violation{}'.format(j), QLabel('   '))
+            widget = getattr(self, 'violation{}'.format(j))
+            self.violations.append(widget)
+
+    def clearViolationLabels(self):
+        for v in self.violations:
+            v.setText('')
+            v.setToolTip('')
+
+    def clearTranscriptionSlots(self):
+        self.slot1.setChecked(False)
+        for s in self.slots[1:]:
+            s.setText('')
 
     def values(self):
         data = ['V' if self.slot1.isChecked() else '']
@@ -276,7 +304,7 @@ class TranscriptionSlot(QLineEdit):
         super().keyPressEvent(e)
 
 
-class TranscriptionField(QHBoxLayout):
+class TranscriptionField(QGridLayout):
 
     slotSelectionChanged = Signal(int)
 
@@ -287,13 +315,18 @@ class TranscriptionField(QHBoxLayout):
         self.left_bracket = QLabel('[')
         self.right_bracket = QLabel(']<font size="5"><b><sub>{}</sub></b></font>'.format(self.number))
         self.transcription = QHBoxLayout()
+        self.violations = QHBoxLayout()
 
-        self.addWidget(self.left_bracket)
-        self.addLayout(self.transcription)
-        self.addWidget(self.right_bracket)
+        self.addWidget(self.left_bracket, 0, 0)
+        self.addLayout(self.transcription, 0, 1)
+        self.addWidget(self.right_bracket, 0, 10)
+        self.addLayout(self.violations, 1, 1)
 
     def addSlot(self, slot):
         self.transcription.addWidget(slot)
+
+    def addViolationLabel(self, label):
+        self.violations.addWidget(label)
 
 class TranscriptionInfo(QGridLayout):
 
