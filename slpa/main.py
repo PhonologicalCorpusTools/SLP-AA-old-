@@ -75,8 +75,7 @@ class FeaturesDialog(QDialog):
 
         majorLocationLayout = QVBoxLayout()
         self.majorLocationList = QListWidget()
-        self.majorLocationList.clicked.connect(self.changeMinorList)
-        for location in self.majorLocations:
+        for location in sorted(self.majorLocations):
             self.majorLocationList.addItem(location)
         self.majorLocationList.setCurrentRow(0)
         addMajorLocationButton = QPushButton('Add major location')
@@ -89,7 +88,7 @@ class FeaturesDialog(QDialog):
 
         minorLocationLayout = QVBoxLayout()
         self.minorLocationList = QListWidget()
-        for location in self.minorLocations[self.majorLocations[0]]:
+        for location in sorted(self.minorLocations[self.majorLocations[0]]):
             self.minorLocationList.addItem(location)
         self.minorLocationList.setCurrentRow(0)
         addMinorLocationButton = QPushButton('Add minor location')
@@ -99,10 +98,11 @@ class FeaturesDialog(QDialog):
         minorLocationLayout.addWidget(self.minorLocationList)
         minorLocationLayout.addWidget(addMinorLocationButton)
         minorLocationLayout.addWidget(removeMinorLocationButton)
+        self.majorLocationList.currentItemChanged.connect(self.changeMinorList)
 
         movementLayout = QVBoxLayout()
         self.movementList = QListWidget()
-        for movement in movements:
+        for movement in sorted(movements):
             self.movementList.addItem(movement)
         self.movementList.setCurrentRow(0)
         addMovementButton = QPushButton('Add movement')
@@ -115,7 +115,7 @@ class FeaturesDialog(QDialog):
 
         orientationLayout = QVBoxLayout()
         self.orientationList = QListWidget()
-        for orientation in orientations:
+        for orientation in sorted(orientations):
             self.orientationList.addItem(orientation)
         self.orientationList.setCurrentRow(0)
         addOrientationButton = QPushButton('Add orientation')
@@ -140,22 +140,78 @@ class FeaturesDialog(QDialog):
         buttonLayout.addWidget(cancelButton)
         okButton.clicked.connect(self.accept)
         cancelButton.clicked.connect(self.reject)
+        restoreDefaultsButtons = QPushButton('Restore defaults')
+        restoreDefaultsButtons.clicked.connect(self.restoreDefaultFeatures)
+        buttonLayout.addWidget(restoreDefaultsButtons)
         layout.addLayout(buttonLayout)
 
         self.setLayout(layout)
+
+        self.removeWarning = QMessageBox()
+        self.removeWarning.setWindowTitle('Warning')
+        self.removeWarningText = ('This will remove the {} from the list.\n'
+                                 'This may cause problems if any signs in your corpus use this feature.\n'
+                                 'Are you sure?')
+        self.removeWarning.addButton('OK', QMessageBox.AcceptRole)
+        self.removeWarning.addButton('Cancel', QMessageBox.RejectRole)
 
         self.emptyListWarning = QMessageBox()
         self.emptyListWarning.setWindowTitle('Warning')
         self.emptyListWarning.setText(('This feature cannot be deleted. '
                                       'You must have at least one feature in each list.'))
 
+    def restoreDefaultFeatures(self):
+        alert = QMessageBox()
+        alert.setWindowTitle('Warning')
+        alert.setText('This will remove all current features and restore the default values.\n'
+                      'Are you sure you want to remove this feature?')
+        alert.addButton('OK', QMessageBox.AcceptRole)
+        alert.addButton('Cancel', QMessageBox.RejectRole)
+        alert.exec_()
+        role = alert.buttonRole(alert.clickedButton())
+        if role == QMessageBox.RejectRole:
+            return
+
+        self.minorLocations = {'Head': ['Cheek', 'Nose', 'Chin', 'Eye','Forehead', 'Head top', 'Mouth',
+                                        'Under chin', 'Upper lip'],
+                                'Arm': ['Elbow (back)', 'Elbow (front)','Forearm (back)', 'Forearm (front)',
+                                        'Forearm (ulnar)', 'Upper arm', 'Wrist (back)','Wrist (front)'],
+                                'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder',
+                                          'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist'],
+                                'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)', 'Finger (ulnar)',
+                                                 'Heel', 'Palm (front)', 'Palm (back)']}
+        self.minorLocationList.clear()
+
+        self.majorLocations = ['Head', 'Arm', 'Trunk', 'Non-dominant']
+        self.majorLocationList.clear()
+        for location in sorted(self.majorLocations):
+            self.majorLocationList.addItem(location)
+        self.majorLocationList.setCurrentRow(0)
+
+        self.movements = ['Arc', 'Circular', 'Straight', 'Back and forth', 'No movement', 'Multiple']
+        self.movementList.clear()
+        for movement in sorted(self.movements):
+            self.movementList.addItem(movement)
+        self.movementList.setCurrentRow(0)
+
+        self.orientations = ['None specified', 'Front', 'Back', 'Side', 'Up', 'Down']
+        self.orientationList.clear()
+        for orientation in sorted(self.orientations):
+            self.orientationList.addItem(orientation)
+        self.orientationList.setCurrentRow(0)
+
     def changeMinorList(self):
         selectedMajorFeature = self.majorLocationList.currentItem()
+        if selectedMajorFeature is None:
+            return
+            #this happens when restoring default values
+            #the major list has no items but currentIndexChanged() is still emitted
         name = selectedMajorFeature.text()
         self.minorLocationList.clear()
         try:
             for location in self.minorLocations[name]:
                 self.minorLocationList.addItem(location)
+            self.minorLocationList.sortItems()
         except KeyError:
             self.minorLocationList.clear()
 
@@ -168,14 +224,31 @@ class FeaturesDialog(QDialog):
                 self.majorLocationList.addItem(name)
                 self.minorLocations[name] = list()
                 self.majorLocationList.setCurrentRow(len(self.majorLocationList)-1)
+                self.majorLocationList.sortItems()
 
     def removeMajorLocation(self):
+
         if len(self.majorLocationList) == 1:
             self.emptyListWarning.exec_()
             return
+
         listItems = self.majorLocationList.selectedItems()
+        feature_name = listItems[0].text()
+        text = 'the major feature \"{}\" and any associated minor features'.format(feature_name)
+        self.removeWarning.setText(self.removeWarningText.format(text))
+        self.removeWarning.exec_()
+        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
+        if role == QMessageBox.RejectRole:
+            return
+
+
         for item in listItems:
             self.majorLocationList.takeItem(self.majorLocationList.row(item))
+            try:
+                del self.minorLocations[item.text()]
+            except KeyError:
+                pass
+        self.majorLocationList.sortItems()
         self.majorLocationList.setCurrentRow(0)
 
     def addMinorLocation(self):
@@ -188,17 +261,28 @@ class FeaturesDialog(QDialog):
                 major = self.majorLocationList.currentItem().text()
                 self.minorLocations[major].append(name)
                 self.minorLocationList.setCurrentRow(len(self.minorLocationList) - 1)
-
+                self.minorLocationList.sortItems()
 
     def removeMinorLocation(self):
         if len(self.minorLocationList) == 1:
             self.emptyListWarning.exec_()
             return
+
         listItems = self.minorLocationList.selectedItems()
+        feature_name = listItems[0].text()
+        text = 'the minor location \"{}\"'.format(feature_name)
+        self.removeWarning.setText(self.removeWarningText.format(text))
+        self.removeWarning.exec_()
+        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
+        if role == QMessageBox.RejectRole:
+            return
+
+
         major = selectedMajorFeature = self.majorLocationList.currentItem().text()
         for item in listItems:
             self.minorLocationList.takeItem(self.minorLocationList.row(item))
             self.minorLocations[major].remove(item.text())
+        self.minorLocationList.sortItems()
         self.minorLocationList.setCurrentRow(0)
 
 
@@ -210,14 +294,26 @@ class FeaturesDialog(QDialog):
             if name:
                 self.movementList.addItem(name)
                 self.movementList.setCurrentRow(len(self.movementList) - 1)
+                self.movementList.sortItems()
 
     def removeMovement(self):
         if len(self.movementList) == 1:
             self.emptyListWarning.exec_()
             return
+
         listItems = self.movementList.selectedItems()
+        feature_name = listItems[0].text()
+        text = 'the movement feature \"{}\"'.format(feature_name)
+        self.removeWarning.setText(self.removeWarningText.format(text))
+        self.removeWarning.exec_()
+        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
+        if role == QMessageBox.RejectRole:
+            return
+
+
         for item in listItems:
             self.movementList.takeItem(self.movementList.row(item))
+        self.movementList.sortItems()
         self.movementList.setCurrentRow(0)
 
     def addOrientation(self):
@@ -228,14 +324,26 @@ class FeaturesDialog(QDialog):
             if name:
                 self.orientationList.addItem(name)
                 self.orientationList.setCurrentRow(len(self.orientationList) - 1)
+                self.orientationList.sortItems()
 
     def removeOrientation(self):
         if len(self.orientationList) == 1:
             self.emptyListWarning.exec_()
             return
+
         listItems = self.orientationList.selectedItems()
+        feature_name = listItems[0].text()
+        text = 'the orientation feature \"{}\"'.format(feature_name)
+        self.removeWarning.setText(self.removeWarningText.format(text))
+        self.removeWarning.exec_()
+        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
+        if role == QMessageBox.RejectRole:
+            return
+
+
         for item in listItems:
             self.orientationList.takeItem(self.orientationList.row(item))
+        self.orientationList.sortItems()
         self.orientationList.setCurrentRow(0)
 
 
@@ -278,9 +386,8 @@ class MajorFeatureLayout(QGridLayout):
             self.orientation.addItem(orientation)
 
         self.major.currentIndexChanged.connect(self.changeMinorLocation)
-        self.major.setCurrentIndex(0) #not working?
+        self.major.setCurrentIndex(0)
         self.changeMinorLocation()
-        #not sure why this call is needed, since .setCurrentIndex should fire the signal, but it doesn't seem to work
 
         self.addWidget(QLabel('Major Location'), 0, 0)
         self.addWidget(self.major,0,1)
@@ -586,7 +693,6 @@ class MainWindow(QMainWindow):
         self.openBlenderButton.clicked.connect(self.launchBlender)
         topLayout.addWidget(self.openBlenderButton)
 
-
         layout.addLayout(topLayout)
 
         #Make gloss entry
@@ -721,7 +827,6 @@ class MainWindow(QMainWindow):
 
     def readSettings(self):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
-
         self.settings.beginGroup('constraints')
         for c in MasterConstraintList:
             name = c[0]
@@ -734,9 +839,11 @@ class MainWindow(QMainWindow):
         self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
         self.settings.endGroup()
 
+        self.settings.value
+
         self.settings.beginGroup('features')
         self.majorLocations = self.settings.value('majorLocations',
-                                                  defaultValue=['None specified', 'Head', 'Arm', 'Trunk', 'Non-dominant'])
+                                                  defaultValue=['Head', 'Arm', 'Trunk', 'Non-dominant'])
         self.minorLocations = self.settings.value('minorLocations',
                                                   defaultValue={'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead',
                                                     'Head top', 'Mouth', 'Under chin', 'Upper lip'],
@@ -747,8 +854,8 @@ class MainWindow(QMainWindow):
                                         'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)',
                                                          'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)']})
         self.movements = self.settings.value('movements',
-                                             defaultValue=['None specified', 'Arc', 'Circular', 'Straight', 'Back and forth',
-                                                           'No movement', 'Multiple'])
+                                             defaultValue=['No movement', 'Arc', 'Circular','Straight','Back and forth',
+                                                           'Multiple'])
         self.orientations = self.settings.value('orientations',
                                                 defaultValue=['None specified', 'Front', 'Back', 'Side', 'Up', 'Down'])
         self.settings.endGroup()
@@ -763,18 +870,21 @@ class MainWindow(QMainWindow):
             alert.addButton('Go back', QMessageBox.NoRole)
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
-            if role == Qt.AcceptRole:
-                self.saveCorpus()
-            elif role == Qt.RejectRole:
+            if role == QMessageBox.AcceptRole:
+                result = self.saveCorpus()
+                if result is None:
+                    return
+            elif role == QMessageBox.RejectRole:
                 pass
-            elif role == Qt.NoRole:
+            elif role == QMessageBox.NoRole:
                 return
         self.writeSettings()
         try:
             os.remove(os.path.join(os.getcwd(),'handCode.txt'))
         except FileNotFoundError:
             pass
-        super().closeEvent()
+        #super().closeEvent(QCloseEvent())
+        self.close()
 
     def checkTranscription(self):
         dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs)
@@ -937,6 +1047,7 @@ class MainWindow(QMainWindow):
 
         self.updateCorpus(kwargs, isDuplicate)
         QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
+        return True
 
     def updateCorpus(self, kwargs, isDuplicate):
         self.corpus.addWord(Sign(kwargs))
@@ -1114,6 +1225,11 @@ class MainWindow(QMainWindow):
                                         triggered = self.defineFeatures)
 
     def defineFeatures(self):
+        currentMajor = self.featuresLayout.major.currentText()
+        currentMinor = self.featuresLayout.minor.currentText()
+        currentMovement = self.featuresLayout.movement.currentText()
+        currentOrientation = self.featuresLayout.orientation.currentText()
+
         dialog = FeaturesDialog([self.majorLocations, self.minorLocations, self.movements, self.orientations])
         results = dialog.exec_()
         if results:
@@ -1127,7 +1243,12 @@ class MainWindow(QMainWindow):
                 item = dialog.majorLocationList.item(index)
                 self.majorLocations.append(item.text())
                 self.featuresLayout.major.addItem(item.text())
-            self.featuresLayout.major.setCurrentIndex(0)
+            if currentMajor in self.majorLocations:
+                self.featuresLayout.major.setCurrentText(currentMajor)
+                self.featuresLayout.minor.setCurrentText(currentMinor)
+            else:
+                self.featuresLayout.major.setCurrentIndex(0)
+                self.featuresLayout.minor.setCurrentIndex(0)
 
             self.featuresLayout.movement.clear()
             self.movements = list()
@@ -1135,6 +1256,10 @@ class MainWindow(QMainWindow):
                 item = dialog.movementList.item(index)
                 self.movements.append(item.text())
                 self.featuresLayout.movement.addItem(item.text())
+            if currentMovement in self.movements:
+                self.featuresLayout.movement.setCurrentText(currentMovement)
+            else:
+                self.featuresLayout.movement.setCurrentIndex(0)
 
             self.featuresLayout.orientation.clear()
             self.orientations = list()
@@ -1142,6 +1267,10 @@ class MainWindow(QMainWindow):
                 item = dialog.orientationList.item(index)
                 self.orientations.append(item.text())
                 self.featuresLayout.orientation.addItem(item.text())
+            if currentOrientation in self.orientations:
+                self.featuresLayout.orientation.setCurrentText(currentOrientation)
+            else:
+                self.featuresLayout.orientation.setCurrentIndex(0)
 
     def setConstraints(self):
         dialog = ConstraintsDialog(self.constraints)
