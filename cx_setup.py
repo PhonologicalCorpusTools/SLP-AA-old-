@@ -8,7 +8,7 @@ def readme():
         return f.read()
 
 base = None
-incl_files = list()
+incl_files = [os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media')]
 if sys.platform == "win32":
     base = "Win32GUI"
     libegl = os.path.join(os.path.dirname(PyQt5.__file__),'libEGL.dll')
@@ -23,7 +23,7 @@ shortcut_table = [
      "ProgramMenuFolder",       # Directory_
      "%s" % (exe_name,),        # Name
      "TARGETDIR",               # Component_
-     "[TARGETDIR]pct.exe",      # Target
+     "[TARGETDIR]slpa.exe",     # Target
      None,                      # Arguments
      None,                      # Description
      None,                      # Hotkey

@@ -371,17 +371,13 @@ class MajorFeatureLayout(QGridLayout):
 
         self.majorLocations, self.minorLocations, self.movements, self.orientations = settings
         self.major = QComboBox()
-        #self.major.addItem('Major Location')
         for location in self.majorLocations:
             self.major.addItem(location)
         self.minor = QComboBox()
-        #self.minor.addItem('Minor Location')
         self.movement = QComboBox()
-        #self.movement.addItem('Movement')
         for movement in self.movements:
             self.movement.addItem(movement)
         self.orientation = QComboBox()
-        #self.orientation.addItem('Orientation')
         for orientation in self.orientations:
             self.orientation.addItem(orientation)
 
@@ -1663,9 +1659,12 @@ class ExportCorpusDialog(QDialog):
 
 def clean(item):
     """Clean up the memory by closing and deleting the item if possible."""
-    if isinstance(item, list) or isinstance(item, dict):
+    if isinstance(item, list):
         for _ in range(len(item)):
             clean(item.pop())
+    elif isinstance(item, dict):
+        while item:
+            clean(item.popitem())
     else:
         try:
             item.close()
