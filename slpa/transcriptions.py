@@ -300,6 +300,9 @@ class TranscriptionSlot(QLineEdit):
             elif key == 83:# == Qt.Key_S
                 self.completer().setCurrentRow(6)
                 self.setText(X_IN_BOX)
+        text = e.text()
+        if text in ['l', 'u', 'o', 'e', 'f', 'h', 'm']:
+            self.setText(text.upper())
         self.completer().complete()
         super().keyPressEvent(e)
 
