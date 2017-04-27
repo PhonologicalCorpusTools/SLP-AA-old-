@@ -91,6 +91,8 @@ class FeaturesDialog(QDialog):
         minorLocationLayout = QVBoxLayout()
         self.minorLocationList = QListWidget()
         for location in sorted(self.minorLocations[self.majorLocations[0]]):
+            if not location:
+                pass
             self.minorLocationList.addItem(location)
         self.minorLocationList.setCurrentRow(0)
         addMinorLocationButton = QPushButton('Add minor location')
