@@ -76,6 +76,8 @@ class FeaturesDialog(QDialog):
         majorLocationLayout = QVBoxLayout()
         self.majorLocationList = QListWidget()
         for location in sorted(self.majorLocations):
+            if not location:
+                continue
             self.majorLocationList.addItem(location)
         self.majorLocationList.setCurrentRow(0)
         addMajorLocationButton = QPushButton('Add major location')
@@ -103,6 +105,8 @@ class FeaturesDialog(QDialog):
         movementLayout = QVBoxLayout()
         self.movementList = QListWidget()
         for movement in sorted(movements):
+            if not movement:
+                continue
             self.movementList.addItem(movement)
         self.movementList.setCurrentRow(0)
         addMovementButton = QPushButton('Add movement')
@@ -116,6 +120,8 @@ class FeaturesDialog(QDialog):
         orientationLayout = QVBoxLayout()
         self.orientationList = QListWidget()
         for orientation in sorted(orientations):
+            if not orientation:
+                continue
             self.orientationList.addItem(orientation)
         self.orientationList.setCurrentRow(0)
         addOrientationButton = QPushButton('Add orientation')
@@ -147,6 +153,10 @@ class FeaturesDialog(QDialog):
 
         self.setLayout(layout)
 
+        self.cannotRemove = QMessageBox()
+        self.cannotRemove.setWindowTitle('Warning')
+        self.cannotRemove.setText('This feature cannot be removed.')
+
         self.removeWarning = QMessageBox()
         self.removeWarning.setWindowTitle('Warning')
         self.removeWarningText = ('This will remove the {} from the list.\n'
@@ -164,7 +174,7 @@ class FeaturesDialog(QDialog):
         alert = QMessageBox()
         alert.setWindowTitle('Warning')
         alert.setText('This will remove all current features and restore the default values.\n'
-                      'Are you sure you want to remove this feature?')
+                      'Are you sure you want to do this?')
         alert.addButton('OK', QMessageBox.AcceptRole)
         alert.addButton('Cancel', QMessageBox.RejectRole)
         alert.exec_()
@@ -172,12 +182,14 @@ class FeaturesDialog(QDialog):
         if role == QMessageBox.RejectRole:
             return
 
+        #the empty string options are not reset here, so they aren't displayed in the GUI
+        #instead, empty string are added in the "if result" clause of MainWindow.defineFeatures()
         self.minorLocations = {'Head': ['Cheek', 'Nose', 'Chin', 'Eye','Forehead', 'Head top', 'Mouth',
                                         'Under chin', 'Upper lip'],
                                 'Arm': ['Elbow (back)', 'Elbow (front)','Forearm (back)', 'Forearm (front)',
                                         'Forearm (ulnar)', 'Upper arm', 'Wrist (back)','Wrist (front)'],
                                 'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder',
-                                          'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist'],
+                                          'Torso (bottom)', 'Torso (mid)', 'Torso (top)', 'Waist'],
                                 'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)', 'Finger (ulnar)',
                                                  'Heel', 'Palm (front)', 'Palm (back)']}
         self.minorLocationList.clear()
@@ -194,7 +206,7 @@ class FeaturesDialog(QDialog):
             self.movementList.addItem(movement)
         self.movementList.setCurrentRow(0)
 
-        self.orientations = ['None specified', 'Front', 'Back', 'Side', 'Up', 'Down']
+        self.orientations = ['Front', 'Back', 'Side', 'Up', 'Down']
         self.orientationList.clear()
         for orientation in sorted(self.orientations):
             self.orientationList.addItem(orientation)
@@ -228,12 +240,18 @@ class FeaturesDialog(QDialog):
 
     def removeMajorLocation(self):
 
+        listItems = self.majorLocationList.selectedItems()
+        feature_name = listItems[0].text()
+
+        if not feature_name:
+            self.cannotRemove.exec_()
+            return
+
         if len(self.majorLocationList) == 1:
             self.emptyListWarning.exec_()
             return
 
-        listItems = self.majorLocationList.selectedItems()
-        feature_name = listItems[0].text()
+
         text = 'the major feature \"{}\" and any associated minor features'.format(feature_name)
         self.removeWarning.setText(self.removeWarningText.format(text))
         self.removeWarning.exec_()
@@ -839,21 +857,23 @@ class MainWindow(QMainWindow):
 
         self.settings.beginGroup('features')
         self.majorLocations = self.settings.value('majorLocations',
-                                                  defaultValue=['Head', 'Arm', 'Trunk', 'Non-dominant'])
+                                                  defaultValue=['', 'Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral'])
         self.minorLocations = self.settings.value('minorLocations',
-                                                  defaultValue={'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead',
+                                                  defaultValue={'':'',
+                                                      'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead',
                                                     'Head top', 'Mouth', 'Under chin', 'Upper lip'],
                                         'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)',
                                                     'Forearm (ulnar)', 'Upper arm','Wrist (back)', 'Wrist (front)'],
                                         'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder',
-                                                    'TorsoBottom', 'TorsoMid', 'TorsoTop', 'Waist'],
+                                                    'Torso (bottom)', 'Torso (mid)', 'Torso (top)', 'Waist'],
                                         'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)',
-                                                         'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)']})
+                                                         'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)'],
+                                        'Neutral': ['Neutral']})
         self.movements = self.settings.value('movements',
-                                             defaultValue=['No movement', 'Arc', 'Circular','Straight','Back and forth',
+                                             defaultValue=['','No movement', 'Arc', 'Circular','Straight','Back and forth',
                                                            'Multiple'])
         self.orientations = self.settings.value('orientations',
-                                                defaultValue=['None specified', 'Front', 'Back', 'Side', 'Up', 'Down'])
+                                                defaultValue=['','Front', 'Back', 'Side', 'Up', 'Down'])
         self.settings.endGroup()
 
     def closeEvent(self, e):
@@ -883,9 +903,11 @@ class MainWindow(QMainWindow):
         self.close()
 
     def checkTranscription(self):
-        dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs)
+        dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs, self.featuresLayout)
         dialog.exec_()
 
+        if not dialog.violations:
+            return
 
         for j in [1,2]:
             for k in [1,2]:
@@ -1233,12 +1255,17 @@ class MainWindow(QMainWindow):
             self.featuresLayout.minor.clear()
             self.minorLocations = dialog.minorLocations
 
+            #Empty strings are added here to allow the user to have no feature selected (as opposed to, say, no movement
+            #which is different). These empty strings are used in the "define features" dialog.
             self.featuresLayout.major.clear()
             self.majorLocations = list()
+            self.majorLocations.append('')
+            self.featuresLayout.major.addItem('')
             for index in range(dialog.majorLocationList.count()):
                 item = dialog.majorLocationList.item(index)
                 self.majorLocations.append(item.text())
                 self.featuresLayout.major.addItem(item.text())
+
             if currentMajor in self.majorLocations:
                 self.featuresLayout.major.setCurrentText(currentMajor)
                 self.featuresLayout.minor.setCurrentText(currentMinor)
@@ -1248,6 +1275,8 @@ class MainWindow(QMainWindow):
 
             self.featuresLayout.movement.clear()
             self.movements = list()
+            self.movements.append('')
+            self.featuresLayout.movement.addItem('')
             for index in range(dialog.movementList.count()):
                 item = dialog.movementList.item(index)
                 self.movements.append(item.text())
@@ -1259,6 +1288,8 @@ class MainWindow(QMainWindow):
 
             self.featuresLayout.orientation.clear()
             self.orientations = list()
+            self.orientations.append('')
+            self.featuresLayout.orientation.addItem('')
             for index in range(dialog.orientationList.count()):
                 item = dialog.orientationList.item(index)
                 self.orientations.append(item.text())
@@ -1274,7 +1305,6 @@ class MainWindow(QMainWindow):
         if constraints:
             for c in MasterConstraintList:
                 self.constraints[c[0]] = getattr(dialog, c[0]).isChecked()
-
 
     def setTranscriptionRestrictions(self):
         restricted = self.setRestrictionsAct.isChecked()
@@ -1360,7 +1390,7 @@ class MainWindow(QMainWindow):
 
 class ConstraintCheckMessageBox(QDialog):
 
-    def __init__(self, constraints, configTabs):
+    def __init__(self, constraints, configTabs, featuresLayout):
         super().__init__()
         self.setWindowTitle('Transcription verification')
         layout = QVBoxLayout()
@@ -1374,9 +1404,10 @@ class ConstraintCheckMessageBox(QDialog):
             buttonLayout.addWidget(ok)
             layout.addLayout(buttonLayout)
             self.setLayout(layout)
+            self.violations = {}
             return
 
-        self.satisfied_message = 'This constraint is fully satisfied\n("{}").'
+        self.satisfied_message = 'This constraint is fully satisfied.\n("{}")'
         self.violations = {'config1hand1': {n:set() for n in range(35)}, 'config2hand1': {n:set() for n in range(35)},
                            'config1hand2': {n:set() for n in range(35)}, 'config2hand2': {n:set() for n in range(35)}}
 
@@ -1398,7 +1429,6 @@ class ConstraintCheckMessageBox(QDialog):
         self.pageSelection.currentIndexChanged.connect(self.pages.setCurrentIndex)
 
         no_problems = True
-
         for c in MasterConstraintList:
             alert_text = list()
             constraint_text = list()
@@ -1412,24 +1442,30 @@ class ConstraintCheckMessageBox(QDialog):
                 elif c[1].constraint_type == 'conditional':
                     self.conditionalConstraintsTab.addTab(tab, c[1].name)
 
-                for k in [1,2]:
-                    transcription = configTabs.widget(k-1).hand1Transcription.slots
-                    problems = c[1].check(transcription)
+                if c[1].name in ['Major Features Constraint', 'Second Hand Movement Constraint']:
+                    problems = c[1].check(featuresLayout)
                     if problems:
-                        constraint_text.append('\nConfig {}, Hand 1: {}'.format(k, problems))
-                        slots = [int(x) for x in problems.split(', ')]
-                        handconfig = 'config{}hand1'.format(k)
-                        for s in slots:
-                            self.violations[handconfig][s].add(c[1].name)
+                        problems.insert(0,'\n')
+                        constraint_text.append('\n\n'.join(problems))
+                else:
+                    for k in [1,2]:
+                        transcription = configTabs.widget(k-1).hand1Transcription.slots
+                        problems = c[1].check(transcription)
+                        if problems:
+                            constraint_text.append('\nConfig {}, Hand 1: {}'.format(k, problems))
+                            slots = [int(x) for x in problems.split(', ')]
+                            handconfig = 'config{}hand1'.format(k)
+                            for s in slots:
+                                self.violations[handconfig][s].add(c[1].name)
 
-                    transcription = configTabs.widget(k-1).hand2Transcription.slots
-                    problems = c[1].check(transcription)
-                    if problems:
-                        constraint_text.append('\nConfig {}, Hand 2: {}'.format(k, problems))
-                        slots = [int(x) for x in problems.split(', ')]
-                        handconfig = 'config{}hand2'.format(k)
-                        for s in slots:
-                            self.violations[handconfig][s].add(c[1].name)
+                        transcription = configTabs.widget(k-1).hand2Transcription.slots
+                        problems = c[1].check(transcription)
+                        if problems:
+                            constraint_text.append('\nConfig {}, Hand 2: {}'.format(k, problems))
+                            slots = [int(x) for x in problems.split(', ')]
+                            handconfig = 'config{}hand2'.format(k)
+                            for s in slots:
+                                self.violations[handconfig][s].add(c[1].name)
 
                 if constraint_text:
                     alert_text.append('The following slots are in violation of the {}\n'

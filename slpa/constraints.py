@@ -145,16 +145,54 @@ class RingPinkyAnatomicalContstraint():
                 output.sort()
                 return ', '.join(output)
 
+class MajorFeaturesConstraint():
+    """
+    Major features must be selected
+    """
+    name = 'Major Features Constraint'
+    explanation = ('A transcription must indicate location, movement, and orientation')
+    constraint_type = 'transcription'
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def check(cls, featuresLayout):
+        output = list()
+        if featuresLayout.major.currentText() == 'Neutral':
+            output.append('Major location')
+        if featuresLayout.minor.currentText() == 'Neutral':
+            output.append('Minor location')
+        if featuresLayout.orientation.currentText() == 'None':
+            output.append('Orientation')
+        if featuresLayout.movement.currentText() == 'None':
+            output.append('Movement')
+        return output
+
+class SecondHandMovementConstraint():
+    name = 'Second Hand Movement Constraint'
+    explanation = ('If a sign uses two hands, the second hand must have a movement feature')
+    constraint_type = 'transcription'
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def check(cls, transcription):
+        output = list()
+        return output
 
 def sortMasterList(listItem):
-    if listItem[1].constraint_type == 'transcription':
+    if listItem[1].name == 'No Empty Slots Constraint':
         return 0
-    elif listItem[1].constraint_type == 'simple':
+    elif listItem[1].constraint_type == 'transcription':
         return 1
-    elif listItem[1].constraint_type == 'conditional':
+    elif listItem[1].constraint_type == 'simple':
         return 2
-    else:
+    elif listItem[1].constraint_type == 'conditional':
         return 3
+    else:
+        return 4
 
 
 MasterConstraintList = inspect.getmembers(sys.modules[__name__], inspect.isclass)
