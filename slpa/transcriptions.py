@@ -1,5 +1,4 @@
-from .imports import *
-from .constraints import *
+from imports import *
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
@@ -460,7 +459,7 @@ class TranscriptionInfo(QGridLayout):
         elif e < 16:
             self.fieldTypeInfo.setText('Thumb/finger contact')
             self.fieldNumberInfo.setText('3')
-        elif e < 19:
+        elif e < 20:
             self.fieldTypeInfo.setText('Index finger')
             self.fieldNumberInfo.setText('4')
         elif e < 25:

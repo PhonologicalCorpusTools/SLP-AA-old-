@@ -159,14 +159,16 @@ class MajorFeaturesConstraint():
     @classmethod
     def check(cls, featuresLayout):
         output = list()
-        if featuresLayout.major.currentText() == 'Neutral':
+        if not featuresLayout.major.currentText():
             output.append('Major location')
-        if featuresLayout.minor.currentText() == 'Neutral':
+        if not featuresLayout.minor.currentText():
             output.append('Minor location')
-        if featuresLayout.orientation.currentText() == 'None':
+        if not featuresLayout.orientation.currentText():
             output.append('Orientation')
-        if featuresLayout.movement.currentText() == 'None':
-            output.append('Movement')
+        if not featuresLayout.oneHandMovement.currentText():
+            output.append('One hand movement')
+        if not featuresLayout.twoHandMovement.currentText():
+            output.append('Two hand movement')
         return output
 
 class SecondHandMovementConstraint():

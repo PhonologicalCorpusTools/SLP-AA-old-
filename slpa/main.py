@@ -5,14 +5,15 @@ import sys
 import subprocess
 import collections
 from enum import Enum
-from .imports import *
-from .handshapes import *
-from .lexicon import *
-from .binary import *
-from .transcriptions import *
-from .constraints import *
-from slpa import __version__ as currentSLPAversion
+from imports import *
+from handshapes import *
+from lexicon import *
+from binary import *
+from transcriptions import *
+from constraints import *
+#from slpa import __version__ as currentSLPAversion
 
+__currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
 
@@ -67,7 +68,7 @@ class FeaturesDialog(QDialog):
     def __init__(self, settings, parent=None):
         super().__init__()
         self.setWindowTitle('Define major feature values')
-        self.majorLocations, self.minorLocations, oneHandMovements, orientations = settings
+        self.majorLocations, self.minorLocations, oneHandMovements, twoHandMovements, orientations = settings
 
         layout = QVBoxLayout()
 
@@ -90,6 +91,9 @@ class FeaturesDialog(QDialog):
 
         minorLocationLayout = QVBoxLayout()
         self.minorLocationList = QListWidget()
+        major_location = self.majorLocations[0]
+        if major_location not in self.minorLocations:
+            self.minorLocations[major_location] = ['']
         for location in sorted(self.minorLocations[self.majorLocations[0]]):
             if not location:
                 continue
@@ -104,20 +108,37 @@ class FeaturesDialog(QDialog):
         minorLocationLayout.addWidget(removeMinorLocationButton)
         self.majorLocationList.currentItemChanged.connect(self.changeMinorList)
 
-        movementLayout = QVBoxLayout()
+        oneHandMovementLayout = QVBoxLayout()
         self.oneHandMovementList = QListWidget()
         for oneHandMovement in sorted(oneHandMovements):
             if not oneHandMovement:
                 continue
             self.oneHandMovementList.addItem(oneHandMovement)
         self.oneHandMovementList.setCurrentRow(0)
-        addMovementButton = QPushButton('Add one hand movement')
-        addMovementButton.clicked.connect(self.addMovement)
-        removeMovementButton = QPushButton('Remove one hand movement')
-        removeMovementButton.clicked.connect(self.removeMovement)
-        movementLayout.addWidget(self.oneHandMovementList)
-        movementLayout.addWidget(addMovementButton)
-        movementLayout.addWidget(removeMovementButton)
+        addOneHandMovementButton = QPushButton('Add one hand movement')
+        addOneHandMovementButton.clicked.connect(self.addOneHandMovement)
+        removeOneHandMovementButton = QPushButton('Remove one hand movement')
+        removeOneHandMovementButton.clicked.connect(self.removeOneHandMovement)
+        oneHandMovementLayout.addWidget(self.oneHandMovementList)
+        oneHandMovementLayout.addWidget(addOneHandMovementButton)
+        oneHandMovementLayout.addWidget(removeOneHandMovementButton)
+
+        twoHandMovementLayout = QVBoxLayout()
+        self.twoHandMovementList = QListWidget()
+        for twoHandMovement in sorted(twoHandMovements):
+            if not twoHandMovement:
+                continue
+            self.twoHandMovementList.addItem(twoHandMovement)
+            print(twoHandMovement)
+        self.twoHandMovementList.setCurrentRow(0)
+        addTwoHandMovementButton = QPushButton('Add two hand movement')
+        addTwoHandMovementButton.clicked.connect(self.addTwoHandMovement)
+        removeTwoHandMovementButton = QPushButton('Remove two hand movement')
+        removeTwoHandMovementButton.clicked.connect(self.removeTwoHandMovement)
+        twoHandMovementLayout.addWidget(self.twoHandMovementList)
+        twoHandMovementLayout.addWidget(addTwoHandMovementButton)
+        twoHandMovementLayout.addWidget(removeTwoHandMovementButton)
+
 
         orientationLayout = QVBoxLayout()
         self.orientationList = QListWidget()
@@ -136,7 +157,8 @@ class FeaturesDialog(QDialog):
 
         listLayout.addLayout(majorLocationLayout)
         listLayout.addLayout(minorLocationLayout)
-        listLayout.addLayout(movementLayout)
+        listLayout.addLayout(oneHandMovementLayout)
+        listLayout.addLayout(twoHandMovementLayout)
         listLayout.addLayout(orientationLayout)
 
         layout.addLayout(listLayout)
@@ -306,7 +328,7 @@ class FeaturesDialog(QDialog):
         self.minorLocationList.setCurrentRow(0)
 
 
-    def addMovement(self):
+    def addOneHandMovement(self):
         dialog = FeatureEntryDialog()
         result = dialog.exec_()
         if result:
@@ -316,7 +338,17 @@ class FeaturesDialog(QDialog):
                 self.oneHandMovementList.setCurrentRow(len(self.oneHandMovementList) - 1)
                 self.oneHandMovementList.sortItems()
 
-    def removeMovement(self):
+    def addTwoHandMovement(self):
+        dialog = FeatureEntryDialog()
+        result = dialog.exec_()
+        if result:
+            name = dialog.featureNameEdit.text()
+            if name:
+                self.twoHandMovementList.addItem(name)
+                self.twoHandMovementList.setCurrentRow(len(self.twoHandMovementList) - 1)
+                self.twoHandMovementList.sortItems()
+
+    def removeOneHandMovement(self):
         if len(self.oneHandMovementList) == 1:
             self.emptyListWarning.exec_()
             return
@@ -335,6 +367,25 @@ class FeaturesDialog(QDialog):
             self.oneHandMovementList.takeItem(self.oneHandMovementList.row(item))
         self.oneHandMovementList.sortItems()
         self.oneHandMovementList.setCurrentRow(0)
+
+    def removeTwoHandMovement(self):
+        if len(self.twoHandMovementList) == 1:
+            self.emptyListWarning.exec_()
+            return
+
+        listItems = self.twoHandMovementList.selectedItems()
+        feature_name = listItems[0].text()
+        text = 'the two hand movement feature \"{}\"'.format(feature_name)
+        self.removeWarning.setText(self.removeWarningText.format(text))
+        self.removeWarning.exec_()
+        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
+        if role == QMessageBox.RejectRole:
+            return
+
+        for item in listItems:
+            self.twoHandMovementList.takeItem(self.twoHandMovementList.row(item))
+        self.twoHandMovementList.sortItems()
+        self.twoHandMovementList.setCurrentRow(0)
 
     def addOrientation(self):
         dialog = FeatureEntryDialog()
@@ -389,7 +440,7 @@ class MajorFeatureLayout(QGridLayout):
     def __init__(self, settings):
         super().__init__()
 
-        self.majorLocations, self.minorLocations, self.oneHandMovements, self.orientations = settings
+        self.majorLocations, self.minorLocations, self.oneHandMovements, self.twoHandMovements, self.orientations = settings
         self.major = QComboBox()
         for location in self.majorLocations:
             self.major.addItem(location)
@@ -397,6 +448,10 @@ class MajorFeatureLayout(QGridLayout):
         self.oneHandMovement = QComboBox()
         for movement in self.oneHandMovements:
             self.oneHandMovement.addItem(movement)
+        self.twoHandMovement = QComboBox()
+        for movement in self.twoHandMovements:
+            self.twoHandMovement.addItem(movement)
+
         self.orientation = QComboBox()
         for orientation in self.orientations:
             self.orientation.addItem(orientation)
@@ -406,13 +461,15 @@ class MajorFeatureLayout(QGridLayout):
         self.changeMinorLocation()
 
         self.addWidget(QLabel('Major Location'), 0, 0)
-        self.addWidget(self.major,0,1)
+        self.addWidget(self.major, 0, 1)
         self.addWidget(QLabel('Minor Location'), 1, 0)
-        self.addWidget(self.minor,1,1)
+        self.addWidget(self.minor, 1, 1)
         self.addWidget(QLabel('One Hand Movement'), 2, 0)
         self.addWidget(self.oneHandMovement, 2, 1)
-        self.addWidget(QLabel('Orientation'), 3, 0)
-        self.addWidget(self.orientation,3,1)
+        self.addWidget(QLabel('Two Hand Movement'), 3, 0)
+        self.addWidget(self.twoHandMovement, 3, 1)
+        self.addWidget(QLabel('Orientation'), 4, 0)
+        self.addWidget(self.orientation, 4, 1)
 
         self.addWidget(QLabel(), 0, 2) #adds a filler item for spacing
         self.setColumnStretch(2,1)
@@ -750,7 +807,9 @@ class MainWindow(QMainWindow):
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
         #Add major features (location, movement, orientation)
-        self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations, self.oneHandMovements, self.orientations])
+        #these variables are defined in MainWindow.readSettings()
+        self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations,
+                                                  self.oneHandMovements, self.twoHandMovements, self.orientations])
         self.featuresLayout.major.currentTextChanged.connect(self.userMadeChanges)
         self.featuresLayout.minor.currentTextChanged.connect(self.userMadeChanges)
         self.featuresLayout.oneHandMovement.currentTextChanged.connect(self.userMadeChanges)
@@ -874,6 +933,8 @@ class MainWindow(QMainWindow):
         self.oneHandMovements = self.settings.value('oneHandMovements',
                                                     defaultValue=['','No movement', 'Arc', 'Circular','Straight','Back and forth',
                                                            'Multiple'])
+        self.twoHandMovements = self.settings.value('twoHandMovements',
+                                                    defaultValue=['', 'N/A', 'None', 'Alternating', 'Simaultaneous'])
         self.orientations = self.settings.value('orientations',
                                                 defaultValue=['','Front', 'Back', 'Side', 'Up', 'Down'])
         self.settings.endGroup()
@@ -1247,10 +1308,13 @@ class MainWindow(QMainWindow):
     def defineFeatures(self):
         currentMajor = self.featuresLayout.major.currentText()
         currentMinor = self.featuresLayout.minor.currentText()
-        currentMovement = self.featuresLayout.oneHandMovement.currentText()
+        currentOneHandMovement = self.featuresLayout.oneHandMovement.currentText()
+        currentTwoHandMovement = self.featuresLayout.twoHandMovement.currentText()
         currentOrientation = self.featuresLayout.orientation.currentText()
 
-        dialog = FeaturesDialog([self.majorLocations, self.minorLocations, self.oneHandMovements, self.orientations])
+        dialog = FeaturesDialog([self.majorLocations, self.minorLocations,
+                                 self.oneHandMovements, self.twoHandMovements,
+                                 self.orientations])
         results = dialog.exec_()
         if results:
 
@@ -1283,10 +1347,23 @@ class MainWindow(QMainWindow):
                 item = dialog.oneHandMovementList.item(index)
                 self.oneHandMovements.append(item.text())
                 self.featuresLayout.oneHandMovement.addItem(item.text())
-            if currentMovement in self.oneHandMovements:
-                self.featuresLayout.oneHandMovement.setCurrentText(currentMovement)
+            if currentOneHandMovement in self.oneHandMovements:
+                self.featuresLayout.oneHandMovement.setCurrentText(currentOneHandMovement)
             else:
                 self.featuresLayout.oneHandMovement.setCurrentIndex(0)
+
+            self.featuresLayout.twoHandMovement.clear()
+            self.twoHandMovements = list()
+            self.twoHandMovements.append('')
+            self.featuresLayout.twoHandMovement.addItem('')
+            for index in range(dialog.twoHandMovementList.count()):
+                item = dialog.twoHandMovementList.item(index)
+                self.twoHandMovements.append(item.text())
+                self.featuresLayout.twoHandMovement.addItem(item.text())
+            if currentTwoHandMovement in self.twoHandMovements:
+                self.featuresLayout.twoHandMovement.setCurrentText(currentTwoHandMovement)
+            else:
+                self.featuresLayout.twoHandMovement.setCurrentIndex(0)
 
             self.featuresLayout.orientation.clear()
             self.orientations = list()
@@ -1742,5 +1819,10 @@ def loadcsvCorpus(path):
             self.corpusDock.widget().layout().addWidget(button)
 
 def getMediaFilePath(filename):
-    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', filename)
+    if hasattr(sys, 'frozen'):
+        dir = os.path.dirname(sys.executable)
+        # dir = os.path.dirname(sys.argv[0])
+        path = os.path.join(dir, 'media', filename)
+    else:
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', filename)
     return path

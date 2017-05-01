@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-from slpa.main import MainWindow, QApplicationMessaging
+from main import MainWindow, QApplicationMessaging
 
 if sys.platform.startswith('win'):
     if getattr(sys, 'frozen', False):
@@ -17,7 +17,7 @@ if sys.platform.startswith('win'):
         sys.stdout = FakeSTD()
         sys.stderr = FakeSTD()
 
-def main():
+def run_slpa():
 
     app = QApplicationMessaging(sys.argv)
     if app.isRunning():
@@ -26,14 +26,14 @@ def main():
         else:
             app.sendMessage('ARISE')
     else:
-        main = MainWindow(app)
-        app.aboutToQuit.connect(main.cleanUp)
+        slpaGUI = MainWindow(app)
+        app.aboutToQuit.connect(slpaGUI.cleanUp)
 
-        app.setActiveWindow(main)
-        main.show()
+        app.setActiveWindow(slpaGUI)
+        slpaGUI.show()
         sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
-    main()
+    run_slpa()
 
