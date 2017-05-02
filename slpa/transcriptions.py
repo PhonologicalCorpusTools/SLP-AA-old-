@@ -290,7 +290,24 @@ class TranscriptionSlot(QLineEdit):
 
     def keyPressEvent(self, e):
         key = e.key()
-        if self.num in [20, 25, 30]:
+
+        #capitalize L, U, O in slot 2
+        if self.num == 2:
+            if key in [76, 85, 79]: #Qt.Key_L, Qt.Key_U, Qt.Key_O
+                self.setText(e.text().upper())
+
+        #capitalize M in slot 7 (only)
+        elif self.num == 7:
+            if key == 77: #Qt.Key_M
+                self.setText(e.text().upper())
+
+        #capitalize E, F, H in numerous slots
+        elif self.num in [4,5,17,18,19,22,23,24,27,28,29,32,33,34]:
+            if key in [69, 70, 72]: #Qt.Key_E, Qt.Key_F, Qt.Key_H
+                self.setText(e.text().upper())
+
+        #allow Z, C, and S to act stand in for various 'x' values that can't be typed
+        elif self.num in [20, 25, 30]:
             if key == 90:# == Qt.Key_Z:
                 self.completer().setCurrentRow(5)
                 self.setText('x-')
@@ -300,9 +317,6 @@ class TranscriptionSlot(QLineEdit):
             elif key == 83:# == Qt.Key_S
                 self.completer().setCurrentRow(6)
                 self.setText(X_IN_BOX)
-        text = e.text()
-        if text in ['l', 'u', 'o', 'e', 'f', 'h', 'm']:
-            e = QEvent.KeyPress(text.upper())
 
         self.completer().complete()
         super().keyPressEvent(e)

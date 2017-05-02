@@ -71,7 +71,10 @@ class NoEmptySlotsConstraint():
         output = list()
         for slot in transcription[1:]:
             if not slot.text():
-                output.append(str(slot.num))
+                if slot.num in [12, 13, 14, 15]:
+                    pass
+                else:
+                    output.append(str(slot.num))
         return ', '.join(output)
 
 
@@ -132,18 +135,20 @@ class RingPinkyAnatomicalContstraint():
     @classmethod
     def check(cls, transcription):
         output = list()
-        if transcription[32].text() == 'F':
-            output.append('32')
-        if transcription[33].text() == 'F':
-            output.append('33')
-        if output == ['32', '33']:
+        if transcription[27].text() in 'EHi':
+            output.append('27')
+        if transcription[28].text() in 'EHi':
+            output.append('28')
+        if output == ['27', '28']:
             if transcription[14].text() != '4':
-                if transcription[27].text() in 'EHi':
-                    output.append('28')
-                if transcription[28].text() in 'EHi':
-                    output.append('29')
+                if transcription[32].text() == 'F':
+                    output.append('32')
+                if transcription[33].text() == 'F':
+                    output.append('33')
                 output.sort()
                 return ', '.join(output)
+        else:
+            return []
 
 class MajorFeaturesConstraint():
     """
