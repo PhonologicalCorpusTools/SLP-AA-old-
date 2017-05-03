@@ -306,7 +306,7 @@ class TranscriptionSlot(QLineEdit):
             if key in [69, 70, 72]: #Qt.Key_E, Qt.Key_F, Qt.Key_H
                 self.setText(e.text().upper())
 
-        #allow Z, C, and S to act stand in for various 'x' values that can't be typed
+        #allow Z, C, and S to stand in for various 'x' values that can't be typed
         elif self.num in [20, 25, 30]:
             if key == 90:# == Qt.Key_Z:
                 self.completer().setCurrentRow(5)
@@ -488,12 +488,5 @@ class TranscriptionInfo(QGridLayout):
         self.slotNumberInfo.setText(str(e))
         self.slotTypeInfo.setText(self.purposeDict[e])
         self.slotOptionsInfo.setText(self.optionsDict[e])
-
-class TranscriptionConstraintTab(QWidget):
-
-    def __init__(self):
-        super().__init__()
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
 
 
