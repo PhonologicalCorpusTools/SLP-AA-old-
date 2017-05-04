@@ -11,7 +11,7 @@ from lexicon import *
 from binary import *
 from transcriptions import *
 from constraints import *
-from constraintwidgets import ConstraintCheckMessageBox
+from constraintwidgets import *
 #from slpa import __version__ as currentSLPAversion
 
 __currentSLPAversion__ = 0.1
@@ -538,7 +538,6 @@ class HandConfigTab(QWidget):
         self.configLayout.addLayout(self.hand1Transcription, 0, 0)
         self.hand2Transcription = TranscriptionLayout(hand=2)
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
-
         self.setLayout(self.configLayout)
 
     def clearAll(self):
@@ -730,9 +729,10 @@ class MainWindow(QMainWindow):
         self.createActions()
         self.createMenus()
 
-        self.restrictedTranscriptions = True
+        # self.restrictedTranscriptions = True
         self.askSaveChanges = False
         self.constraints = dict()
+        self.clipboard = list()
         self.readSettings()
 
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
@@ -765,6 +765,14 @@ class MainWindow(QMainWindow):
         self.openBlenderButton = QPushButton('Visualize transcription')
         self.openBlenderButton.clicked.connect(self.launchBlender)
         topLayout.addWidget(self.openBlenderButton)
+
+        # Copy and paste transcriptions
+        self.copyButton = QPushButton('Copy')
+        self.pasteButton = QPushButton('Paste')
+        self.copyButton.clicked.connect(self.copyTranscription)
+        self.pasteButton.clicked.connect(self.pasteTranscription)
+        topLayout.addWidget(self.copyButton)
+        topLayout.addWidget(self.pasteButton)
 
         layout.addLayout(topLayout)
 
@@ -826,6 +834,52 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         #self.setFixedSize(self.size())
         self.defineTabOrder()
+
+    def keyPressEvent(self, e):
+        key = e.key()
+        modifiers = e.modifiers()
+        if (key == Qt.Key_C) and (modifiers == Qt.ControlModifier):
+            self.copyTranscription()
+        elif (key == Qt.Key_V) and (modifiers == Qt.ControlModifier):
+            self.pasteTranscription()
+        else:
+            super().keyPressEvent(e)
+
+    def copyTranscription(self):
+        transcriptions = list()
+        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        dialog = TranscriptionCopyDialog(transcriptions)
+        result = dialog.exec_()
+        if result:
+            self.clipboard = dialog.selectedTranscription
+
+    def pasteTranscription(self):
+        if not self.clipboard:
+            alert = QMessageBox()
+            alert.setWindowTitle('Error')
+            alert.setText('Your transcription clipboard is currently empty. You need to copy a transcription before '
+                          'you can paste one.')
+            alert.exec_()
+            return
+        transcriptions = list()
+        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        dialog = TranscriptionPasteDialog(self.clipboard, transcriptions)
+        result = dialog.exec_()
+        if result:
+            if dialog.transcriptionID == 0:
+                self.configTabs.widget(0).hand1Transcription.updateFromCopy(self.clipboard)
+            elif dialog.transcriptionID == 1:
+                self.configTabs.widget(0).hand2Transcription.updateFromCopy(self.clipboard)
+            if dialog.transcriptionID == 2:
+                self.configTabs.widget(1).hand1Transcription.updateFromCopy(self.clipboard)
+            if dialog.transcriptionID == 3:
+                self.configTabs.widget(1).hand2Transcription.updateFromCopy(self.clipboard)
 
     def userMadeChanges(self, e):
         self.askSaveChanges = True

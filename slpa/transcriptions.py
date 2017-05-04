@@ -27,13 +27,12 @@ class TranscriptionLayout(QVBoxLayout):
         self.violations = list()
 
         self.lineLayout = QHBoxLayout()
-        self.lineLayout.setContentsMargins(-1,0,-1,-1)
+        self.lineLayout.setContentsMargins(-1, 0, -1, -1)
         self.addLayout(self.lineLayout)
 
         self.generateSlots()
         self.generateViolationLabels()
         self.generateFields()
-
 
     def generateFields(self):
         #FIELD 1 (Forearm)
@@ -198,11 +197,24 @@ class TranscriptionLayout(QVBoxLayout):
                                                                      ''.join([self[n].getText() for n in range(29,34)]))
         return transcription
 
+    def updateFromCopy(self, other):
+        self.clearTranscriptionSlots()
+        if other.slot1.isChecked():
+            self.slot1.setChecked(True)
+        for slot in other.slots[1:]:
+            text = slot.getText(empty_text='')
+            getattr(self, 'slot{}'.format(slot.num)).setText(text)
+
     def __str__(self):
         return ','.join(self.values())
 
+    def str_with_underscores(self):
+        return ''.join([v if v else '_' for v in self.values()])
+
     def __getitem__(self, num):
         return self.slots[num]
+
+
 
 class TranscriptionCompleter(QCompleter):
 
@@ -267,8 +279,8 @@ class TranscriptionSlot(QLineEdit):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def getText(self):
-        return self.text() if self.text() else '_'
+    def getText(self, empty_text = '_'):
+        return self.text() if self.text() else empty_text
 
     @Slot(bool)
     def changeValidatorState(self, unrestricted):
@@ -490,3 +502,118 @@ class TranscriptionInfo(QGridLayout):
         self.slotOptionsInfo.setText(self.optionsDict[e])
 
 
+class TranscriptionPasteDialog(QDialog):
+
+    def __init__(self, copiedTranscription, otherTranscriptions):
+        super().__init__()
+        layout = QVBoxLayout()
+        copyLayout = QHBoxLayout()
+        layout.addLayout(copyLayout)
+        copyLayout.addWidget(QLabel('The currently copied transcription is '))
+        copyLayout.addWidget(QLabel(copiedTranscription.str_with_underscores()))
+
+        layout.addWidget(QLabel('Where would you like to paste this transcription?'))
+
+        self.transcriptions = otherTranscriptions
+        radioLayout = QGridLayout()
+        layout.addLayout(radioLayout)
+        hand1config1 = QRadioButton(otherTranscriptions[0].str_with_underscores())
+        hand1config1.setChecked(True)
+        hand1config2 = QRadioButton(otherTranscriptions[1].str_with_underscores())
+        hand2config1 = QRadioButton(otherTranscriptions[2].str_with_underscores())
+        hand2config2 = QRadioButton(otherTranscriptions[3].str_with_underscores())
+
+        self.transcriptionRadioButtons = QButtonGroup()
+        self.transcriptionRadioButtons.addButton(hand1config1)
+        self.transcriptionRadioButtons.setId(hand1config1, 0)
+        self.transcriptionRadioButtons.addButton(hand1config2)
+        self.transcriptionRadioButtons.setId(hand1config2, 1)
+        self.transcriptionRadioButtons.addButton(hand2config1)
+        self.transcriptionRadioButtons.setId(hand2config1, 2)
+        self.transcriptionRadioButtons.addButton(hand2config2)
+        self.transcriptionRadioButtons.setId(hand2config2, 3)
+
+        radioLayout.addWidget(QLabel('Hand 1, Config 1'), 0, 0)
+        radioLayout.addWidget(hand1config1, 0, 1)
+        radioLayout.addWidget(QLabel('Hand 1, Config 2'), 1, 0)
+        radioLayout.addWidget(hand1config2, 1, 1)
+        radioLayout.addWidget(QLabel('Hand 2, Config 1'), 2, 0)
+        radioLayout.addWidget(hand2config1, 2, 1)
+        radioLayout.addWidget(QLabel('Hand 2, Config 2'), 3, 0)
+        radioLayout.addWidget(hand2config2, 3, 1)
+
+        buttonLayout = QHBoxLayout()
+        layout.addLayout(buttonLayout)
+        ok = QPushButton('OK')
+        ok.clicked.connect(self.accept)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+
+        self.setLayout(layout)
+
+    def accept(self):
+        selectedButton = self.transcriptionRadioButtons.checkedButton()
+        id = self.transcriptionRadioButtons.id(selectedButton)
+        self.transcriptionID = id
+        self.selectedTranscription = self.transcriptions[id]
+        super().accept()
+
+    def reject(self):
+        self.selectedTranscription = None
+        super().reject()
+
+class TranscriptionCopyDialog(QDialog):
+
+    def __init__(self, transcriptions):
+        super().__init__()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel('Which transcription do you want to copy?'))
+        self.transcriptions = transcriptions
+        radioLayout = QGridLayout()
+        layout.addLayout(radioLayout)
+        hand1config1 = QRadioButton(transcriptions[0].str_with_underscores())
+        hand1config1.setChecked(True)
+        hand1config2 = QRadioButton(transcriptions[1].str_with_underscores())
+        hand2config1 = QRadioButton(transcriptions[2].str_with_underscores())
+        hand2config2 = QRadioButton(transcriptions[3].str_with_underscores())
+        self.transcriptionRadioButtons = QButtonGroup()
+        self.transcriptionRadioButtons.addButton(hand1config1)
+        self.transcriptionRadioButtons.setId(hand1config1, 0)
+        self.transcriptionRadioButtons.addButton(hand1config2)
+        self.transcriptionRadioButtons.setId(hand1config2, 1)
+        self.transcriptionRadioButtons.addButton(hand2config1)
+        self.transcriptionRadioButtons.setId(hand2config1, 2)
+        self.transcriptionRadioButtons.addButton(hand2config2)
+        self.transcriptionRadioButtons.setId(hand2config2, 3)
+
+        radioLayout.addWidget(QLabel('Hand 1, Config 1'), 0, 0)
+        radioLayout.addWidget(hand1config1, 0, 1)
+        radioLayout.addWidget(QLabel('Hand 1, Config 2'), 1, 0)
+        radioLayout.addWidget(hand1config2, 1, 1)
+        radioLayout.addWidget(QLabel('Hand 2, Config 1'), 2, 0)
+        radioLayout.addWidget(hand2config1, 2, 1)
+        radioLayout.addWidget(QLabel('Hand 2, Config 2'), 3, 0)
+        radioLayout.addWidget(hand2config2, 3, 1)
+
+        buttonLayout = QHBoxLayout()
+        layout.addLayout(buttonLayout)
+        ok = QPushButton('OK')
+        ok.clicked.connect(self.accept)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+
+        self.setLayout(layout)
+
+    def accept(self):
+        selectedButton = self.transcriptionRadioButtons.checkedButton()
+        id = self.transcriptionRadioButtons.id(selectedButton)
+        self.selectedTranscription = self.transcriptions[id]
+        super().accept()
+
+    def reject(self):
+        self.selectedTranscription = None
+        super().reject()

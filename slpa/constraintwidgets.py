@@ -227,7 +227,6 @@ class ConstraintCheckMessageBox(QDialog):
 
         self.tab_maximum = {page_number:self.pages.widget(page_number).count()-1
                                      for page_number in range(self.page_maximum)}
-        print(self.tab_maximum)
         buttonLayout = QHBoxLayout()
         ok = QPushButton('OK')
         ok.clicked.connect(self.accept)
