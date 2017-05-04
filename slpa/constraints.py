@@ -168,12 +168,14 @@ class MajorFeaturesConstraint():
             output.append('Major location')
         if not featuresLayout.minor.currentText():
             output.append('Minor location')
-        if not featuresLayout.orientation.currentText():
-            output.append('Orientation')
         if not featuresLayout.oneHandMovement.currentText():
             output.append('One hand movement')
         if not featuresLayout.twoHandMovement.currentText():
             output.append('Two hand movement')
+        if not featuresLayout.orientation.currentText():
+            output.append('Orientation')
+        if not featuresLayout.dislocation.currentText():
+            output.append('Dislocation')
         return output
 
 class SecondHandMovementConstraint():
