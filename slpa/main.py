@@ -17,6 +17,22 @@ from constraintwidgets import *
 __currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
+DEFAULT_MAJOR_LOCATIONS = ['', 'Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral']
+DEFAULT_MINOR_LOCATIONS = {'':'',
+    'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead','Head top', 'Mouth', 'Under chin', 'Upper lip'],
+    'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)','Forearm (ulnar)',
+            'Upper arm','Wrist (back)', 'Wrist (front)'],
+    'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder','Torso (bottom)', 'Torso (mid)',
+            'Torso (top)', 'Waist'],
+    'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)','Finger (ulnar)', 'Heel',
+            'Palm (front)', 'Palm (back)'],
+    'Neutral': ['Neutral', 'Upper head height', 'Mid head height', 'Low head height', 'Neck height', 'Shoulder height',
+                'Upper torso height', 'Mid torso height', 'Low torso height', 'Waist height']}
+DEFAULT_ONE_HAND_MOVEMENTS = ['','Arc', 'Circular','Straight','Back and forth', 'Multiple', 'Hold']
+DEFAULT_TWO_HAND_MOVEMENTS = ['', 'N/A', 'Hold', 'Alternating', 'Simaultaneous']
+DEFAULT_ORIENTATIONS = ['','Front', 'Back', 'Side', 'Up', 'Down']
+DEFAULT_DISLOCATIONS = ['', 'None', 'Right', 'Left']
+
 
 class QApplicationMessaging(QApplication):
     messageFromOtherInstance = Signal(bytes)
@@ -69,7 +85,12 @@ class FeaturesDialog(QDialog):
     def __init__(self, settings, parent=None):
         super().__init__()
         self.setWindowTitle('Define major feature values')
-        self.majorLocations, self.minorLocations, oneHandMovements, twoHandMovements, orientations = settings
+        self.majorLocations = settings[0]
+        self.minorLocations = settings[1]
+        oneHandMovements = settings[2]
+        twoHandMovements = settings[3]
+        orientations = settings[4]
+        dislocations = settings[5]
 
         layout = QVBoxLayout()
 
@@ -81,7 +102,6 @@ class FeaturesDialog(QDialog):
             if not location:
                 continue
             self.majorLocationList.addItem(location)
-        self.majorLocationList.setCurrentRow(0)
         addMajorLocationButton = QPushButton('Add major location')
         addMajorLocationButton.clicked.connect(self.addMajorLocation)
         removeMajorLocationButton = QPushButton('Remove major location')
@@ -108,6 +128,7 @@ class FeaturesDialog(QDialog):
         minorLocationLayout.addWidget(addMinorLocationButton)
         minorLocationLayout.addWidget(removeMinorLocationButton)
         self.majorLocationList.currentItemChanged.connect(self.changeMinorList)
+        self.majorLocationList.setCurrentItem(self.majorLocationList.item(0))
 
         oneHandMovementLayout = QVBoxLayout()
         self.oneHandMovementList = QListWidget()
@@ -155,11 +176,27 @@ class FeaturesDialog(QDialog):
         orientationLayout.addWidget(addOrientationButton)
         orientationLayout.addWidget(removeOrientationButton)
 
+        dislocationLayout = QVBoxLayout()
+        self.dislocationList = QListWidget()
+        for dislocation in sorted(dislocations):
+            if not dislocation:
+                continue
+            self.dislocationList.addItem(dislocation)
+        self.dislocationList.setCurrentRow(0)
+        addDislocationButton = QPushButton('Add dislocation')
+        addDislocationButton.clicked.connect(self.addDislocation)
+        removeDislocationButton = QPushButton('Remove dislocation')
+        removeDislocationButton.clicked.connect(self.removeDislocation)
+        dislocationLayout.addWidget(self.dislocationList)
+        dislocationLayout.addWidget(addDislocationButton)
+        dislocationLayout.addWidget(removeDislocationButton)
+
         listLayout.addLayout(majorLocationLayout)
         listLayout.addLayout(minorLocationLayout)
         listLayout.addLayout(oneHandMovementLayout)
         listLayout.addLayout(twoHandMovementLayout)
         listLayout.addLayout(orientationLayout)
+        listLayout.addLayout(dislocationLayout)
 
         layout.addLayout(listLayout)
 
@@ -206,35 +243,41 @@ class FeaturesDialog(QDialog):
         if role == QMessageBox.RejectRole:
             return
 
-        #the empty string options are not reset here, so they aren't displayed in the GUI
+        #the empty string options are not reset here, in order that they not be displayed in the GUI
         #instead, empty string are added in the "if result" clause of MainWindow.defineFeatures()
-        self.minorLocations = {'Head': ['Cheek', 'Nose', 'Chin', 'Eye','Forehead', 'Head top', 'Mouth',
-                                        'Under chin', 'Upper lip'],
-                                'Arm': ['Elbow (back)', 'Elbow (front)','Forearm (back)', 'Forearm (front)',
-                                        'Forearm (ulnar)', 'Upper arm', 'Wrist (back)','Wrist (front)'],
-                                'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder',
-                                          'Torso (bottom)', 'Torso (mid)', 'Torso (top)', 'Waist'],
-                                'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)', 'Finger (ulnar)',
-                                                 'Heel', 'Palm (front)', 'Palm (back)']}
+        self.minorLocations = DEFAULT_MINOR_LOCATIONS
+        self.minorLocations.pop('')
         self.minorLocationList.clear()
 
-        self.majorLocations = ['Head', 'Arm', 'Trunk', 'Non-dominant']
+        self.majorLocations = DEFAULT_MAJOR_LOCATIONS[1:]
         self.majorLocationList.clear()
         for location in sorted(self.majorLocations):
             self.majorLocationList.addItem(location)
         self.majorLocationList.setCurrentRow(0)
 
-        self.oneHandMovements = ['Arc', 'Circular', 'Straight', 'Back and forth', 'No movement', 'Multiple']
+        self.oneHandMovements = DEFAULT_ONE_HAND_MOVEMENTS[1:]
         self.oneHandMovementList.clear()
         for movement in sorted(self.oneHandMovements):
             self.oneHandMovementList.addItem(movement)
         self.oneHandMovementList.setCurrentRow(0)
 
-        self.orientations = ['Front', 'Back', 'Side', 'Up', 'Down']
+        self.twoHandMovements = DEFAULT_TWO_HAND_MOVEMENTS[1:]
+        self.twoHandMovementList.clear()
+        for movement in sorted(self.twoHandMovements):
+            self.twoHandMovementList.addItem(movement)
+        self.twoHandMovementList.setCurrentRow(0)
+
+        self.orientations = DEFAULT_ORIENTATIONS[1:]
         self.orientationList.clear()
         for orientation in sorted(self.orientations):
             self.orientationList.addItem(orientation)
         self.orientationList.setCurrentRow(0)
+
+        self.dislocations = DEFAULT_DISLOCATIONS[1:]
+        self.dislocationList.clear()
+        for dislocation in sorted(self.dislocations):
+            self.dislocationList.addItem(dislocation)
+        self.dislocationList.setCurrentRow(0)
 
     def changeMinorList(self):
         selectedMajorFeature = self.majorLocationList.currentItem()
@@ -411,11 +454,41 @@ class FeaturesDialog(QDialog):
         if role == QMessageBox.RejectRole:
             return
 
-
         for item in listItems:
             self.orientationList.takeItem(self.orientationList.row(item))
         self.orientationList.sortItems()
         self.orientationList.setCurrentRow(0)
+
+    def addDislocation(self):
+        dialog = FeatureEntryDialog()
+        result = dialog.exec_()
+        if result:
+            name = dialog.featureNameEdit.text()
+            if name:
+                self.dislocationList.addItem(name)
+                self.dislocationList.setCurrentRow(len(self.dislocationList) - 1)
+                self.dislocationList.sortItems()
+
+    def removeDislocation(self):
+        if len(self.dislocationList) == 1:
+            self.emptyListWarning.exec_()
+            return
+
+        listItems = self.dislocationList.selectedItems()
+        feature_name = listItems[0].text()
+        text = 'the dislocation feature \"{}\"'.format(feature_name)
+        self.removeWarning.setText(self.removeWarningText.format(text))
+        self.removeWarning.exec_()
+        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
+        if role == QMessageBox.RejectRole:
+            return
+
+        for item in listItems:
+            self.dislocationList.takeItem(self.dislocationList.row(item))
+        self.dislocationList.sortItems()
+        self.dislocationList.setCurrentRow(0)
+
+
 
 
 class FeatureEntryDialog(QDialog):
@@ -440,7 +513,12 @@ class MajorFeatureLayout(QGridLayout):
     def __init__(self, settings):
         super().__init__()
 
-        self.majorLocations, self.minorLocations, self.oneHandMovements, self.twoHandMovements, self.orientations = settings
+        self.majorLocations = settings[0]
+        self.minorLocations = settings[1]
+        self.oneHandMovements = settings[2]
+        self.twoHandMovements = settings[3]
+        self.orientations = settings[4]
+        self.dislocations = settings[5]
         self.major = QComboBox()
         for location in self.majorLocations:
             self.major.addItem(location)
@@ -456,6 +534,10 @@ class MajorFeatureLayout(QGridLayout):
         for orientation in self.orientations:
             self.orientation.addItem(orientation)
 
+        self.dislocation = QComboBox()
+        for dislocation in self.dislocations:
+            self.dislocation.addItem(dislocation)
+
         self.major.currentIndexChanged.connect(self.changeMinorLocation)
         self.major.setCurrentIndex(0)
         self.changeMinorLocation()
@@ -470,6 +552,8 @@ class MajorFeatureLayout(QGridLayout):
         self.addWidget(self.twoHandMovement, 3, 1)
         self.addWidget(QLabel('Orientation'), 4, 0)
         self.addWidget(self.orientation, 4, 1)
+        self.addWidget(QLabel('Dislocation'), 5, 0)
+        self.addWidget(self.dislocation, 5, 1)
 
         self.addWidget(QLabel(), 0, 2) #adds a filler item for spacing
         self.setColumnStretch(2,1)
@@ -817,7 +901,8 @@ class MainWindow(QMainWindow):
         #Add major features (location, movement, orientation)
         #these variables are defined in MainWindow.readSettings()
         self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations,
-                                                  self.oneHandMovements, self.twoHandMovements, self.orientations])
+                                                  self.oneHandMovements, self.twoHandMovements,
+                                                  self.orientations, self.dislocations])
         self.featuresLayout.major.currentTextChanged.connect(self.userMadeChanges)
         self.featuresLayout.minor.currentTextChanged.connect(self.userMadeChanges)
         self.featuresLayout.oneHandMovement.currentTextChanged.connect(self.userMadeChanges)
@@ -950,8 +1035,10 @@ class MainWindow(QMainWindow):
         self.settings.beginGroup('features')
         self.settings.setValue('majorLocations', self.majorLocations)
         self.settings.setValue('minorLocations', self.minorLocations)
-        self.settings.setValue('oneHandMovememnts', self.oneHandMovements)
+        self.settings.setValue('oneHandMovements', self.oneHandMovements)
+        self.settings.setValue('twoHandMovements', self.twoHandMovements)
         self.settings.setValue('orientations', self.orientations)
+        self.settings.setValue('dislocations', self.dislocations)
         self.settings.endGroup()
 
     def readSettings(self):
@@ -971,26 +1058,12 @@ class MainWindow(QMainWindow):
         self.settings.value
 
         self.settings.beginGroup('features')
-        self.majorLocations = self.settings.value('majorLocations',
-                                                  defaultValue=['', 'Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral'])
-        self.minorLocations = self.settings.value('minorLocations',
-                                                  defaultValue={'':'',
-                                                      'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead',
-                                                    'Head top', 'Mouth', 'Under chin', 'Upper lip'],
-                                        'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)',
-                                                    'Forearm (ulnar)', 'Upper arm','Wrist (back)', 'Wrist (front)'],
-                                        'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder',
-                                                    'Torso (bottom)', 'Torso (mid)', 'Torso (top)', 'Waist'],
-                                        'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)',
-                                                         'Finger (ulnar)', 'Heel', 'Palm (front)', 'Palm (back)'],
-                                        'Neutral': ['Neutral']})
-        self.oneHandMovements = self.settings.value('oneHandMovements',
-                                                    defaultValue=['','No movement', 'Arc', 'Circular','Straight','Back and forth',
-                                                           'Multiple'])
-        self.twoHandMovements = self.settings.value('twoHandMovements',
-                                                    defaultValue=['', 'N/A', 'None', 'Alternating', 'Simaultaneous'])
-        self.orientations = self.settings.value('orientations',
-                                                defaultValue=['','Front', 'Back', 'Side', 'Up', 'Down'])
+        self.majorLocations = self.settings.value('majorLocations', defaultValue=DEFAULT_MAJOR_LOCATIONS)
+        self.minorLocations = self.settings.value('minorLocations', defaultValue=DEFAULT_MINOR_LOCATIONS)
+        self.oneHandMovements = self.settings.value('oneHandMovements', defaultValue=DEFAULT_ONE_HAND_MOVEMENTS)
+        self.twoHandMovements = self.settings.value('twoHandMovements',defaultValue=DEFAULT_TWO_HAND_MOVEMENTS)
+        self.orientations = self.settings.value('orientations', defaultValue=DEFAULT_ORIENTATIONS)
+        self.dislocations = self.settings.value('dislocations', defaultValue=DEFAULT_DISLOCATIONS)
         self.settings.endGroup()
 
     def closeEvent(self, e):
@@ -1365,10 +1438,11 @@ class MainWindow(QMainWindow):
         currentOneHandMovement = self.featuresLayout.oneHandMovement.currentText()
         currentTwoHandMovement = self.featuresLayout.twoHandMovement.currentText()
         currentOrientation = self.featuresLayout.orientation.currentText()
+        currentDislocation = self.featuresLayout.dislocation.currentText()
 
         dialog = FeaturesDialog([self.majorLocations, self.minorLocations,
                                  self.oneHandMovements, self.twoHandMovements,
-                                 self.orientations])
+                                 self.orientations, self.dislocations])
         results = dialog.exec_()
         if results:
 
@@ -1431,6 +1505,19 @@ class MainWindow(QMainWindow):
                 self.featuresLayout.orientation.setCurrentText(currentOrientation)
             else:
                 self.featuresLayout.orientation.setCurrentIndex(0)
+
+            self.featuresLayout.dislocation.clear()
+            self.dislocations = list()
+            self.dislocations.append('')
+            self.featuresLayout.dislocation.addItem('')
+            for index in range(dialog.dislocationList.count()):
+                item = dialog.dislocationList.item(index)
+                self.dislocations.append(item.text())
+                self.featuresLayout.dislocation.addItem(item.text())
+            if currentDislocation in self.dislocations:
+                self.featuresLayout.dislocation.setCurrentText(currentDislocation)
+            else:
+                self.featuresLayout.dislocation.setCurrentIndex(0)
 
     def setConstraints(self):
         dialog = ConstraintsDialog(self.constraints)

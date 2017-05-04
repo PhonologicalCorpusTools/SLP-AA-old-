@@ -155,7 +155,7 @@ class MajorFeaturesConstraint():
     Major features must be selected
     """
     name = 'Major Features Constraint'
-    explanation = ('A transcription must indicate location, movement, and orientation')
+    explanation = ('A transcription must indicate location, movement, orientation and dislocation')
     constraint_type = 'transcription'
 
     def __init__(self):
@@ -179,6 +179,9 @@ class MajorFeaturesConstraint():
         return output
 
 class SecondHandMovementConstraint():
+    """
+    Not yet implemented
+    """
     name = 'Second Hand Movement Constraint'
     explanation = ('If a sign uses two hands, the second hand must have a movement feature')
     constraint_type = 'transcription'
