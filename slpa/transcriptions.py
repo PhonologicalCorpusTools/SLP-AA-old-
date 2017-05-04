@@ -506,6 +506,7 @@ class TranscriptionPasteDialog(QDialog):
 
     def __init__(self, copiedTranscription, otherTranscriptions):
         super().__init__()
+        self.setWindowTitle('Paste transcription')
         layout = QVBoxLayout()
         copyLayout = QHBoxLayout()
         layout.addLayout(copyLayout)
@@ -568,6 +569,7 @@ class TranscriptionCopyDialog(QDialog):
 
     def __init__(self, transcriptions):
         super().__init__()
+        self.setWindowTitle('Copy transcription')
         layout = QVBoxLayout()
         layout.addWidget(QLabel('Which transcription do you want to copy?'))
         self.transcriptions = transcriptions

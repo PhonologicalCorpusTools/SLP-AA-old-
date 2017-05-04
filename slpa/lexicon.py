@@ -1,5 +1,6 @@
 #from slpa import __version__ as currentSLPAversion
 from collections import OrderedDict
+from random import choice
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
 
@@ -31,11 +32,15 @@ class Corpus():
         for item in wordlist:
             yield self.wordlist[item]
 
+    def __repr__(self):
+        return 'Corpus object with name "{}"'.format(self.name)
+
     def addWord(self, hs):
         self.wordlist[hs.gloss] = hs
 
-    def __str__(self):
-        return 'Corpus object called "{}"'.format(self.name)
+    def randomWord(self):
+        word = choice(list(self.wordlist.keys()))
+        return self.wordlist[word]
 
 
 class Sign():

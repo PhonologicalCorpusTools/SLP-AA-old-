@@ -508,7 +508,7 @@ class FeatureEntryDialog(QDialog):
         self.setLayout(layout)
 
 
-class MajorFeatureLayout(QGridLayout):
+class MajorFeatureLayout(QHBoxLayout):
 
     def __init__(self, settings):
         super().__init__()
@@ -519,6 +519,7 @@ class MajorFeatureLayout(QGridLayout):
         self.twoHandMovements = settings[3]
         self.orientations = settings[4]
         self.dislocations = settings[5]
+        self.setContentsMargins(0,0,0,0)
         self.major = QComboBox()
         for location in self.majorLocations:
             self.major.addItem(location)
@@ -542,21 +543,24 @@ class MajorFeatureLayout(QGridLayout):
         self.major.setCurrentIndex(0)
         self.changeMinorLocation()
 
-        self.addWidget(QLabel('Major Location'), 0, 0)
-        self.addWidget(self.major, 0, 1)
-        self.addWidget(QLabel('Minor Location'), 1, 0)
-        self.addWidget(self.minor, 1, 1)
-        self.addWidget(QLabel('One Hand Movement'), 2, 0)
-        self.addWidget(self.oneHandMovement, 2, 1)
-        self.addWidget(QLabel('Two Hand Movement'), 3, 0)
-        self.addWidget(self.twoHandMovement, 3, 1)
-        self.addWidget(QLabel('Orientation'), 4, 0)
-        self.addWidget(self.orientation, 4, 1)
-        self.addWidget(QLabel('Dislocation'), 5, 0)
-        self.addWidget(self.dislocation, 5, 1)
+        self.addWidget(QLabel('Major Location'))#, 0, 0)
+        self.addWidget(self.major)#, 0, 1)
+        self.addWidget(QLabel('Minor Location'))#, 1, 0)
+        self.addWidget(self.minor)#, 1, 1)
 
-        self.addWidget(QLabel(), 0, 2) #adds a filler item for spacing
-        self.setColumnStretch(2,1)
+        self.addWidget(QLabel('One Hand Movement'))#, 0, 2)# 2, 0)
+        self.addWidget(self.oneHandMovement)#, 0, 3)#2, 1)
+        self.addWidget(QLabel('Two Hand Movement'))#, 1, 2 )#3, 0)
+        self.addWidget(self.twoHandMovement)#, 1, 3 )#3, 1)
+
+        self.addWidget(QLabel('Orientation'))#, 0, 4)#4, 0)
+        self.addWidget(self.orientation)#, 0, 5)#4, 1)
+        self.addWidget(QLabel('Dislocation'))#, 1, 4)#5, 0)
+        self.addWidget(self.dislocation)#, 1, 5)#5, 1)
+
+        self.addWidget(QLabel())#, 0, 7) #adds a filler item for spacing
+        # self.setColumnStretch(7,1)
+
 
     def changeMinorLocation(self):
         majorText = self.major.currentText()
@@ -871,6 +875,16 @@ class MainWindow(QMainWindow):
         self.configTabs.addTab(HandConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
 
+        # Add major features (location, movement, orientation, dislocation)
+        self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations,
+                                                  self.oneHandMovements, self.twoHandMovements,
+                                                  self.orientations, self.dislocations])
+        self.featuresLayout.major.currentTextChanged.connect(self.userMadeChanges)
+        self.featuresLayout.minor.currentTextChanged.connect(self.userMadeChanges)
+        self.featuresLayout.oneHandMovement.currentTextChanged.connect(self.userMadeChanges)
+        self.featuresLayout.orientation.currentTextChanged.connect(self.userMadeChanges)
+        layout.addLayout(self.featuresLayout)
+
         #Make hand image and accompanying info
         self.infoPanel = QHBoxLayout()
         self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
@@ -898,16 +912,7 @@ class MainWindow(QMainWindow):
                 slot.textChanged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
-        #Add major features (location, movement, orientation)
-        #these variables are defined in MainWindow.readSettings()
-        self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations,
-                                                  self.oneHandMovements, self.twoHandMovements,
-                                                  self.orientations, self.dislocations])
-        self.featuresLayout.major.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.minor.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.oneHandMovement.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.orientation.currentTextChanged.connect(self.userMadeChanges)
-        layout.addLayout(self.featuresLayout)
+
 
         self.globalLayout.addLayout(layout)
 
@@ -1092,6 +1097,17 @@ class MainWindow(QMainWindow):
         #super().closeEvent(QCloseEvent())
         self.close()
 
+    def checkBackwardsComptibility(self):
+        word = self.corpus.randomWord()
+        if not hasattr(word, 'oneHandMovement'):
+            for word in self.corpus:
+                setattr(word, 'oneHandMovement', word.movement)
+                setattr(word, 'twoHandMovement', '')
+                setattr(word, 'dislocation', '')
+                del word.movement
+            self.saveCorpus(checkForEmptyGloss=False)
+
+
     def checkTranscription(self):
         dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs, self.featuresLayout)
         dialog.exec_()
@@ -1194,14 +1210,15 @@ class MainWindow(QMainWindow):
         self.corpusList.clear()
         self.newGloss()
         self.corpus = load_binary(file_path)
+        self.checkBackwardsComptibility()
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
 
         #self.showMaximized()
 
-    def saveCorpus(self):
+    def saveCorpus(self, checkForEmptyGloss=True):
         isDuplicate = False
-        if not self.gloss.glossEdit.text():
+        if not self.gloss.glossEdit.text() and checkForEmptyGloss:
             alert = QMessageBox()
             alert.setWindowTitle('Missing gloss')
             alert.setText('Please enter a gloss before saving')
