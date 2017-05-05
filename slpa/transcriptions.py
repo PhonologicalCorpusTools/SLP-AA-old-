@@ -34,6 +34,8 @@ class TranscriptionLayout(QVBoxLayout):
         self.generateViolationLabels()
         self.generateFields()
 
+        self.flagList = [False for slot in range(len(self.slots))]
+
     def generateFields(self):
         #FIELD 1 (Forearm)
         self.field1 = TranscriptionField(number=1)
@@ -108,6 +110,13 @@ class TranscriptionLayout(QVBoxLayout):
         self.lineLayout.addLayout(self.field7)
         self.fields.append(self.field7)
 
+    def connectSlotSignals(self):
+        for slot in self.slots[1:]:
+            slot.slotFlagged.connect(self.updateFlagList)
+
+    def updateFlagList(self, slotNum, isFlagged):
+        self.flagList[slotNum] = isFlagged
+
     def fillPredeterminedSlots(self):
         self.slot8.setText(NULL)
         self.slot9.setText('/')
@@ -165,6 +174,19 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot32 = TranscriptionSlot(32, 7, '[EFHi]', list('EFHi?'))
         self.slot33 = TranscriptionSlot(33, 7, '[EFHi]', list('EFHi?'))
         self.slot34 = TranscriptionSlot(34, 7, '[EFHi]', list('EFHi?'))
+
+    def isEmpty(self):
+        if self.slot1.isChecked():
+            return False
+        for slot in self.slots[1:]:
+            if slot.num in [8,9,16,21,26,31]:
+                continue
+            if slot.text():
+                return False
+        return True
+
+    def isFilled(self):
+        return not self.isEmpty()
 
     def generateViolationLabels(self):
         for j in range(1,35):
@@ -227,6 +249,7 @@ class TranscriptionCompleter(QCompleter):
 class TranscriptionSlot(QLineEdit):
 
     slotSelectionChanged = Signal(int)
+    slotFlagged = Signal(int, bool)
 
     def __init__(self, num, field, regex, completer_options):
         super().__init__()
@@ -272,6 +295,26 @@ class TranscriptionSlot(QLineEdit):
             self.setText('4')
             self.setEnabled(False)
             self.setToolTip('Slot 31. Represents pinky finger. Always marked as 4.')
+
+        # set button context menu policy
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
+
+        # create context menu
+        self.popMenu = QMenu(self)
+        self.popMenu.addAction(QAction('Flag as uncertain', self, triggered=self.addFlag))
+        self.popMenu.addAction(QAction('Remove flag', self, triggered=self.removeFlag))
+
+    def showContextMenu(self, point):
+        self.popMenu.exec_(self.mapToGlobal(point))
+
+    def addFlag(self, e):
+        self.setStyleSheet("QLineEdit{background: red;}")
+        self.slotFlagged.emit(self.num, True)
+
+    def removeFlag(self, e):
+        self.setStyleSheet("QLineEdit{background: white;}")
+        self.slotFlagged.emit(self.num, False)
 
     def __eq__(self, other):
         return self.text() == other.text()

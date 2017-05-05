@@ -50,13 +50,15 @@ class ConstraintsDialog(QDialog):
         removeAllButton = QPushButton('Unselect all (global)')
         removeAllButton.clicked.connect(self.removeAll)
         buttonLayout.addWidget(removeAllButton)
+        okCancelLayout = QHBoxLayout()
         ok = QPushButton('OK')
         cancel = QPushButton('Cancel')
         ok.clicked.connect(self.accept)
         cancel.clicked.connect(self.reject)
-        buttonLayout.addWidget(ok)
-        buttonLayout.addWidget(cancel)
+        okCancelLayout.addWidget(ok)
+        okCancelLayout.addWidget(cancel)
         layout.addLayout(buttonLayout)
+        layout.addLayout(okCancelLayout)
 
         self.setLayout(layout)
 
@@ -185,11 +187,21 @@ class ConstraintCheckMessageBox(QDialog):
                 elif c[1].constraint_type == 'conditional':
                     self.conditionalConstraintsTab.addTab(tab, c[1].name)
 
-                if c[1].name in ['Major Features Constraint', 'Second Hand Movement Constraint']:
+                if c[1].name == 'Major Features Constraint':
                     problems = c[1].check(featuresLayout)
                     if problems:
                         problems.insert(0,'\n')
                         constraint_text.append('\n\n'.join(problems))
+
+                elif c[1].name == 'Second Hand Movement Constraint':
+                    twoHandFeature = featuresLayout.twoHandMovement.currentText()
+                    problems = c[1].check(configTabs.widget(0).hand2Transcription, twoHandFeature)
+                    if problems:
+                        constraint_text.append('\nConfig 1 Hand 2 (no two hand movement specified)')
+                    problems = c[1].check(configTabs.widget(1).hand2Transcription, twoHandFeature)
+                    if problems:
+                        constraint_text.append('\nConfig 2 Hand 2 (no two hand movement specified)')
+
                 else:
                     for k in [1,2]:
                         transcription = configTabs.widget(k-1).hand1Transcription.slots

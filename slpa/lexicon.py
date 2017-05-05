@@ -45,13 +45,21 @@ class Corpus():
 
 class Sign():
 
-    sign_attributes = ['gloss', 'config1', 'config2', 'major', 'minor', 'movement', 'orientation']
+    sign_attributes = {'gloss': str(), 'config1': None, 'config2': None, 'major': str(), 'minor': str(),
+                       'oneHandMovement': str(), 'twoHandMovement': str(),
+                       'orientation': str(), 'dislocation': str(), 'flags': dict()}
+
+    sorted_attributes = ['gloss', 'config1', 'config2', 'major', 'minor',
+                       'oneHandMovement', 'twoHandMovement',
+                       'orientation', 'dislocation', 'flags']
 
     headers = ['gloss',
-                       'config1hand1', 'config1hand2',
-                       'config2hand1', 'config2hand2',
-                       'major', 'minor',
-                       'movement', 'orientation']
+                'config1hand1', 'config1hand2',
+                'config2hand1', 'config2hand2',
+                'major', 'minor',
+                'oneHandMovement', 'twoHandMovement',
+                'orientation', 'dislocation']
+
     for config_num in [1, 2]:
         for hand_num in [1, 2]:
             for slot_num in range(1, 35):
@@ -81,7 +89,7 @@ class Sign():
         return self.__str__()
 
     def data(self):
-        return OrderedDict([(key,getattr(self, key)) for key in Sign.sign_attributes])
+        return OrderedDict([(key,getattr(self, key)) for key in Sign.sorted_attributes])
 
     def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL):
         output = list()
@@ -111,9 +119,13 @@ class Sign():
                 value = 'None' if not value else value
             elif key == 'minor':
                 value = 'None' if not value else value
-            elif key == 'orientation':
+            elif key  == 'oneHandMovement':
                 value = 'None' if not value else value
-            elif key  == 'movement':
+            elif key == 'twoHandMovement':
+                value = 'None' if not value else value
+            elif key == 'dislocation':
+                value = 'None' if not value else value
+            elif key == 'orientation':
                 value = 'None' if not value else value
             output.append(value)
 

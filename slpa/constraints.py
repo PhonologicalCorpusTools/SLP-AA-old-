@@ -180,18 +180,20 @@ class MajorFeaturesConstraint():
 
 class SecondHandMovementConstraint():
     """
-    Not yet implemented
+    Two hand feature must be selected if the sign has anything transcribed in the second hand
     """
     name = 'Second Hand Movement Constraint'
-    explanation = ('If a sign uses two hands, the second hand must have a movement feature')
+    explanation = ('If a sign uses two hands, then a two-hand movement must be specified')
     constraint_type = 'transcription'
 
     def __init__(self):
         pass
 
     @classmethod
-    def check(cls, transcription):
+    def check(cls, transcription, secondHandFeature):
         output = list()
+        if transcription.isFilled() and not secondHandFeature:
+            output.append('Two hand movement')
         return output
 
 def sortMasterList(listItem):

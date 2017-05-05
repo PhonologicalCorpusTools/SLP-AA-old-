@@ -575,8 +575,11 @@ class MajorFeatureLayout(QHBoxLayout):
 
     def reset(self):
         self.major.setCurrentIndex(0)
+        self.minor.setCurrentIndex(0)
         self.oneHandMovement.setCurrentIndex(0)
+        self.twoHandMovement.setCurrentIndex(0)
         self.orientation.setCurrentIndex(0)
+        self.dislocation.setCurrentIndex(0)
 
 class ConfigLayout(QGridLayout):
 
@@ -902,6 +905,7 @@ class MainWindow(QMainWindow):
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
                 slot.textChanged.connect(self.userMadeChanges)
+                slot.slotFlagged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
             self.configTabs.widget(k).hand2Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
@@ -910,6 +914,7 @@ class MainWindow(QMainWindow):
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
                 slot.textChanged.connect(self.userMadeChanges)
+                slot.slotFlagged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
 
@@ -1099,13 +1104,24 @@ class MainWindow(QMainWindow):
 
     def checkBackwardsComptibility(self):
         word = self.corpus.randomWord()
-        if not hasattr(word, 'oneHandMovement'):
-            for word in self.corpus:
+        for attribute in Sign.sign_attributes:
+            if not hasattr(word, attribute):
+                break
+        else:
+            return
+
+        for word in self.corpus:
+            if not hasattr(word, 'oneHandMovement'):
                 setattr(word, 'oneHandMovement', word.movement)
                 setattr(word, 'twoHandMovement', '')
                 setattr(word, 'dislocation', '')
                 del word.movement
-            self.saveCorpus(checkForEmptyGloss=False)
+            if not hasattr(word, 'flags'):
+                setattr(word, 'flags', {'config1hand1': [False for n in range(35)],
+                                        'config1hand2': [False for n in range(35)],
+                                        'config2hand1': [False for n in range(35)],
+                                        'config2hand2': [False for n in range(35)]})
+        save_binary(self.corpus, self.corpus.path)
 
 
     def checkTranscription(self):
@@ -1274,7 +1290,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
         return True
 
-    def updateCorpus(self, kwargs, isDuplicate):
+    def updateCorpus(self, kwargs, isDuplicate=False):
         self.corpus.addWord(Sign(kwargs))
         if not isDuplicate:
             self.corpusList.addItem(kwargs['gloss'])
@@ -1302,7 +1318,10 @@ class MainWindow(QMainWindow):
         config1.clearAll()
         config2.clearAll()
 
-        config1hand1 = signData['config1hand1']
+        handconfigs = ['config1hand1', 'config1hand2', 'config2hand1', 'config2hand2']
+
+        handconfig = 'config1hand1'
+        config1hand1 = signData[handconfig]
         for num, slot in enumerate(config1.hand1Transcription.slots):
             if num == 0:
                 if config1hand1[0] == '_' or not config1hand1[0]:
@@ -1312,8 +1331,11 @@ class MainWindow(QMainWindow):
             else:
                 text = config1hand1[num]
                 slot.setText('' if text == '_' else text)
+                if signData['flags'][handconfig][slot.num]:
+                    slot.setStyleSheet("QLineEdit{background: red;}")
 
-        config1hand2 = signData['config1hand2']
+        handconfig = 'config1hand2'
+        config1hand2 = signData[handconfig]
         for num, slot in enumerate(config1.hand2Transcription.slots):
             if num == 0:
                 if config1hand2[0] == '_' or not config1hand2[0]:
@@ -1323,8 +1345,11 @@ class MainWindow(QMainWindow):
             else:
                 text = config1hand2[num]
                 slot.setText('' if text == '_' else text)
+                if signData['flags'][handconfig][slot.num]:
+                    slot.setStyleSheet("QLineEdit{background: red;}")
 
-        config2hand1 = signData['config2hand1']
+        handconfig = 'config2hand1'
+        config2hand1 = signData[handconfig]
         for num, slot in enumerate(config2.hand1Transcription.slots):
             if num == 0:
                 if config2hand1[0] == '_' or not config2hand1[0]:
@@ -1334,8 +1359,11 @@ class MainWindow(QMainWindow):
             else:
                 text = config2hand1[num]
                 slot.setText('' if text == '_' else text)
+                if signData['flags'][handconfig][slot.num]:
+                    slot.setStyleSheet("QLineEdit{background: red;}")
 
-        config2hand2 = signData['config2hand2']
+        handconfig = 'config2hand2'
+        config2hand2 = signData[handconfig]
         for num, slot in enumerate(config2.hand2Transcription.slots):
             if num == 0:
                 if config2hand2[0] == '_' or not config2hand2[0]:
@@ -1345,8 +1373,10 @@ class MainWindow(QMainWindow):
             else:
                 text = config2hand2[num]
                 slot.setText('' if text == '_' else text)
+                if signData['flags'][handconfig][slot.num]:
+                    slot.setStyleSheet("QLineEdit{background: red;}")
 
-        for name in ['major', 'minor', 'oneHandMovement', 'orientation']:
+        for name in ['major', 'minor', 'oneHandMovement', 'twoHandMovement', 'orientation', 'dislocation']:
             widget = getattr(self.featuresLayout, name)
             index = widget.findText(signData[name])
             if index == -1:
@@ -1354,43 +1384,47 @@ class MainWindow(QMainWindow):
             widget.setCurrentIndex(index)
         self.askSaveChanges = False
 
-    def generateSign(self):
-        data = {'config1': None, 'config2': None,
-                'major': None, 'minor': None, 'oneHandMovement': None, 'orientation': None}
-        config1 = self.configTabs.widget(0).findChildren(TranscriptionLayout)
-        data['config1'] = [config1[0].text(), config1[1].text()]
-        config2 = self.configTabs.widget(1).findChildren(TranscriptionLayout)
-        data['config2'] = [config2[0].text(), config2[1].text()]
-        gloss = self.gloss.glossEdit.text().strip()
-        data['gloss'] = gloss
-        major = self.featuresLayout.major.currentText()
-        data['major'] = 'None' if major == 'Major Location' else major
-        minor = self.featuresLayout.minor.currentText()
-        data['minor'] = 'None' if minor == 'Minor Location' else minor
-        oneHandMovement = self.featuresLayout.oneHandMovement.currentText()
-        data['oneHandMovement'] = 'None' if oneHandMovement == 'oneHandMovement' else oneHandMovement
-        orientation = self.featuresLayout.orientation.currentText()
-        data['orientation'] = 'None' if orientation == 'Orientation' else orientation
-        return Sign(data)
-
     def generateKwargs(self):
+        #This is called whenever the corpus is updated/saved
         kwargs = {'path': None, 'file_mode': None,
                 'config1': None, 'config2': None,
-                'major': None, 'minor': None, 'oneHandMovement': None, 'orientation': None}
+                'major': None, 'minor': None,
+                'oneHandMovement': None, 'twoHandMovement': None,
+                'orientation': None, 'dislocation': None,
+                'flags': None}
         config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
+
         config2 = self.configTabs.widget(1)#.findChildren(TranscriptionLayout)
         kwargs['config2'] = [config2.hand1(), config2.hand2()]
+
         gloss = self.gloss.glossEdit.text().strip()
         kwargs['gloss'] = gloss
+
         major = self.featuresLayout.major.currentText()
-        kwargs['major'] = 'None' if major == 'Major Location' else major
+        kwargs['major'] = 'None' if not major else major
+
         minor = self.featuresLayout.minor.currentText()
-        kwargs['minor'] = 'None' if minor == 'Minor Location' else minor
+        kwargs['minor'] = 'None' if not minor else minor
+
         oneHandMovement = self.featuresLayout.oneHandMovement.currentText()
-        kwargs['oneHandMovement'] = 'None' if oneHandMovement == 'oneHandMovement' else oneHandMovement
+        kwargs['oneHandMovement'] = 'None' if not oneHandMovement else oneHandMovement
+
+        twoHandMovement = self.featuresLayout.twoHandMovement.currentText()
+        kwargs['twoHandMovement'] = 'None' if not twoHandMovement else twoHandMovement
+
         orientation = self.featuresLayout.orientation.currentText()
-        kwargs['orientation'] = 'None' if orientation == 'Orientation' else orientation
+        kwargs['orientation'] = 'None' if not orientation else orientation
+
+        dislocation = self.featuresLayout.dislocation.currentText()
+        kwargs['dislocation'] = 'None' if not dislocation else dislocation
+
+        flags = {'hand1config1': self.configTabs.widget(0).hand1Transcription.flagList,
+                 'hand1config2': self.configTabs.widget(0).hand2Transcription.flagList,
+                 'hand2config1': self.configTabs.widget(1).hand1Transcription.flagList,
+                 'hand2config2': self.configTabs.widget(1).hand2Transcription.flagList}
+        kwargs['flags'] = flags
+
         return kwargs
 
     def createMenus(self):
