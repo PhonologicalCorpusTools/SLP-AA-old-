@@ -34,7 +34,8 @@ class TranscriptionLayout(QVBoxLayout):
         self.generateViolationLabels()
         self.generateFields()
 
-        self.flagList = [False for slot in range(len(self.slots))]
+        self.flagList = [False for n in range(34)]
+        self.connectSlotSignals()
 
     def generateFields(self):
         #FIELD 1 (Forearm)
@@ -270,6 +271,7 @@ class TranscriptionSlot(QLineEdit):
         completer.setMaxVisibleItems(8)
         self.setCompleter(completer)
         self.completer().activated.connect(self.completerActivated)
+        self.setStyleSheet("QLineEdit{background: white;} QLineEdit:hover{border: 1px solid gray; background-color white;}")
 
         if self.num == 8:
             self.setText(NULL)
@@ -303,18 +305,22 @@ class TranscriptionSlot(QLineEdit):
         # create context menu
         self.popMenu = QMenu(self)
         self.popMenu.addAction(QAction('Flag as uncertain', self, triggered=self.addFlag))
-        self.popMenu.addAction(QAction('Remove flag', self, triggered=self.removeFlag))
+        self.removeFlagAction = QAction('Remove flag', self, triggered=self.removeFlag)
+        self.removeFlagAction.setEnabled(False)
+        self.popMenu.addAction(self.removeFlagAction)
 
     def showContextMenu(self, point):
         self.popMenu.exec_(self.mapToGlobal(point))
 
-    def addFlag(self, e):
-        self.setStyleSheet("QLineEdit{background: red;}")
-        self.slotFlagged.emit(self.num, True)
+    def addFlag(self, e=None):
+        self.setStyleSheet("QLineEdit{background: red;} QLineEdit:hover{border: 1px solid gray; background-color red;}")
+        self.slotFlagged.emit(self.num-1, True)
+        self.removeFlagAction.setEnabled(True)
 
-    def removeFlag(self, e):
-        self.setStyleSheet("QLineEdit{background: white;}")
-        self.slotFlagged.emit(self.num, False)
+    def removeFlag(self, e=None):
+        self.setStyleSheet("QLineEdit{background: white;} QLineEdit:hover{border: 1px solid gray; background-color white;}")
+        self.slotFlagged.emit(self.num-1, False)
+        self.removeFlagAction.setEnabled(False)
 
     def __eq__(self, other):
         return self.text() == other.text()
@@ -340,8 +346,10 @@ class TranscriptionSlot(QLineEdit):
         self.completer().complete()
         self.slotSelectionChanged.emit(self.num)
 
-    def mousePressEvent(self, e):
-        self.setFocus(Qt.TabFocusReason)
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.setFocus(Qt.TabFocusReason)
+        #ignore right clicks, the context menu should appear instead of triggering the completer
 
     def keyPressEvent(self, e):
         key = e.key()
