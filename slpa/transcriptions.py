@@ -134,8 +134,8 @@ class TranscriptionLayout(QVBoxLayout):
         #FIELD 2 (Thumb)
         self.slot2 = TranscriptionSlot(2, 2, '[LUO\\?]', list('LUO?'))
         self.slot3 = TranscriptionSlot(3, 2, '[{<=x\\?]', list('{<=x?'))
-        self.slot4 = TranscriptionSlot(4, 2, '[EFHi\\?]', list('EFHi?'))
-        self.slot5 = TranscriptionSlot(5, 2, '[EFHi\\?]', list('EFHi?'))
+        self.slot4 = TranscriptionSlot(4, 2, '[EFHi\\?]', list('HEiF?'))
+        self.slot5 = TranscriptionSlot(5, 2, '[EFHi\\?]', list('HEiF?'))
 
         #FIELD 3 (Thumb/Finger Contact)
         self.slot6 = TranscriptionSlot(6, 3, '[fbru\\?]', list('fbru?'))
@@ -151,30 +151,30 @@ class TranscriptionLayout(QVBoxLayout):
 
         #FIELD 4 (Index)
         self.slot16 = TranscriptionSlot(16, 4, '1', ['1'])
-        self.slot17 = TranscriptionSlot(17, 4, '[EFHi\\?]', list('EFHi?'))
-        self.slot18 = TranscriptionSlot(18, 4, '[EFHi\\?]', list('EFHi?'))
-        self.slot19 = TranscriptionSlot(19, 4, '[EFHi\\?]', list('EFHi?'))
+        self.slot17 = TranscriptionSlot(17, 4, '[EFHi\\?]', list('HEiF?'))
+        self.slot18 = TranscriptionSlot(18, 4, '[EFHi\\?]', list('HEiF?'))
+        self.slot19 = TranscriptionSlot(19, 4, '[EFHi\\?]', list('HEiF?'))
 
         #FIELD 5 (Middle)
         self.slot20 = TranscriptionSlot(20, 5, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-','\u2327', '?'])
         self.slot21 = TranscriptionSlot(21, 5, '2', ['2'])
-        self.slot22 = TranscriptionSlot(22, 5, '[EFHi\\?]', list('EFHi?'))
-        self.slot23 = TranscriptionSlot(23, 5, '[EFHi\\?]', list('EFHi?'))
-        self.slot24 = TranscriptionSlot(24, 5, '[EFHi\\?]', list('EFHi?'))
+        self.slot22 = TranscriptionSlot(22, 5, '[EFHi\\?]', list('HEiF?'))
+        self.slot23 = TranscriptionSlot(23, 5, '[EFHi\\?]', list('HEiF?'))
+        self.slot24 = TranscriptionSlot(24, 5, '[EFHi\\?]', list('HEiF?'))
 
         #FIELD 6 (Ring)
         self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-','\u2327', '?'])
         self.slot26 = TranscriptionSlot(26, 6, '3', ['3'])
-        self.slot27 = TranscriptionSlot(27, 6, '[EFHi\\?]', list('EFHi?'))
-        self.slot28 = TranscriptionSlot(28, 6, '[EFHi\\?]', list('EFHi?'))
-        self.slot29 = TranscriptionSlot(29, 6, '[EFHi\\?]', list('EFHi?'))
+        self.slot27 = TranscriptionSlot(27, 6, '[EFHi\\?]', list('HEiF?'))
+        self.slot28 = TranscriptionSlot(28, 6, '[EFHi\\?]', list('HEiF?'))
+        self.slot29 = TranscriptionSlot(29, 6, '[EFHi\\?]', list('HEiF?'))
 
         #FIELD 7 (Middle)
         self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-','\u2327', '?'])
         self.slot31 = TranscriptionSlot(31, 7, '4', ['4'])
-        self.slot32 = TranscriptionSlot(32, 7, '[EFHi]', list('EFHi?'))
-        self.slot33 = TranscriptionSlot(33, 7, '[EFHi]', list('EFHi?'))
-        self.slot34 = TranscriptionSlot(34, 7, '[EFHi]', list('EFHi?'))
+        self.slot32 = TranscriptionSlot(32, 7, '[EFHi]', list('HEiF?'))
+        self.slot33 = TranscriptionSlot(33, 7, '[EFHi]', list('HEiF?'))
+        self.slot34 = TranscriptionSlot(34, 7, '[EFHi]', list('HEiF?'))
 
     def isEmpty(self):
         if self.slot1.isChecked():

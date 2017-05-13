@@ -1614,10 +1614,7 @@ class MainWindow(QMainWindow):
                 kwargs['x_in_box'] = x_in_box
             if null:
                 kwargs['null'] = null
-            # output = [word.export(include_fields=include_fields, blank_space=blank_space, x_in_box=x_in_box, null=null)
-            #           for word in self.corpus]
             output = [word.export(**kwargs) for word in self.corpus]
-
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
                     print(Sign.headers, file=f)
@@ -1631,7 +1628,6 @@ class MainWindow(QMainWindow):
                 alert.setText('The file {} is already open in a program on your computer. Please close the file before '
                               'saving, or choose a different file name.'.format(filename))
                 alert.exec_()
-
 
     def sizeHint(self):
         sz = QMainWindow.sizeHint(self)
