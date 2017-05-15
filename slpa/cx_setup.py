@@ -8,7 +8,7 @@ def readme():
         return f.read()
 
 base = None
-incl_files = [os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media')]
+incl_files = ['media']
 if sys.platform == "win32":
     base = "Win32GUI"
     libegl = os.path.join(os.path.dirname(PyQt5.__file__),'libEGL.dll')
@@ -57,7 +57,7 @@ bdist_msi_options = {
         'initial_target_dir': r'[ProgramFiles64Folder]\%s\%s' % (group_name, exe_name),
         'data':msi_data}
 
-bdist_mac_options = {#'iconfile':'docs/images/icon.icns',
+bdist_mac_options = {#'iconfile':'media/slpa_icon.ico',
                     'qt_menu_nib':'/opt/local/share/qt5/plugins/platforms',
                     'bundle_name':'Sign Language Phonetic Annotator',
                     #'include_frameworks':["/Library/Frameworks/Tcl.framework",
@@ -82,7 +82,7 @@ setup(name='Sign Language Phonetic Annotator',
       author='UBC Phonology Group',
       author_email='kathleen.hall@ubc.ca',
       packages = ['slpa'],
-      executables = [Executable('bin/slpa.py',
+      executables = [Executable('slpa.py',
                             base=base,
                             #shortcutDir=r'[StartMenuFolder]\%s' % group_name,
                             #shortcutName=exe_name,

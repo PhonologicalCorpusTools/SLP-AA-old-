@@ -1802,11 +1802,9 @@ def loadcsvCorpus(path):
             self.corpusDock.widget().layout().addWidget(button)
 
 def getMediaFilePath(filename):
-    # if hasattr(sys, 'frozen'):
-    #     dir = os.path.dirname(sys.executable)
-    #     # dir = os.path.dirname(sys.argv[0])
-    #     path = os.path.join(dir, 'media', filename)
-    # else:
-    #     path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', filename)
-    path = os.path.join(os.getcwd(), 'media', filename)
+    if hasattr(sys, 'frozen'):
+        dir = os.path.dirname(sys.executable)
+        path = os.path.join(dir, 'media', filename)
+    else:
+        path = os.path.join(os.getcwd(), 'media', filename)
     return path
