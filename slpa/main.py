@@ -4,7 +4,6 @@ import os
 import sys
 import subprocess
 import collections
-from enum import Enum
 from imports import *
 from handshapes import *
 from lexicon import *
@@ -12,6 +11,7 @@ from binary import *
 from transcriptions import *
 from constraints import *
 from constraintwidgets import *
+from parameters import *
 #from slpa import __version__ as currentSLPAversion
 
 __currentSLPAversion__ = 0.1
@@ -871,6 +871,10 @@ class MainWindow(QMainWindow):
         topLayout.addWidget(self.copyButton)
         topLayout.addWidget(self.pasteButton)
 
+        paramButton = QPushButton('View Parameters')
+        paramButton.clicked.connect(self.showParameterDialog)
+        topLayout.addWidget(paramButton)
+
         layout.addLayout(topLayout)
 
         #Make gloss entry
@@ -935,6 +939,11 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         #self.setFixedSize(self.size())
         self.defineTabOrder()
+
+    def showParameterDialog(self):
+        dialog = TreeViewParameters([Quality, MajorMovement, MajorLocation])
+        dialog.exec_()
+
 
     def keyPressEvent(self, e):
         key = e.key()
@@ -1803,6 +1812,7 @@ def loadcsvCorpus(path):
 
 def getMediaFilePath(filename):
     if hasattr(sys, 'frozen'):
+        print('True')
         dir = os.path.dirname(sys.executable)
         path = os.path.join(dir, 'media', filename)
     else:
