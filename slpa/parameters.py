@@ -69,7 +69,7 @@ class TreeViewParameters(QDialog):
         self.tree.currentItemChanged.connect(self.itemChanged)
         self.buttonGroups = dict()
         for p in parameters:
-            parent = QTreeWidgetItem(self.tree)
+            parent = ParameterTreeWidgetItem(self.tree)
             parent.setText(0, p.name)
             self.addChildren(parent, p)
         layout.addWidget(self.tree)
@@ -94,17 +94,14 @@ class TreeViewParameters(QDialog):
             else:
                 #it's a string, and therefore a terminal node
                 child.setText(0, c)
-                child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
+                child.setFlags(Qt.ItemIsUserCheckable|Qt.ItemIsEnabled)#(child.flags() | Qt.ItemIsUserCheckable)
                 child.setCheckState(0, Qt.Unchecked)
                 buttonGroup.append(child)
                 appendGroup = True
-
-
         if appendGroup:
             self.buttonGroups[parentParameter.name] = buttonGroup
 
     def itemChanged(self, item, column):
-        print(item.text(0), column)
         if item.parent() is None:
             return
         if item.parent().text(0) not in self.buttonGroups.keys():
@@ -123,7 +120,6 @@ class ParameterTreeWidgetItem(QTreeWidgetItem):
     def setData(self, column, role, value):
         state = self.checkState(column)
         super().setData(column, role, value)
-        print(value)
         if (role == Qt.CheckStateRole and
             state != self.checkState(column)):
             treewidget = self.treeWidget()
