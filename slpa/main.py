@@ -871,9 +871,13 @@ class MainWindow(QMainWindow):
         topLayout.addWidget(self.copyButton)
         topLayout.addWidget(self.pasteButton)
 
-        paramButton = QPushButton('View Parameters')
-        paramButton.clicked.connect(self.showParameterDialog)
+        paramButton = QPushButton('View Parameters as Tree')
+        paramButton.clicked.connect(self.showParameterTree)
         topLayout.addWidget(paramButton)
+
+        paramButton2 = QPushButton('View Parameters as Menu')
+        paramButton2.clicked.connect(self.showParameterMenu)
+        topLayout.addWidget(paramButton2)
 
         layout.addLayout(topLayout)
 
@@ -940,8 +944,12 @@ class MainWindow(QMainWindow):
         #self.setFixedSize(self.size())
         self.defineTabOrder()
 
-    def showParameterDialog(self):
+    def showParameterTree(self):
         dialog = TreeViewParameters([Quality, MajorMovement, MajorLocation])
+        dialog.exec_()
+
+    def showParameterMenu(self):
+        dialog = MenuViewParameters([Quality, MajorMovement, MajorLocation])
         dialog.exec_()
 
 

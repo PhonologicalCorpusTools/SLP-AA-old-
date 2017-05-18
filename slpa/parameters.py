@@ -25,8 +25,39 @@ class ListViewParameters(QDialog):
 
 class MenuViewParameters(QDialog):
 
+    def __init__(self, parameters):
+        super().__init__()
+        self.setWindowTitle('Select Parameters')
+        self.layout = QGridLayout()
+        row = 0
+        for p in parameters:
+            parameterButton = QPushButton(p.name)
+            parameterMenu = QMenu(p.name)
+            self.addChildren(parameterMenu, p)
+            parameterButton.setMenu(parameterMenu)
+            self.layout.addWidget(parameterButton, row, 0)
+            row += 1
+        self.setLayout(self.layout)
+
+    def addChildren(self, parentMenu, parentParameter):
+        for c in parentParameter.children:
+            if isinstance(c, Parameter):
+                childMenu = parentMenu.addMenu(c.name)
+                #if it's a parameter, then it's a non-terminal node
+                self.addChildren(childMenu, c)
+            else:
+                #it's a string, and therefore a terminal node
+                action = QAction(c, self, checkable = True)
+                parentMenu.addAction(action)
+
+class ParameterTreeWidget(QTreeWidget):
+    itemChecked = Signal(object, int)
+
     def __init__(self):
         super().__init__()
+
+    def handleItemChecked(self, item, column):
+        print('ItemChecked', int(item.checkState(column)))
 
 class TreeViewParameters(QDialog):
 
@@ -34,28 +65,70 @@ class TreeViewParameters(QDialog):
         super().__init__()
         self.setWindowTitle('Select Parameters')
         layout = QVBoxLayout()
-        self.tree = QTreeWidget()
-        self.terminalNodes = defaultdict(list)
+        self.tree = ParameterTreeWidget()
+        self.tree.currentItemChanged.connect(self.itemChanged)
+        self.buttonGroups = dict()
         for p in parameters:
             parent = QTreeWidgetItem(self.tree)
             parent.setText(0, p.name)
             self.addChildren(parent, p)
         layout.addWidget(self.tree)
         self.setLayout(layout)
+        self.selectionLayout = QGridLayout()
+        row = 0
+        for p in parameters:
+            self.selectionLayout.addWidget(QLabel(p.name), row, 0)
+            self.selectionLayout.addWidget(QLabel('No value selected'), row, 1)
+            row += 1
+        layout.addLayout(self.selectionLayout)
 
     def addChildren(self, parentWidget, parentParameter):
+        buttonGroup = list()
+        appendGroup = False
         for c in parentParameter.children:
-            child = QTreeWidgetItem(parentWidget)
+            child = ParameterTreeWidgetItem(parentWidget)
             if isinstance(c, Parameter):
                 #if it's a parameter, then it's a non-terminal node
                 child.setText(0, c.name)
                 self.addChildren(child, c)
             else:
                 #it's a string, and therefore a terminal node
-                self.terminalNodes[parentParameter.name].append(child)
                 child.setText(0, c)
                 child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
                 child.setCheckState(0, Qt.Unchecked)
+                buttonGroup.append(child)
+                appendGroup = True
+
+
+        if appendGroup:
+            self.buttonGroups[parentParameter.name] = buttonGroup
+
+    def itemChanged(self, item, column):
+        print(item.text(0), column)
+        if item.parent() is None:
+            return
+        if item.parent().text(0) not in self.buttonGroups.keys():
+            return
+        for button in self.buttonGroups[item.parent().text(0)]:
+            if button.text(0) == item.text(0):
+                button.setCheckState(0, Qt.Checked)
+            else:
+                button.setCheckState(0, Qt.Unchecked)
+
+class ParameterTreeWidgetItem(QTreeWidgetItem):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+    def setData(self, column, role, value):
+        state = self.checkState(column)
+        super().setData(column, role, value)
+        print(value)
+        if (role == Qt.CheckStateRole and
+            state != self.checkState(column)):
+            treewidget = self.treeWidget()
+            if treewidget is not None:
+                treewidget.itemChecked.emit(self, column)
 
 class Parameter(object):
 
