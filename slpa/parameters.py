@@ -1,63 +1,50 @@
 from imports import *
 from collections import defaultdict
 
-class ListViewParameters(QDialog):
-
-    def __init__(self, parameters, max_list = 4):
-        super().__init__()
-        self.parameters = parameters
-        layout = QHBoxLayout()
-        topList = QListWidget()
-        layout.addWidget(topList)
-        for n in max_list:
-            setattr(self, 'list{}'.format(n), QListWidget())
-            layout.addWidget(getattr(self, 'list{}'.format(n)))
-
-        for p in parameters:
-            topList.addItem(p.name)
-        topList.currentItemChanged.connect(self.nextList)
-
-    def nextList(self, item):
-        for p in self.parameters:
-            if p.name == item:
-
-                break
-
-class MenuViewParameters(QDialog):
-
-    def __init__(self, parameters):
-        super().__init__()
-        self.setWindowTitle('Select Parameters')
-        self.layout = QGridLayout()
-        row = 0
-        for p in parameters:
-            parameterButton = QPushButton(p.name)
-            parameterMenu = QMenu(p.name)
-            self.addChildren(parameterMenu, p)
-            parameterButton.setMenu(parameterMenu)
-            self.layout.addWidget(parameterButton, row, 0)
-            row += 1
-        self.setLayout(self.layout)
-
-    def addChildren(self, parentMenu, parentParameter):
-        for c in parentParameter.children:
-            if isinstance(c, Parameter):
-                childMenu = parentMenu.addMenu(c.name)
-                #if it's a parameter, then it's a non-terminal node
-                self.addChildren(childMenu, c)
-            else:
-                #it's a string, and therefore a terminal node
-                action = QAction(c, self, checkable = True)
-                parentMenu.addAction(action)
-
 class ParameterTreeWidget(QTreeWidget):
     itemChecked = Signal(object, int)
 
-    def __init__(self):
+    def __init__(self, dialog):
         super().__init__()
+        self.itemClicked.connect(self.handleItemChanged)
+        self.currentItemChanged.connect(self.handleItemChanged)
+        self.dialog = dialog
 
-def handleItemChecked(self, item, column):
-    print('ItemChecked', int(item.checkState(column)))
+    def handleItemChanged(self, item, column):
+        if item.parent() is None:
+            return
+
+        parent = self.findTopParent(item)
+        for button in self.buttonGroups[parent.text(0)]:
+            if button.text(0) == item.text(0):
+                button.setCheckState(0, Qt.Checked)
+                label = getattr(self.dialog, parent.text(0)+'Label')
+                # if label.text() == 'None selected':
+                #     label.setText(' : '.join([item.parent().text(0), button.text(0)]))
+                colon_count = label.text().count(':')
+                if colon_count < 2:
+                    label.setText(' : '.join([item.parent().text(0), button.text(0)]))
+                else:
+                    text = label.text().split(' : ')
+                    new_text = list()
+                    for t in text:
+                        if item.text(0) in text:
+                            new_text.append(' : '.join([item.parent().text(0), button.text(0)]))
+                        else:
+                            new_text.append(text)
+                    label.setText(new_text)
+            else:
+                button.setCheckState(0, Qt.Unchecked)
+
+    def findTopParent(self, item):
+        parent = item.parent()
+        while True:
+            if parent.parent() is None:
+                break
+            else:
+                parent = parent.parent()
+        return parent
+
 
 class TreeViewParameters(QDialog):
 
@@ -65,24 +52,24 @@ class TreeViewParameters(QDialog):
         super().__init__()
         self.setWindowTitle('Select Parameters')
         layout = QVBoxLayout()
-        self.tree = ParameterTreeWidget()
-        self.tree.currentItemChanged.connect(self.itemChanged)
-        self.buttonGroups = dict()
+        self.tree = ParameterTreeWidget(self)
+        self.tree.buttonGroups = defaultdict(list)
         for p in parameters:
             parent = ParameterTreeWidgetItem(self.tree)
             parent.setText(0, p.name)
-            self.addChildren(parent, p)
+            self.addChildren(parent, p, p.name)
         layout.addWidget(self.tree)
         self.setLayout(layout)
         self.selectionLayout = QGridLayout()
         row = 0
         for p in parameters:
+            setattr(self, p.name+'Label', QLabel('Nothing selected'))
             self.selectionLayout.addWidget(QLabel(p.name), row, 0)
-            self.selectionLayout.addWidget(QLabel('No value selected'), row, 1)
+            self.selectionLayout.addWidget(getattr(self, p.name+'Label'), row, 1)
             row += 1
         layout.addLayout(self.selectionLayout)
 
-    def addChildren(self, parentWidget, parentParameter):
+    def addChildren(self, parentWidget, parentParameter, top_parameter):
         buttonGroup = list()
         appendGroup = False
         for c in parentParameter.children:
@@ -90,27 +77,16 @@ class TreeViewParameters(QDialog):
             if isinstance(c, Parameter):
                 #if it's a parameter, then it's a non-terminal node
                 child.setText(0, c.name)
-                self.addChildren(child, c)
+                self.addChildren(child, c, top_parameter)
             else:
                 #it's a string, and therefore a terminal node
                 child.setText(0, c)
-                child.setFlags(Qt.ItemIsUserCheckable|Qt.ItemIsEnabled)#(child.flags() | Qt.ItemIsUserCheckable)
+                child.setFlags(Qt.ItemIsUserCheckable|Qt.ItemIsEnabled)
                 child.setCheckState(0, Qt.Unchecked)
                 buttonGroup.append(child)
                 appendGroup = True
         if appendGroup:
-            self.buttonGroups[parentParameter.name] = buttonGroup
-
-    def itemChanged(self, item, column):
-        if item.parent() is None:
-            return
-        if item.parent().text(0) not in self.buttonGroups.keys():
-            return
-        for button in self.buttonGroups[item.parent().text(0)]:
-            if button.text(0) == item.text(0):
-                button.setCheckState(0, Qt.Checked)
-            else:
-                button.setCheckState(0, Qt.Unchecked)
+            self.tree.buttonGroups[top_parameter].extend(buttonGroup)
 
 class ParameterTreeWidgetItem(QTreeWidgetItem):
 

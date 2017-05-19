@@ -871,13 +871,9 @@ class MainWindow(QMainWindow):
         topLayout.addWidget(self.copyButton)
         topLayout.addWidget(self.pasteButton)
 
-        paramButton = QPushButton('View Parameters as Tree')
+        paramButton = QPushButton('View Parameters')
         paramButton.clicked.connect(self.showParameterTree)
         topLayout.addWidget(paramButton)
-
-        paramButton2 = QPushButton('View Parameters as Menu')
-        paramButton2.clicked.connect(self.showParameterMenu)
-        topLayout.addWidget(paramButton2)
 
         layout.addLayout(topLayout)
 
