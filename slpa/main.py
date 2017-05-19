@@ -1142,6 +1142,7 @@ class MainWindow(QMainWindow):
                 setattr(word, 'oneHandMovement', word.movement)
                 del word.movement
 
+        self.corpus.path = os.path.join(os.getcwd(), self.corpus.name)
         save_binary(self.corpus, self.corpus.path)
         self.corpus = load_binary(self.corpus.path)
 

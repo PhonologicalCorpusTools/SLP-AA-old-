@@ -56,8 +56,8 @@ class ParameterTreeWidget(QTreeWidget):
     def __init__(self):
         super().__init__()
 
-    def handleItemChecked(self, item, column):
-        print('ItemChecked', int(item.checkState(column)))
+def handleItemChecked(self, item, column):
+    print('ItemChecked', int(item.checkState(column)))
 
 class TreeViewParameters(QDialog):
 

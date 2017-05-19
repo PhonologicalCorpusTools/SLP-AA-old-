@@ -138,12 +138,12 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot5 = TranscriptionSlot(5, 2, '[EFHi\\?]', list('HEiF?'))
 
         #FIELD 3 (Thumb/Finger Contact)
-        self.slot6 = TranscriptionSlot(6, 3, '[fbru\\?]', list('fbru?'))
-        self.slot7 = TranscriptionSlot(7, 3, '[tdpM\\?]', list('tdpM?'))
+        self.slot6 = TranscriptionSlot(6, 3, '[tfbru\\?]', list('tfbru?'))
+        self.slot7 = TranscriptionSlot(7, 3, '[dpM\\?]', list('dpM?'))
         self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL])
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
-        self.slot10 = TranscriptionSlot(10, 3, '[fbru\\?]', list('fbru?'))
-        self.slot11 = TranscriptionSlot(11, 3, '[tdmpM\\?]', list('tdmpM?'))
+        self.slot10 = TranscriptionSlot(10, 3, '[tfbru\\?]', list('tfbru?'))
+        self.slot11 = TranscriptionSlot(11, 3, '[dmpM\\?]', list('dmpM?'))
         self.slot12 = TranscriptionSlot(12, 3, '[-1\s]', ['-','1'])
         self.slot13 = TranscriptionSlot(13, 3, '[-2\s]', ['-','2'])
         self.slot14 = TranscriptionSlot(14, 3, '[-3\s]', ['-','3'])
@@ -491,12 +491,12 @@ class TranscriptionInfo(QGridLayout):
                               3: '{ (full abduction)\n< (neutral)\n= (adducted)',
                               4: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
                               5: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              6: 'f (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
-                              7: 't (tip)\nd (distal)\np (proximal)\nM (meta-carpal)',
+                              6: 't (tip)\nf (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
+                              7: 'd (distal)\np (proximal)\nM (meta-carpal)',
                               #8 always null,
                               #9 always forward slash,
-                              10: 'f (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
-                              11: 't (tip)\nd (distal)\nm (medial)\np (proximal)\nM (meta-carpal)',
+                              10: 't (tip)\nf (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
+                              11: 'd (distal)\nm (medial)\np (proximal)\nM (meta-carpal)',
                               12: '1 (if contact with index)\n- (if no contact)',
                               13: '2 (if contact with middle)\n- (if no contact)',
                               14: '3 (if contact with ring)\n- (if no contact)',
