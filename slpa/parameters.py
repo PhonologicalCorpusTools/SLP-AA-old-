@@ -9,30 +9,19 @@ class ParameterTreeWidget(QTreeWidget):
         self.itemClicked.connect(self.handleItemChanged)
         self.currentItemChanged.connect(self.handleItemChanged)
         self.dialog = dialog
+        self.buttonGroups = defaultdict(list)
 
     def handleItemChanged(self, item, column):
         if item.parent() is None:
             return
 
         parent = self.findTopParent(item)
-        for button in self.buttonGroups[parent.text(0)]:
+        selectionLayout = getattr(self.dialog, parent.text(0)+'Layout')
+        selectionLayout.changeText(item.parent().text(0), item.text(0))
+
+        for button in self.buttonGroups[item.parent().text(0)]:
             if button.text(0) == item.text(0):
                 button.setCheckState(0, Qt.Checked)
-                label = getattr(self.dialog, parent.text(0)+'Label')
-                # if label.text() == 'None selected':
-                #     label.setText(' : '.join([item.parent().text(0), button.text(0)]))
-                colon_count = label.text().count(':')
-                if colon_count < 2:
-                    label.setText(' : '.join([item.parent().text(0), button.text(0)]))
-                else:
-                    text = label.text().split(' : ')
-                    new_text = list()
-                    for t in text:
-                        if item.text(0) in text:
-                            new_text.append(' : '.join([item.parent().text(0), button.text(0)]))
-                        else:
-                            new_text.append(text)
-                    label.setText(new_text)
             else:
                 button.setCheckState(0, Qt.Unchecked)
 
@@ -45,31 +34,55 @@ class ParameterTreeWidget(QTreeWidget):
                 parent = parent.parent()
         return parent
 
+class ParameterSelectionsLayout(QHBoxLayout):
 
-class TreeViewParameters(QDialog):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+        self.values = list()
+        self.addWidget(QLabel(self.name))
+
+    def addLabel(self, text):
+        setattr(self, text+'Label', QLabel(text))
+        self.values.append(text+'Label')
+        self.addWidget(getattr(self, text+'Label'))
+
+    def changeText(self, labelName, newText):
+        widgetName = labelName+'Label'
+        for value in self.values:
+            if value == widgetName:
+                getattr(self, widgetName).setText(' : '.join([labelName, newText]))
+                break
+
+class TreeViewDialog(QDialog):
 
     def __init__(self, parameters):
         super().__init__()
         self.setWindowTitle('Select Parameters')
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
         self.tree = ParameterTreeWidget(self)
-        self.tree.buttonGroups = defaultdict(list)
+        self.selectionLayout = QVBoxLayout()
         for p in parameters:
+            setattr(self, p.name + 'Layout', ParameterSelectionsLayout(p.name))
+            self.selectionLayout.addLayout(getattr(self, p.name + 'Layout'))
             parent = ParameterTreeWidgetItem(self.tree)
             parent.setText(0, p.name)
-            self.addChildren(parent, p, p.name)
+            self.addChildren(parent, p, p.name, getattr(self, p.name + 'Layout'))
         layout.addWidget(self.tree)
-        self.setLayout(layout)
-        self.selectionLayout = QGridLayout()
-        row = 0
-        for p in parameters:
-            setattr(self, p.name+'Label', QLabel('Nothing selected'))
-            self.selectionLayout.addWidget(QLabel(p.name), row, 0)
-            self.selectionLayout.addWidget(getattr(self, p.name+'Label'), row, 1)
-            row += 1
         layout.addLayout(self.selectionLayout)
 
-    def addChildren(self, parentWidget, parentParameter, top_parameter):
+        # for p in parameters:
+        #     setattr(self, p.name+'Layout', ParameterSelectionsLayout(p.name))
+        #     self.selectionLayout.addLayout(getattr(self, p.name+'Layout'))
+        #     # setattr(self, p.name+'Label', QLabel('Nothing selected'))
+        #     # self.selectionLayout.addWidget(getattr(self, p.name+'Label'), row, 0)
+        #     # self.selectionLayout.addWidget(getattr(self, p.name+'Label'), row, 1)
+        #     # self.selectionlayout.addLayout(ParameterSelectionsLayout(), row, 1)
+
+
+        self.setLayout(layout)
+
+    def addChildren(self, parentWidget, parentParameter, top_parameter, selectionLayout):
         buttonGroup = list()
         appendGroup = False
         for c in parentParameter.children:
@@ -77,7 +90,7 @@ class TreeViewParameters(QDialog):
             if isinstance(c, Parameter):
                 #if it's a parameter, then it's a non-terminal node
                 child.setText(0, c.name)
-                self.addChildren(child, c, top_parameter)
+                self.addChildren(child, c, top_parameter, selectionLayout)
             else:
                 #it's a string, and therefore a terminal node
                 child.setText(0, c)
@@ -85,8 +98,12 @@ class TreeViewParameters(QDialog):
                 child.setCheckState(0, Qt.Unchecked)
                 buttonGroup.append(child)
                 appendGroup = True
+
         if appendGroup:
-            self.tree.buttonGroups[top_parameter].extend(buttonGroup)
+            self.tree.buttonGroups[parentParameter.name].extend(buttonGroup)
+            selectionLayout.addLabel(buttonGroup[0].parent().text(0))
+            #every member of the buttonGroup has the same parent, so just grab an arbitrary one and use that information
+
 
 class ParameterTreeWidgetItem(QTreeWidgetItem):
 
@@ -115,7 +132,7 @@ class Parameter(object):
         self.children.sort()
 
     def __str__(self):
-        return p.name
+        return self.name
 
     def len(self):
         return len(self.children)

@@ -941,7 +941,7 @@ class MainWindow(QMainWindow):
         self.defineTabOrder()
 
     def showParameterTree(self):
-        dialog = TreeViewParameters([Quality, MajorMovement, MajorLocation])
+        dialog = TreeViewDialog([Quality, MajorMovement, MajorLocation])
         dialog.exec_()
 
     def showParameterMenu(self):
