@@ -1,5 +1,6 @@
 from imports import *
 from collections import defaultdict
+import anytree
 
 class ParameterTreeWidget(QTreeWidget):
     itemChecked = Signal(object, int)
@@ -138,6 +139,29 @@ class Parameter(object):
         return len(self.children)
 
 
+class ParameterTreeModel():
+
+    def __init__(self, parameters):
+        self.tree = anytree.Node('Root', parent=None)
+        for p in parameters:
+            parameterNode = anytree.Node(p.name, parent=self.tree)
+            setattr(self, p.name, parameterNode)
+            for child in p.children:
+                self.addNode(child, parameterNode)
+
+
+    def addNode(self, parameter, parentNode):
+        if hasattr(parameter, 'children'):
+            newNode = anytree.Node(parameter.name, parent=parentNode)
+            for c in parameter.children:
+                self.addNode(c, newNode)
+        else:
+            newNode = anytree.Node(parameter, parent=parentNode)
+
+
+
+
+
 Temporal = Parameter(name='Temporal', children = ['None', 'Prolonged', 'Shortened', 'Accelerating'])
 NonTemporal = Parameter(name='Non-temporal', children = ['None', 'Tensed', 'Reduced', 'Enlarged'])
 Contact = Parameter(name='Contact', children=['None', 'Contacting'])
@@ -160,7 +184,24 @@ Zone = Parameter(name='Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ul
 NonDominantLocation = Parameter(name='Non-dominant hand location', children=[HandPart, Zone])
 MajorLocation = Parameter(name='Major Location', children=[BodyLocation, SignSpaceLocation, NonDominantLocation])
 
-
+# treeModel = ParameterTreeModel([Quality, MajorMovement, MajorLocation])
+# for pre, fill, node in anytree.RenderTree(treeModel.tree):
+#     print("{}{}".format(pre, node.name))
+#
+# import pickle
+# import os
+# from binary import load_binary, save_binary
+# save_binary(treeModel, os.path.join(os.getcwd(),'tree.tree'))
+# treeModel = load_binary(os.path.join(os.getcwd(), 'tree.tree'))
+# for pre, fill, node in anytree.RenderTree(treeModel.tree):
+#     print("{}{}".format(pre, node.name))
+# treeModel.addNode('Spam', treeModel.tree)
+# # tree.addNode('Vikings', tree.)
+# save_binary(treeModel, os.path.join(os.getcwd(),'tree.tree'))
+# tree = load_binary(os.path.join(os.getcwd(), 'tree.tree'))
+# for pre, fill, node in anytree.RenderTree(treeModel.tree):
+#     print("{}{}".format(pre, node.name))
+#
 # MajorLocation = Parameter('Major', ['', 'Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral'])
 # OneHandMovement = Parameter('One hand movement', ['','Arc', 'Circular','Straight','Back and forth', 'Multiple', 'Hold'])
 # TwoHandMovement = Parameter('Two hand movement', ['', 'N/A', 'Hold', 'Alternating', 'Simaultaneous'])

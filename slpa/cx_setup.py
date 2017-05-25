@@ -42,9 +42,9 @@ build_exe_options = {"excludes": [
                     "include_files":incl_files,
                     "includes": [
                             "PyQt5",
-                            "PyQt5.QtWebKitWidgets",
-                            "PyQt5.QtWebKit",
-                            "PyQt5.QtPrintSupport",
+##                            "PyQt5.QtWebKitWidgets",
+##                            "PyQt5.QtWebKit",
+##                            "PyQt5.QtPrintSupport",
                             "PyQt5.QtMultimedia",
                             "sys"]
                             }
@@ -81,8 +81,8 @@ setup(name='Sign Language Phonetic Annotator',
       url='https://github.com/PhonologicalCorpusTools/SLP-Annotator',
       author='UBC Phonology Group',
       author_email='kathleen.hall@ubc.ca',
-      packages = ['slpa'],
-      executables = [Executable('slpa.py',
+##      packages = ['slpa'],
+      executables = [Executable('run_slpa.py',
                             base=base,
                             #shortcutDir=r'[StartMenuFolder]\%s' % group_name,
                             #shortcutName=exe_name,
