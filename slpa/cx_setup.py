@@ -46,7 +46,7 @@ build_exe_options = {"excludes": [
 ##                            "PyQt5.QtWebKit",
 ##                            "PyQt5.QtPrintSupport",
                             "PyQt5.QtMultimedia",
-                            "sys"]
+                            "sys", "anytree"]
                             }
 
 msi_data = {"Shortcut": shortcut_table}

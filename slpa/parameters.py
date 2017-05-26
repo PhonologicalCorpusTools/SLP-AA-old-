@@ -158,10 +158,6 @@ class ParameterTreeModel():
         else:
             newNode = anytree.Node(parameter, parent=parentNode)
 
-
-
-
-
 Temporal = Parameter(name='Temporal', children = ['None', 'Prolonged', 'Shortened', 'Accelerating'])
 NonTemporal = Parameter(name='Non-temporal', children = ['None', 'Tensed', 'Reduced', 'Enlarged'])
 Contact = Parameter(name='Contact', children=['None', 'Contacting'])
