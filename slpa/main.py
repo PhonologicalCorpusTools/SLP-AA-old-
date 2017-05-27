@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 import collections
+import parameters
 from imports import *
 from handshapes import *
 from lexicon import *
@@ -11,7 +12,7 @@ from binary import *
 from transcriptions import *
 from constraints import *
 from constraintwidgets import *
-from parameters import *
+from parameterwidgets import ParameterDialog, ParameterTreeModel
 #from slpa import __version__ as currentSLPAversion
 
 __currentSLPAversion__ = 0.1
@@ -941,13 +942,9 @@ class MainWindow(QMainWindow):
         self.defineTabOrder()
 
     def showParameterTree(self):
-        dialog = TreeViewDialog([Quality, MajorMovement, MajorLocation])
-        dialog.exec_()
-
-    def showParameterMenu(self):
-        dialog = MenuViewParameters([Quality, MajorMovement, MajorLocation])
-        dialog.exec_()
-
+        model = ParameterTreeModel([parameters.Quality, parameters.MajorMovement, parameters.MajorLocation])
+        dialog = ParameterDialog(model)
+        dialog.show()
 
     def keyPressEvent(self, e):
         key = e.key()
