@@ -74,7 +74,7 @@ class ParameterDialog(QDialog):
         self.tree = ParameterTreeWidget(self)
         self.displayTree = anytree.Node('Selected Parameters', parent=None)
         self.selectionLayout = QVBoxLayout()
-        self.displayTreeWidget = QLabel()
+        self.displayTreeWidget = QTextEdit()
         for p in model.tree.children:
             # setattr(self, p.name + 'Layout', ParameterSelectionsLayout(p.name))
             # self.selectionLayout.addLayout(getattr(self, p.name + 'Layout'))
@@ -88,7 +88,7 @@ class ParameterDialog(QDialog):
         parameterLayout.addLayout(self.selectionLayout)
 
         terminalNodesLayout = QVBoxLayout()
-        self.terminalNodesLabel = QLabel('No parameters selected')
+        self.terminalNodesLabel = QTextEdit('No parameters selected')
         terminalNodesLayout.addWidget(self.terminalNodesLabel)
         parameterLayout.addLayout(terminalNodesLayout)
 

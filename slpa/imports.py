@@ -4,7 +4,7 @@ from PyQt5.QtNetwork import QLocalSocket, QLocalServer
 from PyQt5.QtGui import (QFont, QFontMetrics, QIcon, QFontMetricsF, QPixmap, QRegExpValidator, QCloseEvent, QKeyEvent)
 from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction, QDockWidget,
                             QApplication, QWidget, QMessageBox, QTreeWidget, QTreeWidgetItem,
-                            QDialog, QGroupBox, QVBoxLayout, QButtonGroup,
+                            QDialog, QGroupBox, QVBoxLayout, QButtonGroup, QTextEdit,
                             QPushButton, QFrame, QGridLayout,QRadioButton,
                             QLineEdit, QFileDialog, QComboBox, QListWidget,
                             QProgressDialog, QCheckBox, QMenu, QMenuBar, QSizePolicy, QToolTip, QCompleter,
