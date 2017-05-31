@@ -30,6 +30,10 @@ Direction = Parameter(name = 'Direction', children = ['None', 'Forward', 'Backwa
 MajorMovement = Parameter(name='Major movement', children=[ContourMovement, ContourPlane, Repetition, Direction])
 
 #MAJOR LOCATION PARAMETERS
+HandPart = Parameter(name = 'Hand part', children = ['Hand', 'Fingers', 'Thumb', 'Index', 'Middle', 'Ring', 'Pinky'])
+WeakHandZone = Parameter(name = 'Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ulnar', 'Tips', 'Knuckle',
+                                                    'Base', 'Heel', 'Web', 'Palm'])
+WeakHandLocation = Parameter(name='Weak hand location', children=[HandPart, WeakHandZone])
 BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of head'])
 ForwardDistance = Parameter(name='Degrees of forward distance', children=['Unspecified', 'Proximal', 'Medial', 'Distal'])
 SideToSide = Parameter(name='Side-to-side dimension', children=['No offset', 'In line with breast', 'In line with shoulder'])
@@ -37,10 +41,14 @@ Height = Parameter(name='Height', children=['Top of head', 'Forehead', 'Nose', '
 Vector = Parameter(name='Vector', children=['L3', 'L2', 'L1', '0', 'R1', 'R2', 'R3'])
 SignSpaceLocation = Parameter(name='Signing space location', children=[ForwardDistance, SideToSide, Height, Vector])
 HandPart = Parameter(name='Hand part location', children = ['Hand', 'Fingers', 'Thumb', 'Index', 'Middle', 'Pinky'])
-Zone = Parameter(name='Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ulnar'])
-NonDominantLocation = Parameter(name='Non-dominant hand location', children=[HandPart, Zone])
+SigningSpaceZone = Parameter(name='Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ulnar'])
+NonDominantLocation = Parameter(name='Non-dominant hand location', children=[HandPart, SigningSpaceZone])
 MajorLocation = Parameter(name='Major Location', children=[BodyLocation, SignSpaceLocation, NonDominantLocation])
 
+#LOCAL MOVEMENT PARAMETERS
+LocalMovement = Parameter(name='Local Movement', children=['Wiggling', 'Hooking', 'Flattening', 'Twisting', 'Nodding',
+                                                           'Releasing', 'Rubbing', 'Circling'])
 
 
 
+defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation ]

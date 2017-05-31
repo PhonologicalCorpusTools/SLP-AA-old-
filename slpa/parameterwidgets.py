@@ -61,12 +61,16 @@ class ParameterSelectionsLayout(QHBoxLayout):
                 break
 
 class ParameterDialog(QDialog):
+    updateAfterClosing = Signal(bool, anytree.Node)
 
     def __init__(self, model):
         super().__init__()
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setWindowTitle('Select Parameters')
-        layout = QHBoxLayout()
+        self.accepted = False
+        layout = QVBoxLayout()
+        self.model = model
+        parameterLayout = QHBoxLayout()
         self.tree = ParameterTreeWidget(self)
         self.displayTree = anytree.Node('Selected Parameters', parent=None)
         self.selectionLayout = QVBoxLayout()
@@ -80,9 +84,34 @@ class ParameterDialog(QDialog):
             self.addChildren(parent, p, p.name, displayNode)#, getattr(self, p.name + 'Layout'))
         self.generateDisplayTreeText()
         self.selectionLayout.addWidget(self.displayTreeWidget)
-        layout.addWidget(self.tree)
-        layout.addLayout(self.selectionLayout)
+        parameterLayout.addWidget(self.tree)
+        parameterLayout.addLayout(self.selectionLayout)
+
+        terminalNodesLayout = QVBoxLayout()
+        self.terminalNodesLabel = QLabel('No parameters selected')
+        terminalNodesLayout.addWidget(self.terminalNodesLabel)
+        parameterLayout.addLayout(terminalNodesLayout)
+
+        buttonLayout = QHBoxLayout()
+        okButton = QPushButton('OK')
+        cancelButton = QPushButton('Cancel')
+        buttonLayout.addWidget(okButton)
+        buttonLayout.addWidget(cancelButton)
+        okButton.clicked.connect(self.accept)
+        cancelButton.clicked.connect(self.reject)
+
+        layout.addLayout(parameterLayout)
+        layout.addLayout(buttonLayout)
+
         self.setLayout(layout)
+
+    def accept(self):
+        self.updateAfterClosing.emit(True, self.displayTree)
+        super().accept()
+
+    def reject(self):
+        self.updateAfterClosing.emit(False, self.displayTree)
+        super().reject()
 
     def generateDisplayTreeText(self):
         treeText = list()
@@ -92,21 +121,11 @@ class ParameterDialog(QDialog):
         self.displayTreeWidget.setText(treeText)
 
     def updateDisplayTree(self, item, parent, addToTree=None):
-        print(addToTree)
         if addToTree is None:
             return #in this case user clicked text, not a checkbox
 
-        # terminalNode = [node for node in anytree.PostOrderIter(self.displayTree)
-        #                  if node.is_leaf and node.name == item and node.parent.name == parent]
-        # if not terminalNode:
-        #     print('no terminals', item)
-        #     return
-        # else:
-        #     terminalNode = terminalNode[0]
-
         if addToTree:
-            parentNode = [node for node in anytree.PostOrderIter(self.displayTree)
-                          if node.name == parent][0]
+            parentNode = [node for node in anytree.PostOrderIter(self.displayTree) if node.name == parent][0]
             for child in parentNode.children:
                 child.parent = None
                 del child
@@ -116,8 +135,18 @@ class ParameterDialog(QDialog):
         for pre, fill, node in anytree.RenderTree(self.displayTree):
             treeText.append("{}{}".format(pre, node.name))
         self.displayTreeWidget.setText('\n'.join(treeText))
+        self.updateTerminalNodes()
 
-    def addChildren(self, parentWidget, parentParameter, top_parameter, displayNode):#, selectionLayout):
+    def updateTerminalNodes(self):
+        text = list()
+        true_children = [node.name for pre, fill, node in anytree.RenderTree(self.model.tree) if node.is_leaf]
+        for pre, fill, node in anytree.RenderTree(self.displayTree):
+            if node.is_leaf and node.name in true_children:
+                text.append(node.name)
+        text = '\n'.join(text)
+        self.terminalNodesLabel.setText(text)
+
+    def addChildren(self, parentWidget, parentParameter, top_parameter, displayNode):
         buttonGroup = list()
         appendGroup = False
         for c in parentParameter.children:
@@ -140,9 +169,6 @@ class ParameterDialog(QDialog):
             self.tree.buttonGroups[parentParameter.name].extend(buttonGroup)
             # selectionLayout.addLabel(buttonGroup[0].parent().text(0))
             #every member of the buttonGroup has the same parent, so just grab an arbitrary one and use that information
-
-    def drawTree(self):
-        pass
 
 
 class ParameterTreeWidgetItem(QTreeWidgetItem):
@@ -181,12 +207,6 @@ class ParameterTreeModel():
         for node in self.tree.children:
             yield node.name
 
-
-class ParameterNode(anytree.NodeMixin):
-
-    def __init__(self, name, parent):
-        super().__init__()
-        self.parent = parent
 # treeModel = ParameterTreeModel([Quality, MajorMovement, MajorLocation])
 # dialog = ParameterDialog([Quality, MajorMovement, MajorLocation])
 

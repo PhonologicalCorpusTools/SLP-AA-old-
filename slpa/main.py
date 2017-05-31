@@ -928,8 +928,6 @@ class MainWindow(QMainWindow):
                 slot.slotFlagged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
-
-
         self.globalLayout.addLayout(layout)
 
         self.wrapper.setLayout(self.globalLayout)
@@ -938,13 +936,19 @@ class MainWindow(QMainWindow):
         self.makeCorpusDock()
 
         self.showMaximized()
-        #self.setFixedSize(self.size())
         self.defineTabOrder()
 
     def showParameterTree(self):
-        model = ParameterTreeModel([parameters.Quality, parameters.MajorMovement, parameters.MajorLocation])
+        model = ParameterTreeModel(parameters.defaultParameters)
         dialog = ParameterDialog(model)
-        dialog.show()
+        dialog.updateAfterClosing.connect(self.updateParameters)
+        result = dialog.show()
+
+    def updateParameters(self, update, parameters):
+        if not update:
+            return
+        else:
+            print(parameters.children)
 
     def keyPressEvent(self, e):
         key = e.key()
