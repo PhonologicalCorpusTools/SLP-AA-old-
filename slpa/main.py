@@ -607,6 +607,12 @@ class GlossLayout(QHBoxLayout):
         self.glossEdit.setPlaceholderText('Gloss')
         self.addWidget(self.glossEdit)
 
+    def text(self):
+        return self.glossEdit.text()
+
+    def setText(self, newText):
+        self.glossEdit.setText(newText)
+
 class HandConfigurationNames(QVBoxLayout):
     def __init__(self):
         QVBoxLayout.__init__(self)
@@ -799,13 +805,13 @@ class CorpusList(QListWidget):
             # if self.askSaveChanges:
                 alert = QMessageBox()
                 alert.setWindowTitle('Warning')
-                alert.setText('Save changes to current entry?')
+                alert.setText('There are unsaved changes to your current entry. What do you want to do?')
                 alert.addButton('Continue and save', QMessageBox.YesRole)
                 alert.addButton('Continue but don\'t save', QMessageBox.NoRole)
                 alert.addButton('Go back', QMessageBox.RejectRole)
                 result = alert.exec_()
                 if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole:
-                    self.parent.saveCorpus()
+                    self.parent.saveCorpus(checkForDuplicates=False)
                     self.parent.askSaveChanges = False
                 elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
                     # self.parent().askSaveChanges = False
@@ -826,6 +832,8 @@ class MainWindow(QMainWindow):
 
         self.createActions()
         self.createMenus()
+
+        self.selectedParameters = None
 
         # self.restrictedTranscriptions = True
         self.askSaveChanges = False
@@ -933,22 +941,35 @@ class MainWindow(QMainWindow):
         self.wrapper.setLayout(self.globalLayout)
         self.setCentralWidget(self.wrapper)
 
+        self.initParameterTree()
         self.makeCorpusDock()
 
         self.showMaximized()
         self.defineTabOrder()
 
+    def initParameterTree(self):
+        #this function should only be called once, when SLP-Annotator is loaded
+        #after that, call parameterDialog.updateSelectedFeatres()
+        self.parameterModel = ParameterTreeModel(self.parameters)
+        #this needs to get the total set of parameters
+        #currently it always accepts the default set, but this
+        #should be eventually configurable, and it will have to draw from the user's Settings
+        self.parameterDialog = ParameterDialog(self.parameterModel)
+        #The paramaterDialog is modeless, and merely hides when closed.
+        #this needs to get both the model, and the specific set of parameters for the currently selected word in the corpus
+        #there's need to be room for dealing with words that are not fully specified, or which have not been specified
+        #at all (e.g. newly created words)
+        self.parameterDialog.updateAfterClosing.connect(self.updateParameters)
+
     def showParameterTree(self):
-        model = ParameterTreeModel(parameters.defaultParameters)
-        dialog = ParameterDialog(model)
-        dialog.updateAfterClosing.connect(self.updateParameters)
-        result = dialog.show()
+        self.parameterDialog.show()
 
     def updateParameters(self, update, parameters):
         if not update:
             return
         else:
-            print(parameters.children)
+            self.selectedParameters = parameters
+            self.askSaveChanges = True
 
     def keyPressEvent(self, e):
         key = e.key()
@@ -1062,6 +1083,10 @@ class MainWindow(QMainWindow):
         self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
         self.settings.endGroup()
 
+        self.settings.beginGroup('parameters')
+        self.settings.setValue('parameters', self.parameters)
+        self.settings.endGroup()
+
         self.settings.beginGroup('features')
         self.settings.setValue('majorLocations', self.majorLocations)
         self.settings.setValue('minorLocations', self.minorLocations)
@@ -1086,6 +1111,10 @@ class MainWindow(QMainWindow):
         self.settings.endGroup()
 
         self.settings.value
+
+        self.settings.beginGroup('parameters')
+        self.parameters = self.settings.value('parameters', defaultValue=parameters.defaultParameters)
+        self.settings.endGroup()
 
         self.settings.beginGroup('features')
         self.majorLocations = self.settings.value('majorLocations', defaultValue=DEFAULT_MAJOR_LOCATIONS)
@@ -1187,19 +1216,19 @@ class MainWindow(QMainWindow):
 
         code = self.configTabs.widget(0).hand1Transcription.blenderCode()
 
-        # if os.path.exists(os.path.join(os.getcwd(), 'handCode.txt')):
-        #     #check if the existing code matches the current transcription
-        #     #if so, just load the most recent image, don't render a second time
-        #     with open(os.path.join(os.getcwd(), 'handCode.txt'), encoding='utf-8') as file:
-        #         old_code = file.read()
-        #         old_code = old_code.strip()
-        #         print(code)
-        #         print(old_code)
-        #     if old_code == code:
-        #         self.blenderDialog = BlenderOutputWindow('hand_output.png')
-        #         self.blenderDialog.show()
-        #         self.blenderDialog.raise_()
-        #         return
+        if os.path.exists(os.path.join(os.getcwd(), 'handCode.txt')):
+            #check if the existing code matches the current transcription
+            #if so, just load the most recent image, don't render a second time
+            with open(os.path.join(os.getcwd(), 'handCode.txt'), encoding='utf-8') as file:
+                old_code = file.read()
+                old_code = old_code.strip()
+                print(code)
+                print(old_code)
+            if old_code == code:
+                self.blenderDialog = BlenderOutputWindow('hand_output.png')
+                self.blenderDialog.show()
+                self.blenderDialog.raise_()
+                return
 
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
@@ -1207,12 +1236,12 @@ class MainWindow(QMainWindow):
         proc = subprocess.Popen(
             [blenderPath,
               blenderFile,
-             '--background',
+             # '--background',
               "--python", blenderScript])
         proc.communicate()
-        self.blenderDialog = BlenderOutputWindow('hand_output.png', self.gloss.glossEdit.text())
-        self.blenderDialog.show()
-        self.blenderDialog.raise_()
+        # self.blenderDialog = BlenderOutputWindow('hand_output.png', self.gloss.glossEdit.text())
+        # self.blenderDialog.show()
+        # self.blenderDialog.raise_()
 
     def clearLayout(self, layout):
         while layout.count():
@@ -1253,7 +1282,7 @@ class MainWindow(QMainWindow):
 
         #self.showMaximized()
 
-    def saveCorpus(self, event=None, checkForEmptyGloss=True):
+    def saveCorpus(self, event=None, checkForEmptyGloss=True, checkForDuplicates=True):
         isDuplicate = False
         if not self.gloss.glossEdit.text() and checkForEmptyGloss:
             alert = QMessageBox()
@@ -1292,7 +1321,11 @@ class MainWindow(QMainWindow):
         else: #corpus exists
             kwargs['path'] = self.corpus.path
             kwargs['file_mode'] = 'a'
-            if kwargs['gloss'] in self.corpus.wordlist:
+            if not checkForDuplicates:
+                isDuplicate = True
+                #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
+                #to save a gloss, under certain circumstances
+            elif kwargs['gloss'] in self.corpus.wordlist:
                 isDuplicate = True
                 alert = QMessageBox()
                 alert.setWindowTitle('Duplicate entry')
@@ -1335,7 +1368,7 @@ class MainWindow(QMainWindow):
         gloss = '' if not gloss else gloss.text()
         # gloss = gloss.text()
         sign = self.corpus[gloss]
-        self.gloss.glossEdit.setText(sign['gloss'])
+        self.gloss.setText(sign['gloss'])
         config1 = self.configTabs.widget(0)
         config2 = self.configTabs.widget(1)
         config1.clearAll()
@@ -1413,6 +1446,7 @@ class MainWindow(QMainWindow):
                 index = 0
             widget.setCurrentIndex(index)
         self.askSaveChanges = False
+        self.parameterDialog.updateSelectedParameters(sign['parameters'])
 
     def generateKwargs(self):
         #This is called whenever the corpus is updated/saved
@@ -1421,7 +1455,7 @@ class MainWindow(QMainWindow):
                 'major': None, 'minor': None,
                 'oneHandMovement': None, 'twoHandMovement': None,
                 'orientation': None, 'dislocation': None,
-                'flags': None}
+                'flags': None, 'parameters': None}
         config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
 
@@ -1454,6 +1488,7 @@ class MainWindow(QMainWindow):
                  'config2hand1': self.configTabs.widget(1).hand1Transcription.flagList,
                  'config2hand2': self.configTabs.widget(1).hand2Transcription.flagList}
         kwargs['flags'] = flags
+        kwargs['parameters'] = self.parameterDialog.displayTree
         return kwargs
 
     def createMenus(self):
@@ -1682,6 +1717,8 @@ class MainWindow(QMainWindow):
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
 
         self.featuresLayout.reset()
+        self.parameterDialog.accept()
+        self.initParameterTree()
         self.askSaveChanges = False
 
 class ExportCorpusDialog(QDialog):

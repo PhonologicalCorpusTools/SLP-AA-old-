@@ -105,13 +105,22 @@ class ParameterDialog(QDialog):
 
         self.setLayout(layout)
 
+    def shutDown(self):
+        super().close()
+
+    def closeEvent(self, e):
+        self.updateAfterClosing.emit(False, self.displayTree)
+        self.hide()
+
     def accept(self):
         self.updateAfterClosing.emit(True, self.displayTree)
-        super().accept()
+        #super().accept()
+        self.hide()
 
     def reject(self):
         self.updateAfterClosing.emit(False, self.displayTree)
-        super().reject()
+        #super().reject()
+        self.hide()
 
     def generateDisplayTreeText(self):
         treeText = list()
@@ -119,6 +128,11 @@ class ParameterDialog(QDialog):
             treeText.append("{}{}".format(pre, node.name))
         treeText = '\n'.join(treeText)
         self.displayTreeWidget.setText(treeText)
+
+    def updateSelectedParameters(self, parameters):
+        self.displayTree = parameters
+        self.generateDisplayTreeText()
+        self.updateTerminalNodes()
 
     def updateDisplayTree(self, item, parent, addToTree=None):
         if addToTree is None:
@@ -142,7 +156,7 @@ class ParameterDialog(QDialog):
         true_children = [node.name for pre, fill, node in anytree.RenderTree(self.model.tree) if node.is_leaf]
         for pre, fill, node in anytree.RenderTree(self.displayTree):
             if node.is_leaf and node.name in true_children:
-                text.append(node.name)
+                text.append(' : '.join([node.parent.name, node.name]))
         text = '\n'.join(text)
         self.terminalNodesLabel.setText(text)
 
@@ -206,26 +220,5 @@ class ParameterTreeModel():
     def __iter__(self):
         for node in self.tree.children:
             yield node.name
-
-# treeModel = ParameterTreeModel([Quality, MajorMovement, MajorLocation])
-# dialog = ParameterDialog([Quality, MajorMovement, MajorLocation])
-
-# print([(node.name, node.parent.name) for node in anytree.PostOrderIter(treeModel.tree, filter_=lambda x: x.is_leaf)])
-# for pre, fill, node in anytree.RenderTree(treeModel.tree):
-#     print("{}{}".format(pre, node.name))
-#
-# import pickle
-# import os
-# from binary import load_binary, save_binary
-# save_binary(treeModel, os.path.join(os.getcwd(),'tree.tree'))
-# treeModel = load_binary(os.path.join(os.getcwd(), 'tree.tree'))
-# for pre, fill, node in anytree.RenderTree(treeModel.tree):
-#     print("{}{}".format(pre, node.name))
-# treeModel.addNode('Spam', treeModel.tree)
-# # tree.addNode('Vikings', tree.)
-# save_binary(treeModel, os.path.join(os.getcwd(),'tree.tree'))
-# tree = load_binary(os.path.join(os.getcwd(), 'tree.tree'))
-# for pre, fill, node in anytree.RenderTree(treeModel.tree):
-#     print("{}{}".format(pre, node.name))
 
 

@@ -51,4 +51,4 @@ LocalMovement = Parameter(name='Local Movement', children=['Wiggling', 'Hooking'
 
 
 
-defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation ]
+defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation]

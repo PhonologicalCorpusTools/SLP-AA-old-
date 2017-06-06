@@ -48,16 +48,18 @@ class Sign():
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None, 'major': str(), 'minor': str(),
                        'oneHandMovement': str(), 'twoHandMovement': str(),
                        'orientation': str(), 'dislocation': str(),
+                       'parameters': dict(),
                        'flags': {'config1hand1':[False for n in range(34)], 'config1hand2':[False for n in range(34)],
                                  'config2hand1':[False for n in range(34)], 'config2hand2':[False for n in range(34)]}}
 
-    sorted_attributes = ['gloss', 'config1', 'config2', 'major', 'minor',
+    sorted_attributes = ['gloss', 'config1', 'config2', 'parameters', 'major', 'minor',
                        'oneHandMovement', 'twoHandMovement',
                        'orientation', 'dislocation', 'flags']
 
     headers = ['gloss',
                 'config1hand1', 'config1hand2',
                 'config2hand1', 'config2hand2',
+                'parameters',
                 'major', 'minor',
                 'oneHandMovement', 'twoHandMovement',
                 'orientation', 'dislocation']
