@@ -830,15 +830,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('SLP-Annotator')
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
 
-        self.createActions()
-        self.createMenus()
-
-        self.selectedParameters = None
-
-        # self.restrictedTranscriptions = True
+        #Set "global" variables
         self.askSaveChanges = False
         self.constraints = dict()
         self.clipboard = list()
+        self.createActions()
+        self.createMenus()
         self.readSettings()
 
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
@@ -1110,10 +1107,13 @@ class MainWindow(QMainWindow):
         self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
         self.settings.endGroup()
 
-        self.settings.value
-
         self.settings.beginGroup('parameters')
         self.parameters = self.settings.value('parameters', defaultValue=parameters.defaultParameters)
+        self.settings.endGroup()
+
+        self.settings.beginGroup('windows')
+        self.showSaveAlert = self.settings.value('showAlertOnSave', defaultValue = False)
+        self.parametersAlwaysOnTop = self.settings.value('parametersAlwaysOnTop', defaultValue = False)
         self.settings.endGroup()
 
         self.settings.beginGroup('features')
@@ -1502,10 +1502,31 @@ class MainWindow(QMainWindow):
         self.settingsMenu = self.menuBar().addMenu('&Settings')
         self.settingsMenu.addAction(self.setRestrictionsAct)
         self.settingsMenu.addAction(self.setConstraintsAct)
+        self.settingsMenu.addAction(self.alertOnCorpusSaveAct)
+        self.settingsMenu.addAction(self.keepParametersOnTopAct)
         self.featuresMenu = self.menuBar().addMenu('&Features')
         self.featuresMenu.addAction(self.defineFeaturesAct)
 
+    def alertOnCorpusSave(self):
+        pass
+
+    def keepParametersOnTop(self):
+        pass
+
     def createActions(self):
+
+        self.alertOnCorpusSaveAct = QAction('Show &alert when corpus saves',
+                                            self,
+                                            statusTip="Show dialog box whenever a corpus entry is saved",
+                                            checkable = True,
+                                            triggered = self.alertOnCorpusSave)
+
+        self.keepParametersOnTopAct = QAction('Keep parameters window on &top',
+                                              self,
+                                              statusTip = 'Keep parameters window on top of other windows',
+                                              checkable = True,
+                                              triggered = self.keepParametersOnTop)
+
 
         self.newCorpusAct = QAction('&New corpus',
                                     self,
@@ -1855,7 +1876,6 @@ def loadcsvCorpus(path):
 
 def getMediaFilePath(filename):
     if hasattr(sys, 'frozen'):
-        print('True')
         dir = os.path.dirname(sys.executable)
         path = os.path.join(dir, 'media', filename)
     else:

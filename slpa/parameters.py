@@ -27,7 +27,7 @@ ContourMovement = Parameter(name='Contour of movement', children = ['Hold', 'Str
 ContourPlane = Parameter(name='Contour planes', children = ['Hold', 'Horizontal', 'Vertical', 'Surface', 'Midline', 'Oblique'])
 Repetition = Parameter(name='Repetition',children=['None', 'Once', 'Twice', 'Multiple'])
 Direction = Parameter(name = 'Direction', children = ['None', 'Forward', 'Backward'])
-MajorMovement = Parameter(name='Major movement', children=[ContourMovement, ContourPlane, Repetition, Direction])
+MajorMovement = Parameter(name='Major Movement', children=[ContourMovement, ContourPlane, Repetition, Direction])
 
 #MAJOR LOCATION PARAMETERS
 HandPart = Parameter(name = 'Hand part', children = ['Hand', 'Fingers', 'Thumb', 'Index', 'Middle', 'Ring', 'Pinky'])
