@@ -14,6 +14,22 @@ class ParameterTreeWidget(QTreeWidget):
         self.currentItemChanged.connect(self.handleItemChanged)
         self.currentItemChanged.connect(self.dialog.updateDisplayTree)
 
+    def getChildren(self, node):
+        if not node.childCount():
+            yield node
+        else:
+            for n in range(node.childCount()):
+                child = node.child(n)
+                yield child
+                self.getChildren(child)
+
+    def topDownIter(self):
+        topNode = self.invisibleRootItem()
+        for node in range(topNode.childCount()):
+            child = topNode.child(node)
+            self.getChildren(child)
+
+
     def handleItemChanged(self, item, column):
         if item.parent() is None:
             return
@@ -75,6 +91,7 @@ class ParameterDialog(QDialog):
         for p in model.tree.children:
             displayNode = anytree.Node(p.name, parent=self.displayTree)
             parent = ParameterTreeWidgetItem(self.tree)
+            parent.setFlags(Qt.ItemIsSelectable | parent.flags() ^ Qt.ItemIsUserCheckable)
             parent.setText(0, p.name)
             self.addChildren(parent, p, p.name, displayNode)
         self.tree.buttonGroups['Major Location'].extend(self.specialButtons)
@@ -102,6 +119,7 @@ class ParameterDialog(QDialog):
 
         self.setLayout(layout)
 
+
     def alwaysOnTop(self, stayOnTop):
         if stayOnTop:
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
@@ -114,7 +132,15 @@ class ParameterDialog(QDialog):
 
         for c in parentParameter.children:
             child = ParameterTreeWidgetItem(parentWidget)
-            if not c.is_leaf:
+            print(c.name)
+            print('currently is {}'.format('checkable' if child.flags() & Qt.ItemIsUserCheckable else 'not checkable'))
+            if c.is_leaf:
+                child.setText(0, c.name)
+                child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                child.setCheckState(0, Qt.Unchecked)
+                buttonGroup.append(child)
+                appendGroup = True
+            else:
                 #it's a non-terminal node
                 newDisplayNode = anytree.Node(c.name, parent=displayNode)
                 child.setText(0, c.name)
@@ -122,14 +148,11 @@ class ParameterDialog(QDialog):
                     child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                     child.setCheckState(0, Qt.Unchecked)
                     self.specialButtons.append(child)
-                self.addChildren(child, c, top_parameter, newDisplayNode)#, selectionLayout)
-            else:
-                #it's a terminal node
-                child.setText(0, c.name)
-                child.setFlags(Qt.ItemIsUserCheckable|Qt.ItemIsEnabled)
-                child.setCheckState(0, Qt.Unchecked)
-                buttonGroup.append(child)
-                appendGroup = True
+                else:
+                    print('should not be checkable')
+                    child.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable^child.flags())
+                    print('Item is user checkable' if child.flags() & Qt.ItemIsUserCheckable else 'item no longer checkable')
+                self.addChildren(child, c, top_parameter, newDisplayNode)
 
         if appendGroup:
             self.tree.buttonGroups[parentParameter.name].extend(buttonGroup)
@@ -143,12 +166,10 @@ class ParameterDialog(QDialog):
 
     def accept(self):
         self.updateAfterClosing.emit(True, self.displayTree)
-        #super().accept()
         self.hide()
 
     def reject(self):
         self.updateAfterClosing.emit(False, self.displayTree)
-        #super().reject()
         self.hide()
 
     def generateDisplayTreeText(self):
@@ -163,24 +184,28 @@ class ParameterDialog(QDialog):
         self.generateDisplayTreeText()
         self.updateTerminalNodes()
 
+    def buildTree(self, treeWidgetItem, displayTreeItem):
+        canBeChecked = treeWidgetItem.flags() & Qt.ItemIsUserCheckable
+        if (not canBeChecked) or (canBeChecked and treeWidgetItem.checkState(0)):
+            newDisplayNode = anytree.Node(treeWidgetItem.text(0), parent=displayTreeItem)
+            for n in range(treeWidgetItem.childCount()):
+                child = treeWidgetItem.child(n)
+                self.buildTree(child, newDisplayNode)
+
     def updateDisplayTree(self, item, parent, addToTree=None):
         if addToTree is None:
             return #in this case user clicked text, not a checkbox
 
         if addToTree:
-            parentNode = [node for node in anytree.PostOrderIter(self.displayTree) if node.name == parent]
-            if parentNode:
-                parentNode = parentNode[0]
-                for child in parentNode.children:
-                    child.parent = None
-                    del child
-                node = anytree.Node(item, parent=parentNode)
-            else:
-                print(parent)
+            topNode = anytree.Node('Selected Parameters', parent=None)
+            root = self.tree.invisibleRootItem()
+            self.buildTree(root, topNode)
+            self.displayTree = topNode
 
         treeText = list()
         for pre, fill, node in anytree.RenderTree(self.displayTree):
             treeText.append("{}{}".format(pre, node.name))
+        self.displayTreeWidget.clear()
         self.displayTreeWidget.setText('\n'.join(treeText))
         self.updateTerminalNodes()
 
