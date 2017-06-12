@@ -959,6 +959,8 @@ class MainWindow(QMainWindow):
         self.parameterDialog.updateAfterClosing.connect(self.updateParameters)
 
     def showParameterTree(self):
+        self.parameterDialog.resize(self.parameterDialog.adjustedWidth, self.parameterDialog.adjustedHeight)
+        self.parameterDialog.move(self.parameterDialog.adjustedPos)
         self.parameterDialog.show()
 
     def updateParameters(self, update, parameters):
@@ -1499,31 +1501,42 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.newGlossAct)
         self.fileMenu.addAction(self.exportCorpusAct)
         self.fileMenu.addAction(self.quitAct)
-        self.settingsMenu = self.menuBar().addMenu('&Settings')
+
+        self.constraintsMenu = self.menuBar().addMenu('&Constraints')
+        self.constraintsMenu.addAction(self.setConstraintsAct)
+
+        self.settingsMenu = self.menuBar().addMenu('&Options')
         self.settingsMenu.addAction(self.setRestrictionsAct)
-        self.settingsMenu.addAction(self.setConstraintsAct)
         self.settingsMenu.addAction(self.alertOnCorpusSaveAct)
         self.settingsMenu.addAction(self.keepParametersOnTopAct)
-        self.featuresMenu = self.menuBar().addMenu('&Features')
-        self.featuresMenu.addAction(self.defineFeaturesAct)
+
+        # self.featuresMenu = self.menuBar().addMenu('&Features')
+        # self.featuresMenu.addAction(self.defineFeaturesAct)
 
     def alertOnCorpusSave(self):
-        pass
+        if self.alertOnCorpusSaveAct.isChecked():
+            self.showSaveAlert = True
+        else:
+            self.showSaveAlert = False
 
     def keepParametersOnTop(self):
-        pass
+        if self.keepParametersOnTopAct.isChecked():
+            self.parameterDialog.setWindowFlags(Qt.WindowStaysOnTopHint)
+            self.parameterDialog.show()
+        else:
+            self.parameterDialog.setWindowFlags(self.parameterDialog.windowFlags() ^ Qt.WindowStaysOnTopHint)
 
     def createActions(self):
 
-        self.alertOnCorpusSaveAct = QAction('Show &alert when corpus saves',
+        self.alertOnCorpusSaveAct = QAction('&Alert after saving',
                                             self,
-                                            statusTip="Show dialog box whenever a corpus entry is saved",
+                                            statusTip='Show a pop-up window whenever a corpus entry is saved',
                                             checkable = True,
                                             triggered = self.alertOnCorpusSave)
 
         self.keepParametersOnTopAct = QAction('Keep parameters window on &top',
                                               self,
-                                              statusTip = 'Keep parameters window on top of other windows',
+                                              statusTip = 'Always keep the parameters window on top of other windows',
                                               checkable = True,
                                               triggered = self.keepParametersOnTop)
 
@@ -1538,7 +1551,7 @@ class MainWindow(QMainWindow):
 
         self.saveCorpusAct = QAction( "&Save corpus...",
                 self,
-                statusTip="Save a corpus", triggered=self.saveCorpus)
+                statusTip="Save current corpus", triggered=self.saveCorpus)
 
         self.newGlossAct = QAction('&New gloss',
                 self,
@@ -1559,14 +1572,14 @@ class MainWindow(QMainWindow):
                                     statusTip = 'If on, anything can be entered into transcriptions',
                                     triggered = self.setTranscriptionRestrictions,
                                     checkable = True)
-        self.setConstraintsAct = QAction('Select anatomical/phonological constraints',
+        self.setConstraintsAct = QAction('Select anatomical/phonological &constraints...',
                                     self,
-                                    statusTip = 'Select constraints on transcriptions',
+                                    statusTip = 'Select (violable) constraints on transcriptions',
                                     triggered = self.setConstraints)
-        self.defineFeaturesAct = QAction('View/edit major feature values...',
-                                        self,
-                                        statusTip = 'View/edit major feature values',
-                                        triggered = self.defineFeatures)
+        # self.defineFeaturesAct = QAction('Edit parameter values...',
+        #                                 self,
+        #                                 statusTip = 'Edit the set of possible handshape parameters',
+        #                                 triggered = self.defineFeatures)
 
     def defineFeatures(self):
         currentMajor = self.featuresLayout.major.currentText()

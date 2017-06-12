@@ -1,6 +1,6 @@
 from imports import *
 from collections import defaultdict
-from parameters import *
+import parameters
 import anytree
 
 class ParameterTreeWidget(QTreeWidget):
@@ -29,7 +29,6 @@ class ParameterTreeWidget(QTreeWidget):
             child = topNode.child(node)
             self.getChildren(child)
 
-
     def handleItemChanged(self, item, column):
         if item.parent() is None:
             return
@@ -40,7 +39,7 @@ class ParameterTreeWidget(QTreeWidget):
                 self.dialog.updateDisplayTree(button.text(0), item.parent().text(0), addToTree=True)
             else:
                 button.setCheckState(0, Qt.Unchecked)
-                self.dialog.updateDisplayTree(button.text(0), item.parent().text(0), addToTree=False)
+                #self.dialog.updateDisplayTree(button.text(0), item.parent().text(0), addToTree=False)
 
     def findTopParent(self, item):
         parent = item.parent()
@@ -79,15 +78,19 @@ class ParameterDialog(QDialog):
         super().__init__()
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setWindowTitle('Select Parameters')
-        self.accepted = False
-        layout = QVBoxLayout()
         self.model = model
-        parameterLayout = QHBoxLayout()
+        self.adjustedHeight = self.frameGeometry().height()
+        self.adjustedWidth = self.frameGeometry().width()
+        self.adjustedPos = self.pos()
         self.tree = ParameterTreeWidget(self)
         self.displayTree = anytree.Node('Selected Parameters', parent=None)
         self.selectionLayout = QVBoxLayout()
         self.displayTreeWidget = QTextEdit()
         self.specialButtons = list()
+
+        layout = QVBoxLayout()
+        parameterLayout = QHBoxLayout()
+
         for p in model.tree.children:
             displayNode = anytree.Node(p.name, parent=self.displayTree)
             parent = ParameterTreeWidgetItem(self.tree)
@@ -95,7 +98,6 @@ class ParameterDialog(QDialog):
             parent.setText(0, p.name)
             self.addChildren(parent, p, p.name, displayNode)
         self.tree.buttonGroups['Major Location'].extend(self.specialButtons)
-
         self.generateDisplayTreeText()
         self.selectionLayout.addWidget(self.displayTreeWidget)
         parameterLayout.addWidget(self.tree)
@@ -109,22 +111,33 @@ class ParameterDialog(QDialog):
         buttonLayout = QHBoxLayout()
         okButton = QPushButton('OK')
         cancelButton = QPushButton('Cancel')
+        resetButton = QPushButton('Reset to default values')
         buttonLayout.addWidget(okButton)
         buttonLayout.addWidget(cancelButton)
+        buttonLayout.addWidget(resetButton)
         okButton.clicked.connect(self.accept)
         cancelButton.clicked.connect(self.reject)
+        resetButton.clicked.connect(self.reset)
 
         layout.addLayout(parameterLayout)
         layout.addLayout(buttonLayout)
 
         self.setLayout(layout)
+        self.resize(self.adjustedHeight, self.adjustedWidth)
+        self.move(self.adjustedPos)
+
+    def reset(self):
+        topTreeWidgetItem = self.tree.invisibleRootItem()
+        topDisplayNode = self.displayTree
+        topModelNode = self.model
+
 
 
     def alwaysOnTop(self, stayOnTop):
         if stayOnTop:
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
         else:
-            self.setWindowFlags(Qt.WindowStaysOnBottomHint)
+            self.setWindowFlags(self.windowFlags() ^ Qt.WindowStaysOnTopHint)
 
     def addChildren(self, parentWidget, parentParameter, top_parameter, displayNode):
         buttonGroup = list()
@@ -132,8 +145,6 @@ class ParameterDialog(QDialog):
 
         for c in parentParameter.children:
             child = ParameterTreeWidgetItem(parentWidget)
-            print(c.name)
-            print('currently is {}'.format('checkable' if child.flags() & Qt.ItemIsUserCheckable else 'not checkable'))
             if c.is_leaf:
                 child.setText(0, c.name)
                 child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
@@ -149,27 +160,27 @@ class ParameterDialog(QDialog):
                     child.setCheckState(0, Qt.Unchecked)
                     self.specialButtons.append(child)
                 else:
-                    print('should not be checkable')
                     child.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable^child.flags())
-                    print('Item is user checkable' if child.flags() & Qt.ItemIsUserCheckable else 'item no longer checkable')
                 self.addChildren(child, c, top_parameter, newDisplayNode)
 
         if appendGroup:
             self.tree.buttonGroups[parentParameter.name].extend(buttonGroup)
 
-    def shutDown(self):
-        super().close()
-
     def closeEvent(self, e):
-        self.updateAfterClosing.emit(False, self.displayTree)
-        self.hide()
+        self.reject()
 
     def accept(self):
         self.updateAfterClosing.emit(True, self.displayTree)
+        self.adjustedHeight = self.frameGeometry().height()
+        self.adjustedWidth = self.frameGeometry().width()
+        self.adjustedPos = self.pos()
         self.hide()
 
     def reject(self):
         self.updateAfterClosing.emit(False, self.displayTree)
+        self.adjustedHeight = self.frameGeometry().height()
+        self.adjustedWidth = self.frameGeometry().width()
+        self.adjustedPos = self.pos()
         self.hide()
 
     def generateDisplayTreeText(self):
@@ -202,12 +213,12 @@ class ParameterDialog(QDialog):
             self.buildTree(root, topNode)
             self.displayTree = topNode
 
-        treeText = list()
-        for pre, fill, node in anytree.RenderTree(self.displayTree):
-            treeText.append("{}{}".format(pre, node.name))
-        self.displayTreeWidget.clear()
-        self.displayTreeWidget.setText('\n'.join(treeText))
-        self.updateTerminalNodes()
+            treeText = list()
+            for pre, fill, node in anytree.RenderTree(self.displayTree):
+                treeText.append("{}{}".format(pre, node.name))
+            self.displayTreeWidget.clear()
+            self.displayTreeWidget.setText('\n'.join(treeText))
+            self.updateTerminalNodes()
 
     def updateTerminalNodes(self):
         text = list()
@@ -237,18 +248,18 @@ class ParameterTreeModel():
     def __init__(self, parameters):
         self.tree = anytree.Node('Parameters', parent=None)
         for p in parameters:
-            parameterNode = anytree.Node(p.name, parent=self.tree)
+            parameterNode = ParameterNode(p, parent=self.tree) #anytree.Node(p.name, parent=self.tree)
             setattr(self, p.name, parameterNode)
             for child in p.children:
                 self.addNode(child, parameterNode)
 
     def addNode(self, parameter, parentNode):
         if hasattr(parameter, 'children'):
-            newNode = anytree.Node(parameter.name, parent=parentNode)
+            newNode = ParameterNode(parameter, parent=parentNode)#anytree.Node(parameter.name, parent=parentNode)
             for c in parameter.children:
                 self.addNode(c, newNode)
         else:
-            newNode = anytree.Node(parameter, parent=parentNode)
+            newNode = ParameterNode(parameters.TerminalParameter(parameter, parentNode), parent=parentNode) #anytree.Node(parameter, parent=parentNode)
 
     def __getitem__(self, item):
         for node in self.tree.children:
@@ -262,3 +273,13 @@ class ParameterTreeModel():
             yield node.name
 
 
+class ParameterNode(anytree.Node):
+
+    def __init__(self, parameter, parent=None):
+        super().__init__(parameter.name, parent=parent)
+        self.name = parameter.name
+        self.parameter = parameter
+        print(self.name)
+        print(self.parameter)
+        print(self.parameter.__dict__)
+        #print(self.parameter.spam)
