@@ -946,7 +946,7 @@ class MainWindow(QMainWindow):
 
     def initParameterTree(self):
         #this function should only be called once, when SLP-Annotator is loaded
-        #after that, call parameterDialog.updateSelectedFeatres()
+        #after that, call parameterDialog.showParameterTree()
         self.parameterModel = ParameterTreeModel(self.parameters)
         #this needs to get the total set of parameters
         #currently it always accepts the default set, but this
@@ -954,7 +954,7 @@ class MainWindow(QMainWindow):
         self.parameterDialog = ParameterDialog(self.parameterModel)
         #The paramaterDialog is modeless, and merely hides when closed.
         #this needs to get both the model, and the specific set of parameters for the currently selected word in the corpus
-        #there's need to be room for dealing with words that are not fully specified, or which have not been specified
+        #there needs to be room for dealing with words that are not fully specified, or which have not been specified
         #at all (e.g. newly created words)
         self.parameterDialog.updateAfterClosing.connect(self.updateParameters)
 
