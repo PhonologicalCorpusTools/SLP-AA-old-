@@ -39,7 +39,7 @@ class ParameterTreeWidget(QTreeWidget):
                 self.dialog.updateDisplayTree(addToTree=True)
             else:
                 button.setCheckState(0, Qt.Unchecked)
-                #self.dialog.updateDisplayTree(button.text(0), item.parent().text(0), addToTree=False)
+                #self.dialog.updateDisplayTree(addToTree=False)
 
     def findTopParent(self, item):
         parent = item.parent()
@@ -128,6 +128,7 @@ class ParameterDialog(QDialog):
         self.move(self.adjustedPos)
 
     def reset(self):
+        self.displayTree = anytree.Node('Selected Parameters', parent = None)
         self.displayTreeWidget.clear()
         self.tree = ParameterTreeWidget(self)
         self.terminalNodesLabel.setText('')
@@ -167,7 +168,7 @@ class ParameterDialog(QDialog):
                     self.specialButtons.append(child)
                 else:
                     child.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable^child.flags())
-                self.addChildren(child, c, top_parameter, newDisplayNode, checkDefaults)
+                self.addChildren(child, c, top_parameter, newDisplayNode, checkDefaults=checkDefaults)
 
         if appendGroup:
             self.tree.buttonGroups[parentParameter.name].extend(buttonGroup)
