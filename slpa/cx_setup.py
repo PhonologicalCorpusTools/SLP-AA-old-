@@ -46,11 +46,9 @@ build_exe_options = {"excludes": [
 ##                            "PyQt5.QtWebKit",
 ##                            "PyQt5.QtPrintSupport",
                             "PyQt5.QtMultimedia",
-<<<<<<< Updated upstream
+
                             "sys", "anytree"]
-=======
-                            "sys","anytree"]
->>>>>>> Stashed changes
+
                             }
 
 msi_data = {"Shortcut": shortcut_table}
