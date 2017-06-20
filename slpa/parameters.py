@@ -1,13 +1,12 @@
 class Parameter:
 
-    def __init__(self, name, children=None, parent=None, default=None):
+    def __init__(self, name, children=None, parent=None, default=None, is_default=False):
         self.name = name
         self.parent = parent
-        self.spam = 'Spam'
         self.default = default
+        self.is_default = is_default
         self.children = list()
         self.defaultChild = None
-        self.vikings = 'Vikings'
         if children is not None:
             for child in children:
                 if isinstance(child, str):
@@ -86,7 +85,7 @@ WeakHandZone = Parameter(name = 'Zone', children = ['Inside', 'Pad', 'Back', 'Ra
                                                     'Base', 'Heel', 'Web', 'Palm'], parent=WeakHandLocation)
 WeakHandLocation.addChildren([HandPart, WeakHandZone])
 
-BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of head'], default='Back of head', parent=WeakHandLocation)
+BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of head'], default='Back of head', parent=WeakHandLocation, is_default=True)
 ForwardDistance = Parameter(name='Degrees of forward distance', children=['Unspecified', 'Proximal', 'Medial', 'Distal'], default='Unspecified', parent=WeakHandLocation)
 SideToSide = Parameter(name='Side-to-side dimension', children=['No offset', 'In line with breast', 'In line with shoulder'], default='No offset', parent=WeakHandLocation)
 Height = Parameter(name='Height', children=['Top of head', 'Forehead', 'Nose', 'Mouth', 'Chin'], default='Chin', parent=WeakHandLocation)
