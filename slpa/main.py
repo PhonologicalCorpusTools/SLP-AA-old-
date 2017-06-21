@@ -12,6 +12,7 @@ from binary import *
 from transcriptions import *
 from constraints import *
 from constraintwidgets import *
+from notes import *
 from parameterwidgets import ParameterDialog, ParameterTreeModel
 #from slpa import __version__ as currentSLPAversion
 
@@ -939,6 +940,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.wrapper)
 
         self.initParameterTree()
+        self.initCorpusNotes()
         self.makeCorpusDock()
 
         self.showMaximized()
@@ -1281,6 +1283,7 @@ class MainWindow(QMainWindow):
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
         self.corpusList.sortItems()
+        self.corpusNotes.setText(self.corpus.notes)
 
         #self.showMaximized()
 
@@ -1349,6 +1352,7 @@ class MainWindow(QMainWindow):
     def updateCorpus(self, kwargs, isDuplicate=False):
         sign = Sign(kwargs)
         self.corpus.addWord(sign)
+        self.corpus.corpusNotes = kwargs['corpusNotes']
         if not isDuplicate:
             self.corpusList.addItem(kwargs['gloss'])
             self.corpusList.sortItems()
@@ -1448,7 +1452,6 @@ class MainWindow(QMainWindow):
                 index = 0
             widget.setCurrentIndex(index)
         self.askSaveChanges = False
-        self.parameterDialog.updateSelectedParameters(sign['parameters'])
 
     def generateKwargs(self):
         #This is called whenever the corpus is updated/saved
@@ -1457,7 +1460,7 @@ class MainWindow(QMainWindow):
                 'major': None, 'minor': None,
                 'oneHandMovement': None, 'twoHandMovement': None,
                 'orientation': None, 'dislocation': None,
-                'flags': None, 'parameters': None}
+                'flags': None, 'parameters': None, 'corpusNotes': None}
         config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
 
@@ -1491,6 +1494,8 @@ class MainWindow(QMainWindow):
                  'config2hand2': self.configTabs.widget(1).hand2Transcription.flagList}
         kwargs['flags'] = flags
         kwargs['parameters'] = self.parameterDialog.displayTree
+        kwargs['corpusNotes'] = self.corpusNotes.getText()
+        print(kwargs['corpusNotes'])
         return kwargs
 
     def createMenus(self):
@@ -1509,6 +1514,10 @@ class MainWindow(QMainWindow):
         self.settingsMenu.addAction(self.setRestrictionsAct)
         self.settingsMenu.addAction(self.alertOnCorpusSaveAct)
         self.settingsMenu.addAction(self.keepParametersOnTopAct)
+
+        self.notesMenu = self.menuBar().addMenu('&Notes')
+        self.notesMenu.addAction(self.addCorpusNotesAct)
+        self.notesMenu.addAction(self.addSignNotesAct)
 
         # self.featuresMenu = self.menuBar().addMenu('&Features')
         # self.featuresMenu.addAction(self.defineFeaturesAct)
@@ -1576,10 +1585,40 @@ class MainWindow(QMainWindow):
                                     self,
                                     statusTip = 'Select (violable) constraints on transcriptions',
                                     triggered = self.setConstraints)
+        self.addCorpusNotesAct = QAction('Edit &corpus notes...',
+                                         self,
+                                         statusTip = 'Open a notepad for information about the corpus',
+                                         triggered = self.addCorpusNotes)
+        self.addSignNotesAct = QAction('Edit &sign notes...',
+                                        self,
+                                       statusTip = 'Open a notepad for information about the current sign',
+                                       triggered = self.addSignNotes)
+
         # self.defineFeaturesAct = QAction('Edit parameter values...',
         #                                 self,
         #                                 statusTip = 'Edit the set of possible handshape parameters',
         #                                 triggered = self.defineFeatures)
+
+
+    def initCorpusNotes(self):
+        self.corpusNotes = NotesDialog()
+        if self.corpus is None:
+            title = 'Notes for unnamed corpus'
+        else:
+            title = 'Notes for {} corpus'.format(self.corpus.name)
+        self.corpusNotes.setWindowTitle(title)
+
+
+    def addCorpusNotes(self):
+        if self.corpus is None:
+            title = 'Notes for unnamed corpus'
+        else:
+            title = 'Notes for {} corpus'.format(self.corpus.name)
+        self.corpusNotes.setWindowTitle(title)
+        self.corpusNotes.show()
+
+    def addSignNotes(self):
+        pass
 
     def defineFeatures(self):
         currentMajor = self.featuresLayout.major.currentText()

@@ -5,18 +5,26 @@ X_IN_BOX = '\u2327'
 NULL = '\u2205'
 
 class Corpus():
-    corpus_attributes = {'name': 'corpus', 'wordlist': dict(), '_discourse': None,
+    corpus_attributes = {'name': 'corpus', 'wordlist': dict(), '_discourse': None, 'path': None,
                          'specifier': None, 'inventory': None, 'inventoryModel': None, 'has_frequency': True,
                          'has_spelling': False, 'has_wordtokens': False, 'has_audio': False, 'wav_path': None,
                          '_attributes': list(),
+                         'corpusNotes': str(),
                          '_version': 0.1#currentSLPAversion
                          }
     basic_attributes = ['spelling', 'transcription', 'frequency']
 
     def __init__(self, kwargs):
-        self.path = kwargs['path']
-        self.name = kwargs['name']
-        self.wordlist = dict()
+        for attr, default_value in Corpus.corpus_attributes.items():
+            try:
+                setattr(self, attr, kwargs[attr])
+            except KeyError:
+                setattr(self, attr, default_value)
+        self.basic_attributes = Corpus.basic_attributes[:]
+
+    @property
+    def notes(self):
+        return self.corpusNotes
 
     def __len__(self):
         return len(self.wordlist)
