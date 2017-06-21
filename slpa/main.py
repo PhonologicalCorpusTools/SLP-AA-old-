@@ -941,6 +941,7 @@ class MainWindow(QMainWindow):
 
         self.initParameterTree()
         self.initCorpusNotes()
+        self.initSignNotes()
         self.makeCorpusDock()
 
         self.showMaximized()
@@ -1375,6 +1376,7 @@ class MainWindow(QMainWindow):
         # gloss = gloss.text()
         sign = self.corpus[gloss]
         self.gloss.setText(sign['gloss'])
+        self.signNotes.setText(sign['signNotes'])
         config1 = self.configTabs.widget(0)
         config2 = self.configTabs.widget(1)
         config1.clearAll()
@@ -1460,7 +1462,8 @@ class MainWindow(QMainWindow):
                 'major': None, 'minor': None,
                 'oneHandMovement': None, 'twoHandMovement': None,
                 'orientation': None, 'dislocation': None,
-                'flags': None, 'parameters': None, 'corpusNotes': None}
+                'flags': None, 'parameters': None,
+                'corpusNotes': None, 'signNotes': None}
         config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
 
@@ -1495,7 +1498,7 @@ class MainWindow(QMainWindow):
         kwargs['flags'] = flags
         kwargs['parameters'] = self.parameterDialog.displayTree
         kwargs['corpusNotes'] = self.corpusNotes.getText()
-        print(kwargs['corpusNotes'])
+        kwargs['signNotes'] = self.signNotes.getText()
         return kwargs
 
     def createMenus(self):
@@ -1608,17 +1611,28 @@ class MainWindow(QMainWindow):
             title = 'Notes for {} corpus'.format(self.corpus.name)
         self.corpusNotes.setWindowTitle(title)
 
+    def initSignNotes(self):
+        self.signNotes = NotesDialog()
+        if self.gloss.text():
+            self.signNotes.setWindowTitle('Notes for the sign {}'.format(self.gloss.text()))
+        else:
+            self.signNotes.setWindowTitle('Notes for an unglossed sign')
 
     def addCorpusNotes(self):
         if self.corpus is None:
-            title = 'Notes for unnamed corpus'
+            self.corpusNotes.setWindowTitle('Notes for unnamed corpus')
         else:
-            title = 'Notes for {} corpus'.format(self.corpus.name)
-        self.corpusNotes.setWindowTitle(title)
+            self.corpusNotes.setWindowTitle('Notes for {} corpus'.format(self.corpus.name))
         self.corpusNotes.show()
+        self.corpusNotes.raise_()
 
     def addSignNotes(self):
-        pass
+        if self.gloss.text():
+            self.signNotes.setWindowTitle('Notes for the sign {}'.format(self.gloss.text()))
+        else:
+            self.signNotes.setWindowTitle('Notes for an unglossed sign')
+        self.signNotes.show()
+        self.signNotes.raise_()
 
     def defineFeatures(self):
         currentMajor = self.featuresLayout.major.currentText()
@@ -1792,6 +1806,7 @@ class MainWindow(QMainWindow):
         self.featuresLayout.reset()
         self.parameterDialog.accept()
         self.initParameterTree()
+        self.initSignNotes()
         self.askSaveChanges = False
 
 class ExportCorpusDialog(QDialog):

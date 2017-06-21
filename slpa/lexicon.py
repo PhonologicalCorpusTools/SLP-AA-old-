@@ -58,11 +58,12 @@ class Sign():
                        'orientation': str(), 'dislocation': str(),
                        'parameters': dict(),
                        'flags': {'config1hand1':[False for n in range(34)], 'config1hand2':[False for n in range(34)],
-                                 'config2hand1':[False for n in range(34)], 'config2hand2':[False for n in range(34)]}}
+                                 'config2hand1':[False for n in range(34)], 'config2hand2':[False for n in range(34)]},
+                       'signNotes': str()}
 
     sorted_attributes = ['gloss', 'config1', 'config2', 'parameters', 'major', 'minor',
                        'oneHandMovement', 'twoHandMovement',
-                       'orientation', 'dislocation', 'flags']
+                       'orientation', 'dislocation', 'flags', 'notes']
 
     headers = ['gloss',
                 'config1hand1', 'config1hand2',
@@ -78,10 +79,10 @@ class Sign():
                 headers.append('config{}hand{}slot{}'.format(config_num,hand_num, slot_num))
     headers = ','.join(headers)
 
-    def __init__(self, data):
+    def __init__(self, kwargs):
         for attribute, default_value in Sign.sign_attributes.items():
             try:
-                setattr(self, attribute, data[attribute])
+                setattr(self, attribute, kwargs[attribute])
             except KeyError:
                 setattr(self, attribute, default_value)
 
