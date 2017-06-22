@@ -1081,10 +1081,6 @@ class MainWindow(QMainWindow):
             self.settings.setValue(name, self.constraints[name])
         self.settings.endGroup()
 
-        self.settings.beginGroup('transcriptions')
-        self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
-        self.settings.endGroup()
-
         self.settings.beginGroup('parameters')
         self.settings.setValue('parameters', self.parameters)
         self.settings.endGroup()
@@ -1098,27 +1094,23 @@ class MainWindow(QMainWindow):
         self.settings.setValue('dislocations', self.dislocations)
         self.settings.endGroup()
 
+        self.settings.beginGroup('options')
+        self.settings.setValue('showSaveAlert', self.alertOnCorpusSaveAct.isChecked())
+        self.settings.setValue('parametersAlwaysOnTop', self.keepParametersOnTopAct.isChecked())
+        self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
+        self.settings.endGroup()
+
     def readSettings(self):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
+
         self.settings.beginGroup('constraints')
         for c in MasterConstraintList:
             name = c[0]
             self.constraints[name] = self.settings.value(name, type=bool)
         self.settings.endGroup()
 
-        self.settings.beginGroup('transcriptions')
-        self.restrictedTranscriptions = self.settings.value('restrictedTranscriptions', type=bool)
-        self.setRestrictionsAct.setChecked(self.restrictedTranscriptions)
-        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
-        self.settings.endGroup()
-
         self.settings.beginGroup('parameters')
         self.parameters = self.settings.value('parameters', defaultValue=parameters.defaultParameters)
-        self.settings.endGroup()
-
-        self.settings.beginGroup('windows')
-        self.showSaveAlert = self.settings.value('showAlertOnSave', defaultValue = False)
-        self.parametersAlwaysOnTop = self.settings.value('parametersAlwaysOnTop', defaultValue = False)
         self.settings.endGroup()
 
         self.settings.beginGroup('features')
@@ -1128,6 +1120,16 @@ class MainWindow(QMainWindow):
         self.twoHandMovements = self.settings.value('twoHandMovements',defaultValue=DEFAULT_TWO_HAND_MOVEMENTS)
         self.orientations = self.settings.value('orientations', defaultValue=DEFAULT_ORIENTATIONS)
         self.dislocations = self.settings.value('dislocations', defaultValue=DEFAULT_DISLOCATIONS)
+        self.settings.endGroup()
+
+        self.settings.beginGroup('options')
+        self.showSaveAlert = self.settings.value('showSaveAlert', defaultValue=False, type=bool)
+        self.alertOnCorpusSaveAct.setChecked(self.showSaveAlert)
+        self.parametersAlwaysOnTop = self.settings.value('parametersAlwaysOnTop', defaultValue=True, type=bool)
+        self.keepParametersOnTopAct.setChecked(self.parametersAlwaysOnTop)
+        self.restrictedTranscriptions = self.settings.value('restrictedTranscriptions', type=bool)
+        self.setRestrictionsAct.setChecked(self.restrictedTranscriptions)
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
         self.settings.endGroup()
 
     def closeEvent(self, e):
@@ -1157,6 +1159,10 @@ class MainWindow(QMainWindow):
         self.close()
 
     def checkBackwardsComptibility(self):
+        for attribute, default_value in Corpus.corpus_attributes.items():
+            if not hasattr(self.corpus, attribute):
+                setattr(self.corpus, attribute, default_value)
+
         word = self.corpus.randomWord()
         for attribute in Sign.sign_attributes:
             if not hasattr(word, attribute):
@@ -1347,7 +1353,8 @@ class MainWindow(QMainWindow):
                     return
 
         self.updateCorpus(kwargs, isDuplicate)
-        QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
+        if self.showSaveAlert:
+            QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
         return True
 
     def updateCorpus(self, kwargs, isDuplicate=False):
@@ -1537,6 +1544,7 @@ class MainWindow(QMainWindow):
             self.parameterDialog.show()
         else:
             self.parameterDialog.setWindowFlags(self.parameterDialog.windowFlags() ^ Qt.WindowStaysOnTopHint)
+            self.parametersDialog.hide()
 
     def createActions(self):
 
@@ -1757,7 +1765,8 @@ class MainWindow(QMainWindow):
                     print(Sign.headers, file=f)
                     for word in output:
                         print(word, file=f)
-                QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
+                if self.showSaveAlert:
+                    QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
             except PermissionError:
                 filename = os.path.split(path)[-1]
                 alert = QMessageBox()
