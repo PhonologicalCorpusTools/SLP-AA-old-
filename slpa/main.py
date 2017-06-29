@@ -377,6 +377,11 @@ class MainWindow(QMainWindow):
         self.configTabs.addTab(HandConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
 
+        #Add "global" handshape options (as checkboxes)
+        self.globalOptionsLayout = QHBoxLayout()
+        self.setupGlobalOptions()
+        layout.addLayout(self.globalOptionsLayout)
+
         #Make hand image and accompanying info
         self.infoPanel = QHBoxLayout()
         self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
@@ -419,6 +424,27 @@ class MainWindow(QMainWindow):
 
         self.showMaximized()
         self.defineTabOrder()
+
+    def setupGlobalOptions(self):
+        globalOptionsLabel = QLabel('Global handshape options:')
+        globalOptionsLabel.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.globalOptionsLayout.addWidget(globalOptionsLabel)
+        self.forearmCheckBox = QCheckBox('Forearm is involved')
+        self.forearmCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.globalOptionsLayout.addWidget(self.forearmCheckBox)
+        self.forearmCheckBox.clicked.connect(self.userMadeChanges)
+        self.partialObscurityCheckBox = QCheckBox('This sign is partially obscured')
+        self.partialObscurityCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.partialObscurityCheckBox.clicked.connect(self.userMadeChanges)
+        self.globalOptionsLayout.addWidget(self.partialObscurityCheckBox)
+        self.uncertainCodingCheckBox = QCheckBox('The coding for this sign is uncertain')
+        self.uncertainCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.uncertainCodingCheckBox.clicked.connect(self.userMadeChanges)
+        self.globalOptionsLayout.addWidget(self.uncertainCodingCheckBox)
+        self.incompleteCodingCheckBox = QCheckBox('The coding for this sign is incomplete')
+        self.incompleteCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.incompleteCodingCheckBox.clicked.connect(self.userMadeChanges)
+        self.globalOptionsLayout.addWidget(self.incompleteCodingCheckBox)
 
     def setupParameterDialog(self):
         if self.parameterDialog is None:
@@ -908,17 +934,20 @@ class MainWindow(QMainWindow):
         self.parameterDialog.model.tree = self.currentHandShape().parameters
         self.parameterDialog.tree.resetChecks()
         self.parameterDialog.updateDisplayTree(True)
+        self.forearmCheckBox.setChecked(sign['forearmInvolved'])
+        self.partialObscurityCheckBox.setChecked(sign['partialObscurity'])
+        self.incompleteCodingCheckBox.setChecked(sign['incompleteCoding'])
+        self.uncertainCodingCheckBox.setChecked(sign['uncertainCoding'])
         self.askSaveChanges = False
 
     def generateKwargs(self):
         #This is called whenever the corpus is updated/saved
         kwargs = {'path': None, 'file_mode': None,
                 'config1': None, 'config2': None,
-                'major': None, 'minor': None,
-                'oneHandMovement': None, 'twoHandMovement': None,
-                'orientation': None, 'dislocation': None,
                 'flags': None, 'parameters': None,
-                'corpusNotes': None, 'signNotes': None}
+                'corpusNotes': None, 'signNotes': None,
+                'forearmInvolved': False, 'partialObscurity': False,
+                'uncertainCoding': False, 'incompleteCoding': False}
 
         config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
@@ -937,6 +966,10 @@ class MainWindow(QMainWindow):
         kwargs['parameters'] = self.parameterDialog.model.tree
         kwargs['corpusNotes'] = self.corpusNotes.getText()
         kwargs['signNotes'] = self.signNotes.getText()
+        kwargs['forearmInvolved'] = self.forearmCheckBox.isChecked()
+        kwargs['partialObscurity'] = self.partialObscurityCheckBox.isChecked()
+        kwargs['incompleteCoding'] = self.incompleteCodingCheckBox.isChecked()
+        kwargs['uncertainCoding'] = self.uncertainCodingCheckBox.isChecked()
         return kwargs
 
     def createMenus(self):

@@ -58,7 +58,12 @@ class Sign():
                        'parameters': defaultParameterTree,
                        'flags': {'config1hand1':[False for n in range(34)], 'config1hand2':[False for n in range(34)],
                                  'config2hand1':[False for n in range(34)], 'config2hand2':[False for n in range(34)]},
-                       'signNotes': str()}
+                       'signNotes': str(),
+                       'forearmInvolved': False,
+                       'partialObscurity': False,
+                       'uncertainCoding': False,
+                       'incompleteCoding': False
+                       }
 
     sorted_attributes = ['gloss', 'config1', 'config2', 'parameters', 'flags', 'notes']
 
