@@ -1,4 +1,4 @@
-from imports import QHBoxLayout, QVBoxLayout, QPlainTextEdit, QDialog, QPushButton
+from imports import QVBoxLayout, QPlainTextEdit, QDialog
 
 class NotesDialog(QDialog):
 
@@ -7,14 +7,6 @@ class NotesDialog(QDialog):
         layout = QVBoxLayout()
         self.notepad = QPlainTextEdit()
         layout.addWidget(self.notepad)
-        # buttonLayout = QHBoxLayout()
-        # ok = QPushButton('OK')
-        # ok.clicked.connect(self.accept)
-        # cancel = QPushButton('Cancel')
-        # cancel.clicked.connect(self.reject)
-        # buttonLayout.addWidget(ok)
-        # buttonLayout.addWidget(cancel)
-        # layout.addLayout(buttonLayout)
         self.setLayout(layout)
 
     def accept(self):

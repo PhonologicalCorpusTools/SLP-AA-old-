@@ -1,3 +1,5 @@
+import anytree
+
 class Parameter:
 
     def __init__(self, name, children=None, parent=None, default=None, is_default=False):
@@ -53,6 +55,7 @@ class TerminalParameter:
     def __str__(self):
         return self.name
 
+
 #QUALITY PARAMETERS
 Quality = Parameter(name='Quality')
 Temporal = Parameter(name='Temporal', children = ['None', 'Prolonged', 'Shortened', 'Accelerating'], default='None', parent=Quality)
@@ -71,7 +74,7 @@ MajorMovement.addChildren([ContourMovement, ContourPlane, Repetition, Direction]
 
 #LOCAL MOVEMENT PARAMETERS
 LocalMovement = Parameter(name='Local Movement', children=['Hold', 'Wiggling', 'Hooking', 'Flattening', 'Twisting',
-                                                           'Nodding', 'Releasing', 'Rubbing', 'Circling'],
+                                                           'Nodding', 'Releasing', 'Rubbing', 'Circling', 'Shaking'],
                                                  default='Hold')
 
 #MAJOR LOCATION PARAMETERS
@@ -82,7 +85,7 @@ NonDominantLocation = Parameter(name='Non-dominant hand location')
 
 HandPart = Parameter(name = 'Hand part', children = ['Hand', 'Fingers', 'Thumb', 'Index', 'Middle', 'Ring', 'Pinky'], parent=WeakHandLocation)
 WeakHandZone = Parameter(name = 'Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ulnar', 'Tips', 'Knuckle',
-                                                    'Base', 'Heel', 'Web', 'Palm'], parent=WeakHandLocation)
+                                                    'Base', 'Heel', 'Web', 'Palm', 'Arm'], parent=WeakHandLocation)
 WeakHandLocation.addChildren([HandPart, WeakHandZone])
 
 BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of head'], default='Back of head', parent=WeakHandLocation, is_default=True)
@@ -99,3 +102,15 @@ NonDominantLocation.addChildren([HandPart, SigningSpaceZone])
 MajorLocation.addChildren([BodyLocation, SignSpaceLocation, NonDominantLocation])
 
 defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation]
+
+
+def addChild(child, parent):
+    node = anytree.Node(parameter.name, parent=parent)
+    for child in node.children:
+        addChild(child, node)
+
+defaultParameterTree = anytree.Node('Parameters', parent = None)
+for parameter in defaultParameters:
+    node = anytree.Node(parameter.name, parent = defaultParameterTree)
+    for child in parameter.children:
+        addChild(child, node)

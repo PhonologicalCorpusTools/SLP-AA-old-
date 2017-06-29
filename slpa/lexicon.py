@@ -1,6 +1,7 @@
 #from slpa import __version__ as currentSLPAversion
 from collections import OrderedDict
 from random import choice
+from parameters import defaultParameterTree
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
 
@@ -53,25 +54,18 @@ class Corpus():
 
 class Sign():
 
-    sign_attributes = {'gloss': str(), 'config1': None, 'config2': None, 'major': str(), 'minor': str(),
-                       'oneHandMovement': str(), 'twoHandMovement': str(),
-                       'orientation': str(), 'dislocation': str(),
-                       'parameters': dict(),
+    sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
+                       'parameters': defaultParameterTree,
                        'flags': {'config1hand1':[False for n in range(34)], 'config1hand2':[False for n in range(34)],
                                  'config2hand1':[False for n in range(34)], 'config2hand2':[False for n in range(34)]},
                        'signNotes': str()}
 
-    sorted_attributes = ['gloss', 'config1', 'config2', 'parameters', 'major', 'minor',
-                       'oneHandMovement', 'twoHandMovement',
-                       'orientation', 'dislocation', 'flags', 'notes']
+    sorted_attributes = ['gloss', 'config1', 'config2', 'parameters', 'flags', 'notes']
 
     headers = ['gloss',
                 'config1hand1', 'config1hand2',
                 'config2hand1', 'config2hand2',
-                'parameters',
-                'major', 'minor',
-                'oneHandMovement', 'twoHandMovement',
-                'orientation', 'dislocation']
+                'parameters']
 
     for config_num in [1, 2]:
         for hand_num in [1, 2]:

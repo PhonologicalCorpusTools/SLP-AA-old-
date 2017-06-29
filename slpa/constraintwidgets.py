@@ -128,7 +128,7 @@ class ConstraintsDialog(QDialog):
 
 class ConstraintCheckMessageBox(QDialog):
 
-    def __init__(self, constraints, configTabs, featuresLayout):
+    def __init__(self, constraints, configTabs):
         super().__init__()
         self.setWindowTitle('Transcription verification')
         layout = QVBoxLayout()
@@ -187,20 +187,20 @@ class ConstraintCheckMessageBox(QDialog):
                 elif c[1].constraint_type == 'conditional':
                     self.conditionalConstraintsTab.addTab(tab, c[1].name)
 
-                if c[1].name == 'Major Features Constraint':
-                    problems = c[1].check(featuresLayout)
-                    if problems:
-                        problems.insert(0,'\n')
-                        constraint_text.append('\n\n'.join(problems))
-
-                elif c[1].name == 'Second Hand Movement Constraint':
-                    twoHandFeature = featuresLayout.twoHandMovement.currentText()
-                    problems = c[1].check(configTabs.widget(0).hand2Transcription, twoHandFeature)
-                    if problems:
-                        constraint_text.append('\nConfig 1 Hand 2 (no two hand movement specified)')
-                    problems = c[1].check(configTabs.widget(1).hand2Transcription, twoHandFeature)
-                    if problems:
-                        constraint_text.append('\nConfig 2 Hand 2 (no two hand movement specified)')
+                # if c[1].name == 'Major Features Constraint':
+                #     problems = c[1].check(featuresLayout)
+                #     if problems:
+                #         problems.insert(0,'\n')
+                #         constraint_text.append('\n\n'.join(problems))
+                #
+                # elif c[1].name == 'Second Hand Movement Constraint':
+                #     twoHandFeature = featuresLayout.twoHandMovement.currentText()
+                #     problems = c[1].check(configTabs.widget(0).hand2Transcription, twoHandFeature)
+                #     if problems:
+                #         constraint_text.append('\nConfig 1 Hand 2 (no two hand movement specified)')
+                #     problems = c[1].check(configTabs.widget(1).hand2Transcription, twoHandFeature)
+                #     if problems:
+                #         constraint_text.append('\nConfig 2 Hand 2 (no two hand movement specified)')
 
                 else:
                     for k in [1,2]:

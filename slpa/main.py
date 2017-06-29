@@ -5,6 +5,7 @@ import sys
 import subprocess
 import collections
 import parameters
+import decorators
 from imports import *
 from handshapes import *
 from lexicon import *
@@ -14,26 +15,12 @@ from constraints import *
 from constraintwidgets import *
 from notes import *
 from parameterwidgets import ParameterDialog, ParameterTreeModel
+import anytree
 #from slpa import __version__ as currentSLPAversion
 
 __currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
-DEFAULT_MAJOR_LOCATIONS = ['', 'Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral']
-DEFAULT_MINOR_LOCATIONS = {'':'',
-    'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead','Head top', 'Mouth', 'Under chin', 'Upper lip'],
-    'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)','Forearm (ulnar)',
-            'Upper arm','Wrist (back)', 'Wrist (front)'],
-    'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder','Torso (bottom)', 'Torso (mid)',
-            'Torso (top)', 'Waist'],
-    'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)','Finger (ulnar)', 'Heel',
-            'Palm (front)', 'Palm (back)'],
-    'Neutral': ['Neutral', 'Upper head height', 'Mid head height', 'Low head height', 'Neck height', 'Shoulder height',
-                'Upper torso height', 'Mid torso height', 'Low torso height', 'Waist height']}
-DEFAULT_ONE_HAND_MOVEMENTS = ['','Arc', 'Circular','Straight','Back and forth', 'Multiple', 'Hold']
-DEFAULT_TWO_HAND_MOVEMENTS = ['', 'N/A', 'Hold', 'Alternating', 'Simaultaneous']
-DEFAULT_ORIENTATIONS = ['','Front', 'Back', 'Side', 'Up', 'Down']
-DEFAULT_DISLOCATIONS = ['', 'None', 'Right', 'Left']
 
 
 class QApplicationMessaging(QApplication):
@@ -81,507 +68,6 @@ class QApplicationMessaging(QApplication):
         socket.write(bytes(message, 'UTF-8'))
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
-
-class FeaturesDialog(QDialog):
-
-    def __init__(self, settings, parent=None):
-        super().__init__()
-        self.setWindowTitle('Define major feature values')
-        self.majorLocations = settings[0]
-        self.minorLocations = settings[1]
-        oneHandMovements = settings[2]
-        twoHandMovements = settings[3]
-        orientations = settings[4]
-        dislocations = settings[5]
-
-        layout = QVBoxLayout()
-
-        listLayout = QHBoxLayout()
-
-        majorLocationLayout = QVBoxLayout()
-        self.majorLocationList = QListWidget()
-        for location in sorted(self.majorLocations):
-            if not location:
-                continue
-            self.majorLocationList.addItem(location)
-        addMajorLocationButton = QPushButton('Add major location')
-        addMajorLocationButton.clicked.connect(self.addMajorLocation)
-        removeMajorLocationButton = QPushButton('Remove major location')
-        removeMajorLocationButton.clicked.connect(self.removeMajorLocation)
-        majorLocationLayout.addWidget(self.majorLocationList)
-        majorLocationLayout.addWidget(addMajorLocationButton)
-        majorLocationLayout.addWidget(removeMajorLocationButton)
-
-        minorLocationLayout = QVBoxLayout()
-        self.minorLocationList = QListWidget()
-        major_location = self.majorLocations[0]
-        if major_location not in self.minorLocations:
-            self.minorLocations[major_location] = ['']
-        for location in sorted(self.minorLocations[self.majorLocations[0]]):
-            if not location:
-                continue
-            self.minorLocationList.addItem(location)
-        self.minorLocationList.setCurrentRow(0)
-        addMinorLocationButton = QPushButton('Add minor location')
-        addMinorLocationButton.clicked.connect(self.addMinorLocation)
-        removeMinorLocationButton = QPushButton('Remove minor location')
-        removeMinorLocationButton.clicked.connect(self.removeMinorLocation)
-        minorLocationLayout.addWidget(self.minorLocationList)
-        minorLocationLayout.addWidget(addMinorLocationButton)
-        minorLocationLayout.addWidget(removeMinorLocationButton)
-        self.majorLocationList.currentItemChanged.connect(self.changeMinorList)
-        self.majorLocationList.setCurrentItem(self.majorLocationList.item(0))
-
-        oneHandMovementLayout = QVBoxLayout()
-        self.oneHandMovementList = QListWidget()
-        for oneHandMovement in sorted(oneHandMovements):
-            if not oneHandMovement:
-                continue
-            self.oneHandMovementList.addItem(oneHandMovement)
-        self.oneHandMovementList.setCurrentRow(0)
-        addOneHandMovementButton = QPushButton('Add one hand movement')
-        addOneHandMovementButton.clicked.connect(self.addOneHandMovement)
-        removeOneHandMovementButton = QPushButton('Remove one hand movement')
-        removeOneHandMovementButton.clicked.connect(self.removeOneHandMovement)
-        oneHandMovementLayout.addWidget(self.oneHandMovementList)
-        oneHandMovementLayout.addWidget(addOneHandMovementButton)
-        oneHandMovementLayout.addWidget(removeOneHandMovementButton)
-
-        twoHandMovementLayout = QVBoxLayout()
-        self.twoHandMovementList = QListWidget()
-        for twoHandMovement in sorted(twoHandMovements):
-            if not twoHandMovement:
-                continue
-            self.twoHandMovementList.addItem(twoHandMovement)
-        self.twoHandMovementList.setCurrentRow(0)
-        addTwoHandMovementButton = QPushButton('Add two hand movement')
-        addTwoHandMovementButton.clicked.connect(self.addTwoHandMovement)
-        removeTwoHandMovementButton = QPushButton('Remove two hand movement')
-        removeTwoHandMovementButton.clicked.connect(self.removeTwoHandMovement)
-        twoHandMovementLayout.addWidget(self.twoHandMovementList)
-        twoHandMovementLayout.addWidget(addTwoHandMovementButton)
-        twoHandMovementLayout.addWidget(removeTwoHandMovementButton)
-
-
-        orientationLayout = QVBoxLayout()
-        self.orientationList = QListWidget()
-        for orientation in sorted(orientations):
-            if not orientation:
-                continue
-            self.orientationList.addItem(orientation)
-        self.orientationList.setCurrentRow(0)
-        addOrientationButton = QPushButton('Add orientation')
-        addOrientationButton.clicked.connect(self.addOrientation)
-        removeOrientationButton = QPushButton('Remove orientation')
-        removeOrientationButton.clicked.connect(self.removeOrientation)
-        orientationLayout.addWidget(self.orientationList)
-        orientationLayout.addWidget(addOrientationButton)
-        orientationLayout.addWidget(removeOrientationButton)
-
-        dislocationLayout = QVBoxLayout()
-        self.dislocationList = QListWidget()
-        for dislocation in sorted(dislocations):
-            if not dislocation:
-                continue
-            self.dislocationList.addItem(dislocation)
-        self.dislocationList.setCurrentRow(0)
-        addDislocationButton = QPushButton('Add dislocation')
-        addDislocationButton.clicked.connect(self.addDislocation)
-        removeDislocationButton = QPushButton('Remove dislocation')
-        removeDislocationButton.clicked.connect(self.removeDislocation)
-        dislocationLayout.addWidget(self.dislocationList)
-        dislocationLayout.addWidget(addDislocationButton)
-        dislocationLayout.addWidget(removeDislocationButton)
-
-        listLayout.addLayout(majorLocationLayout)
-        listLayout.addLayout(minorLocationLayout)
-        listLayout.addLayout(oneHandMovementLayout)
-        listLayout.addLayout(twoHandMovementLayout)
-        listLayout.addLayout(orientationLayout)
-        listLayout.addLayout(dislocationLayout)
-
-        layout.addLayout(listLayout)
-
-        buttonLayout = QHBoxLayout()
-        okButton = QPushButton('OK')
-        cancelButton = QPushButton('Cancel')
-        buttonLayout.addWidget(okButton)
-        buttonLayout.addWidget(cancelButton)
-        okButton.clicked.connect(self.accept)
-        cancelButton.clicked.connect(self.reject)
-        restoreDefaultsButtons = QPushButton('Restore defaults')
-        restoreDefaultsButtons.clicked.connect(self.restoreDefaultFeatures)
-        buttonLayout.addWidget(restoreDefaultsButtons)
-        layout.addLayout(buttonLayout)
-
-        self.setLayout(layout)
-
-        self.cannotRemove = QMessageBox()
-        self.cannotRemove.setWindowTitle('Warning')
-        self.cannotRemove.setText('This feature cannot be removed.')
-
-        self.removeWarning = QMessageBox()
-        self.removeWarning.setWindowTitle('Warning')
-        self.removeWarningText = ('This will remove the {} from the list.\n'
-                                 'This may cause problems if any signs in your corpus use this feature.\n'
-                                 'Are you sure?')
-        self.removeWarning.addButton('OK', QMessageBox.AcceptRole)
-        self.removeWarning.addButton('Cancel', QMessageBox.RejectRole)
-
-        self.emptyListWarning = QMessageBox()
-        self.emptyListWarning.setWindowTitle('Warning')
-        self.emptyListWarning.setText(('This feature cannot be deleted. '
-                                      'You must have at least one feature in each list.'))
-
-    def restoreDefaultFeatures(self):
-        alert = QMessageBox()
-        alert.setWindowTitle('Warning')
-        alert.setText('This will remove all current features and restore the default values.\n'
-                      'Are you sure you want to do this?')
-        alert.addButton('OK', QMessageBox.AcceptRole)
-        alert.addButton('Cancel', QMessageBox.RejectRole)
-        alert.exec_()
-        role = alert.buttonRole(alert.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-        #the empty string options are not reset here, in order that they not be displayed in the GUI
-        #instead, empty string are added in the "if result" clause of MainWindow.defineFeatures()
-        self.minorLocations = DEFAULT_MINOR_LOCATIONS
-        self.minorLocations.pop('')
-        self.minorLocationList.clear()
-
-        self.majorLocations = DEFAULT_MAJOR_LOCATIONS[1:]
-        self.majorLocationList.clear()
-        for location in sorted(self.majorLocations):
-            self.majorLocationList.addItem(location)
-        self.majorLocationList.setCurrentRow(0)
-
-        self.oneHandMovements = DEFAULT_ONE_HAND_MOVEMENTS[1:]
-        self.oneHandMovementList.clear()
-        for movement in sorted(self.oneHandMovements):
-            self.oneHandMovementList.addItem(movement)
-        self.oneHandMovementList.setCurrentRow(0)
-
-        self.twoHandMovements = DEFAULT_TWO_HAND_MOVEMENTS[1:]
-        self.twoHandMovementList.clear()
-        for movement in sorted(self.twoHandMovements):
-            self.twoHandMovementList.addItem(movement)
-        self.twoHandMovementList.setCurrentRow(0)
-
-        self.orientations = DEFAULT_ORIENTATIONS[1:]
-        self.orientationList.clear()
-        for orientation in sorted(self.orientations):
-            self.orientationList.addItem(orientation)
-        self.orientationList.setCurrentRow(0)
-
-        self.dislocations = DEFAULT_DISLOCATIONS[1:]
-        self.dislocationList.clear()
-        for dislocation in sorted(self.dislocations):
-            self.dislocationList.addItem(dislocation)
-        self.dislocationList.setCurrentRow(0)
-
-    def changeMinorList(self):
-        selectedMajorFeature = self.majorLocationList.currentItem()
-        if selectedMajorFeature is None:
-            return
-            #this happens when restoring default values
-            #the major list has no items but currentIndexChanged() is still emitted
-        name = selectedMajorFeature.text()
-        self.minorLocationList.clear()
-        try:
-            for location in self.minorLocations[name]:
-                self.minorLocationList.addItem(location)
-            self.minorLocationList.sortItems()
-        except KeyError:
-            self.minorLocationList.clear()
-
-    def addMajorLocation(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.majorLocationList.addItem(name)
-                self.minorLocations[name] = list()
-                self.majorLocationList.setCurrentRow(len(self.majorLocationList)-1)
-                self.majorLocationList.sortItems()
-
-    def removeMajorLocation(self):
-
-        listItems = self.majorLocationList.selectedItems()
-        feature_name = listItems[0].text()
-
-        if not feature_name:
-            self.cannotRemove.exec_()
-            return
-
-        if len(self.majorLocationList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-
-        text = 'the major feature \"{}\" and any associated minor features'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-
-        for item in listItems:
-            self.majorLocationList.takeItem(self.majorLocationList.row(item))
-            try:
-                del self.minorLocations[item.text()]
-            except KeyError:
-                pass
-        self.majorLocationList.sortItems()
-        self.majorLocationList.setCurrentRow(0)
-
-    def addMinorLocation(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.minorLocationList.addItem(name)
-                major = self.majorLocationList.currentItem().text()
-                self.minorLocations[major].append(name)
-                self.minorLocationList.setCurrentRow(len(self.minorLocationList) - 1)
-                self.minorLocationList.sortItems()
-
-    def removeMinorLocation(self):
-        if len(self.minorLocationList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.minorLocationList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the minor location \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-
-        major = selectedMajorFeature = self.majorLocationList.currentItem().text()
-        for item in listItems:
-            self.minorLocationList.takeItem(self.minorLocationList.row(item))
-            self.minorLocations[major].remove(item.text())
-        self.minorLocationList.sortItems()
-        self.minorLocationList.setCurrentRow(0)
-
-
-    def addOneHandMovement(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.oneHandMovementList.addItem(name)
-                self.oneHandMovementList.setCurrentRow(len(self.oneHandMovementList) - 1)
-                self.oneHandMovementList.sortItems()
-
-    def addTwoHandMovement(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.twoHandMovementList.addItem(name)
-                self.twoHandMovementList.setCurrentRow(len(self.twoHandMovementList) - 1)
-                self.twoHandMovementList.sortItems()
-
-    def removeOneHandMovement(self):
-        if len(self.oneHandMovementList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.oneHandMovementList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the one hand movement feature \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-
-        for item in listItems:
-            self.oneHandMovementList.takeItem(self.oneHandMovementList.row(item))
-        self.oneHandMovementList.sortItems()
-        self.oneHandMovementList.setCurrentRow(0)
-
-    def removeTwoHandMovement(self):
-        if len(self.twoHandMovementList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.twoHandMovementList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the two hand movement feature \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-        for item in listItems:
-            self.twoHandMovementList.takeItem(self.twoHandMovementList.row(item))
-        self.twoHandMovementList.sortItems()
-        self.twoHandMovementList.setCurrentRow(0)
-
-    def addOrientation(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.orientationList.addItem(name)
-                self.orientationList.setCurrentRow(len(self.orientationList) - 1)
-                self.orientationList.sortItems()
-
-    def removeOrientation(self):
-        if len(self.orientationList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.orientationList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the orientation feature \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-        for item in listItems:
-            self.orientationList.takeItem(self.orientationList.row(item))
-        self.orientationList.sortItems()
-        self.orientationList.setCurrentRow(0)
-
-    def addDislocation(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.dislocationList.addItem(name)
-                self.dislocationList.setCurrentRow(len(self.dislocationList) - 1)
-                self.dislocationList.sortItems()
-
-    def removeDislocation(self):
-        if len(self.dislocationList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.dislocationList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the dislocation feature \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-        for item in listItems:
-            self.dislocationList.takeItem(self.dislocationList.row(item))
-        self.dislocationList.sortItems()
-        self.dislocationList.setCurrentRow(0)
-
-
-
-
-class FeatureEntryDialog(QDialog):
-
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('Enter new feature name')
-        layout = QHBoxLayout()
-        self.featureNameEdit = QLineEdit()
-        self.okButton = QPushButton('OK')
-        self.cancelButton = QPushButton('Cancel')
-        self.okButton.clicked.connect(self.accept)
-        self.cancelButton.clicked.connect(self.reject)
-        layout.addWidget(self.featureNameEdit)
-        layout.addWidget(self.okButton)
-        layout.addWidget(self.cancelButton)
-        self.setLayout(layout)
-
-
-class MajorFeatureLayout(QHBoxLayout):
-
-    def __init__(self, settings):
-        super().__init__()
-
-        self.majorLocations = settings[0]
-        self.minorLocations = settings[1]
-        self.oneHandMovements = settings[2]
-        self.twoHandMovements = settings[3]
-        self.orientations = settings[4]
-        self.dislocations = settings[5]
-        self.setContentsMargins(0,0,0,0)
-        self.major = QComboBox()
-        for location in self.majorLocations:
-            self.major.addItem(location)
-        self.minor = QComboBox()
-        self.oneHandMovement = QComboBox()
-        for movement in self.oneHandMovements:
-            self.oneHandMovement.addItem(movement)
-        self.twoHandMovement = QComboBox()
-        for movement in self.twoHandMovements:
-            self.twoHandMovement.addItem(movement)
-
-        self.orientation = QComboBox()
-        for orientation in self.orientations:
-            self.orientation.addItem(orientation)
-
-        self.dislocation = QComboBox()
-        for dislocation in self.dislocations:
-            self.dislocation.addItem(dislocation)
-
-        self.major.currentIndexChanged.connect(self.changeMinorLocation)
-        self.major.setCurrentIndex(0)
-        self.changeMinorLocation()
-
-        self.addWidget(QLabel('Major Location'))#, 0, 0)
-        self.addWidget(self.major)#, 0, 1)
-        self.addWidget(QLabel('Minor Location'))#, 1, 0)
-        self.addWidget(self.minor)#, 1, 1)
-
-        self.addWidget(QLabel('One Hand Movement'))#, 0, 2)# 2, 0)
-        self.addWidget(self.oneHandMovement)#, 0, 3)#2, 1)
-        self.addWidget(QLabel('Two Hand Movement'))#, 1, 2 )#3, 0)
-        self.addWidget(self.twoHandMovement)#, 1, 3 )#3, 1)
-
-        self.addWidget(QLabel('Orientation'))#, 0, 4)#4, 0)
-        self.addWidget(self.orientation)#, 0, 5)#4, 1)
-        self.addWidget(QLabel('Dislocation'))#, 1, 4)#5, 0)
-        self.addWidget(self.dislocation)#, 1, 5)#5, 1)
-
-        self.addWidget(QLabel())#, 0, 7) #adds a filler item for spacing
-        # self.setColumnStretch(7,1)
-
-
-    def changeMinorLocation(self):
-        majorText = self.major.currentText()
-        if not majorText:
-            #this is an empty string if the major box has just been cleared because the user
-            #updated the FeaturesDialog options
-            #this function is incidentally called during this process because the combo boxes are cleared
-            return
-        self.minor.clear()
-        for location in self.minorLocations[majorText]:
-            self.minor.addItem(location)
-
-    def reset(self):
-        self.major.setCurrentIndex(0)
-        self.minor.setCurrentIndex(0)
-        self.oneHandMovement.setCurrentIndex(0)
-        self.twoHandMovement.setCurrentIndex(0)
-        self.orientation.setCurrentIndex(0)
-        self.dislocation.setCurrentIndex(0)
 
 class ConfigLayout(QGridLayout):
 
@@ -803,7 +289,6 @@ class CorpusList(QListWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.parent.askSaveChanges:
-            # if self.askSaveChanges:
                 alert = QMessageBox()
                 alert.setWindowTitle('Warning')
                 alert.setText('There are unsaved changes to your current entry. What do you want to do?')
@@ -813,13 +298,10 @@ class CorpusList(QListWidget):
                 result = alert.exec_()
                 if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole:
                     self.parent.saveCorpus(checkForDuplicates=False)
-                    self.parent.askSaveChanges = False
                 elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
-                    # self.parent().askSaveChanges = False
-                    # index = self.indexFromItem(previous_gloss)
-                    # self.corpusList.setCurrentIndex(index)
                     return
         super().mousePressEvent(event)
+        self.setCurrentRow(self.row(self.selectedItems()[0]))
 
 
 class MainWindow(QMainWindow):
@@ -895,16 +377,6 @@ class MainWindow(QMainWindow):
         self.configTabs.addTab(HandConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
 
-        # Add major features (location, movement, orientation, dislocation)
-        self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations,
-                                                  self.oneHandMovements, self.twoHandMovements,
-                                                  self.orientations, self.dislocations])
-        self.featuresLayout.major.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.minor.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.oneHandMovement.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.orientation.currentTextChanged.connect(self.userMadeChanges)
-        layout.addLayout(self.featuresLayout)
-
         #Make hand image and accompanying info
         self.infoPanel = QHBoxLayout()
         self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
@@ -939,7 +411,8 @@ class MainWindow(QMainWindow):
         self.wrapper.setLayout(self.globalLayout)
         self.setCentralWidget(self.wrapper)
 
-        self.initParameterTree()
+        self.parameterDialog = None
+        self.setupParameterDialog()
         self.initCorpusNotes()
         self.initSignNotes()
         self.makeCorpusDock()
@@ -947,19 +420,33 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         self.defineTabOrder()
 
-    def initParameterTree(self):
-        #this function should only be called once, when SLP-Annotator is loaded
-        #after that, call parameterDialog.showParameterTree()
-        self.parameterModel = ParameterTreeModel(self.parameters)
-        #this needs to get the total set of parameters
-        #currently it always accepts the default set, but this
-        #should be eventually configurable, and it will have to draw from the user's Settings
+    def setupParameterDialog(self):
+        if self.parameterDialog is None:
+            self.parameterModel = ParameterTreeModel(self.parameters)
+        else:
+            self.parameterDialog.deleteLater()
+            if self.currentHandShape() is not None:
+                self.parameterModel = ParameterTreeModel(self.currentHandShape().parameters)
+            else:
+                self.parameterModel = ParameterTreeModel(self.parameters)
+
         self.parameterDialog = ParameterDialog(self.parameterModel)
-        #The paramaterDialog is modeless, and merely hides when closed.
-        #this needs to get both the model, and the specific set of parameters for the currently selected word in the corpus
-        #there needs to be room for dealing with words that are not fully specified, or which have not been specified
-        #at all (e.g. newly created words)
         self.parameterDialog.updateAfterClosing.connect(self.updateParameters)
+
+    def currentHandShape(self):
+        if self.corpus is None:
+            value = None
+        elif not self.gloss.glossEdit.text():
+            value = None
+        else:
+            try:
+                value = self.corpus[self.gloss.glossEdit.text()]
+            except KeyError:
+                value = None
+        return value
+
+    def currentGloss(self):
+        return self.gloss.glossEdit.text()
 
     def showParameterTree(self):
         self.parameterDialog.resize(self.parameterDialog.adjustedWidth, self.parameterDialog.adjustedHeight)
@@ -1067,11 +554,6 @@ class MainWindow(QMainWindow):
                 pass
         self.setTabOrder(self.configTabs.widget(1).hand2Transcription[-2],
                          self.configTabs.widget(1).hand2Transcription[-1])
-        self.setTabOrder(self.configTabs.widget(1).hand2Transcription[-1],
-                         self.featuresLayout.major)
-        self.setTabOrder(self.featuresLayout.major, self.featuresLayout.minor)
-        self.setTabOrder(self.featuresLayout.minor, self.featuresLayout.oneHandMovement)
-        self.setTabOrder(self.featuresLayout.oneHandMovement, self.featuresLayout.orientation)
 
     def writeSettings(self):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
@@ -1085,23 +567,17 @@ class MainWindow(QMainWindow):
         self.settings.setValue('parameters', self.parameters)
         self.settings.endGroup()
 
-        self.settings.beginGroup('features')
-        self.settings.setValue('majorLocations', self.majorLocations)
-        self.settings.setValue('minorLocations', self.minorLocations)
-        self.settings.setValue('oneHandMovements', self.oneHandMovements)
-        self.settings.setValue('twoHandMovements', self.twoHandMovements)
-        self.settings.setValue('orientations', self.orientations)
-        self.settings.setValue('dislocations', self.dislocations)
-        self.settings.endGroup()
-
         self.settings.beginGroup('options')
+        self.settings.setValue('askAboutDuplicates', self.askAboutDuplicatesAct.isChecked())
         self.settings.setValue('showSaveAlert', self.alertOnCorpusSaveAct.isChecked())
         self.settings.setValue('parametersAlwaysOnTop', self.keepParametersOnTopAct.isChecked())
         self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
         self.settings.endGroup()
 
-    def readSettings(self):
+    def readSettings(self, reset=False):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
+        if reset:
+            self.settings.clear()
 
         self.settings.beginGroup('constraints')
         for c in MasterConstraintList:
@@ -1113,17 +589,10 @@ class MainWindow(QMainWindow):
         self.parameters = self.settings.value('parameters', defaultValue=parameters.defaultParameters)
         self.settings.endGroup()
 
-        self.settings.beginGroup('features')
-        self.majorLocations = self.settings.value('majorLocations', defaultValue=DEFAULT_MAJOR_LOCATIONS)
-        self.minorLocations = self.settings.value('minorLocations', defaultValue=DEFAULT_MINOR_LOCATIONS)
-        self.oneHandMovements = self.settings.value('oneHandMovements', defaultValue=DEFAULT_ONE_HAND_MOVEMENTS)
-        self.twoHandMovements = self.settings.value('twoHandMovements',defaultValue=DEFAULT_TWO_HAND_MOVEMENTS)
-        self.orientations = self.settings.value('orientations', defaultValue=DEFAULT_ORIENTATIONS)
-        self.dislocations = self.settings.value('dislocations', defaultValue=DEFAULT_DISLOCATIONS)
-        self.settings.endGroup()
-
         self.settings.beginGroup('options')
-        self.showSaveAlert = self.settings.value('showSaveAlert', defaultValue=False, type=bool)
+        self.showDuplicateWarning = self.settings.value('showDuplicateWarning', defaultValue=True, type=bool)
+        self.askAboutDuplicatesAct.setChecked(self.showDuplicateWarning)
+        self.showSaveAlert = self.settings.value('showSaveAlert', defaultValue=True, type=bool)
         self.alertOnCorpusSaveAct.setChecked(self.showSaveAlert)
         self.parametersAlwaysOnTop = self.settings.value('parametersAlwaysOnTop', defaultValue=True, type=bool)
         self.keepParametersOnTopAct.setChecked(self.parametersAlwaysOnTop)
@@ -1132,24 +601,8 @@ class MainWindow(QMainWindow):
         self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
         self.settings.endGroup()
 
+    @decorators.checkForUnsavedChanges
     def closeEvent(self, e):
-        if self.askSaveChanges:
-            alert = QMessageBox()
-            alert.setWindowTitle('Warning')
-            alert.setText('You have unsaved changes that will be lost if you quit.\n What would you like to do?')
-            alert.addButton('Save and quit', QMessageBox.AcceptRole)
-            alert.addButton('Quit without saving' , QMessageBox.RejectRole)
-            alert.addButton('Go back', QMessageBox.NoRole)
-            alert.exec_()
-            role = alert.buttonRole(alert.clickedButton())
-            if role == QMessageBox.AcceptRole:
-                result = self.saveCorpus()
-                if result is None:
-                    return
-            elif role == QMessageBox.RejectRole:
-                pass
-            elif role == QMessageBox.NoRole:
-                return
         self.writeSettings()
         try:
             os.remove(os.path.join(os.getcwd(),'handCode.txt'))
@@ -1164,8 +617,10 @@ class MainWindow(QMainWindow):
                 setattr(self.corpus, attribute, default_value)
 
         word = self.corpus.randomWord()
-        for attribute in Sign.sign_attributes:
+        for attribute, default_value in Sign.sign_attributes.items():
             if not hasattr(word, attribute):
+                break
+            if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
                 break
         else:
             return
@@ -1173,6 +628,8 @@ class MainWindow(QMainWindow):
         for word in self.corpus:
             for attribute, default_value in Sign.sign_attributes.items():
                 if not hasattr(word, attribute):
+                    setattr(word, attribute, default_value)
+                if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
                     setattr(word, attribute, default_value)
 
             if hasattr(word, 'movement'):
@@ -1185,7 +642,7 @@ class MainWindow(QMainWindow):
 
 
     def checkTranscription(self):
-        dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs, self.featuresLayout)
+        dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs)
         dialog.exec_()
 
         if not dialog.violations:
@@ -1271,7 +728,8 @@ class MainWindow(QMainWindow):
         self.dockLayout = QVBoxLayout()
         self.dockWrapper.setLayout(self.dockLayout)
         self.corpusList = CorpusList(self) #QListWidget(self)
-        self.corpusList.currentItemChanged.connect(self.loadHandShape)
+        #self.corpusList.currentItemChanged.connect(self.loadHandShape)
+        self.corpusList.itemClicked.connect(self.loadHandShape)
         self.dockLayout.addWidget(self.corpusList)
         self.corpusDock.setWidget(self.dockWrapper)
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
@@ -1290,29 +748,24 @@ class MainWindow(QMainWindow):
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
         self.corpusList.sortItems()
+        self.corpusList.setCurrentRow(0)
+        self.corpusList.itemClicked.emit(self.corpusList.currentItem())
         self.corpusNotes.setText(self.corpus.notes)
-
         #self.showMaximized()
 
+    @decorators.checkForGloss
     def saveCorpus(self, event=None, checkForEmptyGloss=True, checkForDuplicates=True):
-        isDuplicate = False
-        if not self.gloss.glossEdit.text() and checkForEmptyGloss:
-            alert = QMessageBox()
-            alert.setWindowTitle('Missing gloss')
-            alert.setText('Please enter a gloss before saving')
-            alert.exec_()
-            return
-
         kwargs = self.generateKwargs()
         if self.corpus is None:
             alert = QMessageBox()
             alert.setWindowTitle('No corpus loaded')
             alert.setText('You must have a corpus loaded before you can save words. What would you like to do?')
-            alert.addButton('Add this word to an existing corpus', QMessageBox.AcceptRole)
-            alert.addButton('Create a new corpus', QMessageBox.RejectRole)
+            alert.addButton('Create a new corpus', QMessageBox.AcceptRole)
+            alert.addButton('Add this word to an existing corpus', QMessageBox.NoRole)
+
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
-            if role ==  1:#create new corpus
+            if role ==  QMessageBox.AcceptRole:#create new corpus
                 savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.corpus')
                 path = savename[0]
                 if not path:
@@ -1324,7 +777,7 @@ class MainWindow(QMainWindow):
                 kwargs['name'] = os.path.split(path)[1].split('.')[0]
                 self.corpus = Corpus(kwargs)
 
-            elif role == 0: #load existing corpus and add to it
+            elif role == QMessageBox.NoRole: #load existing corpus and add to it
                 self.loadCorpus()
                 if self.corpus is None:
                     # corpus will be None if the user opened a file dialog, then changed their mind and cancelled
@@ -1337,7 +790,7 @@ class MainWindow(QMainWindow):
                 isDuplicate = True
                 #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
                 #to save a gloss, under certain circumstances
-            elif kwargs['gloss'] in self.corpus.wordlist:
+            elif kwargs['gloss'] in self.corpus.wordlist and self.showDuplicateWarning:
                 isDuplicate = True
                 alert = QMessageBox()
                 alert.setWindowTitle('Duplicate entry')
@@ -1355,6 +808,7 @@ class MainWindow(QMainWindow):
         self.updateCorpus(kwargs, isDuplicate)
         if self.showSaveAlert:
             QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
+        self.askSaveChanges = False
         return True
 
     def updateCorpus(self, kwargs, isDuplicate=False):
@@ -1364,7 +818,6 @@ class MainWindow(QMainWindow):
         if not isDuplicate:
             self.corpusList.addItem(kwargs['gloss'])
             self.corpusList.sortItems()
-
             for row in range(self.corpusList.count()):
                 if self.corpusList.item(row).text() == kwargs['gloss']:
                     self.corpusList.setCurrentRow(row)
@@ -1378,9 +831,8 @@ class MainWindow(QMainWindow):
         self.corpusList.clear()
         self.askSaveChanges = False
 
-    def loadHandShape(self, gloss, previous_gloss=None):
+    def loadHandShape(self, gloss):
         gloss = '' if not gloss else gloss.text()
-        # gloss = gloss.text()
         sign = self.corpus[gloss]
         self.gloss.setText(sign['gloss'])
         self.signNotes.setText(sign['signNotes'])
@@ -1421,7 +873,6 @@ class MainWindow(QMainWindow):
                 else:
                     slot.removeFlag()
 
-
         handconfig = 'config2hand1'
         config2hand1 = sign[handconfig]
         for slot in config2.hand1Transcription.slots:
@@ -1454,12 +905,9 @@ class MainWindow(QMainWindow):
                 else:
                     slot.removeFlag()
 
-        for name in ['major', 'minor', 'oneHandMovement', 'twoHandMovement', 'orientation', 'dislocation']:
-            widget = getattr(self.featuresLayout, name)
-            index = widget.findText(sign[name])
-            if index == -1:
-                index = 0
-            widget.setCurrentIndex(index)
+        self.parameterDialog.model.tree = self.currentHandShape().parameters
+        self.parameterDialog.tree.resetChecks()
+        self.parameterDialog.updateDisplayTree(True)
         self.askSaveChanges = False
 
     def generateKwargs(self):
@@ -1471,6 +919,7 @@ class MainWindow(QMainWindow):
                 'orientation': None, 'dislocation': None,
                 'flags': None, 'parameters': None,
                 'corpusNotes': None, 'signNotes': None}
+
         config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
 
@@ -1480,30 +929,12 @@ class MainWindow(QMainWindow):
         gloss = self.gloss.glossEdit.text().strip()
         kwargs['gloss'] = gloss
 
-        major = self.featuresLayout.major.currentText()
-        kwargs['major'] = 'None' if not major else major
-
-        minor = self.featuresLayout.minor.currentText()
-        kwargs['minor'] = 'None' if not minor else minor
-
-        oneHandMovement = self.featuresLayout.oneHandMovement.currentText()
-        kwargs['oneHandMovement'] = 'None' if not oneHandMovement else oneHandMovement
-
-        twoHandMovement = self.featuresLayout.twoHandMovement.currentText()
-        kwargs['twoHandMovement'] = 'None' if not twoHandMovement else twoHandMovement
-
-        orientation = self.featuresLayout.orientation.currentText()
-        kwargs['orientation'] = 'None' if not orientation else orientation
-
-        dislocation = self.featuresLayout.dislocation.currentText()
-        kwargs['dislocation'] = 'None' if not dislocation else dislocation
-
         flags = {'config1hand1': self.configTabs.widget(0).hand1Transcription.flagList,
                  'config1hand2': self.configTabs.widget(0).hand2Transcription.flagList,
                  'config2hand1': self.configTabs.widget(1).hand1Transcription.flagList,
                  'config2hand2': self.configTabs.widget(1).hand2Transcription.flagList}
         kwargs['flags'] = flags
-        kwargs['parameters'] = self.parameterDialog.displayTree
+        kwargs['parameters'] = self.parameterDialog.model.tree
         kwargs['corpusNotes'] = self.corpusNotes.getText()
         kwargs['signNotes'] = self.signNotes.getText()
         return kwargs
@@ -1524,13 +955,16 @@ class MainWindow(QMainWindow):
         self.settingsMenu.addAction(self.setRestrictionsAct)
         self.settingsMenu.addAction(self.alertOnCorpusSaveAct)
         self.settingsMenu.addAction(self.keepParametersOnTopAct)
+        self.settingsMenu.addAction(self.askAboutDuplicatesAct)
 
         self.notesMenu = self.menuBar().addMenu('&Notes')
         self.notesMenu.addAction(self.addCorpusNotesAct)
         self.notesMenu.addAction(self.addSignNotesAct)
 
-        # self.featuresMenu = self.menuBar().addMenu('&Features')
-        # self.featuresMenu.addAction(self.defineFeaturesAct)
+        if not hasattr(sys, 'frozen'):
+            self.debugMenu = self.menuBar().addMenu('&Debug')
+            self.debugMenu.addAction(self.resetSettingsAct)
+            self.debugMenu.addAction(self.forceBackCompatCheckAct)
 
     def alertOnCorpusSave(self):
         if self.alertOnCorpusSaveAct.isChecked():
@@ -1546,9 +980,35 @@ class MainWindow(QMainWindow):
             self.parameterDialog.setWindowFlags(self.parameterDialog.windowFlags() ^ Qt.WindowStaysOnTopHint)
             self.parametersDialog.hide()
 
+    def resetSettings(self):
+        self.readSettings(reset = True)
+
+    def askAboutDuplicates(self):
+        if self.askAboutDuplicatesAct.isChecked():
+            self.showDuplicateWarning = True
+        else:
+            self.showDuplicateWarning = False
+
     def createActions(self):
 
-        self.alertOnCorpusSaveAct = QAction('&Alert after saving',
+        self.forceBackCompatCheckAct = QAction('Force backward compatibility check',
+                                               self,
+                                               statusTip = 'Check compatibility of current corpus',
+                                               triggered = self.checkBackwardsComptibility)
+
+        self.askAboutDuplicatesAct = QAction('Warn about duplicate glosses',
+                                             self,
+                                             statusTip = 'Ask before overwriting duplicate glosses',
+                                             checkable = True,
+                                             triggered = self.askAboutDuplicates)
+
+        self.resetSettingsAct = QAction('&Reset all settings',
+                                        self,
+                                        statusTip = 'Reset all options and settings to defaults',
+                                        triggered = self.resetSettings)
+
+
+        self.alertOnCorpusSaveAct = QAction('&Autosave',
                                             self,
                                             statusTip='Show a pop-up window whenever a corpus entry is saved',
                                             checkable = True,
@@ -1567,11 +1027,13 @@ class MainWindow(QMainWindow):
 
         self.loadCorpusAct = QAction( "&Load corpus...",
                 self,
-                statusTip="Load a corpus", triggered=self.loadCorpus)
+                statusTip="Load a corpus",
+                triggered=self.loadCorpus)
 
         self.saveCorpusAct = QAction( "&Save corpus...",
                 self,
-                statusTip="Save current corpus", triggered=self.saveCorpus)
+                statusTip="Save current corpus",
+                triggered=self.saveCorpus)
 
         self.newGlossAct = QAction('&New gloss',
                 self,
@@ -1605,11 +1067,6 @@ class MainWindow(QMainWindow):
                                        statusTip = 'Open a notepad for information about the current sign',
                                        triggered = self.addSignNotes)
 
-        # self.defineFeaturesAct = QAction('Edit parameter values...',
-        #                                 self,
-        #                                 statusTip = 'Edit the set of possible handshape parameters',
-        #                                 triggered = self.defineFeatures)
-
 
     def initCorpusNotes(self):
         self.corpusNotes = NotesDialog()
@@ -1633,6 +1090,7 @@ class MainWindow(QMainWindow):
             self.corpusNotes.setWindowTitle('Notes for {} corpus'.format(self.corpus.name))
         self.corpusNotes.show()
         self.corpusNotes.raise_()
+        self.askSaveChanges = True
 
     def addSignNotes(self):
         if self.gloss.text():
@@ -1641,93 +1099,7 @@ class MainWindow(QMainWindow):
             self.signNotes.setWindowTitle('Notes for an unglossed sign')
         self.signNotes.show()
         self.signNotes.raise_()
-
-    def defineFeatures(self):
-        currentMajor = self.featuresLayout.major.currentText()
-        currentMinor = self.featuresLayout.minor.currentText()
-        currentOneHandMovement = self.featuresLayout.oneHandMovement.currentText()
-        currentTwoHandMovement = self.featuresLayout.twoHandMovement.currentText()
-        currentOrientation = self.featuresLayout.orientation.currentText()
-        currentDislocation = self.featuresLayout.dislocation.currentText()
-
-        dialog = FeaturesDialog([self.majorLocations, self.minorLocations,
-                                 self.oneHandMovements, self.twoHandMovements,
-                                 self.orientations, self.dislocations])
-        results = dialog.exec_()
-        if results:
-
-            self.featuresLayout.minor.clear()
-            self.minorLocations = dialog.minorLocations
-
-            #Empty strings are added here to allow the user to have no feature selected (as opposed to, say, no movement
-            #which is different). These empty strings are used in the "define features" dialog.
-            self.featuresLayout.major.clear()
-            self.majorLocations = list()
-            self.majorLocations.append('')
-            self.featuresLayout.major.addItem('')
-            for index in range(dialog.majorLocationList.count()):
-                item = dialog.majorLocationList.item(index)
-                self.majorLocations.append(item.text())
-                self.featuresLayout.major.addItem(item.text())
-
-            if currentMajor in self.majorLocations:
-                self.featuresLayout.major.setCurrentText(currentMajor)
-                self.featuresLayout.minor.setCurrentText(currentMinor)
-            else:
-                self.featuresLayout.major.setCurrentIndex(0)
-                self.featuresLayout.minor.setCurrentIndex(0)
-
-            self.featuresLayout.oneHandMovement.clear()
-            self.oneHandMovements = list()
-            self.oneHandMovements.append('')
-            self.featuresLayout.oneHandMovement.addItem('')
-            for index in range(dialog.oneHandMovementList.count()):
-                item = dialog.oneHandMovementList.item(index)
-                self.oneHandMovements.append(item.text())
-                self.featuresLayout.oneHandMovement.addItem(item.text())
-            if currentOneHandMovement in self.oneHandMovements:
-                self.featuresLayout.oneHandMovement.setCurrentText(currentOneHandMovement)
-            else:
-                self.featuresLayout.oneHandMovement.setCurrentIndex(0)
-
-            self.featuresLayout.twoHandMovement.clear()
-            self.twoHandMovements = list()
-            self.twoHandMovements.append('')
-            self.featuresLayout.twoHandMovement.addItem('')
-            for index in range(dialog.twoHandMovementList.count()):
-                item = dialog.twoHandMovementList.item(index)
-                self.twoHandMovements.append(item.text())
-                self.featuresLayout.twoHandMovement.addItem(item.text())
-            if currentTwoHandMovement in self.twoHandMovements:
-                self.featuresLayout.twoHandMovement.setCurrentText(currentTwoHandMovement)
-            else:
-                self.featuresLayout.twoHandMovement.setCurrentIndex(0)
-
-            self.featuresLayout.orientation.clear()
-            self.orientations = list()
-            self.orientations.append('')
-            self.featuresLayout.orientation.addItem('')
-            for index in range(dialog.orientationList.count()):
-                item = dialog.orientationList.item(index)
-                self.orientations.append(item.text())
-                self.featuresLayout.orientation.addItem(item.text())
-            if currentOrientation in self.orientations:
-                self.featuresLayout.orientation.setCurrentText(currentOrientation)
-            else:
-                self.featuresLayout.orientation.setCurrentIndex(0)
-
-            self.featuresLayout.dislocation.clear()
-            self.dislocations = list()
-            self.dislocations.append('')
-            self.featuresLayout.dislocation.addItem('')
-            for index in range(dialog.dislocationList.count()):
-                item = dialog.dislocationList.item(index)
-                self.dislocations.append(item.text())
-                self.featuresLayout.dislocation.addItem(item.text())
-            if currentDislocation in self.dislocations:
-                self.featuresLayout.dislocation.setCurrentText(currentDislocation)
-            else:
-                self.featuresLayout.dislocation.setCurrentIndex(0)
+        self.askSaveChanges = True
 
     def setConstraints(self):
         dialog = ConstraintsDialog(self.constraints)
@@ -1794,27 +1166,14 @@ class MainWindow(QMainWindow):
             item = self.__dict__[i]
             clean(item)
 
+    @decorators.checkForUnsavedChanges
     def newGloss(self, clearFlags=False):
-        if self.askSaveChanges:
-            alert = QMessageBox()
-            alert.setWindowTitle('Warning')
-            alert.setText('This will erase the information for the current word, '
-                          'and you will lose any unsaved changes.\n What would you like to do?')
-            alert.addButton('Continue without saving', QMessageBox.AcceptRole)
-            alert.addButton('Go back', QMessageBox.RejectRole)
-            alert.exec_()
-            role = alert.buttonRole(alert.clickedButton())
-            if role == 0:#AcceptRole:
-                pass
-            elif role == 1:#RejectRole
-                return
         self.gloss.glossEdit.setText('')
         self.configTabs.widget(0).clearAll(clearFlags=clearFlags)
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
 
-        self.featuresLayout.reset()
         self.parameterDialog.accept()
-        self.initParameterTree()
+        self.setupParameterDialog()
         self.initSignNotes()
         self.askSaveChanges = False
 

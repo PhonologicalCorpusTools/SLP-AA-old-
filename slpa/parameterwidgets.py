@@ -16,25 +16,34 @@ class ParameterTreeWidget(QTreeWidget):
 
     def resetChecks(self):
         treeItem = self.invisibleRootItem()
-        self._resetChecks(treeItem, clearAll=False)
+        self._resetChecks(treeItem)
 
     def clearChecks(self):
         treeItem = self.invisibleRootItem()
-        self._resetChecks(treeItem, clearAll=True)
+        self._resetChecks(treeItem, checkStrategy='reset')
 
-    def _resetChecks(self, treeItem, clearAll):
+    def loadChecks(self):
+        treeItem = self.invisibleRootItem()
+        self._resetChecks(treeItem, checkStrategy='load')
+
+    def _resetChecks(self, treeItem, checkStrategy='defaults'):
         for n in range(treeItem.childCount()):
             child = treeItem.child(n)
             if child.flags() & Qt.ItemIsUserCheckable:
-                if clearAll:
+                if checkStrategy == 'reset':
                     child.setCheckState(0, Qt.Unchecked)
-                else:
+                elif checkStrategy == 'load':
+                    if child.is_checked:
+                        child.setCheckState(0, Qt.Checked)
+                    else:
+                        child.setCheckState(0, Qt.Unchecked)
+                elif checkStrategy == 'defaults':
                     if child.parameter.is_default:
                         child.setCheckState(0, Qt.Checked)
                     else:
                         child.setCheckState(0, Qt.Unchecked)
             if child.childCount() > 0:
-                self._resetChecks(child, clearAll)
+                self._resetChecks(child, checkStrategy=checkStrategy)
 
     def getChildren(self, node):
         if not node.childCount():
@@ -168,7 +177,7 @@ class ParameterDialog(QDialog):
         alert = QMessageBox()
         alert.setWindowFlags(Qt.WindowStaysOnTopHint)
         alert.setWindowTitle('Warning')
-        alert.setText('This will erase your currently selected paramters. This action cannot be undone. Continue?')
+        alert.setText('This will erase your currently selected parameters. This action cannot be undone. Continue?')
         alert.addButton('OK', QMessageBox.AcceptRole)
         alert.addButton('Cancel', QMessageBox.RejectRole)
         alert.exec_()
@@ -177,9 +186,6 @@ class ParameterDialog(QDialog):
             return True
         else:
             return False
-
-
-
 
 
     def addChildren(self, parentWidget, parentParameter, top_parameter, displayNode, checkDefaults=False):
@@ -193,6 +199,7 @@ class ParameterDialog(QDialog):
                 child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 if checkDefaults and c.parameter.is_default:
                     child.setCheckState(0, Qt.Checked)
+                    c.is_checked = True
                 else:
                     child.setCheckState(0, Qt.Unchecked)
 
@@ -205,6 +212,9 @@ class ParameterDialog(QDialog):
                 if parentParameter.name == 'Major Location':
                     child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                     child.setCheckState(0, Qt.Unchecked)
+                    if c.name == 'Body location':
+                        child.setCheckState(0, Qt.Checked)
+                        c.is_checked = True
                     self.specialButtons.append(child)
                 else:
                     child.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable^child.flags())
@@ -217,14 +227,14 @@ class ParameterDialog(QDialog):
         self.reject()
 
     def accept(self):
-        self.updateAfterClosing.emit(True, self.displayTree)
+        self.updateAfterClosing.emit(True, self.model.tree)
         self.adjustedHeight = self.frameGeometry().height()
         self.adjustedWidth = self.frameGeometry().width()
         self.adjustedPos = self.pos()
         self.hide()
 
     def reject(self):
-        self.updateAfterClosing.emit(False, self.displayTree)
+        self.updateAfterClosing.emit(False, self.model.tree)
         self.adjustedHeight = self.frameGeometry().height()
         self.adjustedWidth = self.frameGeometry().width()
         self.adjustedPos = self.pos()
@@ -317,11 +327,12 @@ class ParameterTreeModel:
 
 class ParameterNode(anytree.Node):
 
-    def __init__(self, parameter, parent=None):
+    def __init__(self, parameter, parent=None, checked=False):
         super().__init__(parameter.name, parent=parent)
         self.name = parameter.name
         self.parameter = parameter
         self.is_default = self.parameter.is_default
+        self.is_checked = checked
         if isinstance(self.parameter, parameters.TerminalParameter):
            self.default = None
         else:
