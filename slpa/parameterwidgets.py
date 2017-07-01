@@ -337,3 +337,10 @@ class ParameterNode(anytree.Node):
            self.default = None
         else:
             self.default = self.parameter.default
+
+    def printTree(self):
+        treeText = list()
+        for pre, fill, node in anytree.RenderTree(self):
+            treeText.append("{}{}".format(pre, node.name))
+        treeText = '\n'.join(treeText)
+        print(treeText)

@@ -48,7 +48,7 @@ class Parameter:
 class TerminalParameter:
 
     def __init__(self, name, parent):
-        self.name =name
+        self.name = name
         self.parent = parent
         self.is_default = True if self.name == parent.default else False
 

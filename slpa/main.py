@@ -287,8 +287,14 @@ class CorpusList(QListWidget):
         self.parent = parent
 
     def mousePressEvent(self, event):
+        originalItem =  [i for i in self.selectedItems()][0]
+        super().mousePressEvent(event)
         if event.button() == Qt.LeftButton:
-            if self.parent.askSaveChanges:
+            if self.parent.autoSave:
+                self.parent.saveCorpus(checkForDuplicates=False)
+                selectedItem = [i for i in self.selectedItems()][0]
+                self.itemClicked.emit(selectedItem)
+            elif self.parent.askSaveChanges:
                 alert = QMessageBox()
                 alert.setWindowTitle('Warning')
                 alert.setText('There are unsaved changes to your current entry. What do you want to do?')
@@ -296,13 +302,18 @@ class CorpusList(QListWidget):
                 alert.addButton('Continue but don\'t save', QMessageBox.NoRole)
                 alert.addButton('Go back', QMessageBox.RejectRole)
                 result = alert.exec_()
-                if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole:
+                if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole: #continue and save
                     self.parent.saveCorpus(checkForDuplicates=False)
-                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
-                    return
-        super().mousePressEvent(event)
-        self.setCurrentRow(self.row(self.selectedItems()[0]))
+                    selectedItem = [i for i in self.selectedItems()][0]
+                    self.itemClicked.emit(selectedItem)
 
+                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:# continue but don't save
+                    selectedItem = [i for i in self.selectedItems()][0]
+                    self.itemClicked.emit(selectedItem)
+
+                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole: #go back and edit the gloss
+                    self.setCurrentItem(originalItem)
+                    self.itemClicked.emit(originalItem)
 
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
@@ -445,6 +456,10 @@ class MainWindow(QMainWindow):
         self.incompleteCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
         self.incompleteCodingCheckBox.clicked.connect(self.userMadeChanges)
         self.globalOptionsLayout.addWidget(self.incompleteCodingCheckBox)
+        self.globalOptionsWidgets = [self.forearmCheckBox,
+                                     self.partialObscurityCheckBox,
+                                     self.uncertainCodingCheckBox,
+                                     self.incompleteCodingCheckBox]
 
     def setupParameterDialog(self):
         if self.parameterDialog is None:
@@ -598,6 +613,7 @@ class MainWindow(QMainWindow):
         self.settings.setValue('showSaveAlert', self.alertOnCorpusSaveAct.isChecked())
         self.settings.setValue('parametersAlwaysOnTop', self.keepParametersOnTopAct.isChecked())
         self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
+        self.settings.setValue('autoSave', self.autoSaveAct.isChecked())
         self.settings.endGroup()
 
     def readSettings(self, reset=False):
@@ -625,6 +641,8 @@ class MainWindow(QMainWindow):
         self.restrictedTranscriptions = self.settings.value('restrictedTranscriptions', type=bool)
         self.setRestrictionsAct.setChecked(self.restrictedTranscriptions)
         self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
+        self.autoSave = self.settings.value('autosave', type=bool)
+        self.autoSaveAct.setChecked(self.autoSave)
         self.settings.endGroup()
 
     @decorators.checkForUnsavedChanges
@@ -716,8 +734,6 @@ class MainWindow(QMainWindow):
             with open(os.path.join(os.getcwd(), 'handCode.txt'), encoding='utf-8') as file:
                 old_code = file.read()
                 old_code = old_code.strip()
-                print(code)
-                print(old_code)
             if old_code == code:
                 self.blenderDialog = BlenderOutputWindow('hand_output.png')
                 self.blenderDialog.show()
@@ -780,7 +796,8 @@ class MainWindow(QMainWindow):
         #self.showMaximized()
 
     @decorators.checkForGloss
-    def saveCorpus(self, event=None, checkForEmptyGloss=True, checkForDuplicates=True):
+    #@decorators.checkForCorpus
+    def saveCorpus(self, event=None, checkForEmptyGloss=True, checkForDuplicates=True, isDuplicate = False):
         kwargs = self.generateKwargs()
         if self.corpus is None:
             alert = QMessageBox()
@@ -791,7 +808,7 @@ class MainWindow(QMainWindow):
 
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
-            if role ==  QMessageBox.AcceptRole:#create new corpus
+            if role == QMessageBox.AcceptRole:# create new corpus
                 savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.corpus')
                 path = savename[0]
                 if not path:
@@ -803,34 +820,32 @@ class MainWindow(QMainWindow):
                 kwargs['name'] = os.path.split(path)[1].split('.')[0]
                 self.corpus = Corpus(kwargs)
 
-            elif role == QMessageBox.NoRole: #load existing corpus and add to it
+            elif role == QMessageBox.NoRole: # load existing corpus and add to it
                 self.loadCorpus()
                 if self.corpus is None:
                     # corpus will be None if the user opened a file dialog, then changed their mind and cancelled
                     return
-
-        else: #corpus exists
-            kwargs['path'] = self.corpus.path
-            kwargs['file_mode'] = 'a'
-            if not checkForDuplicates:
-                isDuplicate = True
-                #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
-                #to save a gloss, under certain circumstances
-            elif kwargs['gloss'] in self.corpus.wordlist and self.showDuplicateWarning:
-                isDuplicate = True
-                alert = QMessageBox()
-                alert.setWindowTitle('Duplicate entry')
-                alert.setText('A word with the gloss {} already exists in your corpus. '
-                                'What do you want to do?'.format(kwargs['gloss']))
-                alert.addButton('Overwrite exising word', QMessageBox.AcceptRole)
-                alert.addButton('Go back and edit the gloss', QMessageBox.RejectRole)
-                alert.exec_()
-                role = alert.buttonRole(alert.clickedButton())
-                if role == QMessageBox.AcceptRole:#overwrite
-                    pass
-                elif role == QMessageBox.RejectRole:#edit
-                    return
-
+        # else: #corpus exists
+        kwargs['path'] = self.corpus.path
+        kwargs['file_mode'] = 'a'
+        if not checkForDuplicates:
+            isDuplicate = True
+            #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
+            #to save a gloss, under certain circumstances
+        elif kwargs['gloss'] in self.corpus.wordlist and self.showDuplicateWarning:
+            isDuplicate = True
+            alert = QMessageBox()
+            alert.setWindowTitle('Duplicate entry')
+            alert.setText('A word with the gloss {} already exists in your corpus. '
+                            'What do you want to do?'.format(kwargs['gloss']))
+            alert.addButton('Overwrite exising word', QMessageBox.AcceptRole)
+            alert.addButton('Go back and edit the gloss', QMessageBox.RejectRole)
+            alert.exec_()
+            role = alert.buttonRole(alert.clickedButton())
+            if role == QMessageBox.AcceptRole:#overwrite
+                pass
+            elif role == QMessageBox.RejectRole:#edit
+                return
         self.updateCorpus(kwargs, isDuplicate)
         if self.showSaveAlert:
             QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
@@ -839,6 +854,12 @@ class MainWindow(QMainWindow):
 
     def updateCorpus(self, kwargs, isDuplicate=False):
         sign = Sign(kwargs)
+        r = anytree.Resolver('name')
+        quality = r.get(sign.parameters, 'Quality')
+        for child in quality.children:
+            print(child.name)
+            for terminal in child.children:
+                print(terminal.name, terminal.is_checked)
         self.corpus.addWord(sign)
         self.corpus.corpusNotes = kwargs['corpusNotes']
         if not isDuplicate:
@@ -986,6 +1007,7 @@ class MainWindow(QMainWindow):
 
         self.settingsMenu = self.menuBar().addMenu('&Options')
         self.settingsMenu.addAction(self.setRestrictionsAct)
+        self.settingsMenu.addAction(self.autoSaveAct)
         self.settingsMenu.addAction(self.alertOnCorpusSaveAct)
         self.settingsMenu.addAction(self.keepParametersOnTopAct)
         self.settingsMenu.addAction(self.askAboutDuplicatesAct)
@@ -1022,7 +1044,19 @@ class MainWindow(QMainWindow):
         else:
             self.showDuplicateWarning = False
 
+    def setAutoSave(self):
+        if self.autoSaveAct.isChecked():
+            self.autoSave = True
+        else:
+            self.autoSave = False
+
     def createActions(self):
+
+        self.autoSaveAct = QAction('Autosave',
+                                   self,
+                                   statusTip = 'Always save when moving between words in a corpus',
+                                   checkable = True,
+                                   triggered = self.setAutoSave)
 
         self.forceBackCompatCheckAct = QAction('Force backward compatibility check',
                                                self,
@@ -1041,7 +1075,7 @@ class MainWindow(QMainWindow):
                                         triggered = self.resetSettings)
 
 
-        self.alertOnCorpusSaveAct = QAction('&Autosave',
+        self.alertOnCorpusSaveAct = QAction('Show save &alert',
                                             self,
                                             statusTip='Show a pop-up window whenever a corpus entry is saved',
                                             checkable = True,
@@ -1200,7 +1234,7 @@ class MainWindow(QMainWindow):
             clean(item)
 
     @decorators.checkForUnsavedChanges
-    def newGloss(self, clearFlags=False):
+    def newGloss(self, clearFlags=True):
         self.gloss.glossEdit.setText('')
         self.configTabs.widget(0).clearAll(clearFlags=clearFlags)
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
@@ -1208,6 +1242,8 @@ class MainWindow(QMainWindow):
         self.parameterDialog.accept()
         self.setupParameterDialog()
         self.initSignNotes()
+        for widget in self.globalOptionsWidgets:
+            widget.setChecked(False)
         self.askSaveChanges = False
 
 class ExportCorpusDialog(QDialog):
