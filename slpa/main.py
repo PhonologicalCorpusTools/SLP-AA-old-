@@ -428,7 +428,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.wrapper)
 
         self.parameterDialog = None
-        self.setupParameterDialog()
+        self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
         self.initCorpusNotes()
         self.initSignNotes()
         self.makeCorpusDock()
@@ -461,18 +461,23 @@ class MainWindow(QMainWindow):
                                      self.uncertainCodingCheckBox,
                                      self.incompleteCodingCheckBox]
 
-    def setupParameterDialog(self):
+    def setupParameterDialog(self, model):
         if self.parameterDialog is None:
-            self.parameterModel = ParameterTreeModel(self.parameters)
+            model = ParameterTreeModel(parameters.defaultParameters)
+            self.parameterDialog = ParameterDialog(model)
+            self.parameterDialog.treeWidget.resetChecks()
         else:
+            self.parameterDialog.close()
             self.parameterDialog.deleteLater()
             if self.currentHandShape() is not None:
-                self.parameterModel = ParameterTreeModel(self.currentHandShape().parameters)
+                model = self.currentHandShape().parameters
+                self.parameterDialog = ParameterDialog(model, checkStrategy='load')
+                #self.parameterDialog.treeWidget.loadChecks()
             else:
-                self.parameterModel = ParameterTreeModel(self.parameters)
+                model = ParameterTreeModel(parameters.defaultParameters)
+                self.parameterDialog = ParameterDialog(model)
+                self.parameterDialog.treeWidget.resetChecks()
 
-        self.parameterDialog = ParameterDialog(self.parameterModel)
-        self.parameterDialog.updateAfterClosing.connect(self.updateParameters)
 
     def currentHandShape(self):
         if self.corpus is None:
@@ -493,13 +498,6 @@ class MainWindow(QMainWindow):
         self.parameterDialog.resize(self.parameterDialog.adjustedWidth, self.parameterDialog.adjustedHeight)
         self.parameterDialog.move(self.parameterDialog.adjustedPos)
         self.parameterDialog.show()
-
-    def updateParameters(self, update, parameters):
-        if not update:
-            return
-        else:
-            self.selectedParameters = parameters
-            self.askSaveChanges = True
 
     def keyPressEvent(self, e):
         key = e.key()
@@ -664,8 +662,8 @@ class MainWindow(QMainWindow):
         for attribute, default_value in Sign.sign_attributes.items():
             if not hasattr(word, attribute):
                 break
-            if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
-                break
+            # if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
+            #     break
         else:
             return
 
@@ -673,8 +671,8 @@ class MainWindow(QMainWindow):
             for attribute, default_value in Sign.sign_attributes.items():
                 if not hasattr(word, attribute):
                     setattr(word, attribute, default_value)
-                if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
-                    setattr(word, attribute, default_value)
+                # if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
+                #     setattr(word, attribute, default_value)
 
             if hasattr(word, 'movement'):
                 setattr(word, 'oneHandMovement', word.movement)
@@ -847,6 +845,9 @@ class MainWindow(QMainWindow):
             elif role == QMessageBox.RejectRole:#edit
                 return
         self.updateCorpus(kwargs, isDuplicate)
+        save_binary(self.corpus, kwargs['path'])
+        self.corpus = load_binary(kwargs['path'])
+        self.askSaveChanges = False
         if self.showSaveAlert:
             QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
         self.askSaveChanges = False
@@ -854,12 +855,6 @@ class MainWindow(QMainWindow):
 
     def updateCorpus(self, kwargs, isDuplicate=False):
         sign = Sign(kwargs)
-        r = anytree.Resolver('name')
-        quality = r.get(sign.parameters, 'Quality')
-        for child in quality.children:
-            print(child.name)
-            for terminal in child.children:
-                print(terminal.name, terminal.is_checked)
         self.corpus.addWord(sign)
         self.corpus.corpusNotes = kwargs['corpusNotes']
         if not isDuplicate:
@@ -869,8 +864,6 @@ class MainWindow(QMainWindow):
                 if self.corpusList.item(row).text() == kwargs['gloss']:
                     self.corpusList.setCurrentRow(row)
                     break
-        save_binary(self.corpus, kwargs['path'])
-        self.askSaveChanges = False
 
     def newCorpus(self):
         self.corpus = None
@@ -952,9 +945,8 @@ class MainWindow(QMainWindow):
                 else:
                     slot.removeFlag()
 
-        self.parameterDialog.model.tree = self.currentHandShape().parameters
-        self.parameterDialog.tree.resetChecks()
-        self.parameterDialog.updateDisplayTree(True)
+        model = sign.parameters
+        self.setupParameterDialog(model)
         self.forearmCheckBox.setChecked(sign['forearmInvolved'])
         self.partialObscurityCheckBox.setChecked(sign['partialObscurity'])
         self.incompleteCodingCheckBox.setChecked(sign['incompleteCoding'])
@@ -984,7 +976,7 @@ class MainWindow(QMainWindow):
                  'config2hand1': self.configTabs.widget(1).hand1Transcription.flagList,
                  'config2hand2': self.configTabs.widget(1).hand2Transcription.flagList}
         kwargs['flags'] = flags
-        kwargs['parameters'] = self.parameterDialog.model.tree
+        kwargs['parameters'] = self.parameterDialog.treeWidget.model
         kwargs['corpusNotes'] = self.corpusNotes.getText()
         kwargs['signNotes'] = self.signNotes.getText()
         kwargs['forearmInvolved'] = self.forearmCheckBox.isChecked()
@@ -1240,7 +1232,7 @@ class MainWindow(QMainWindow):
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
 
         self.parameterDialog.accept()
-        self.setupParameterDialog()
+        self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
         self.initSignNotes()
         for widget in self.globalOptionsWidgets:
             widget.setChecked(False)

@@ -6,42 +6,96 @@ import anytree
 class ParameterTreeWidget(QTreeWidget):
     itemChecked = Signal(object, int)
 
-    def __init__(self, dialog):
+    def __init__(self, parent, model, checkStrategy='defaults'):
         super().__init__()
-        self.dialog = dialog
+        self.parent = parent
+        self.model = model
         self.buttonGroups = defaultdict(list)
+        self.specialButtons = list()
         self.itemClicked.connect(self.handleItemChanged)
         self.currentItemChanged.connect(self.handleItemChanged)
-        self.currentItemChanged.connect(self.dialog.updateDisplayTree)
+        self.currentItemChanged.connect(self.parent.updateDisplayTree)
+
+        for parameter in self.model.tree.children:
+            displayNode = anytree.Node(parameter.name, parent=self.parent.displayTree)
+            parentWidgetItem = ParameterTreeWidgetItem(self, parameter=parameter)
+            parentWidgetItem.setFlags(Qt.ItemIsSelectable | parentWidgetItem.flags() ^ Qt.ItemIsUserCheckable)
+            parentWidgetItem.setText(0, parameter.name)
+            self.addChildren(parentWidgetItem, parameter, displayNode, checkStrategy=checkStrategy)
+
+        self.buttonGroups['Major Location'].extend(self.specialButtons)
+
+    def addChildren(self, parentWidgetItem, parentParameter, displayNode, checkStrategy='defaults'):
+        buttonGroup = list()
+        appendGroup = False
+
+        for c in parentParameter.children:
+            child = ParameterTreeWidgetItem(parentWidgetItem, parameter=c)
+            if c.is_leaf:
+                child.setText(0, c.name)
+                child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                if checkStrategy == 'defaults' and c.parameter.is_default:
+                    child.setCheckState(0, Qt.Checked)
+                    c.is_checked = True
+                elif checkStrategy == 'load' and c.is_checked:
+                    child.setCheckState(0, Qt.Checked)
+                else:
+                    child.setCheckState(0, Qt.Unchecked)
+                    c.is_checked = False
+                buttonGroup.append(child)
+                appendGroup = True
+
+            else:
+                #it's a non-terminal node
+                newDisplayNode = anytree.Node(c.name, parent=displayNode)
+                child.setText(0, c.name)
+                if parentParameter.name == 'Major Location':
+                    child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                    child.setCheckState(0, Qt.Unchecked)
+                    if c.name == 'Body location':
+                        child.setCheckState(0, Qt.Checked)
+                        c.is_checked = True
+                    self.specialButtons.append(child)
+                else:
+                    child.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable^child.flags())
+                self.addChildren(child, c, newDisplayNode, checkStrategy=checkStrategy)
+        if appendGroup:
+            self.buttonGroups[parentParameter.name].extend(buttonGroup)
+
+    def resetModel(self, model):
+        self.model = model
 
     def resetChecks(self):
         treeItem = self.invisibleRootItem()
-        self._resetChecks(treeItem)
+        self._resetChecks(treeItem, checkStrategy='defaults')
 
     def clearChecks(self):
         treeItem = self.invisibleRootItem()
-        self._resetChecks(treeItem, checkStrategy='reset')
+        self._resetChecks(treeItem, checkStrategy='clear')
 
     def loadChecks(self):
         treeItem = self.invisibleRootItem()
         self._resetChecks(treeItem, checkStrategy='load')
 
-    def _resetChecks(self, treeItem, checkStrategy='defaults'):
+    def _resetChecks(self, treeItem, checkStrategy):
         for n in range(treeItem.childCount()):
             child = treeItem.child(n)
             if child.flags() & Qt.ItemIsUserCheckable:
-                if checkStrategy == 'reset':
+                if checkStrategy == 'clear':
                     child.setCheckState(0, Qt.Unchecked)
+                    child.is_checked = False
                 elif checkStrategy == 'load':
-                    if child.is_checked:
+                    if child.parameter.is_checked:
                         child.setCheckState(0, Qt.Checked)
                     else:
                         child.setCheckState(0, Qt.Unchecked)
                 elif checkStrategy == 'defaults':
                     if child.parameter.is_default:
                         child.setCheckState(0, Qt.Checked)
+                        child.is_checked = True
                     else:
                         child.setCheckState(0, Qt.Unchecked)
+                        child.is_checked = False
             if child.childCount() > 0:
                 self._resetChecks(child, checkStrategy=checkStrategy)
 
@@ -64,13 +118,23 @@ class ParameterTreeWidget(QTreeWidget):
         if item is None or item.parent() is None:
             return
         addToTree = False
-        for button in self.buttonGroups[item.parent().text(0)]:
+        parentName = item.parent().text(0)
+        treeResolver = anytree.Resolver('name')
+        path = self.makeTreePath(item)
+        parameterNode = treeResolver.get(self.model.tree, path)
+        for childNode in parameterNode.children:
+            if childNode.name == item.text(0):
+                childNode.is_checked = True
+            else:
+                childNode.is_checked = False
+
+        for button in self.buttonGroups[parentName]:
             if button.text(0) == item.text(0):
                 button.setCheckState(0, Qt.Checked)
                 addToTree = True
             else:
                 button.setCheckState(0, Qt.Unchecked)
-        self.dialog.updateDisplayTree(addToTree)
+        self.parent.updateDisplayTree(addToTree)
 
     def findTopParent(self, item):
         parent = item.parent()
@@ -81,6 +145,19 @@ class ParameterTreeWidget(QTreeWidget):
                 parent = parent.parent()
         return parent
 
+    def makeTreePath(self, item):
+        path = list()
+        parent = item.parent()
+        path.append(parent.text(0))
+        while True:
+            if parent.parent() is None:
+                break
+            else:
+                parent = parent.parent()
+                path.append(parent.text(0))
+        path.reverse()
+        path = '/'.join(path)
+        return path
 
 class ParameterSelectionsLayout(QHBoxLayout):
 
@@ -103,42 +180,32 @@ class ParameterSelectionsLayout(QHBoxLayout):
                 break
 
 class ParameterDialog(QDialog):
-    updateAfterClosing = Signal(bool, anytree.Node)
 
-    def __init__(self, model):
+    def __init__(self, model, checkStrategy='defaults'):
         super().__init__()
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setWindowTitle('Select Parameters')
-        self.model = model
         self.adjustedHeight = self.frameGeometry().height()
         self.adjustedWidth = self.frameGeometry().width()
         self.adjustedPos = self.pos()
-        self.tree = ParameterTreeWidget(self)
+        self.model = model
         self.displayTree = anytree.Node('Selected Parameters', parent=None)
         self.selectionLayout = QVBoxLayout()
         self.displayTreeWidget = QTextEdit()
-        self.specialButtons = list()
+        self.treeWidget = ParameterTreeWidget(self, self.model, checkStrategy=checkStrategy)
 
         layout = QVBoxLayout()
-        parameterLayout = QHBoxLayout()
+        self.parameterLayout = QHBoxLayout()
 
-        for p in model.tree.children:
-            displayNode = anytree.Node(p.name, parent=self.displayTree)
-            parent = ParameterTreeWidgetItem(self.tree, parameter=p)
-            parent.setFlags(Qt.ItemIsSelectable | parent.flags() ^ Qt.ItemIsUserCheckable)
-            parent.setText(0, p.name)
-            self.addChildren(parent, p, p.name, displayNode)
-
-        self.tree.buttonGroups['Major Location'].extend(self.specialButtons)
         self.generateDisplayTreeText()
         self.selectionLayout.addWidget(self.displayTreeWidget)
-        parameterLayout.addWidget(self.tree)
-        parameterLayout.addLayout(self.selectionLayout)
+        self.parameterLayout.addWidget(self.treeWidget)
+        self.parameterLayout.addLayout(self.selectionLayout)
 
         terminalNodesLayout = QVBoxLayout()
         self.terminalNodesLabel = QTextEdit('No parameters selected')
         terminalNodesLayout.addWidget(self.terminalNodesLabel)
-        parameterLayout.addLayout(terminalNodesLayout)
+        self.parameterLayout.addLayout(terminalNodesLayout)
 
         buttonLayout = QGridLayout()
         okButton = QPushButton('OK')
@@ -154,23 +221,38 @@ class ParameterDialog(QDialog):
         resetButton.clicked.connect(self.reset)
         clearButton.clicked.connect(self.clear)
 
-        layout.addLayout(parameterLayout)
+        layout.addLayout(self.parameterLayout)
         layout.addLayout(buttonLayout)
 
         self.setLayout(layout)
         self.resize(self.adjustedHeight, self.adjustedWidth)
         self.move(self.adjustedPos)
 
+    def resetTreeWidget(self, model):
+        self.parameterLayout.removeWidget(self.treeWidget)
+        self.treeWidget = ParameterTreeWidget(self, model)
+        self.parameterLayout.addWidget(self.treeWidget)
+
+    def getSignParameters(self):
+        print('in getSignParameters')
+        r = anytree.Resolver('name')
+        quality = r.get(self.treeWidget.model.tree, 'Quality')
+        for child in quality.children:
+            print(child.name)
+            for terminal in child.children:
+                print(terminal.name, terminal.is_checked)
+        return self.treeWidget.model.getParameters()
+
     def reset(self):
         continue_ = self.showWarning()
         if continue_:
-            self.tree.resetChecks()
+            self.treeWidget.resetChecks()
             self.updateDisplayTree(True)
 
     def clear(self):
         continue_ = self.showWarning()
         if continue_:
-            self.tree.clearChecks()
+            self.treeWidget.clearChecks()
             self.updateDisplayTree(True)
 
     def showWarning(self):
@@ -187,54 +269,16 @@ class ParameterDialog(QDialog):
         else:
             return False
 
-
-    def addChildren(self, parentWidget, parentParameter, top_parameter, displayNode, checkDefaults=False):
-        buttonGroup = list()
-        appendGroup = False
-
-        for c in parentParameter.children:
-            child = ParameterTreeWidgetItem(parentWidget, parameter=c)
-            if c.is_leaf:
-                child.setText(0, c.name)
-                child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-                if checkDefaults and c.parameter.is_default:
-                    child.setCheckState(0, Qt.Checked)
-                    c.is_checked = True
-                else:
-                    child.setCheckState(0, Qt.Unchecked)
-
-                buttonGroup.append(child)
-                appendGroup = True
-            else:
-                #it's a non-terminal node
-                newDisplayNode = anytree.Node(c.name, parent=displayNode)
-                child.setText(0, c.name)
-                if parentParameter.name == 'Major Location':
-                    child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-                    child.setCheckState(0, Qt.Unchecked)
-                    if c.name == 'Body location':
-                        child.setCheckState(0, Qt.Checked)
-                        c.is_checked = True
-                    self.specialButtons.append(child)
-                else:
-                    child.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable^child.flags())
-                self.addChildren(child, c, top_parameter, newDisplayNode, checkDefaults=checkDefaults)
-
-        if appendGroup:
-            self.tree.buttonGroups[parentParameter.name].extend(buttonGroup)
-
     def closeEvent(self, e):
-        self.reject()
+        self.close()
 
     def accept(self):
-        self.updateAfterClosing.emit(True, self.model.tree)
         self.adjustedHeight = self.frameGeometry().height()
         self.adjustedWidth = self.frameGeometry().width()
         self.adjustedPos = self.pos()
         self.hide()
 
     def reject(self):
-        self.updateAfterClosing.emit(False, self.model.tree)
         self.adjustedHeight = self.frameGeometry().height()
         self.adjustedWidth = self.frameGeometry().width()
         self.adjustedPos = self.pos()
@@ -260,7 +304,7 @@ class ParameterDialog(QDialog):
             return
 
         topNode = anytree.Node('Selected Parameters', parent=None)
-        root = self.tree.invisibleRootItem()
+        root = self.treeWidget.invisibleRootItem()
         self.buildTree(root, topNode)
         self.displayTree = topNode
 
@@ -299,14 +343,36 @@ class ParameterTreeModel:
 
     def __init__(self, parameterList):
         self.tree = anytree.Node('Parameters', parent=None)
+        self.parameterList = parameterList
         for p in parameterList:
             parameterNode = ParameterNode(p, parent=self.tree) #anytree.Node(p.name, parent=self.tree)
             setattr(self, p.name, parameterNode)
             for child in p.children:
                 self.addNode(child, parameterNode)
 
+    def printTree(self, nodeName='Quality'):
+        treeText = list()
+        r = anytree.Resolver('name')
+        quality = r.get(self.tree, nodeName)
+        for pre, fill, node in anytree.RenderTree(quality):
+            if node.is_leaf:
+                if node.is_checked:
+                    treeText.append("{}{}".format(pre, node.name))
+            else:
+                treeText.append("{}{}".format(pre, node.name))
+
+        treeText = '\n'.join(treeText)
+        print(treeText)
+
+
+    def getTree(self):
+        return self.tree
+
+    def getParameters(self):
+        return self.parameterList
+
     def addNode(self, parameter, parentNode):
-        if hasattr(parameter, 'children'):
+        if parameter.children:
             newNode = ParameterNode(parameter, parent=parentNode)#anytree.Node(parameter.name, parent=parentNode)
             for c in parameter.children:
                 self.addNode(c, newNode)
@@ -327,12 +393,15 @@ class ParameterTreeModel:
 
 class ParameterNode(anytree.Node):
 
-    def __init__(self, parameter, parent=None, checked=False):
+    def __init__(self, parameter, parent=None, checked=None):
         super().__init__(parameter.name, parent=parent)
         self.name = parameter.name
         self.parameter = parameter
         self.is_default = self.parameter.is_default
-        self.is_checked = checked
+        if checked is None:
+            self.is_checked = self.is_default
+        else:
+            self.is_checked = checked
         if isinstance(self.parameter, parameters.TerminalParameter):
            self.default = None
         else:

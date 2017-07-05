@@ -1,7 +1,9 @@
 #from slpa import __version__ as currentSLPAversion
 from collections import OrderedDict
 from random import choice
-from parameters import defaultParameterTree
+from parameters import defaultParameterTree, defaultParameters
+from parameterwidgets import ParameterTreeModel
+
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
 
@@ -55,7 +57,7 @@ class Corpus():
 class Sign():
 
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
-                       'parameters': defaultParameterTree,
+                       'parameters': ParameterTreeModel(defaultParameters),
                        'flags': {'config1hand1':[False for n in range(34)], 'config1hand2':[False for n in range(34)],
                                  'config2hand1':[False for n in range(34)], 'config2hand2':[False for n in range(34)]},
                        'signNotes': str(),
@@ -103,6 +105,10 @@ class Sign():
     def __repr__(self):
         return self.__str__()
 
+    @property
+    def notes(self):
+        return self.signNotes
+
     def data(self):
         return OrderedDict([(key,getattr(self, key)) for key in Sign.sorted_attributes])
 
@@ -118,7 +124,6 @@ class Sign():
                         hand[0] = 'V'
                     transcription = [x if x else blank_space for x in hand]
                     transcription[7] = null
-                    # transcription = [t if not t == X_IN_BOX else x_in_box for t in transcription]
                     if transcription[19] == X_IN_BOX:
                         transcription[19] = x_in_box
                     if transcription[24] == X_IN_BOX:
@@ -153,7 +158,7 @@ class Sign():
                         symbol = x_in_box
                     if symbol == NULL:
                         symbol = null
-                    output.append(symbol)#slot_list[slot_num])
+                    output.append(symbol)
         output = ','.join(output)
 
         return output

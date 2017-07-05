@@ -20,7 +20,6 @@ class Parameter:
                     child.is_default = False
                 self.children.append(child)
 
-
     def getDefaultValue(self):
         for child in self.children:
             if child.name == self.default:
@@ -45,12 +44,17 @@ class Parameter:
     def __gt__(self, other):
         return self.name > other.name
 
+    def __iter__(self):
+        for child in self.children:
+            yield child
+
 class TerminalParameter:
 
     def __init__(self, name, parent):
         self.name = name
         self.parent = parent
         self.is_default = True if self.name == parent.default else False
+        self.children = tuple()
 
     def __str__(self):
         return self.name
@@ -104,13 +108,13 @@ MajorLocation.addChildren([BodyLocation, SignSpaceLocation, NonDominantLocation]
 defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation]
 
 
-def addChild(child, parent):
-    node = anytree.Node(parameter.name, parent=parent)
-    for child in node.children:
-        addChild(child, node)
+def addChild(parentNode, childParameter):
+    node = anytree.Node(childParameter.name, parent=parentNode)
+    for child in childParameter.children:
+        addChild(node, child)
 
 defaultParameterTree = anytree.Node('Parameters', parent = None)
 for parameter in defaultParameters:
-    node = anytree.Node(parameter.name, parent = defaultParameterTree)
-    for child in parameter.children:
-        addChild(child, node)
+    parentNode = anytree.Node(parameter.name, parent = defaultParameterTree)
+    for childParameter in parameter.children:
+        addChild(parentNode, childParameter)
