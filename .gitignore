@@ -2,7 +2,7 @@
 !requirements.txt
 *.corpus
 *.feature
-.idea/
+*.idea/
 *.iml
 *.exe
 *.msi
@@ -21,8 +21,13 @@
 *.doc
 *.iml
 *.keylayout
+*.xml
 *.wav
 *.DS_Store
+*.blend
+*.obj
+*.mtl
+*.3ds
 
 # C extensions
 *.so

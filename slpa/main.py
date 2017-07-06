@@ -353,6 +353,11 @@ class MainWindow(QMainWindow):
         self.saveButton.clicked.connect(self.saveCorpus)
         topLayout.addWidget(self.saveButton)
 
+        #Make delete button
+        self.deleteButton = QPushButton('Delete word from corpus')
+        self.deleteButton.clicked.connect(self.deleteFromCorpus)
+        topLayout.addWidget(self.deleteButton)
+
         # Make "check transcription" button
         self.checkTranscriptionButton = QPushButton('Check transcription')
         self.checkTranscriptionButton.clicked.connect(self.checkTranscription)
@@ -371,6 +376,7 @@ class MainWindow(QMainWindow):
         topLayout.addWidget(self.copyButton)
         topLayout.addWidget(self.pasteButton)
 
+        #Add parameters button
         paramButton = QPushButton('View Parameters')
         paramButton.clicked.connect(self.showParameterTree)
         topLayout.addWidget(paramButton)
@@ -435,6 +441,29 @@ class MainWindow(QMainWindow):
 
         self.showMaximized()
         self.defineTabOrder()
+
+    def setGloss(self, text):
+        self.gloss.glossEdit.setText(text)
+
+    def deleteFromCorpus(self):
+        hs = self.currentHandShape()
+        gloss = hs.gloss
+        if hs is None or not gloss in self.corpus:
+            alert = QMessageBox()
+            alert.setWindowTitle('Error')
+            alert.setText('The current word has not been saved to the corpus yet, so it cannot be deleted. If you '
+                          'want to clear the main window, click on "New Gloss".')
+            alert.exec_()
+        else:
+            del self.corpus.wordlist[gloss]
+            for n in range(self.corpusList.count()):
+                item = self.corpusList.item(n)
+                if item.text() == gloss:
+                    goodbye = self.corpusList.takeItem(n)
+                    del goodbye
+                    break
+            self.newGloss()
+
 
     def setupGlobalOptions(self):
         globalOptionsLabel = QLabel('Global handshape options:')

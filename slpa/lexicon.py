@@ -33,7 +33,10 @@ class Corpus():
         return len(self.wordlist)
 
     def __contains__(self, item):
-        return item.gloss in self.wordlist
+        if hasattr(item, 'gloss'):
+            return item.gloss in self.wordlist
+        else:
+            return item in self.wordlist
 
     def __getitem__(self, key):
         return self.wordlist[key]
