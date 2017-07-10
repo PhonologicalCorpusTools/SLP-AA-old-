@@ -137,8 +137,8 @@ class HandConfigTab(QWidget):
         if clearFlags:
             for n in range(2,35):
                 slot = 'slot{}'.format(n)
-                getattr(self.hand1Transcription, slot).removeFlag()
-                getattr(self.hand2Transcription, slot).removeFlag()
+                getattr(self.hand1Transcription, slot).removeFlags()
+                getattr(self.hand2Transcription, slot).removeFlags()
 
     def hand1(self):
         return self.hand1Transcription.values()
@@ -509,16 +509,9 @@ class MainWindow(QMainWindow):
 
 
     def currentHandShape(self):
-        if self.corpus is None:
-            value = None
-        elif not self.gloss.glossEdit.text():
-            value = None
-        else:
-            try:
-                value = self.corpus[self.gloss.glossEdit.text()]
-            except KeyError:
-                value = None
-        return value
+        kwargs = self.generateKwargs()
+        sign = Sign(kwargs)
+        return sign
 
     def currentGloss(self):
         return self.gloss.glossEdit.text()
@@ -924,7 +917,7 @@ class MainWindow(QMainWindow):
                 if sign['flags'][handconfig][slot.num-1]:
                     slot.addFlag()
                 else:
-                    slot.removeFlag()
+                    slot.removeFlags()
 
         handconfig = 'config1hand2'
         config1hand2 = sign[handconfig]
@@ -940,7 +933,7 @@ class MainWindow(QMainWindow):
                 if sign['flags'][handconfig][slot.num-1]:
                     slot.addFlag()
                 else:
-                    slot.removeFlag()
+                    slot.removeFlags()
 
         handconfig = 'config2hand1'
         config2hand1 = sign[handconfig]
@@ -956,7 +949,7 @@ class MainWindow(QMainWindow):
                 if sign['flags'][handconfig][slot.num-1]:
                     slot.addFlag()
                 else:
-                    slot.removeFlag()
+                    slot.removeFlags()
 
         handconfig = 'config2hand2'
         config2hand2 = sign[handconfig]
@@ -972,7 +965,7 @@ class MainWindow(QMainWindow):
                 if sign['flags'][handconfig][slot.num-1]:
                     slot.addFlag()
                 else:
-                    slot.removeFlag()
+                    slot.removeFlags()
 
         model = sign.parameters
         self.setupParameterDialog(model)
@@ -1027,11 +1020,14 @@ class MainWindow(QMainWindow):
         self.constraintsMenu.addAction(self.setConstraintsAct)
 
         self.settingsMenu = self.menuBar().addMenu('&Options')
-        self.settingsMenu.addAction(self.setRestrictionsAct)
         self.settingsMenu.addAction(self.autoSaveAct)
         self.settingsMenu.addAction(self.alertOnCorpusSaveAct)
         self.settingsMenu.addAction(self.keepParametersOnTopAct)
         self.settingsMenu.addAction(self.askAboutDuplicatesAct)
+
+        self.transcriptionMenu = self.menuBar().addMenu('&Transcriptions')
+        self.transcriptionMenu.addAction(self.setRestrictionsAct)
+        self.transcriptionMenu.addAction(self.changeTranscriptionFlagsAct)
 
         self.notesMenu = self.menuBar().addMenu('&Notes')
         self.notesMenu.addAction(self.addCorpusNotesAct)
@@ -1071,7 +1067,28 @@ class MainWindow(QMainWindow):
         else:
             self.autoSave = False
 
+    def changeTranscriptionFlags(self):
+        config1 = self.configTabs.widget(0)
+        config2 = self.configTabs.widget(1)
+        flags = [config1.hand1Transcription.flags(), config1.hand2Transcription.flags(),
+                 config2.hand1Transcription.flags(), config2.hand2Transcription.flags()]
+        dialog = TranscriptionFlagWindow(flags)
+        dialog.exec_()
+        if dialog.flags is not None:#dialog.flags is None if the user clicked "cancel"
+            self.configTabs.widget(0).hand1Transcription.updateFlags(dialog.flags[0])
+            self.configTabs.widget(0).hand2Transcription.updateFlags(dialog.flags[1])
+            self.configTabs.widget(1).hand1Transcription.updateFlags(dialog.flags[2])
+            self.configTabs.widget(1).hand2Transcription.updateFlags(dialog.flags[3])
+        #for row in dialog.flags:
+            #iterate through the flags and set the appropriate background/border for each transcription slot
+
+
     def createActions(self):
+
+        self.changeTranscriptionFlagsAct = QAction('Set transcription flags',
+                                                 self,
+                                                 statusTip = 'Change multiple flags at once',
+                                                 triggered = self.changeTranscriptionFlags)
 
         self.autoSaveAct = QAction('Autosave',
                                    self,
@@ -1259,6 +1276,7 @@ class MainWindow(QMainWindow):
         self.gloss.glossEdit.setText('')
         self.configTabs.widget(0).clearAll(clearFlags=clearFlags)
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
+        self.configTabs.setCurrentIndex(0)
 
         self.parameterDialog.accept()
         self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))

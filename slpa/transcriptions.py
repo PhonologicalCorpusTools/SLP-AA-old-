@@ -1,17 +1,8 @@
 from imports import *
+from collections import namedtuple
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
-
-
-class TranscriptionCheckBox(QCheckBox):
-
-    slotSelectionChanged = Signal(int)
-
-    def __init__(self, num, parent=None):
-        super().__init__(parent)
-        self.num = num
-        self.stateChanged.connect(lambda x: self.slotSelectionChanged.emit(0))
 
 class TranscriptionLayout(QVBoxLayout):
 
@@ -27,7 +18,6 @@ class TranscriptionLayout(QVBoxLayout):
         self.violations = list()
 
         self.lineLayout = QHBoxLayout()
-        self.lineLayout.setContentsMargins(-1, 0, -1, -1)
         self.addLayout(self.lineLayout)
 
         self.generateSlots()
@@ -36,6 +26,10 @@ class TranscriptionLayout(QVBoxLayout):
 
         self.flagList = [False for n in range(34)]
         self.connectSlotSignals()
+
+    def updateFlags(self, flags):
+        for flag, slot in zip(flags[1:], self.slots[1:]):
+            slot.updateFlags(flag)
 
     def generateFields(self):
         #FIELD 1 (Forearm)
@@ -210,6 +204,11 @@ class TranscriptionLayout(QVBoxLayout):
         data.extend([slot.text() if slot.text() else '' for slot in self.slots[1:]])
         return data
 
+    def flags(self):
+        Flag = namedtuple('Flag', ['isUncertain', 'isEstimate'])
+        flags = [Flag(slot.isUncertain, slot.isEstimate) for slot in self.slots]
+        return flags
+
     def blenderCode(self):
         transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format('V' if self.slot1.isChecked() else '_',
                                                                      ''.join([self[n].getText() for n in range(1,5)]),
@@ -256,7 +255,13 @@ class TranscriptionSlot(QLineEdit):
         super().__init__()
         self.num = num
         self.field = field
+        self.styleSheetString = ("QLineEdit{{background: {}; border: {};}} "
+                                "QLineEdit:hover{{background {};border: {}; }}")
+        self.background = 'white'
+        self.border = '1px solid gray'
         self.regex = regex
+        self.isUncertain = False
+        self.isEstimate = False
         qregexp = QRegExp(regex)
         qregexp.setCaseSensitivity(Qt.CaseInsensitive)
         self.setValidator(QRegExpValidator(qregexp))
@@ -265,13 +270,15 @@ class TranscriptionSlot(QLineEdit):
             #these slots are the only ones that can contain digraphs, namely 'x+' and 'x-'
         else:
             self.setMaxLength(1)
-        self.setFixedWidth(30)
+
+        # self.setFixedWidth(30)
         self.setFocusPolicy(Qt.TabFocus)
         completer = TranscriptionCompleter(completer_options, self)
         completer.setMaxVisibleItems(8)
         self.setCompleter(completer)
         self.completer().activated.connect(self.completerActivated)
-        self.setStyleSheet("QLineEdit{background: white;} QLineEdit:hover{border: 1px solid gray; background-color white;}")
+        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        self.setStyleSheet(style)
 
         if self.num == 8:
             self.setText(NULL)
@@ -303,24 +310,66 @@ class TranscriptionSlot(QLineEdit):
         self.customContextMenuRequested.connect(self.showContextMenu)
 
         # create context menu
+        self.makeMenu()
+
+    def updateFlags(self, flag):
+        print('slot info:', self.num, self.isEstimate, self.isUncertain)
+        print('flag info:', flag.isEstimate, flag.isUncertain)
+        if flag.isUncertain:
+            self.isUncertain = True
+            self.background = 'pink'
+        else:
+            self.isUncertain = False
+            self.background = 'white'
+
+        if flag.isEstimate:
+            self.isEstimate = True
+            self.border = '2px dashed black'
+        else:
+            self.isEstimate = False
+            self.border = '1px solid grey'
+
+        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        self.setStyleSheet(style)
+
+    def removeFlags(self):
+        self.isEstimate = False
+        self.isUncertain = False
+        self.border = '1px solid grey'
+        self.background = 'white'
+        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        self.setStyleSheet(style)
+
+    def makeMenu(self):
         self.popMenu = QMenu(self)
-        self.popMenu.addAction(QAction('Flag as uncertain', self, triggered=self.addFlag))
-        self.removeFlagAction = QAction('Remove flag', self, triggered=self.removeFlag)
-        self.removeFlagAction.setEnabled(False)
-        self.popMenu.addAction(self.removeFlagAction)
+        self.changeEstimateAct = QAction('Flag as estimate', self, triggered=self.changeEstimate, checkable=True)
+        self.changeUncertaintyAct = QAction('Flag as uncertain', self, triggered=self.changeUncertainty, checkable=True)
+        self.popMenu.addAction(self.changeUncertaintyAct)
+        self.popMenu.addAction(self.changeEstimateAct)
 
     def showContextMenu(self, point):
         self.popMenu.exec_(self.mapToGlobal(point))
 
-    def addFlag(self, e=None):
-        self.setStyleSheet("QLineEdit{background: red;} QLineEdit:hover{border: 1px solid gray; background-color red;}")
-        self.slotFlagged.emit(self.num-1, True)
-        self.removeFlagAction.setEnabled(True)
+    def changeEstimate(self, e=None):
+        if self.changeEstimateAct.isChecked():
+            self.border = '2px dashed black'
+            self.isEstimate = True
+        else:
+            self.border = '1px solid grey'
+            self.isEstimate = False
+        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        self.setStyleSheet(style)
 
-    def removeFlag(self, e=None):
-        self.setStyleSheet("QLineEdit{background: white;} QLineEdit:hover{border: 1px solid gray; background-color white;}")
-        self.slotFlagged.emit(self.num-1, False)
-        self.removeFlagAction.setEnabled(False)
+    def changeUncertainty(self, e=None):
+        if self.changeUncertaintyAct.isChecked():
+            self.background = 'pink'
+            self.isUncertain = True
+        else:
+            self.background = 'white'
+            self.isUncertain = False
+        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        self.setStyleSheet(style)
+        self.slotFlagged.emit(self.num-1, True)
 
     def __eq__(self, other):
         return self.text() == other.text()
@@ -383,6 +432,18 @@ class TranscriptionSlot(QLineEdit):
 
         self.completer().complete()
         super().keyPressEvent(e)
+
+
+class TranscriptionCheckBox(QCheckBox):
+
+    slotSelectionChanged = Signal(int)
+
+    def __init__(self, num, parent=None):
+        super().__init__()
+        self.num = num
+        self.stateChanged.connect(lambda x: self.slotSelectionChanged.emit(0))
+        self.isEstimate = False
+        self.isUncertain = False
 
 
 class TranscriptionField(QGridLayout):
@@ -670,3 +731,100 @@ class TranscriptionCopyDialog(QDialog):
     def reject(self):
         self.selectedTranscription = None
         super().reject()
+
+class TranscriptionFlagWindow(QDialog):
+
+    def __init__(self, currentFlags):
+        super().__init__()
+        self.setWindowTitle('Set transcription flags')
+        layout = QVBoxLayout()
+        self.flagTable = QTableWidget()
+        self.flagTable.setRowCount(4)
+        self.flagTable.setColumnCount(34)
+        self.flagTable.setHorizontalHeaderLabels(['Slot {}'.format(n) for n in range(1,35)])
+        verticalLabels = ['Hand 1, Config 1', 'Hand 1, Config 2', 'Hand 2, Config 1', 'Hand 2, Config 2']
+        self.flagTable.setVerticalHeaderLabels(verticalLabels)
+        for row in range(self.flagTable.rowCount()):
+            for col in range(self.flagTable.columnCount()):
+                item = FlagCheckboxWidget(row, col, self.flagTable)
+                self.flagTable.setCellWidget(row, col, item)
+                cf = currentFlags[row][col]
+                item.uncertainCheckbox.setChecked(cf.isUncertain)
+                item.estimatedCheckbox.setChecked(cf.isEstimate)
+        layout.addWidget(self.flagTable)
+        buttonLayout = QHBoxLayout()
+        okButton = QPushButton('OK')
+        okButton.clicked.connect(self.accept)
+        buttonLayout.addWidget(okButton)
+        cancelButton = QPushButton('Cancel')
+        cancelButton.clicked.connect(self.reject)
+        buttonLayout.addWidget(cancelButton)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+    def accept(self):
+        self.flags = list()
+        for r in range(self.flagTable.rowCount()):
+            row = list()
+            for c in range(self.flagTable.columnCount()):
+                row.append(self.flagTable.cellWidget(r, c).value())
+            self.flags.append(row)
+        super().accept()
+
+    def reject(self):
+        self.flags = None
+        super().reject()
+
+class FlagCheckboxWidget(QWidget):
+
+    def __init__(self, row, column, parentTable):
+        super().__init__()
+        layout = QVBoxLayout()
+        self.row = row
+        self.column = column
+        self.parentTable = parentTable
+        self.estimatedCheckbox = QCheckBox('Estimated')
+        self.uncertainCheckbox = QCheckBox('Uncertain')
+        layout.addWidget(self.uncertainCheckbox)
+        layout.addWidget(self.estimatedCheckbox)
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
+        self.setLayout(layout)
+
+        self.makeMenu()
+
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
+
+    def showContextMenu(self, point):
+        self.popMenu.exec_(self.mapToGlobal(point))
+
+    def makeMenu(self):
+        self.popMenu = QMenu(self)
+        self.matchRowAct = QAction('Make the whole row look like this cell', self, triggered=self.matchRow)
+        self.matchColAct = QAction('Make the whole column look like this cell', self, triggered=self.matchColumn)
+        self.popMenu.addAction(self.matchRowAct)
+        self.popMenu.addAction(self.matchColAct)
+
+    def matchRow(self):
+        currentItem = self.parentTable.cellWidget(self.row, self.column)
+        estimated = currentItem.estimatedCheckbox.isChecked()
+        uncertain = currentItem.uncertainCheckbox.isChecked()
+        for column in range(self.parentTable.columnCount()):
+            item = self.parentTable.cellWidget(self.row, column)
+            item.estimatedCheckbox.setChecked(estimated)
+            item.uncertainCheckbox.setChecked(uncertain)
+
+    def matchColumn(self):
+        currentItem = self.parentTable.cellWidget(self.row, self.column)
+        estimated = currentItem.estimatedCheckbox.isChecked()
+        uncertain = currentItem.uncertainCheckbox.isChecked()
+        for row in range(self.parentTable.rowCount()):
+            item = self.parentTable.cellWidget(row, self.column)
+            item.estimatedCheckbox.setChecked(estimated)
+            item.uncertainCheckbox.setChecked(uncertain)
+
+    def value(self):
+        Flag = namedtuple('Flag', ['isUncertain', 'isEstimate'])
+        return (Flag(self.uncertainCheckbox.isChecked(), self.estimatedCheckbox.isChecked()))
+
