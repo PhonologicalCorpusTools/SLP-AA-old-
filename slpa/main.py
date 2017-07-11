@@ -22,7 +22,6 @@ __currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
 
-
 class QApplicationMessaging(QApplication):
     messageFromOtherInstance = Signal(bytes)
 
@@ -903,69 +902,21 @@ class MainWindow(QMainWindow):
         config1.clearAll()
         config2.clearAll()
 
-        handconfig = 'config1hand1'
-        config1hand1 = sign[handconfig]
-        for slot in config1.hand1Transcription.slots:
-            if slot.num == 1:
-                if config1hand1[0] == '_' or not config1hand1[0]:
-                    slot.setChecked(False)
+        for confignum,handnum in itertools.product([1,2], [1,2]):
+            name = 'config{}hand{}'.format(confignum, handnum)
+            confighand = sign[name]
+            configTab = self.configTabs.widget(confignum-1)
+            transcription = getattr(configTab, 'hand{}Transcription'.format(handnum))
+            for slot in transcription.slots:
+                if slot.num == 1:
+                    if confighand[0] == '_' or not confighand[0]:
+                        slot.setChecked(False)
+                    else:
+                        slot.setChecked(True)
                 else:
-                    slot.setChecked(True)
-            else:
-                text = config1hand1[slot.num-1]
-                slot.setText('' if text == '_' else text)
-                if sign['flags'][handconfig][slot.num-1]:
-                    slot.addFlag()
-                else:
-                    slot.removeFlags()
-
-        handconfig = 'config1hand2'
-        config1hand2 = sign[handconfig]
-        for slot in config1.hand2Transcription.slots:
-            if slot.num == 1:
-                if config1hand2[0] == '_' or not config1hand2[0]:
-                    slot.setChecked(False)
-                else:
-                    slot.setChecked(True)
-            else:
-                text = config1hand2[slot.num-1]
-                slot.setText('' if text == '_' else text)
-                if sign['flags'][handconfig][slot.num-1]:
-                    slot.addFlag()
-                else:
-                    slot.removeFlags()
-
-        handconfig = 'config2hand1'
-        config2hand1 = sign[handconfig]
-        for slot in config2.hand1Transcription.slots:
-            if slot.num == 1:
-                if config2hand1[0] == '_' or not config2hand1[0]:
-                    slot.setChecked(False)
-                else:
-                    slot.setChecked(True)
-            else:
-                text = config2hand1[slot.num-1]
-                slot.setText('' if text == '_' else text)
-                if sign['flags'][handconfig][slot.num-1]:
-                    slot.addFlag()
-                else:
-                    slot.removeFlags()
-
-        handconfig = 'config2hand2'
-        config2hand2 = sign[handconfig]
-        for slot in config2.hand2Transcription.slots:
-            if slot.num == 1:
-                if config2hand2[0] == '_' or not config2hand2[0]:
-                    slot.setChecked(False)
-                else:
-                    slot.setChecked(True)
-            else:
-                text = config2hand2[slot.num-1]
-                slot.setText('' if text == '_' else text)
-                if sign['flags'][handconfig][slot.num-1]:
-                    slot.addFlag()
-                else:
-                    slot.removeFlags()
+                    text = confighand[slot.num - 1]
+                    slot.setText('' if text == '_' else text)
+                    slot.updateFlags(sign.flags[name][slot.num - 1])
 
         model = sign.parameters
         self.setupParameterDialog(model)
@@ -993,10 +944,10 @@ class MainWindow(QMainWindow):
         gloss = self.gloss.glossEdit.text().strip()
         kwargs['gloss'] = gloss
 
-        flags = {'config1hand1': self.configTabs.widget(0).hand1Transcription.flagList,
-                 'config1hand2': self.configTabs.widget(0).hand2Transcription.flagList,
-                 'config2hand1': self.configTabs.widget(1).hand1Transcription.flagList,
-                 'config2hand2': self.configTabs.widget(1).hand2Transcription.flagList}
+        flags = {'config1hand1': self.configTabs.widget(0).hand1Transcription.flags(),
+                 'config1hand2': self.configTabs.widget(0).hand2Transcription.flags(),
+                 'config2hand1': self.configTabs.widget(1).hand1Transcription.flags(),
+                 'config2hand2': self.configTabs.widget(1).hand2Transcription.flags()}
         kwargs['flags'] = flags
         kwargs['parameters'] = self.parameterDialog.treeWidget.model
         kwargs['corpusNotes'] = self.corpusNotes.getText()
@@ -1072,7 +1023,7 @@ class MainWindow(QMainWindow):
         config2 = self.configTabs.widget(1)
         flags = [config1.hand1Transcription.flags(), config1.hand2Transcription.flags(),
                  config2.hand1Transcription.flags(), config2.hand2Transcription.flags()]
-        dialog = TranscriptionFlagWindow(flags)
+        dialog = TranscriptionFlagDialog(flags)
         dialog.exec_()
         if dialog.flags is not None:#dialog.flags is None if the user clicked "cancel"
             self.configTabs.widget(0).hand1Transcription.updateFlags(dialog.flags[0])

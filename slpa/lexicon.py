@@ -3,6 +3,7 @@ from collections import OrderedDict
 from random import choice
 from parameters import defaultParameterTree, defaultParameters
 from parameterwidgets import ParameterTreeModel
+from transcriptions import Flag
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
@@ -61,8 +62,10 @@ class Sign():
 
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
                        'parameters': ParameterTreeModel(defaultParameters),
-                       'flags': {'config1hand1':[False for n in range(34)], 'config1hand2':[False for n in range(34)],
-                                 'config2hand1':[False for n in range(34)], 'config2hand2':[False for n in range(34)]},
+                       'flags': {'config1hand1':[Flag(False,False) for n in range(34)],
+                                 'config1hand2':[Flag(False,False) for n in range(34)],
+                                 'config2hand1':[Flag(False,False) for n in range(34)],
+                                 'config2hand2':[Flag(False,False) for n in range(34)]},
                        'signNotes': str(),
                        'forearmInvolved': False,
                        'partialObscurity': False,

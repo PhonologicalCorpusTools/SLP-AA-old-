@@ -3,6 +3,7 @@ from collections import namedtuple
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
+Flag = namedtuple('Flag', ['isUncertain', 'isEstimate'])
 
 class TranscriptionLayout(QVBoxLayout):
 
@@ -205,7 +206,6 @@ class TranscriptionLayout(QVBoxLayout):
         return data
 
     def flags(self):
-        Flag = namedtuple('Flag', ['isUncertain', 'isEstimate'])
         flags = [Flag(slot.isUncertain, slot.isEstimate) for slot in self.slots]
         return flags
 
@@ -313,21 +313,23 @@ class TranscriptionSlot(QLineEdit):
         self.makeMenu()
 
     def updateFlags(self, flag):
-        print('slot info:', self.num, self.isEstimate, self.isUncertain)
-        print('flag info:', flag.isEstimate, flag.isUncertain)
         if flag.isUncertain:
             self.isUncertain = True
             self.background = 'pink'
+            self.changeUncertaintyAct.setChecked(True)
         else:
             self.isUncertain = False
             self.background = 'white'
+            self.changeUncertaintyAct.setChecked(False)
 
         if flag.isEstimate:
             self.isEstimate = True
             self.border = '2px dashed black'
+            self.changeEstimateAct.setChecked(True)
         else:
             self.isEstimate = False
             self.border = '1px solid grey'
+            self.changeEstimateAct.setChecked(False)
 
         style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
@@ -337,6 +339,8 @@ class TranscriptionSlot(QLineEdit):
         self.isUncertain = False
         self.border = '1px solid grey'
         self.background = 'white'
+        self.changeEstimateAct.setChecked(False)
+        self.changeUncertaintyAct.setChecked(False)
         style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
 
@@ -732,7 +736,7 @@ class TranscriptionCopyDialog(QDialog):
         self.selectedTranscription = None
         super().reject()
 
-class TranscriptionFlagWindow(QDialog):
+class TranscriptionFlagDialog(QDialog):
 
     def __init__(self, currentFlags):
         super().__init__()
@@ -825,6 +829,5 @@ class FlagCheckboxWidget(QWidget):
             item.uncertainCheckbox.setChecked(uncertain)
 
     def value(self):
-        Flag = namedtuple('Flag', ['isUncertain', 'isEstimate'])
         return (Flag(self.uncertainCheckbox.isChecked(), self.estimatedCheckbox.isChecked()))
 
