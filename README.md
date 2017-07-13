@@ -1,8 +1,8 @@
 # SLP-Annotator
 
 One of the barriers to conducting corpus-based phonetic and phonological research on signed languages is the lack of tools for 
-streamlining phonetic annotation in a way that is then compatible with other corpus-analysis resources. In this presentation, we 
-introduce SLPAnnotator, a free, open-source software program that is designed to implement a (slightly modified) version of Johnson 
+streamlining phonetic annotation in a way that is then compatible with other corpus-analysis resources. SLP-Annotator is a free, open-
+source software program that is designed to implement a (slightly modified) version of Johnson 
 and Liddell’s anatomically based and phonetically detailed Sign Language Phonetic Annotation (SLPA) system (2010, 2011a, 2011b, 2012).
 The software creates corpora that are compatible with the more general program Phonological CorpusTools (PCT; Hall et al. 2016) to 
 allow relatively automated phonological analysis. 
@@ -10,9 +10,9 @@ allow relatively automated phonological analysis.
 SLPAnnotator follows the guidelines laid out in Tkachman et al. (2016) to modify SLPA. Specifically, each handshape annotation 
 consists of exactly 34 slots, each of which can consist of a pre-determined list of annotations (see Fig. 1). Completely standardizing 
 the input format of each transcription makes it possible to (a) facilitate the transcription process by providing the transcriber with 
-both visual and written information about what can be entered into each slot (see Fig. 2); (b) provide automatic checks for inaccurate 
+both visual and written information about what can be entered into each slot; (b) provide automatic checks for inaccurate 
 transcriptions (e.g., warning users when they enter anatomically or phonologically implausible configurations); (c) create automatically
-rendered images of the transcribed handshape (see Fig. 3), facilitating readability and human-led accuracy checks; and (d) create 
+rendered images of the transcribed handshape, facilitating readability and human-led accuracy checks; and (d) create 
 corpora that are compatible with automated analysis. For example, after creating corpora using SLPAnnotator, one could import them into
 PCT to test claims about sign language phonology and typology, such as the proposal in Johnson and Liddell (2011b: 21) that when the 
 proximal joints are all extended, the fourth finger is always abducted. This can be done by searching for certain finger configurations
