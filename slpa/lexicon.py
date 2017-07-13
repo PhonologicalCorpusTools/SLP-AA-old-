@@ -1,4 +1,5 @@
 #from slpa import __version__ as currentSLPAversion
+import os
 from collections import OrderedDict
 from random import choice
 from parameters import defaultParameterTree, defaultParameters
@@ -73,17 +74,19 @@ class Sign():
                        'incompleteCoding': False
                        }
 
-    sorted_attributes = ['gloss', 'config1', 'config2', 'parameters', 'flags', 'notes']
+    sorted_attributes = ['gloss', 'config1', 'config2',
+                         'parameters', 'flags', 'notes']
 
-    headers = ['gloss',
-                'config1hand1', 'config1hand2',
-                'config2hand1', 'config2hand2',
-                'parameters']
+    headers = ['gloss', 'config1hand1', 'config1hand2', 'config2hand1', 'config2hand2']
 
     for config_num in [1, 2]:
         for hand_num in [1, 2]:
             for slot_num in range(1, 35):
-                headers.append('config{}hand{}slot{}'.format(config_num,hand_num, slot_num))
+                headers.append('config{}hand{}slot{}'.format(config_num, hand_num, slot_num))
+            headers.append('config{}hand{}uncertain'.format(config_num, hand_num))
+            headers.append('config{}hand{}estimated'.format(config_num, hand_num))
+    headers.append('parameters')
+    headers.append('notes')
     headers = ','.join(headers)
 
     def __init__(self, kwargs):
@@ -116,48 +119,38 @@ class Sign():
         return self.signNotes
 
     def data(self):
-        return OrderedDict([(key,getattr(self, key)) for key in Sign.sorted_attributes])
+        return OrderedDict([(key, getattr(self, key)) for key in Sign.sorted_attributes])
 
     def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL):
         output = list()
-        for key,value in self.data().items():
-
-            if 'config' in key:
-                for hand in value:
-                    if hand[0] == '_' or not hand[0]:
-                        hand[0] = blank_space
-                    else:
-                        hand[0] = 'V'
-                    transcription = [x if x else blank_space for x in hand]
-                    transcription[7] = null
-                    if transcription[19] == X_IN_BOX:
-                        transcription[19] = x_in_box
-                    if transcription[24] == X_IN_BOX:
-                        transcription[24] = x_in_box
-                    if transcription[29] == X_IN_BOX:
-                        transcription[29] = x_in_box
-                    if include_fields:
-                        transcription = self.add_fields(transcription)
-                    output.append(''.join(transcription))
-                continue
-
-            if key == 'major':
-                value = 'None' if not value else value
-            elif key == 'minor':
-                value = 'None' if not value else value
-            elif key  == 'oneHandMovement':
-                value = 'None' if not value else value
-            elif key == 'twoHandMovement':
-                value = 'None' if not value else value
-            elif key == 'dislocation':
-                value = 'None' if not value else value
-            elif key == 'orientation':
-                value = 'None' if not value else value
-            output.append(value)
+        output.append(self.gloss)
+        # for key,value in self.data().items():
+        #     if 'config' in key:
+        for config_num in [1,2]:
+            for hand_num in [1,2]:
+            # for hand_num, hand in enumerate(value):
+                hand = getattr(self, 'config{}hand{}'.format(config_num, hand_num))
+                if hand[0] == '_' or not hand[0]:
+                    hand[0] = blank_space
+                else:
+                    hand[0] = 'V'
+                transcription = [x if x else blank_space for x in hand]
+                transcription[7] = null
+                if transcription[19] == X_IN_BOX:
+                    transcription[19] = x_in_box
+                if transcription[24] == X_IN_BOX:
+                    transcription[24] = x_in_box
+                if transcription[29] == X_IN_BOX:
+                    transcription[29] = x_in_box
+                if include_fields:
+                    transcription = self.add_fields(transcription)
+                output.append(''.join(transcription))
+                #continue
 
         for config_num in [1,2]:
-            for hand_num in [0,1]:
-                slot_list = getattr(self, 'config{}'.format(config_num))[hand_num]
+            for hand_num in [1,2]:
+                #mini_output = list()
+                slot_list = getattr(self, 'config{}hand{}'.format(config_num, hand_num))
                 for slot_num in range(34):
                     symbol = slot_list[slot_num]
                     if symbol == X_IN_BOX:
@@ -165,7 +158,28 @@ class Sign():
                     if symbol == NULL:
                         symbol = null
                     output.append(symbol)
+                # output.append(''.join(mini_output))
+
+                uncertain, estimates = list(), list()
+                key_name = 'config{}hand{}'.format(config_num, hand_num)
+                for i, flag in enumerate(self.flags[key_name]):
+                    if flag.isUncertain:
+                        uncertain.append(str(i+1))
+                    if flag.isEstimate:
+                        estimates.append(str(i+1))
+                uncertain = 'None' if not uncertain else '-'.join(uncertain)
+                estimates = 'None' if not estimates else '-'.join(estimates)
+                output.append(uncertain)
+                output.append(estimates)
+
+        parameters = self.parameters.exportTree()
+        output.append(parameters)
+        output.append(self.notes)
+
         output = ','.join(output)
+
+        with open(os.path.join(os.getcwd(), 'output.txt'), mode='w', encoding='utf-8') as f:
+            print(output, file=f)
 
         return output
 

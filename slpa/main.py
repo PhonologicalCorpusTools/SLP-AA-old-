@@ -447,7 +447,7 @@ class MainWindow(QMainWindow):
     def deleteFromCorpus(self):
         hs = self.currentHandShape()
         gloss = hs.gloss
-        if hs is None or not gloss in self.corpus:
+        if self.corpus is None or hs is None or not gloss in self.corpus:
             alert = QMessageBox()
             alert.setWindowTitle('Error')
             alert.setText('The current word has not been saved to the corpus yet, so it cannot be deleted. If you '
@@ -753,24 +753,24 @@ class MainWindow(QMainWindow):
             with open(os.path.join(os.getcwd(), 'handCode.txt'), encoding='utf-8') as file:
                 old_code = file.read()
                 old_code = old_code.strip()
-            if old_code == code:
-                self.blenderDialog = BlenderOutputWindow('hand_output.png')
-                self.blenderDialog.show()
-                self.blenderDialog.raise_()
-                return
+            # if old_code == code:
+            #     self.blenderDialog = BlenderOutputWindow('hand_output.png')
+            #     self.blenderDialog.show()
+            #     self.blenderDialog.raise_()
+            #     return
 
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
         proc = subprocess.Popen(
             [blenderPath,
-              blenderFile,
-             # '--background',
-              "--python", blenderScript])
+             '--background',
+            "--python", blenderScript,
+             blenderFile])
         proc.communicate()
-        # self.blenderDialog = BlenderOutputWindow('hand_output.png', self.gloss.glossEdit.text())
-        # self.blenderDialog.show()
-        # self.blenderDialog.raise_()
+        self.blenderDialog = BlenderOutputWindow('hand_output.png',self.currentGloss())
+        self.blenderDialog.show()
+        self.blenderDialog.raise_()
 
     def clearLayout(self, layout):
         while layout.count():
@@ -1036,18 +1036,18 @@ class MainWindow(QMainWindow):
 
     def createActions(self):
 
-        self.changeTranscriptionFlagsAct = QAction('Set transcription flags',
+        self.changeTranscriptionFlagsAct = QAction('Set transcription &flags',
                                                  self,
                                                  statusTip = 'Change multiple flags at once',
                                                  triggered = self.changeTranscriptionFlags)
 
-        self.autoSaveAct = QAction('Autosave',
+        self.autoSaveAct = QAction('&Autosave',
                                    self,
                                    statusTip = 'Always save when moving between words in a corpus',
                                    checkable = True,
                                    triggered = self.setAutoSave)
 
-        self.forceBackCompatCheckAct = QAction('Force backward compatibility check',
+        self.forceBackCompatCheckAct = QAction('Force &backward compatibility check',
                                                self,
                                                statusTip = 'Check compatibility of current corpus',
                                                triggered = self.checkBackwardsComptibility)
@@ -1100,7 +1100,7 @@ class MainWindow(QMainWindow):
                 self,
                 statusTip="Quit", triggered=self.closeEvent)
 
-        self.exportCorpusAct = QAction('&Export corpus as csv',
+        self.exportCorpusAct = QAction('&Export corpus as csv...',
                                     self,
                                     statusTip='Save corpus as csv for opening as a spreadsheet',
                                     triggered=self.exportCorpus)
@@ -1200,7 +1200,7 @@ class MainWindow(QMainWindow):
                 alert = QMessageBox()
                 alert.setWindowTitle('Error encountered')
                 alert.setText('The file {} is already open in a program on your computer. Please close the file before '
-                              'saving, or choose a different file name.'.format(filename))
+                              'saving, or else choose a different file name.'.format(filename))
                 alert.exec_()
 
     def sizeHint(self):

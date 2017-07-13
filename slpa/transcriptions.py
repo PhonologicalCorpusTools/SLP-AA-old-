@@ -236,8 +236,6 @@ class TranscriptionLayout(QVBoxLayout):
     def __getitem__(self, num):
         return self.slots[num]
 
-
-
 class TranscriptionCompleter(QCompleter):
 
     def __init__(self, options, lineEditWidget):

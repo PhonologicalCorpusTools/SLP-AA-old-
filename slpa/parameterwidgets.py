@@ -350,6 +350,17 @@ class ParameterTreeModel:
             for child in p.children:
                 self.addNode(child, parameterNode)
 
+    def exportTree(self):
+        export = list()
+        # r = anytree.Resolver('name')
+        # top = r.get(self.tree, '/Parameters')
+        for pre, fill, node in anytree.RenderTree(self.tree):
+            if node.is_leaf:
+                if node.is_checked:
+                    export.append("{}:{}".format(node.parent.name, node.name))
+        export = ','.join(export)
+        return export
+
     def printTree(self, nodeName='Quality'):
         treeText = list()
         r = anytree.Resolver('name')
