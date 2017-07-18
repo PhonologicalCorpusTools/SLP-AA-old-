@@ -20,6 +20,14 @@ class Parameter:
                     child.is_default = False
                 self.children.append(child)
 
+    def sortChildren(self):
+        if self.children is not None:
+            sortedList = [child for child in self.children if child.is_default]
+            toSort = [child for child in self.children if not child.is_default]
+            toSort.sort()
+            sortedList.extend(toSort)
+            self.children = sortedList
+
     def getDefaultValue(self):
         for child in self.children:
             if child.name == self.default:
@@ -59,6 +67,12 @@ class TerminalParameter:
     def __str__(self):
         return self.name
 
+    def __lt__(self, other):
+        return self.name < other.name
+
+    def __gt__(self, other):
+        return self.name > other.name
+
 
 #QUALITY PARAMETERS
 Quality = Parameter(name='Quality')
@@ -71,39 +85,37 @@ Quality.addChildren([Temporal, NonTemporal, Contact])
 #MAJOR MOVEMENT PARAMETERS
 MajorMovement = Parameter(name='Major Movement')
 ContourMovement = Parameter(name='Contour of movement', children = ['Hold', 'Straight', 'Arc', 'Circle', 'Seven'], default='Hold', parent=MajorMovement)
+ContourMovement.sortChildren()
 ContourPlane = Parameter(name='Contour planes', children = ['Hold', 'Horizontal', 'Vertical', 'Surface', 'Midline', 'Oblique'], default='Hold', parent=MajorMovement)
+ContourPlane.sortChildren()
 Repetition = Parameter(name='Repetition',children=['None', 'Once', 'Twice', 'Multiple'], default='None', parent=MajorMovement)
 Direction = Parameter(name = 'Direction', children = ['None', 'Forward', 'Backward'], default='None', parent=MajorMovement)
 MajorMovement.addChildren([ContourMovement, ContourPlane, Repetition, Direction])
 
 #LOCAL MOVEMENT PARAMETERS
-LocalMovement = Parameter(name='Local Movement', children=['Hold', 'Wiggling', 'Hooking', 'Flattening', 'Twisting',
-                                                           'Nodding', 'Releasing', 'Rubbing', 'Circling', 'Shaking'],
-                                                 default='Hold')
+LocalMovement = Parameter(name='Local Movement', children=['Hold', 'Wiggling', 'Hooking', 'Flattening', 'Twisting', 'Nodding', 'Releasing', 'Rubbing', 'Circling', 'Shaking'], default='Hold')
+LocalMovement.sortChildren()
 
 #MAJOR LOCATION PARAMETERS
 MajorLocation = Parameter(name='Major Location')
-WeakHandLocation = Parameter(name='Weak hand location')
-SignSpaceLocation = Parameter(name='Signing space location')
-NonDominantLocation = Parameter(name='Non-dominant hand location')
+SignSpaceLocation = Parameter(name='Signing space location',  is_default=True)
+WeakHandLocation = Parameter(name='Non-dominant hand location')
 
 HandPart = Parameter(name = 'Hand part', children = ['Hand', 'Fingers', 'Thumb', 'Index', 'Middle', 'Ring', 'Pinky'], parent=WeakHandLocation)
-WeakHandZone = Parameter(name = 'Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ulnar', 'Tips', 'Knuckle',
-                                                    'Base', 'Heel', 'Web', 'Palm', 'Arm'], parent=WeakHandLocation)
-WeakHandLocation.addChildren([HandPart, WeakHandZone])
 
-BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of head'], default='Back of head', parent=WeakHandLocation, is_default=True)
-ForwardDistance = Parameter(name='Degrees of forward distance', children=['Unspecified', 'Proximal', 'Medial', 'Distal'], default='Unspecified', parent=WeakHandLocation)
+BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of forehead', 'Nose', 'Cheek', 'Ear', 'Mouth', 'Lip', 'Jaw', 'Chin', 'Neck', 'Shoulder', 'Sternum', 'Chest', 'Trunk', 'Upper arm', 'Forearm', 'Abdomen', 'Leg'], default='Trunk', parent=WeakHandLocation)
+ForwardDistance = Parameter(name='Degrees of forward distance', children=['Unspecified', 'Proximal', 'Medial', 'Distal', 'Extended'], default='Unspecified', parent=WeakHandLocation)
 SideToSide = Parameter(name='Side-to-side dimension', children=['No offset', 'In line with breast', 'In line with shoulder'], default='No offset', parent=WeakHandLocation)
-Height = Parameter(name='Height', children=['Top of head', 'Forehead', 'Nose', 'Mouth', 'Chin'], default='Chin', parent=WeakHandLocation)
+Height = Parameter(name='Height', children=['Top of head', 'Forehead', 'Nose', 'Mouth', 'Chin', 'Neck', 'Sternum', 'Chest', 'Trunk', 'Abdomen'], default='Trunk', parent=WeakHandLocation)
 Vector = Parameter(name='Vector', children=['L3', 'L2', 'L1', '0', 'R1', 'R2', 'R3'], default='0', parent=WeakHandLocation)
 SignSpaceLocation.addChildren([ForwardDistance, SideToSide, Height, Vector])
 
 HandPart = Parameter(name='Hand part location', children = ['Hand', 'Fingers', 'Thumb', 'Index', 'Middle', 'Pinky'], default='Hand', parent=WeakHandLocation)
-SigningSpaceZone = Parameter(name='Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ulnar'], default='Inside', parent=WeakHandLocation)
-NonDominantLocation.addChildren([HandPart, SigningSpaceZone])
+SigningSpaceZone = Parameter(name='Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ulnar', 'Tips', 'Knuckle', 'Base', 'Heel', 'Web', 'Palm', 'Arm'], default='Palm', parent=WeakHandLocation)
+SigningSpaceZone.sortChildren()
+WeakHandLocation.addChildren([HandPart, SigningSpaceZone])
 
-MajorLocation.addChildren([BodyLocation, SignSpaceLocation, NonDominantLocation])
+MajorLocation.addChildren([SignSpaceLocation, BodyLocation, WeakHandLocation])
 
 defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation]
 

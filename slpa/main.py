@@ -674,24 +674,33 @@ class MainWindow(QMainWindow):
         #super().closeEvent(QCloseEvent())
         self.close()
 
+    def copyCorpus(self, path):
+        newCorpus = Corpus({})
+        for word in self.corpus:
+            word.flags = Sign.sign_attributes['flags'].copy()
+            newCorpus.addWord(word)
+        newCorpus.path = path
+        save_binary(newCorpus, newCorpus.path)
+        self.corpus =  load_binary(newCorpus.path)
+
+
     def checkBackwardsComptibility(self):
+
         for attribute, default_value in Corpus.corpus_attributes.items():
             if not hasattr(self.corpus, attribute):
-                setattr(self.corpus, attribute, default_value)
+                setattr(self.corpus, attribute, Corpus.copyValue(Corpus, default_value))
 
         word = self.corpus.randomWord()
         for attribute, default_value in Sign.sign_attributes.items():
             if not hasattr(word, attribute):
                 break
-            # if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
-            #     break
         else:
             return
 
         for word in self.corpus:
             for attribute, default_value in Sign.sign_attributes.items():
                 if not hasattr(word, attribute):
-                    setattr(word, attribute, default_value)
+                    setattr(word, attribute, Sign.copyValue(Sign, default_value))
                 # if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
                 #     setattr(word, attribute, default_value)
 
@@ -699,10 +708,15 @@ class MainWindow(QMainWindow):
                 setattr(word, 'oneHandMovement', word.movement)
                 del word.movement
 
-        self.corpus.path = os.path.join(os.getcwd(), self.corpus.name)
+        #self.corpus.path = self.getOrCreateCorpusPath()
         save_binary(self.corpus, self.corpus.path)
         self.corpus = load_binary(self.corpus.path)
 
+    def getOrCreateCorpusPath(self):
+        if os.path.exists(self.corpus.path):
+            return self.corpus.path
+        else:
+            return os.path.join(os.getcwd(), self.corpus.name)
 
     def checkTranscription(self):
         dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs)
@@ -738,39 +752,35 @@ class MainWindow(QMainWindow):
 
     def launchBlender(self):
         blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
+        blenderPlayerPath = r'C:\Program Files\Blender Foundation\Blender\blenderplayer.exe'
         if not os.path.exists(blenderPath):
             blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
+            blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
         if not os.path.exists(blenderPath):
             blenderPath = '~/Applications/blender.app'
-        blenderFile = os.path.join(os.getcwd(), 'handForPCT.blend')
-        blenderScript = os.path.join(os.getcwd(), 'position_hand.py')
+        blenderFile = os.path.join(os.getcwd(), 'leftHand.blend')
+        blenderScript = os.path.join(os.getcwd(), 'applyHandCode.py')
 
         code = self.configTabs.widget(0).hand1Transcription.blenderCode()
-
-        if os.path.exists(os.path.join(os.getcwd(), 'handCode.txt')):
-            #check if the existing code matches the current transcription
-            #if so, just load the most recent image, don't render a second time
-            with open(os.path.join(os.getcwd(), 'handCode.txt'), encoding='utf-8') as file:
-                old_code = file.read()
-                old_code = old_code.strip()
-            # if old_code == code:
-            #     self.blenderDialog = BlenderOutputWindow('hand_output.png')
-            #     self.blenderDialog.show()
-            #     self.blenderDialog.raise_()
-            #     return
 
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
         proc = subprocess.Popen(
             [blenderPath,
-             '--background',
+            #'--background',
             "--python", blenderScript,
              blenderFile])
         proc.communicate()
-        self.blenderDialog = BlenderOutputWindow('hand_output.png',self.currentGloss())
-        self.blenderDialog.show()
-        self.blenderDialog.raise_()
+
+        proc = subprocess.Popen(
+            [blenderPlayerPath,
+             '-w',
+             os.path.join(os.getcwd(), 'testOut3.blend')])
+        proc.communicate()
+        # self.blenderDialog = BlenderOutputWindow('hand_output.png',self.currentGloss())
+        # self.blenderDialog.show()
+        # self.blenderDialog.raise_()
 
     def clearLayout(self, layout):
         while layout.count():
@@ -805,9 +815,11 @@ class MainWindow(QMainWindow):
         self.corpusList.clear()
         self.newGloss()
         self.corpus = load_binary(file_path)
-        self.checkBackwardsComptibility()
+        # self.copyCorpus(file_path)
+        # self.checkBackwardsComptibility()
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
+        self.corpus.path = file_path
         self.corpusList.sortItems()
         self.corpusList.setCurrentRow(0)
         self.corpusList.itemClicked.emit(self.corpusList.currentItem())
@@ -815,8 +827,23 @@ class MainWindow(QMainWindow):
         #self.showMaximized()
 
     @decorators.checkForGloss
+    def saveCorpusAs(self, event=None):
+        if self.corpus is None:
+            self.saveCorpus()
+        else:
+            savename = QFileDialog.getSaveFileName(self, 'Save Corpus File As', os.getcwd(), '*.corpus')
+            path = savename[0]
+            if not path:
+                return
+            if not path.endswith('.corpus'):
+                path = path + '.corpus'
+            self.corpus.path = path
+            self.corpus.name = os.path.split(path)[1].split('.')[0]
+            save_binary(self.corpus, path)
+
+    @decorators.checkForGloss
     #@decorators.checkForCorpus
-    def saveCorpus(self, event=None, checkForEmptyGloss=True, checkForDuplicates=True, isDuplicate = False):
+    def saveCorpus(self, event=None, checkForDuplicates=True, isDuplicate = False):
         kwargs = self.generateKwargs()
         if self.corpus is None:
             alert = QMessageBox()
@@ -845,8 +872,6 @@ class MainWindow(QMainWindow):
                     # corpus will be None if the user opened a file dialog, then changed their mind and cancelled
                     return
         # else: #corpus exists
-        kwargs['path'] = self.corpus.path
-        kwargs['file_mode'] = 'a'
         if not checkForDuplicates:
             isDuplicate = True
             #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
@@ -866,9 +891,8 @@ class MainWindow(QMainWindow):
             elif role == QMessageBox.RejectRole:#edit
                 return
         self.updateCorpus(kwargs, isDuplicate)
-        save_binary(self.corpus, kwargs['path'])
-        self.corpus = load_binary(kwargs['path'])
-        self.askSaveChanges = False
+        save_binary(self.corpus, self.corpus.path)
+        self.corpus = load_binary(self.corpus.path)
         if self.showSaveAlert:
             QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
         self.askSaveChanges = False
@@ -928,12 +952,13 @@ class MainWindow(QMainWindow):
 
     def generateKwargs(self):
         #This is called whenever the corpus is updated/saved
-        kwargs = {'path': None, 'file_mode': None,
+        kwargs = {'path': None,
                 'config1': None, 'config2': None,
                 'flags': None, 'parameters': None,
                 'corpusNotes': None, 'signNotes': None,
                 'forearmInvolved': False, 'partialObscurity': False,
                 'uncertainCoding': False, 'incompleteCoding': False}
+
 
         config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
@@ -963,6 +988,7 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.newCorpusAct)
         self.fileMenu.addAction(self.loadCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAct)
+        self.fileMenu.addAction(self.saveCorpusAsAct)
         self.fileMenu.addAction(self.newGlossAct)
         self.fileMenu.addAction(self.exportCorpusAct)
         self.fileMenu.addAction(self.quitAct)
@@ -1086,10 +1112,15 @@ class MainWindow(QMainWindow):
                 statusTip="Load a corpus",
                 triggered=self.loadCorpus)
 
-        self.saveCorpusAct = QAction( "&Save corpus...",
+        self.saveCorpusAct = QAction( "&Save corpus",
                 self,
                 statusTip="Save current corpus",
                 triggered=self.saveCorpus)
+
+        self.saveCorpusAsAct = QAction("Save corpus &as...",
+                                       self,
+                                       statusTip = "Save current corpus under a new name",
+                                       triggered=self.saveCorpusAs)
 
         self.newGlossAct = QAction('&New gloss',
                 self,
@@ -1190,9 +1221,11 @@ class MainWindow(QMainWindow):
             output = [word.export(**kwargs) for word in self.corpus]
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
-                    print(Sign.headers, file=f)
+                    #print(Sign.headers, file=f)
+                    f.write(Sign.headers)
                     for word in output:
-                        print(word, file=f)
+                        f.write(word)
+                        #print(word, file=f)
                 if self.showSaveAlert:
                     QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
             except PermissionError:

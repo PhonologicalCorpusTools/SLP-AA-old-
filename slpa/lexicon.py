@@ -24,8 +24,17 @@ class Corpus():
             try:
                 setattr(self, attr, kwargs[attr])
             except KeyError:
-                setattr(self, attr, default_value)
+                value = self.copyValue(default_value)
+                setattr(self, attr, value)
         self.basic_attributes = Corpus.basic_attributes[:]
+
+    def copyValue(self, value):
+        if isinstance(value, dict):
+            return value.copy()
+        elif isinstance(value, list):
+            return value[:]
+        else:
+            return value
 
     @property
     def notes(self):
@@ -94,10 +103,21 @@ class Sign():
             try:
                 setattr(self, attribute, kwargs[attribute])
             except KeyError:
-                setattr(self, attribute, default_value)
+                value = self.copyValue(default_value)
+                setattr(self, attribute, value)
 
         self.config1hand1, self.config1hand2 = self.config1
         self.config2hand1, self.config2hand2 = self.config2
+
+    def copyValue(self, value):
+        if isinstance(value, dict):
+            return value.copy()
+        elif isinstance(value, list):
+            return value[:]
+        elif isinstance(value, ParameterTreeModel):
+            return ParameterTreeModel(defaultParameters)
+        else:
+            return value
 
     def __eq__(self, other):
         if not isinstance(other, Sign):

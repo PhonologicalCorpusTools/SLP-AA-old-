@@ -1,4 +1,6 @@
 import pickle
+import sys
+import os
 
 def load_binary(path):
     with open(path, 'rb') as f:
@@ -8,3 +10,4 @@ def load_binary(path):
 def save_binary(obj, path):
     with open(path,'wb') as f:
         pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
+

@@ -255,8 +255,12 @@ class TranscriptionSlot(QLineEdit):
         self.field = field
         self.styleSheetString = ("QLineEdit{{background: {}; border: {};}} "
                                 "QLineEdit:hover{{background {};border: {}; }}")
-        self.background = 'white'
-        self.border = '1px solid gray'
+        self.defaultBackground = 'white'
+        self.defaultBorder = '1px solid grey'
+        self.flaggedBackground = 'pink'
+        self.flaggedBorder = '2px dashed black'
+        self.background = self.defaultBackground
+        self.border = self.defaultBorder
         self.regex = regex
         self.isUncertain = False
         self.isEstimate = False
@@ -269,7 +273,7 @@ class TranscriptionSlot(QLineEdit):
         else:
             self.setMaxLength(1)
 
-        # self.setFixedWidth(30)
+        self.setFixedWidth(30)
         self.setFocusPolicy(Qt.TabFocus)
         completer = TranscriptionCompleter(completer_options, self)
         completer.setMaxVisibleItems(8)
@@ -313,20 +317,20 @@ class TranscriptionSlot(QLineEdit):
     def updateFlags(self, flag):
         if flag.isUncertain:
             self.isUncertain = True
-            self.background = 'pink'
+            self.background = self.flaggedBackground
             self.changeUncertaintyAct.setChecked(True)
         else:
             self.isUncertain = False
-            self.background = 'white'
+            self.background = self.defaultBackground
             self.changeUncertaintyAct.setChecked(False)
 
         if flag.isEstimate:
             self.isEstimate = True
-            self.border = '2px dashed black'
+            self.border = self.flaggedBorder
             self.changeEstimateAct.setChecked(True)
         else:
             self.isEstimate = False
-            self.border = '1px solid grey'
+            self.border = self.defaultBorder
             self.changeEstimateAct.setChecked(False)
 
         style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
@@ -335,8 +339,8 @@ class TranscriptionSlot(QLineEdit):
     def removeFlags(self):
         self.isEstimate = False
         self.isUncertain = False
-        self.border = '1px solid grey'
-        self.background = 'white'
+        self.border = self.defaultBorder
+        self.background = self.defaultBackground
         self.changeEstimateAct.setChecked(False)
         self.changeUncertaintyAct.setChecked(False)
         style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
@@ -354,20 +358,20 @@ class TranscriptionSlot(QLineEdit):
 
     def changeEstimate(self, e=None):
         if self.changeEstimateAct.isChecked():
-            self.border = '2px dashed black'
+            self.border = self.flaggedBorder
             self.isEstimate = True
         else:
-            self.border = '1px solid grey'
+            self.border = self.defaultBorder
             self.isEstimate = False
         style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
 
     def changeUncertainty(self, e=None):
         if self.changeUncertaintyAct.isChecked():
-            self.background = 'pink'
+            self.background = self.flaggedBackground
             self.isUncertain = True
         else:
-            self.background = 'white'
+            self.background = self.defaultBackground
             self.isUncertain = False
         style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
