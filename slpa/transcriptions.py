@@ -134,7 +134,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #FIELD 3 (Thumb/Finger Contact)
         self.slot6 = TranscriptionSlot(6, 3, '[-tfbru\\?]', list('-tfbru?'))
-        self.slot7 = TranscriptionSlot(7, 3, '[-dpM\\?]', list('-dpM?'))
+        self.slot7 = TranscriptionSlot(7, 3, '[-dtpM\\?]', list('-dtpM?'))
         self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL])
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
         self.slot10 = TranscriptionSlot(10, 3, '[-tfbru\\?]', list('-tfbru?'))
