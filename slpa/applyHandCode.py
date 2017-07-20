@@ -134,10 +134,10 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
 #def makeHandShape(codepath='C:\\Users\\Scott\\Documents\\GitHub\\SLP-Annotator\\slpa', hand='R'):
 if __name__ == '__main__':
     argv = sys.argv
-    args = argv[argv.index("--") + 1:]
+    args = argv[argv.index(" -- ") + 1:]
     print(args)
-    codepath = 'C:\\Users\\Scott\\Documents\\GitHub\\SLP-Annotator\\slpa'
-    hand = 'R'
+    codepath = args[0]#'C:\\Users\\Scott\\Documents\\GitHub\\SLP-Annotator\\slpa'
+    hand = args[1]#'R'
     # Read handshape coding and parse into thumb/fingers
     with open(os.path.join(codepath, 'handCode.txt'), 'r') as inFile:
         code = inFile.read()
@@ -164,7 +164,6 @@ if __name__ == '__main__':
         if not bpy.context.active_pose_bone == None:
             #print("Bone selected: " + str(bpy.context.active_pose_bone.name))
             deactThisBone = bpy.context.active_pose_bone.name
-            print(bpy.data.objects.keys())
             deactThisBone = bpy.data.objects["Armature"].pose.bones[deactThisBone].bone
             deactThisBone.select = False
 

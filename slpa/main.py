@@ -769,6 +769,7 @@ class MainWindow(QMainWindow):
             blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
         if not os.path.exists(blenderPath):
             blenderPath = '~/Applications/blender.app'
+            blenderPlayerPath = '~/Applications/blenderplayer.app'
         blend = 'rightHand.blend' if dialog.hand == 'R' else 'leftHand.blend'
         blenderFile = os.path.join(os.getcwd(), blend)
         blenderScript = os.path.join(os.getcwd(), 'applyHandCode.py')
@@ -784,16 +785,15 @@ class MainWindow(QMainWindow):
 
         code = getattr(tab, attr).blenderCode()
 
-        #code = self.configTabs.widget(0).hand1Transcription.blenderCode()
-
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
         proc = subprocess.Popen(
             [blenderPath,
+             blenderFile,
             '--background',
             "--python", blenderScript,
-             blenderFile, ' -- ', os.getcwd()])
+             ' -- ', os.getcwd(), dialog.hand])
         proc.communicate()
 
         proc = subprocess.Popen(
