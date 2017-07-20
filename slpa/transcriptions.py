@@ -683,13 +683,19 @@ class TranscriptionPasteDialog(QDialog):
         self.selectedTranscription = None
         super().reject()
 
-class TranscriptionCopyDialog(QDialog):
+class TranscriptionSelectDialog(QDialog):
 
-    def __init__(self, transcriptions):
+    def __init__(self, transcriptions, mode='copy'):
         super().__init__()
-        self.setWindowTitle('Copy transcription')
+        if mode == 'copy':
+            self.setWindowTitle('Copy transcription')
+        elif mode == 'blender':
+            self.setWindowTitle('Handshape visualization')
         layout = QVBoxLayout()
-        layout.addWidget(QLabel('Which transcription do you want to copy?'))
+        if mode == 'copy':
+            layout.addWidget(QLabel('Which transcription do you want to copy?'))
+        elif mode == 'blender':
+            layout.addWidget(QLabel('Which transcription do you want to visualize?'))
         self.transcriptions = transcriptions
         radioLayout = QGridLayout()
         layout.addLayout(radioLayout)
@@ -730,8 +736,12 @@ class TranscriptionCopyDialog(QDialog):
 
     def accept(self):
         selectedButton = self.transcriptionRadioButtons.checkedButton()
-        id = self.transcriptionRadioButtons.id(selectedButton)
-        self.selectedTranscription = self.transcriptions[id]
+        self.id = self.transcriptionRadioButtons.id(selectedButton)
+        self.selectedTranscription = self.transcriptions[self.id]
+        if self.id in [0,2]:
+            self.hand = 'R'
+        else:
+            self.hand = 'L'
         super().accept()
 
     def reject(self):

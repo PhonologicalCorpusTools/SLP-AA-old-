@@ -536,7 +536,7 @@ class MainWindow(QMainWindow):
         transcriptions.append(self.configTabs.widget(0).hand2Transcription)
         transcriptions.append(self.configTabs.widget(1).hand1Transcription)
         transcriptions.append(self.configTabs.widget(1).hand2Transcription)
-        dialog = TranscriptionCopyDialog(transcriptions)
+        dialog = TranscriptionSelectDialog(transcriptions, mode='copy')
         result = dialog.exec_()
         if result:
             self.clipboard = dialog.selectedTranscription
@@ -751,6 +751,17 @@ class MainWindow(QMainWindow):
         return
 
     def launchBlender(self):
+
+        transcriptions = list()
+        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        dialog = TranscriptionSelectDialog(transcriptions, mode='blender')
+        dialog.exec_()
+        if not dialog.selectedTranscription:
+            return
+
         blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
         blenderPlayerPath = r'C:\Program Files\Blender Foundation\Blender\blenderplayer.exe'
         if not os.path.exists(blenderPath):
@@ -758,19 +769,31 @@ class MainWindow(QMainWindow):
             blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
         if not os.path.exists(blenderPath):
             blenderPath = '~/Applications/blender.app'
-        blenderFile = os.path.join(os.getcwd(), 'leftHand.blend')
+        blend = 'rightHand.blend' if dialog.hand == 'R' else 'leftHand.blend'
+        blenderFile = os.path.join(os.getcwd(), blend)
         blenderScript = os.path.join(os.getcwd(), 'applyHandCode.py')
 
-        code = self.configTabs.widget(0).hand1Transcription.blenderCode()
+        if dialog.id in [0,1]:
+            tab = self.configTabs.widget(0)
+        else:
+            tab = self.configTabs.widget(1)
+        if dialog.hand == 'R':
+            attr = 'hand1Transcription'
+        else:
+            attr = 'hand2Transcription'
+
+        code = getattr(tab, attr).blenderCode()
+
+        #code = self.configTabs.widget(0).hand1Transcription.blenderCode()
 
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
         proc = subprocess.Popen(
             [blenderPath,
-            #'--background',
+            '--background',
             "--python", blenderScript,
-             blenderFile])
+             blenderFile, ' -- ', os.getcwd()])
         proc.communicate()
 
         proc = subprocess.Popen(
