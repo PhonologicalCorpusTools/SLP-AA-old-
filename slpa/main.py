@@ -768,10 +768,10 @@ class MainWindow(QMainWindow):
             blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
             blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
         if not os.path.exists(blenderPath):
-            blenderPath = '~/Applications/blender.app'
-            blenderPath = os.path.expanduser(blenderPath)
-            blenderPlayerPath = '~/Applications/blenderplayer.app'
-            blenderPlayerPath = os.path.expanduser(blenderPlayerPath)
+            blenderPath = '/Applications/blender.app'
+            #blenderPath = os.path.expanduser(blenderPath)
+            blenderPlayerPath = '/Applications/blenderplayer.app'
+            #blenderPlayerPath = os.path.expanduser(blenderPlayerPath)
         blend = 'rightHand.blend' if dialog.hand == 'R' else 'leftHand.blend'
         blenderFile = os.path.join(os.getcwd(), blend)
         blenderScript = os.path.join(os.getcwd(), 'applyHandCode.py')
