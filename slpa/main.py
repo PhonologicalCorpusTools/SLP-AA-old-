@@ -444,6 +444,14 @@ class MainWindow(QMainWindow):
     def setGloss(self, text):
         self.gloss.glossEdit.setText(text)
 
+    def setBlenderPath(self):
+        dialog = BlenderPathDialog(self.blenderPath)
+        dialog.exec_()
+        if dialog.file_path is None:
+            self.blenderPath = None
+        else:
+            self.blenderPath = os.path.dirname(dialog.file_path)
+
     def deleteFromCorpus(self):
         hs = self.currentHandShape()
         gloss = hs.gloss
@@ -633,6 +641,7 @@ class MainWindow(QMainWindow):
         self.settings.setValue('parametersAlwaysOnTop', self.keepParametersOnTopAct.isChecked())
         self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
         self.settings.setValue('autoSave', self.autoSaveAct.isChecked())
+        self.settings.setValue('blenderPath', self.blenderPath)
         self.settings.endGroup()
 
     def readSettings(self, reset=False):
@@ -662,6 +671,7 @@ class MainWindow(QMainWindow):
         self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
         self.autoSave = self.settings.value('autosave', type=bool)
         self.autoSaveAct.setChecked(self.autoSave)
+        self.blenderPath = self.settings.value('blenderPath')
         self.settings.endGroup()
 
     @decorators.checkForUnsavedChanges
@@ -762,16 +772,43 @@ class MainWindow(QMainWindow):
         if not dialog.selectedTranscription:
             return
 
-        blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
-        blenderPlayerPath = r'C:\Program Files\Blender Foundation\Blender\blenderplayer.exe'
-        if not os.path.exists(blenderPath):
-            blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
-            blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
-        if not os.path.exists(blenderPath):
-            blenderPath = '/Applications/blender.app'
-            #blenderPath = os.path.expanduser(blenderPath)
-            blenderPlayerPath = '/Applications/blenderplayer.app'
-            #blenderPlayerPath = os.path.expanduser(blenderPlayerPath)
+        if self.blenderPath is not None:
+            blenderPath = os.path.join(self.blenderPath, 'blender.exe')
+            blenderPlayerPath = os.path.join(self.blenderPath, 'blenderplayer.exe')
+            if os.path.exists(blenderPath):
+                foundPath = True
+            else:
+                foundPath = False
+        else:
+            foundPath = False
+            if os.path.exists(r'C:\Program Files\Blender Foundation\Blender\blender.exe'):
+                blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
+                blenderPlayerPath = r'C:\Program Files\Blender Foundation\Blender\blenderplayer.exe'
+                foundPath = True
+            elif os.path.exists(r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'):
+                blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
+                blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
+                foundPath = True
+            elif os.path.exists('/Applications/blender.app'):
+                blenderPath = '/Applications/blender.app'
+                blenderPlayerPath = '/Applications/blenderplayer.app'
+                foundPath = True
+            elif os.path.exists(os.path.expanduser('/Applications/blender.app')):
+                blenderPath = os.path.expanduser('/Applications/blender.app')
+                blenderPlayerPath = os.path.expanduser('/Applications/blenderplayer.app')
+                foundPath = True
+
+        if not foundPath:
+            alert = QMessageBox()
+            alert.setWindowTitle('Error')
+            alert.setText('Unfortunately, SLPA could not detect an installation of Blender on your computer. Blender '
+                          'is 3rd party software that SLPA uses to generate 3D models of hand shapes. You can '
+                          'download Blender for free at www.blender.org/download \n'
+                          'If you already have Blender installed, go to the Transcriptions menu, and click on '
+                          '"Set path to Blender" to tell SLPA exactly where you have installed it.')
+            alert.exec_()
+            return
+
         blend = 'rightHand.blend' if dialog.hand == 'R' else 'leftHand.blend'
         blenderFile = os.path.join(os.getcwd(), blend)
         blenderScript = os.path.join(os.getcwd(), 'applyHandCode.py')
@@ -1030,6 +1067,7 @@ class MainWindow(QMainWindow):
         self.transcriptionMenu = self.menuBar().addMenu('&Transcriptions')
         self.transcriptionMenu.addAction(self.setRestrictionsAct)
         self.transcriptionMenu.addAction(self.changeTranscriptionFlagsAct)
+        self.transcriptionMenu.addAction(self.setBlenderPathAct)
 
         self.notesMenu = self.menuBar().addMenu('&Notes')
         self.notesMenu.addAction(self.addCorpusNotesAct)
@@ -1087,7 +1125,12 @@ class MainWindow(QMainWindow):
 
     def createActions(self):
 
-        self.changeTranscriptionFlagsAct = QAction('Set transcription &flags',
+        self.setBlenderPathAct = QAction('Set path to Blender...',
+                                         self,
+                                         statusTip = 'Set path to Blender',
+                                         triggered = self.setBlenderPath)
+
+        self.changeTranscriptionFlagsAct = QAction('Set transcription &flags...',
                                                  self,
                                                  statusTip = 'Change multiple flags at once',
                                                  triggered = self.changeTranscriptionFlags)
@@ -1379,6 +1422,63 @@ class ExportCorpusDialog(QDialog):
             alert.setWindowTitle('File name error')
             alert.setText(text)
             alert.exec_()
+
+class BlenderPathDialog(QDialog):
+
+    def __init__(self, current_path=None):
+        super().__init__()
+        self.setWindowTitle('Set path to Blender')
+        label = QLabel('Path to Blender executable: ')
+        self.pathEdit = QLineEdit()
+        if current_path is not None:
+            self.pathEdit.setText(os.path.join(current_path, 'blender.exe'))
+            self.file_path = current_path
+        else:
+            self.file_path = None
+        explore = QPushButton('Find')
+        explore.clicked.connect(self.findPath)
+        explanation = QLabel('Blender is 3rd party software that the Sign Language Phonetic Annotator uses to generate '
+                             '3D models of hand shapes. You can download Blender for free from '
+                             'https://www.blender.org/download/. '
+                             '\n\nYou must download and install Blender in order for '
+                             'the "Visualize Handshape" button to work. This is completely optional, however, and '
+                             'it is not required for the general use of SLPA.\n\n'
+                             'If you have already installed Blender, click the "Find" button above to locate it on '
+                             'your computer. Look for a file called "blender.exe" (Windows) or "blender.app" (Mac). '
+                             'It is typically located in C:\\Program Files\\Blender Foundation\\Blender on Windows, or '
+                             'in /Applications/Blender on Mac.')
+        explanation.setWordWrap(True)
+        font = QFont(FONT_NAME, FONT_SIZE)
+        explanation.setFont(font)
+        topLayout = QHBoxLayout()
+        topLayout.addWidget(label)
+        topLayout.addWidget(self.pathEdit)
+        topLayout.addWidget(explore)
+        midLayout = QHBoxLayout()
+        ok = QPushButton('OK')
+        cancel = QPushButton('Cancel')
+        ok.clicked.connect(self.accept)
+        cancel.clicked.connect(self.reject)
+        midLayout.addWidget(ok)
+        midLayout.addWidget(cancel)
+
+        mainLayout = QVBoxLayout()
+        mainLayout.addLayout(topLayout)
+        mainLayout.addLayout(midLayout)
+        mainLayout.addWidget(explanation)
+        self.setLayout(mainLayout)
+
+    def findPath(self):
+        file_path = QFileDialog.getOpenFileName(self,
+                                                'Find Blender', os.getcwd(), 'blender.exe')
+        file_path = file_path[0]
+        if not file_path:
+            self.file_path = None
+            self.pathEdit.setText('')
+        else:
+            path = os.path.abspath(file_path)
+            self.file_path = path
+            self.pathEdit.setText(path)
 
 def clean(item):
     """Clean up the memory by closing and deleting the item if possible."""

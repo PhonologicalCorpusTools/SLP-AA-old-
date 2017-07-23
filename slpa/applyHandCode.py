@@ -135,7 +135,6 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
 if __name__ == '__main__':
     argv = sys.argv
     args = argv[argv.index(" -- ") + 1:]
-    print(args)
     codepath = args[0]#'C:\\Users\\Scott\\Documents\\GitHub\\SLP-Annotator\\slpa'
     hand = args[1]#'R'
     # Read handshape coding and parse into thumb/fingers

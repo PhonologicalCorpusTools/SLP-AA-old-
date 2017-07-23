@@ -652,13 +652,13 @@ class TranscriptionPasteDialog(QDialog):
         self.transcriptionRadioButtons.addButton(hand2config2)
         self.transcriptionRadioButtons.setId(hand2config2, 3)
 
-        radioLayout.addWidget(QLabel('Hand 1, Config 1'), 0, 0)
+        radioLayout.addWidget(QLabel('Config 1, Hand 1'), 0, 0)
         radioLayout.addWidget(hand1config1, 0, 1)
-        radioLayout.addWidget(QLabel('Hand 1, Config 2'), 1, 0)
+        radioLayout.addWidget(QLabel('Config 1, Hand 2'), 1, 0)
         radioLayout.addWidget(hand1config2, 1, 1)
-        radioLayout.addWidget(QLabel('Hand 2, Config 1'), 2, 0)
+        radioLayout.addWidget(QLabel('Config 2, Hand 1'), 2, 0)
         radioLayout.addWidget(hand2config1, 2, 1)
-        radioLayout.addWidget(QLabel('Hand 2, Config 2'), 3, 0)
+        radioLayout.addWidget(QLabel('Config 2, Hand 2'), 3, 0)
         radioLayout.addWidget(hand2config2, 3, 1)
 
         buttonLayout = QHBoxLayout()
