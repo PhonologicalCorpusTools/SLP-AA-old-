@@ -476,7 +476,7 @@ class MainWindow(QMainWindow):
         globalOptionsLabel = QLabel('Global handshape options:')
         globalOptionsLabel.setFont(QFont(FONT_NAME, FONT_SIZE))
         self.globalOptionsLayout.addWidget(globalOptionsLabel)
-        self.forearmCheckBox = QCheckBox('Forearm is involved')
+        self.forearmCheckBox = QCheckBox('Forearm is involved (slot 1/field 1)')
         self.forearmCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
         self.globalOptionsLayout.addWidget(self.forearmCheckBox)
         self.forearmCheckBox.clicked.connect(self.userMadeChanges)
@@ -505,11 +505,11 @@ class MainWindow(QMainWindow):
         else:
             self.parameterDialog.close()
             self.parameterDialog.deleteLater()
-            if self.currentHandShape() is not None:
+            try:
                 model = self.currentHandShape().parameters
                 self.parameterDialog = ParameterDialog(model, checkStrategy='load')
-                #self.parameterDialog.treeWidget.loadChecks()
-            else:
+                self.parameterDialog.treeWidget.loadChecks()
+            except:
                 model = ParameterTreeModel(parameters.defaultParameters)
                 self.parameterDialog = ParameterDialog(model)
                 self.parameterDialog.treeWidget.resetChecks()
@@ -1043,6 +1043,9 @@ class MainWindow(QMainWindow):
         kwargs['partialObscurity'] = self.partialObscurityCheckBox.isChecked()
         kwargs['incompleteCoding'] = self.incompleteCodingCheckBox.isChecked()
         kwargs['uncertainCoding'] = self.uncertainCodingCheckBox.isChecked()
+        # print('in kwargs for sign {}'.format(kwargs['gloss']))
+        # print(kwargs['parameters'])
+
         return kwargs
 
     def createMenus(self):
@@ -1221,7 +1224,6 @@ class MainWindow(QMainWindow):
                                         self,
                                        statusTip = 'Open a notepad for information about the current sign',
                                        triggered = self.addSignNotes)
-
 
     def initCorpusNotes(self):
         self.corpusNotes = NotesDialog()

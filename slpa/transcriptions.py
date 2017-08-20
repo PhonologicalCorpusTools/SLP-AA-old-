@@ -37,7 +37,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.field1 = TranscriptionField(number=1)
         self.field1.addSlot(self.slot1)
         self.field1.addViolationLabel(self.violation1)
-        self.lineLayout.addLayout(self.field1)
+        #self.lineLayout.addLayout(self.field1)
         self.fields.append(self.field1)
 
         #FIELD 2 (Thumb)

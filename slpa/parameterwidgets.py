@@ -234,7 +234,6 @@ class ParameterDialog(QDialog):
         self.parameterLayout.addWidget(self.treeWidget)
 
     def getSignParameters(self):
-        print('in getSignParameters')
         r = anytree.Resolver('name')
         quality = r.get(self.treeWidget.model.tree, 'Quality')
         for child in quality.children:
@@ -360,6 +359,9 @@ class ParameterTreeModel:
                     export.append("{}:{}".format(node.parent.name, node.name))
         export = ','.join(export)
         return export
+
+    def __str__(self):
+        return self.exportTree()
 
     def printTree(self, nodeName='Quality'):
         treeText = list()
