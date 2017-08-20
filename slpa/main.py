@@ -498,22 +498,19 @@ class MainWindow(QMainWindow):
                                      self.incompleteCodingCheckBox]
 
     def setupParameterDialog(self, model):
-        if self.parameterDialog is None:
+        try:
+            model = self.corpus[self.currentGloss()].parameters
+        except:
             model = ParameterTreeModel(parameters.defaultParameters)
+
+        if self.parameterDialog is None:
             self.parameterDialog = ParameterDialog(model)
             self.parameterDialog.treeWidget.resetChecks()
         else:
             self.parameterDialog.close()
             self.parameterDialog.deleteLater()
-            try:
-                model = self.currentHandShape().parameters
-                self.parameterDialog = ParameterDialog(model, checkStrategy='load')
-                self.parameterDialog.treeWidget.loadChecks()
-            except:
-                model = ParameterTreeModel(parameters.defaultParameters)
-                self.parameterDialog = ParameterDialog(model)
-                self.parameterDialog.treeWidget.resetChecks()
-
+            self.parameterDialog = ParameterDialog(model, checkStrategy='load')
+            self.parameterDialog.treeWidget.loadChecks()
 
     def currentHandShape(self):
         kwargs = self.generateKwargs()
@@ -877,8 +874,6 @@ class MainWindow(QMainWindow):
         self.corpusList.clear()
         self.newGloss()
         self.corpus = load_binary(file_path)
-        # self.copyCorpus(file_path)
-        # self.checkBackwardsComptibility()
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
         self.corpus.path = file_path
@@ -1043,9 +1038,6 @@ class MainWindow(QMainWindow):
         kwargs['partialObscurity'] = self.partialObscurityCheckBox.isChecked()
         kwargs['incompleteCoding'] = self.incompleteCodingCheckBox.isChecked()
         kwargs['uncertainCoding'] = self.uncertainCodingCheckBox.isChecked()
-        # print('in kwargs for sign {}'.format(kwargs['gloss']))
-        # print(kwargs['parameters'])
-
         return kwargs
 
     def createMenus(self):
