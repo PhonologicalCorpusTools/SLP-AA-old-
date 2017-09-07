@@ -205,6 +205,9 @@ class TranscriptionLayout(QVBoxLayout):
         data.extend([slot.text() if slot.text() else '' for slot in self.slots[1:]])
         return data
 
+    def slotValues(self):
+        return self.slots
+
     def flags(self):
         flags = [Flag(slot.isUncertain, slot.isEstimate) for slot in self.slots]
         return flags
@@ -451,6 +454,9 @@ class TranscriptionCheckBox(QCheckBox):
         self.isEstimate = False
         self.isUncertain = False
 
+    def text(self):
+        return 'V' if self.isChecked() else ''
+
 
 class TranscriptionField(QGridLayout):
 
@@ -683,19 +689,121 @@ class TranscriptionPasteDialog(QDialog):
         self.selectedTranscription = None
         super().reject()
 
+class TranscriptionConfigTab(QWidget):
+
+    def __init__(self, hand_number):
+        QWidget.__init__(self)
+
+        self.configLayout = QGridLayout()
+
+        self.hand1Transcription = TranscriptionLayout(hand=1)
+        self.configLayout.addLayout(self.hand1Transcription, 0, 0)
+        self.hand2Transcription = TranscriptionLayout(hand=2)
+        self.configLayout.addLayout(self.hand2Transcription, 1, 0)
+        self.setLayout(self.configLayout)
+
+    def clearAll(self, clearFlags=False):
+        self.hand1Transcription.clearTranscriptionSlots()
+        self.hand1Transcription.clearViolationLabels()
+        self.hand1Transcription.fillPredeterminedSlots()
+
+        self.hand2Transcription.clearTranscriptionSlots()
+        self.hand2Transcription.clearViolationLabels()
+        self.hand2Transcription.fillPredeterminedSlots()
+
+        if clearFlags:
+            for n in range(2,35):
+                slot = 'slot{}'.format(n)
+                getattr(self.hand1Transcription, slot).removeFlags()
+                getattr(self.hand2Transcription, slot).removeFlags()
+
+    def hand1(self):
+        return self.hand1Transcription.values()
+
+    def hand2(self):
+        return self.hand2Transcription.values()
+
+    def hands(self):
+        return [self.hand1(), self.hand2()]
+
+class TranscriptionSearchDialog(QDialog):
+
+    def __init__(self, corpus):
+        super().__init__()
+
+        self.corpus = corpus
+        self.transcriptions = None
+        self.setWindowTitle('Search')
+
+
+        layout = QVBoxLayout()
+
+        self.topLayout = QHBoxLayout()
+        explanation = QLabel()
+        text = ('Enter the transcription you want to match in your corpus.')
+        explanation.setText(text)
+        explanation.setFont(QFont('Arial', 16))
+        self.topLayout.addWidget(explanation)
+        layout.addLayout(self.topLayout)
+
+        self.configTabs = QTabWidget()
+        self.configTabs.addTab(TranscriptionConfigTab(1), 'Config 1')
+        self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
+        layout.addWidget(self.configTabs)
+
+        buttonLayout = QVBoxLayout()
+        ok = QPushButton('Search')
+        ok.clicked.connect(self.search)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+    def search(self):
+        self.transcriptions = self.getTranscriptions()
+        super().accept()
+
+    def getTranscriptions(self):
+        transcriptions = list()
+        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        return transcriptions
+
+class TranscriptionSearchResultDialog(QDialog):
+
+    def __init__(self, results):
+        super().__init__()
+        self.setWindowTitle('Search Results')
+        layout = QHBoxLayout()
+
+        resultsList = QListWidget()
+        for r in results:
+            resultsList.addItem(r.gloss)
+
+        layout.addWidget(resultsList)
+
+        self.setLayout(layout)
+
 class TranscriptionSelectDialog(QDialog):
 
     def __init__(self, transcriptions, mode='copy'):
         super().__init__()
+
         if mode == 'copy':
             self.setWindowTitle('Copy transcription')
         elif mode == 'blender':
             self.setWindowTitle('Handshape visualization')
         layout = QVBoxLayout()
+
         if mode == 'copy':
             layout.addWidget(QLabel('Which transcription do you want to copy?'))
         elif mode == 'blender':
             layout.addWidget(QLabel('Which transcription do you want to visualize?'))
+
         self.transcriptions = transcriptions
         radioLayout = QGridLayout()
         layout.addLayout(radioLayout)
