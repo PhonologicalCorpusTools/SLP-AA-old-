@@ -1101,6 +1101,8 @@ class MainWindow(QMainWindow):
             matches = self.corpus.search(dialog.transcriptions)
             resultsDialog = TranscriptionSearchResultDialog(matches)
             resultsDialog.exec_()
+            if resultsDialog.result is not None:
+                self.loadHandShape(resultsDialog.result)
         return
 
     def createActions(self):

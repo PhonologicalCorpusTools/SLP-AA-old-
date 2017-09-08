@@ -40,7 +40,6 @@ class Corpus():
         query = [ [query[0], query[1]], [query[2], query[3]]  ]
         match_list = list()
         for word in self:
-            print(word.gloss)
             matches = [ [False, False], [False, False] ]
             for config_num in [1, 2]:
                 for hand_num in [1, 2]:
@@ -54,6 +53,8 @@ class Corpus():
                 match_list.append(word)
         return match_list
 
+    def getWord(self, text):
+        return self[text]
 
     @property
     def notes(self):

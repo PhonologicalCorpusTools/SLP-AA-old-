@@ -778,15 +778,38 @@ class TranscriptionSearchResultDialog(QDialog):
     def __init__(self, results):
         super().__init__()
         self.setWindowTitle('Search Results')
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
+        self.result = None
 
-        resultsList = QListWidget()
+        resultsLayout = QHBoxLayout()
+
+        self.resultsList = QListWidget()
         for r in results:
-            resultsList.addItem(r.gloss)
+            self.resultsList.addItem(r.gloss)
 
-        layout.addWidget(resultsList)
+        resultsLayout.addWidget(self.resultsList)
+        layout.addLayout(resultsLayout)
+
+        buttonLayout = QHBoxLayout()
+        okButton = QPushButton('Go to this entry')
+        cancelButton = QPushButton('Cancel')
+        okButton.clicked.connect(self.accept)
+        cancelButton.clicked.connect(self.reject)
+        buttonLayout.addWidget(okButton)
+        buttonLayout.addWidget(cancelButton)
+
+        layout.addLayout(buttonLayout)
 
         self.setLayout(layout)
+
+    def accept(self):
+        item = self.resultsList.currentItem()
+        self.result = item
+        super().accept()
+
+    def reject(self):
+        self.result = None
+        super().reject()
 
 class TranscriptionSelectDialog(QDialog):
 
