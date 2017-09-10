@@ -1,0 +1,27 @@
+.. _setting_preferences:
+
+***************
+Setting Preferences
+***************
+
+Transcription preferences can be changed using the menu bar at the top of the screen.
+
+.. _constraints:
+
+Constraints
+------------------
+
+When you click on Constraints > Select anatomical/phonological constraints, a new window
+appears. You can switch pages between Transcription Constraints, Simple Constraints, and 
+Conditional Constraints using the pull-down menu. Check individual constraints you would 
+like to apply to your corpus, or use the Select all/Unselect all buttons. Click OK. You
+can also adjust these constraints anytime during your transcription. 
+
+
+.. image:: static/select_constraints.png
+   :width: 90%
+   :align: center
+
+
+Note that the constraints will NOT be automatically applied. You will need to click on 
+the "Check transcription" button before saving a word.
