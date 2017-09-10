@@ -25,7 +25,7 @@ like to apply to your corpus, or use the Select all/Unselect all buttons. Click 
 
 Note that the constraints will NOT be automatically applied. To look for violations of 
 the selected constraints before saving each word, click on the "Check transcription" 
-button  (see :ref: `checking_transcriptions`).
+button  (see :ref:`checking_transcriptions`).
 
 
 .. _options:
