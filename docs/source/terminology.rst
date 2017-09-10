@@ -32,10 +32,12 @@ handshape option (see :ref:`global_handshape_options`) for forearm involvement.
 Each of the rest is devoted to the thumb, thumb-finger contact, and the four fingers. 
 Slots are square boxes inside a field.
 
+
+
 .. _parameters:
 
 Parameters
 ------------------
 
-"Parameters," as used in "View parameters" (see :ref: '') and Options > "Keep parameters
-window on top" (see :ref: ''), refers to parameters other than handshapes.
+"Parameters," as in "View parameters" (see :ref:``) and Options > "Keep parameters
+window on top" (see :ref:`options`), refers to parameters other than handshapes.
