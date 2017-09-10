@@ -9,8 +9,8 @@ Terminology
 Global handshape options
 ------------------
 
-Global handshape options encode information about the whole sign rather than 
-individual handshapes. They should be checked when relevant.
+Global handshape options encode information about the whole sign. 
+They should be checked when relevant.
 
 .. _hand_and_config:
 
@@ -26,7 +26,16 @@ Depending on the signs, you do not necessarily have to fill all four of them.
 
 Field and slot
 ------------------
+
 Field refers to the square brackets numbered from 1 to 7. Field 1 is a global 
 handshape option (see :ref:`global_handshape_options`) for forearm involvement. 
 Each of the rest is devoted to the thumb, thumb-finger contact, and the four fingers. 
 Slots are square boxes inside a field.
+
+.. _parameters:
+
+Parameters
+------------------
+
+"Parameters," as used in "View parameters" (see :ref: '') and Options > "Keep parameters
+window on top" (see :ref: ''), refers to parameters other than handshapes.
