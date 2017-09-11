@@ -41,6 +41,8 @@ and permitted characters are H (hyperextended), E (extended), i (intermediate), 
 
 
 .. image:: static/field_slot.png
+   :width: 90%
+   :align: center
    
 
 
