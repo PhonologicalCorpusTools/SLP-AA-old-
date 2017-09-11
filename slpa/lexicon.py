@@ -36,6 +36,26 @@ class Corpus():
         else:
             return value
 
+    def search(self, query):
+        query = [ [query[0], query[1]], [query[2], query[3]]  ]
+        match_list = list()
+        for word in self:
+            matches = [ [False, False], [False, False] ]
+            for config_num in [1, 2]:
+                for hand_num in [1, 2]:
+                    slot_list = getattr(word, 'config{}hand{}'.format(config_num, hand_num))
+                    compare_list = query[config_num-1][hand_num-1]
+                    compare_list = [slot.text() for slot in compare_list.slots]
+                    if slot_list == compare_list:
+                       matches[config_num-1][hand_num-1] = True
+            matches = [item for sublist in matches for item in sublist]
+            if all(matches):
+                match_list.append(word)
+        return match_list
+
+    def getWord(self, text):
+        return self[text]
+
     @property
     def notes(self):
         return self.corpusNotes
@@ -137,6 +157,9 @@ class Sign():
     @property
     def notes(self):
         return self.signNotes
+
+    def getSlot(self, n):
+        return getattr(self, 'slot'+str(n))
 
     def data(self):
         return OrderedDict([(key, getattr(self, key)) for key in Sign.sorted_attributes])

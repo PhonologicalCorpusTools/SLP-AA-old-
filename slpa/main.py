@@ -111,43 +111,6 @@ class HandConfigurationNames(QVBoxLayout):
         self.addWidget(QLabel('6. Ring'))
         self.addWidget(QLabel('7. Pinky'))
 
-class HandConfigTab(QWidget):
-
-    def __init__(self, hand_number):
-        QWidget.__init__(self)
-
-        self.configLayout = QGridLayout()
-
-        self.hand1Transcription = TranscriptionLayout(hand=1)
-        self.configLayout.addLayout(self.hand1Transcription, 0, 0)
-        self.hand2Transcription = TranscriptionLayout(hand=2)
-        self.configLayout.addLayout(self.hand2Transcription, 1, 0)
-        self.setLayout(self.configLayout)
-
-    def clearAll(self, clearFlags=False):
-        self.hand1Transcription.clearTranscriptionSlots()
-        self.hand1Transcription.clearViolationLabels()
-        self.hand1Transcription.fillPredeterminedSlots()
-
-        self.hand2Transcription.clearTranscriptionSlots()
-        self.hand2Transcription.clearViolationLabels()
-        self.hand2Transcription.fillPredeterminedSlots()
-
-        if clearFlags:
-            for n in range(2,35):
-                slot = 'slot{}'.format(n)
-                getattr(self.hand1Transcription, slot).removeFlags()
-                getattr(self.hand2Transcription, slot).removeFlags()
-
-    def hand1(self):
-        return self.hand1Transcription.values()
-
-    def hand2(self):
-        return self.hand2Transcription.values()
-
-    def hands(self):
-        return [self.hand1(), self.hand2()]
-
 
 class VideoPlayer(QWidget):
 
@@ -389,8 +352,8 @@ class MainWindow(QMainWindow):
 
         #Make tabs for each configuration
         self.configTabs = QTabWidget()
-        self.configTabs.addTab(HandConfigTab(1), 'Config 1')
-        self.configTabs.addTab(HandConfigTab(2), 'Config 2')
+        self.configTabs.addTab(TranscriptionConfigTab(1), 'Config 1')
+        self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
 
         #Add "global" handshape options (as checkboxes)
@@ -426,6 +389,8 @@ class MainWindow(QMainWindow):
                 slot.textChanged.connect(self.userMadeChanges)
                 slot.slotFlagged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
+
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
 
         self.globalLayout.addLayout(layout)
 
@@ -500,6 +465,10 @@ class MainWindow(QMainWindow):
     def setupParameterDialog(self, model):
         try:
             model = self.corpus[self.currentGloss()].parameters
+            if isinstance(model, anytree.node.Node):
+                raise TypeError
+                #temporary backcompat fix for ASL-Lex corpus
+                #for some reason, parameters in this corpus are anytree.Node objects, instead of ParameterTreeModels
         except:
             model = ParameterTreeModel(parameters.defaultParameters)
 
@@ -536,11 +505,7 @@ class MainWindow(QMainWindow):
             super().keyPressEvent(e)
 
     def copyTranscription(self):
-        transcriptions = list()
-        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        transcriptions = self.getTranscriptions()
         dialog = TranscriptionSelectDialog(transcriptions, mode='copy')
         result = dialog.exec_()
         if result:
@@ -758,12 +723,7 @@ class MainWindow(QMainWindow):
         return
 
     def launchBlender(self):
-
-        transcriptions = list()
-        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        transcriptions = self.getTranscriptions()
         dialog = TranscriptionSelectDialog(transcriptions, mode='blender')
         dialog.exec_()
         if not dialog.selectedTranscription:
@@ -798,11 +758,11 @@ class MainWindow(QMainWindow):
         if not foundPath:
             alert = QMessageBox()
             alert.setWindowTitle('Error')
-            alert.setText('Unfortunately, SLPA could not detect an installation of Blender on your computer. Blender '
-                          'is 3rd party software that SLPA uses to generate 3D models of hand shapes. You can '
+            alert.setText('Unfortunately, SLPAnnotator could not detect an installation of Blender on your computer. Blender '
+                          'is 3rd party software that SLPAnnotator uses to generate 3D models of hand shapes. You can '
                           'download Blender for free at www.blender.org/download \n'
                           'If you already have Blender installed, go to the Transcriptions menu, and click on '
-                          '"Set path to Blender" to tell SLPA exactly where you have installed it.')
+                          '"Set path to Blender" to tell SLPAnnotator exactly where you have installed it.')
             alert.exec_()
             return
 
@@ -881,7 +841,7 @@ class MainWindow(QMainWindow):
         self.corpusList.setCurrentRow(0)
         self.corpusList.itemClicked.emit(self.corpusList.currentItem())
         self.corpusNotes.setText(self.corpus.notes)
-        #self.showMaximized()
+        self.showMaximized()
 
     @decorators.checkForGloss
     def saveCorpusAs(self, event=None):
@@ -897,6 +857,7 @@ class MainWindow(QMainWindow):
             self.corpus.path = path
             self.corpus.name = os.path.split(path)[1].split('.')[0]
             save_binary(self.corpus, path)
+            self.corpus = load_binary(path)
 
     @decorators.checkForGloss
     #@decorators.checkForCorpus
@@ -1006,6 +967,7 @@ class MainWindow(QMainWindow):
         self.incompleteCodingCheckBox.setChecked(sign['incompleteCoding'])
         self.uncertainCodingCheckBox.setChecked(sign['uncertainCoding'])
         self.askSaveChanges = False
+        self.showMaximized()
 
     def generateKwargs(self):
         #This is called whenever the corpus is updated/saved
@@ -1015,7 +977,6 @@ class MainWindow(QMainWindow):
                 'corpusNotes': None, 'signNotes': None,
                 'forearmInvolved': False, 'partialObscurity': False,
                 'uncertainCoding': False, 'incompleteCoding': False}
-
 
         config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
@@ -1068,6 +1029,9 @@ class MainWindow(QMainWindow):
         self.notesMenu.addAction(self.addCorpusNotesAct)
         self.notesMenu.addAction(self.addSignNotesAct)
 
+        self.searchMenu = self.menuBar().addMenu('&Search')
+        self.searchMenu.addAction(self.searchCorpusAct)
+
         if not hasattr(sys, 'frozen'):
             self.debugMenu = self.menuBar().addMenu('&Debug')
             self.debugMenu.addAction(self.resetSettingsAct)
@@ -1117,8 +1081,38 @@ class MainWindow(QMainWindow):
         #for row in dialog.flags:
             #iterate through the flags and set the appropriate background/border for each transcription slot
 
+    def getTranscriptions(self):
+        transcriptions = list()
+        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        return transcriptions
+
+    def searchCorpus(self):
+        if not self.corpus:
+            alert = QMessageBox()
+            alert.setWindowTitle('No corpus')
+            alert.setText('You have not yet loaded a corpus, so no search can be performed.')
+            alert.exec_()
+            return
+
+        dialog = TranscriptionSearchDialog(self.corpus)
+        dialog.exec_()
+        if dialog.transcriptions is not None:
+            matches = self.corpus.search(dialog.transcriptions)
+            resultsDialog = TranscriptionSearchResultDialog(matches)
+            resultsDialog.exec_()
+            if resultsDialog.result is not None:
+                self.loadHandShape(resultsDialog.result)
+        return
 
     def createActions(self):
+
+        self.searchCorpusAct = QAction('Search the current corpus...',
+                                       self,
+                                       statusTip = 'Search the current corpus',
+                                       triggered = self.searchCorpus)
 
         self.setBlenderPathAct = QAction('Set path to Blender...',
                                          self,
@@ -1323,6 +1317,7 @@ class MainWindow(QMainWindow):
         self.configTabs.widget(0).clearAll(clearFlags=clearFlags)
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
         self.configTabs.setCurrentIndex(0)
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
 
         self.parameterDialog.accept()
         self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))

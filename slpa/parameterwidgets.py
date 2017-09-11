@@ -340,7 +340,7 @@ class ParameterTreeWidgetItem(QTreeWidgetItem):
 
 class ParameterTreeModel:
 
-    def __init__(self, parameterList):
+    def __init__(self, parameterList, startNode = None):
         self.tree = anytree.Node('Parameters', parent=None)
         self.parameterList = parameterList
         for p in parameterList:

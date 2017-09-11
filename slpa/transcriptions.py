@@ -134,7 +134,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #FIELD 3 (Thumb/Finger Contact)
         self.slot6 = TranscriptionSlot(6, 3, '[-tfbru\\?]', list('-tfbru?'))
-        self.slot7 = TranscriptionSlot(7, 3, '[-dtpM\\?]', list('-dtpM?'))
+        self.slot7 = TranscriptionSlot(7, 3, '[-dpM\\?]', list('-dpM?'))
         self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL])
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
         self.slot10 = TranscriptionSlot(10, 3, '[-tfbru\\?]', list('-tfbru?'))
@@ -204,6 +204,9 @@ class TranscriptionLayout(QVBoxLayout):
         data = ['V' if self.slot1.isChecked() else '']
         data.extend([slot.text() if slot.text() else '' for slot in self.slots[1:]])
         return data
+
+    def slotValues(self):
+        return self.slots
 
     def flags(self):
         flags = [Flag(slot.isUncertain, slot.isEstimate) for slot in self.slots]
@@ -390,8 +393,10 @@ class TranscriptionSlot(QLineEdit):
     def changeValidatorState(self, unrestricted):
         if unrestricted:
             self.setValidator(QRegExpValidator(QRegExp('.*')))
+            self.validatorType = 'unrestricted'
         else:
             self.setValidator(QRegExpValidator(QRegExp(self.regex)))
+            self.validatorType = 'restricted'
 
     def completerActivated(self, e):
         self.setText(e)
@@ -409,20 +414,57 @@ class TranscriptionSlot(QLineEdit):
     def keyPressEvent(self, e):
         key = e.key()
 
+        #don't do anything if under unrestricted settings
+        if self.validatorType == 'unrestricted':
+            self.completer().complete()
+            super().keyPressEvent(e)
+            return
+
+        #otherwise do some helpful stuff, like changing case settings
+
+        #simplify some shift+key combinations
+        if key == Qt.Key_Slash:
+            if self.validator().validate('?', 1):
+                self.setText('?')
+
+        elif key == Qt.Key_Comma:
+            if self.validator().validate('<', 1):
+                self.setText('<')
+
+        elif key == Qt.Key_BracketLeft:
+            if self.validator().validate('{', 1):
+                self.setText('{')
+
         #capitalize L, U, O in slot 2
         if self.num == 2:
             if key in [76, 85, 79]: #Qt.Key_L, Qt.Key_U, Qt.Key_O
                 self.setText(e.text().upper())
 
-        #capitalize M in slot 7 (only)
+        #capitalize M (only) in slot 7, lowercase d and p
         elif self.num == 7:
             if key == 77: #Qt.Key_M
                 self.setText(e.text().upper())
+            elif key == 68 or key == 80: #Qt.Key_D, Qt.Key_P
+                self.setText(e.text().lower())
+
+        #everything in slot 6 and slot 10 is lowercase
+        elif self.num == 6 or self.num == 10:
+            self.setText(e.text().lower())
+
+        #everything in slot 11 is lowercase, except m/M which can be either upper or lower
+        elif self.num == 11:
+            if key in [68, 80]:  #Qt.Key_D, Qt.Key_P
+                self.setText(e.text().lower())
+            elif key == 77: #Qt.Key_M
+                self.setText(e.text())
 
         #capitalize E, F, H in numerous slots
+        #lowercase I in the same slots
         elif self.num in [4,5,17,18,19,22,23,24,27,28,29,32,33,34]:
             if key in [69, 70, 72]: #Qt.Key_E, Qt.Key_F, Qt.Key_H
                 self.setText(e.text().upper())
+            elif key == 73: #Qt.Key_I
+                self.setText(e.text().lower())
 
         #allow Z, C, and S to stand in for various 'x' values that can't be typed
         elif self.num in [20, 25, 30]:
@@ -450,6 +492,9 @@ class TranscriptionCheckBox(QCheckBox):
         self.stateChanged.connect(lambda x: self.slotSelectionChanged.emit(0))
         self.isEstimate = False
         self.isUncertain = False
+
+    def text(self):
+        return 'V' if self.isChecked() else ''
 
 
 class TranscriptionField(QGridLayout):
@@ -683,19 +728,144 @@ class TranscriptionPasteDialog(QDialog):
         self.selectedTranscription = None
         super().reject()
 
+class TranscriptionConfigTab(QWidget):
+
+    def __init__(self, hand_number):
+        QWidget.__init__(self)
+
+        self.configLayout = QGridLayout()
+
+        self.hand1Transcription = TranscriptionLayout(hand=1)
+        self.configLayout.addLayout(self.hand1Transcription, 0, 0)
+        self.hand2Transcription = TranscriptionLayout(hand=2)
+        self.configLayout.addLayout(self.hand2Transcription, 1, 0)
+        self.setLayout(self.configLayout)
+
+    def clearAll(self, clearFlags=False):
+        self.hand1Transcription.clearTranscriptionSlots()
+        self.hand1Transcription.clearViolationLabels()
+        self.hand1Transcription.fillPredeterminedSlots()
+
+        self.hand2Transcription.clearTranscriptionSlots()
+        self.hand2Transcription.clearViolationLabels()
+        self.hand2Transcription.fillPredeterminedSlots()
+
+        if clearFlags:
+            for n in range(2,35):
+                slot = 'slot{}'.format(n)
+                getattr(self.hand1Transcription, slot).removeFlags()
+                getattr(self.hand2Transcription, slot).removeFlags()
+
+    def hand1(self):
+        return self.hand1Transcription.values()
+
+    def hand2(self):
+        return self.hand2Transcription.values()
+
+    def hands(self):
+        return [self.hand1(), self.hand2()]
+
+class TranscriptionSearchDialog(QDialog):
+
+    def __init__(self, corpus):
+        super().__init__()
+
+        self.corpus = corpus
+        self.transcriptions = None
+        self.setWindowTitle('Search')
+
+
+        layout = QVBoxLayout()
+
+        self.topLayout = QHBoxLayout()
+        explanation = QLabel()
+        text = ('Enter the transcription you want to match in your corpus.')
+        explanation.setText(text)
+        explanation.setFont(QFont('Arial', 16))
+        self.topLayout.addWidget(explanation)
+        layout.addLayout(self.topLayout)
+
+        self.configTabs = QTabWidget()
+        self.configTabs.addTab(TranscriptionConfigTab(1), 'Config 1')
+        self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
+        layout.addWidget(self.configTabs)
+
+        buttonLayout = QVBoxLayout()
+        ok = QPushButton('Search')
+        ok.clicked.connect(self.search)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+    def search(self):
+        self.transcriptions = self.getTranscriptions()
+        super().accept()
+
+    def getTranscriptions(self):
+        transcriptions = list()
+        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        return transcriptions
+
+class TranscriptionSearchResultDialog(QDialog):
+
+    def __init__(self, results):
+        super().__init__()
+        self.setWindowTitle('Search Results')
+        layout = QVBoxLayout()
+        self.result = None
+
+        resultsLayout = QHBoxLayout()
+
+        self.resultsList = QListWidget()
+        for r in results:
+            self.resultsList.addItem(r.gloss)
+
+        resultsLayout.addWidget(self.resultsList)
+        layout.addLayout(resultsLayout)
+
+        buttonLayout = QHBoxLayout()
+        okButton = QPushButton('Go to this entry')
+        cancelButton = QPushButton('Cancel')
+        okButton.clicked.connect(self.accept)
+        cancelButton.clicked.connect(self.reject)
+        buttonLayout.addWidget(okButton)
+        buttonLayout.addWidget(cancelButton)
+
+        layout.addLayout(buttonLayout)
+
+        self.setLayout(layout)
+
+    def accept(self):
+        item = self.resultsList.currentItem()
+        self.result = item
+        super().accept()
+
+    def reject(self):
+        self.result = None
+        super().reject()
+
 class TranscriptionSelectDialog(QDialog):
 
     def __init__(self, transcriptions, mode='copy'):
         super().__init__()
+
         if mode == 'copy':
             self.setWindowTitle('Copy transcription')
         elif mode == 'blender':
             self.setWindowTitle('Handshape visualization')
         layout = QVBoxLayout()
+
         if mode == 'copy':
             layout.addWidget(QLabel('Which transcription do you want to copy?'))
         elif mode == 'blender':
             layout.addWidget(QLabel('Which transcription do you want to visualize?'))
+
         self.transcriptions = transcriptions
         radioLayout = QGridLayout()
         layout.addLayout(radioLayout)
