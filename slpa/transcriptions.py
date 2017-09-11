@@ -198,7 +198,10 @@ class TranscriptionLayout(QVBoxLayout):
     def clearTranscriptionSlots(self):
         self.slot1.setChecked(False)
         for s in self.slots[1:]:
-            s.setText('')
+            if s.num in [8,16,21,26,31]:
+                continue
+            else:
+                s.setText('')
 
     def values(self):
         data = ['V' if self.slot1.isChecked() else '']
@@ -869,29 +872,30 @@ class TranscriptionSelectDialog(QDialog):
         self.transcriptions = transcriptions
         radioLayout = QGridLayout()
         layout.addLayout(radioLayout)
-        hand1config1 = QRadioButton(transcriptions[0].str_with_underscores())
-        hand1config1.setChecked(True)
-        hand1config2 = QRadioButton(transcriptions[1].str_with_underscores())
-        hand2config1 = QRadioButton(transcriptions[2].str_with_underscores())
-        hand2config2 = QRadioButton(transcriptions[3].str_with_underscores())
-        self.transcriptionRadioButtons = QButtonGroup()
-        self.transcriptionRadioButtons.addButton(hand1config1)
-        self.transcriptionRadioButtons.setId(hand1config1, 0)
-        self.transcriptionRadioButtons.addButton(hand1config2)
-        self.transcriptionRadioButtons.setId(hand1config2, 1)
-        self.transcriptionRadioButtons.addButton(hand2config1)
-        self.transcriptionRadioButtons.setId(hand2config1, 2)
-        self.transcriptionRadioButtons.addButton(hand2config2)
-        self.transcriptionRadioButtons.setId(hand2config2, 3)
+        config1hand1 = QRadioButton(transcriptions[0].str_with_underscores())
+        config1hand2 = QRadioButton(transcriptions[1].str_with_underscores())
+        config2hand1 = QRadioButton(transcriptions[2].str_with_underscores())
+        config2hand2 = QRadioButton(transcriptions[3].str_with_underscores())
+        config1hand1.setChecked(True)
 
-        radioLayout.addWidget(QLabel('Hand 1, Config 1'), 0, 0)
-        radioLayout.addWidget(hand1config1, 0, 1)
-        radioLayout.addWidget(QLabel('Hand 1, Config 2'), 1, 0)
-        radioLayout.addWidget(hand1config2, 1, 1)
-        radioLayout.addWidget(QLabel('Hand 2, Config 1'), 2, 0)
-        radioLayout.addWidget(hand2config1, 2, 1)
-        radioLayout.addWidget(QLabel('Hand 2, Config 2'), 3, 0)
-        radioLayout.addWidget(hand2config2, 3, 1)
+        self.transcriptionRadioButtons = QButtonGroup()
+        self.transcriptionRadioButtons.addButton(config1hand1)
+        self.transcriptionRadioButtons.setId(config1hand1, 0)
+        self.transcriptionRadioButtons.addButton(config1hand2)
+        self.transcriptionRadioButtons.setId(config1hand2, 1)
+        self.transcriptionRadioButtons.addButton(config2hand1)
+        self.transcriptionRadioButtons.setId(config2hand1, 2)
+        self.transcriptionRadioButtons.addButton(config2hand2)
+        self.transcriptionRadioButtons.setId(config2hand2, 3)
+
+        radioLayout.addWidget(QLabel('Config 1, Hand 1'), 0, 0)
+        radioLayout.addWidget(config1hand1, 0, 1)
+        radioLayout.addWidget(QLabel('Config 1, Hand 2'), 1, 0)
+        radioLayout.addWidget(config1hand2, 1, 1)
+        radioLayout.addWidget(QLabel('Config 2, Hand 1'), 2, 0)
+        radioLayout.addWidget(config2hand1, 2, 1)
+        radioLayout.addWidget(QLabel('Config 2, Hand 2'), 3, 0)
+        radioLayout.addWidget(config2hand2, 3, 1)
 
         buttonLayout = QHBoxLayout()
         layout.addLayout(buttonLayout)

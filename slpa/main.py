@@ -404,7 +404,7 @@ class MainWindow(QMainWindow):
         self.makeCorpusDock()
 
         self.showMaximized()
-        self.defineTabOrder()
+        #self.defineTabOrder()
 
     def setGloss(self, text):
         self.gloss.glossEdit.setText(text)
@@ -526,7 +526,9 @@ class MainWindow(QMainWindow):
         transcriptions.append(self.configTabs.widget(1).hand2Transcription)
         dialog = TranscriptionPasteDialog(self.clipboard, transcriptions)
         result = dialog.exec_()
+        print('Result', result)
         if result:
+            print('dialog ID', dialog.transcriptionID)
             if dialog.transcriptionID == 0:
                 self.configTabs.widget(0).hand1Transcription.updateFromCopy(self.clipboard)
             elif dialog.transcriptionID == 1:
