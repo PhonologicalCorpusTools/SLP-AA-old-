@@ -134,7 +134,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #FIELD 3 (Thumb/Finger Contact)
         self.slot6 = TranscriptionSlot(6, 3, '[-tfbru\\?]', list('-tfbru?'))
-        self.slot7 = TranscriptionSlot(7, 3, '[-dtpM\\?]', list('-dtpM?'))
+        self.slot7 = TranscriptionSlot(7, 3, '[-dpM\\?]', list('-dpM?'))
         self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL])
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
         self.slot10 = TranscriptionSlot(10, 3, '[-tfbru\\?]', list('-tfbru?'))
@@ -393,8 +393,10 @@ class TranscriptionSlot(QLineEdit):
     def changeValidatorState(self, unrestricted):
         if unrestricted:
             self.setValidator(QRegExpValidator(QRegExp('.*')))
+            self.validatorType = 'unrestricted'
         else:
             self.setValidator(QRegExpValidator(QRegExp(self.regex)))
+            self.validatorType = 'restricted'
 
     def completerActivated(self, e):
         self.setText(e)
@@ -412,20 +414,57 @@ class TranscriptionSlot(QLineEdit):
     def keyPressEvent(self, e):
         key = e.key()
 
+        #don't do anything if under unrestricted settings
+        if self.validatorType == 'unrestricted':
+            self.completer().complete()
+            super().keyPressEvent(e)
+            return
+
+        #otherwise do some helpful stuff, like changing case settings
+
+        #simplify some shift+key combinations
+        if key == Qt.Key_Slash:
+            if self.validator().validate('?', 1):
+                self.setText('?')
+
+        elif key == Qt.Key_Comma:
+            if self.validator().validate('<', 1):
+                self.setText('<')
+
+        elif key == Qt.Key_BracketLeft:
+            if self.validator().validate('{', 1):
+                self.setText('{')
+
         #capitalize L, U, O in slot 2
         if self.num == 2:
             if key in [76, 85, 79]: #Qt.Key_L, Qt.Key_U, Qt.Key_O
                 self.setText(e.text().upper())
 
-        #capitalize M in slot 7 (only)
+        #capitalize M (only) in slot 7, lowercase d and p
         elif self.num == 7:
             if key == 77: #Qt.Key_M
                 self.setText(e.text().upper())
+            elif key == 68 or key == 80: #Qt.Key_D, Qt.Key_P
+                self.setText(e.text().lower())
+
+        #everything in slot 6 and slot 10 is lowercase
+        elif self.num == 6 or self.num == 10:
+            self.setText(e.text().lower())
+
+        #everything in slot 11 is lowercase, except m/M which can be either upper or lower
+        elif self.num == 11:
+            if key in [68, 80]:  #Qt.Key_D, Qt.Key_P
+                self.setText(e.text().lower())
+            elif key == 77: #Qt.Key_M
+                self.setText(e.text())
 
         #capitalize E, F, H in numerous slots
+        #lowercase I in the same slots
         elif self.num in [4,5,17,18,19,22,23,24,27,28,29,32,33,34]:
             if key in [69, 70, 72]: #Qt.Key_E, Qt.Key_F, Qt.Key_H
                 self.setText(e.text().upper())
+            elif key == 73: #Qt.Key_I
+                self.setText(e.text().lower())
 
         #allow Z, C, and S to stand in for various 'x' values that can't be typed
         elif self.num in [20, 25, 30]:

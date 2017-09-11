@@ -390,6 +390,8 @@ class MainWindow(QMainWindow):
                 slot.slotFlagged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
+
         self.globalLayout.addLayout(layout)
 
         self.wrapper.setLayout(self.globalLayout)
@@ -1315,6 +1317,7 @@ class MainWindow(QMainWindow):
         self.configTabs.widget(0).clearAll(clearFlags=clearFlags)
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
         self.configTabs.setCurrentIndex(0)
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
 
         self.parameterDialog.accept()
         self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
