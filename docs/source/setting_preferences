@@ -24,7 +24,7 @@ like to apply to your corpus, or use the Select all/Unselect all buttons. Click 
    :align: center
 
 Note that the constraints will NOT be automatically applied. To look for violations of 
-the selected constraints before saving each word, click on the "Check transcription" 
+the selected constraints, click on the "Check transcription" 
 button  (see :ref:`checking_transcriptions`).
 
 
@@ -49,4 +49,4 @@ Transcriptions
 ------------------
 
 If you select Transcriptions > Allow unrestricted transcriptions, it will
-allow you to type in symbols that are not on the list of Permitted characters.
+allow you to type in symbols that are not on the list of Permitted characters (see :ref:`field_and_slot`).
