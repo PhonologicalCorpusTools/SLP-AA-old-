@@ -31,10 +31,10 @@ Field refers to the square brackets numbered from 1 to 7. Slots are square boxes
 inside a field. Slot 1 in Field 1 is a global handshape option (see :ref:`global_handshape_options`) 
 for forearm involvement. Field 2 to 7 are devoted to the thumb, thumb-finger contact, 
 and the four fingers.
-If you click on any slot, information about that particular slot will appear 
-at the bottom right corner.
+If you click on any slot, a list of permitted characters will appear as a pull-down menu. 
+Further information about that particular slot will appear at the bottom right corner.
 
-For example, if you click on Slot 5 in Field 2, the following information will appear:
+For example, if you click on Slot 5 in Field 2, you will find the following information:
 
 Field number is 2; Field type is Thumb; Slot number is 5; Slot type is Thumb DIP flexion; 
 and permitted characters are H (hyperextended), E (extended), i (intermediate), and F (flexed).
