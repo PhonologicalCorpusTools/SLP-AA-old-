@@ -19,7 +19,7 @@ a symbol yourself.
       Notes on typing in a symbol
 
       * Slots are generally case-insensitive. An exeption is Slot 11, which permits both "m" and "M".
-      * In Slots 20, 25, and 30, use the key 'z' for "x-"; 'c' for "x+"; and 's' for "".
+      * In Slots 20, 25, and 30, use the key 'z' for "x-"; 'c' for "x+"; and 's' for "☒".
 
 .. _flag_slot:
 
