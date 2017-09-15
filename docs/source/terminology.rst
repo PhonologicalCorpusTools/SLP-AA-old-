@@ -24,7 +24,7 @@ Depending on the signs, you do not necessarily have to fill all four of them.
 
 .. _field_and_slot:
 
-Field and slot
+Field and Slot
 ------------------
 
 Field refers to the square brackets numbered from 1 to 7. Slots are square boxes
