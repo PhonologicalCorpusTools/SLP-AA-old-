@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b8e444d6-1c9c-4d8b-802c-7e3ca1254927" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/testOut3.blend1" afterPath="$PROJECT_DIR$/slpa/testOut3.blend1" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/cx_setup.py" afterPath="$PROJECT_DIR$/slpa/cx_setup.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/main.py" afterPath="$PROJECT_DIR$/slpa/main.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/transcriptions.py" afterPath="$PROJECT_DIR$/slpa/transcriptions.py" />
     </list>
     <ignored path="SLP-Annotator.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -27,32 +28,11 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/slpa/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="1285" column="26" selection-start-line="1285" selection-start-column="21" selection-end-line="1285" selection-end-column="26" />
+            <state relative-caret-position="187">
+              <caret line="1115" column="53" selection-start-line="1115" selection-start-column="53" selection-end-line="1115" selection-end-column="53" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
-                <element signature="e#4508#4671#0" expanded="false" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="parameters.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/slpa/parameters.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="parameterwidgets.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/slpa/parameterwidgets.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="88">
-              <caret line="239" column="29" selection-start-line="239" selection-start-column="29" selection-end-line="239" selection-end-column="29" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -60,10 +40,22 @@
       <file leaf-file-name="transcriptions.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/slpa/transcriptions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="17" column="27" selection-start-line="17" selection-start-column="27" selection-end-line="17" selection-end-column="27" />
+            <state relative-caret-position="65">
+              <caret line="765" column="43" selection-start-line="765" selection-start-column="43" selection-end-line="765" selection-end-column="43" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="search.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/slpa/search.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="148">
+              <caret line="105" column="66" selection-start-line="105" selection-start-column="66" selection-end-line="105" selection-end-column="66" />
+              <folding>
+                <element signature="e#0#117#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -72,8 +64,8 @@
       <file leaf-file-name="lexicon.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/slpa/lexicon.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1313">
-              <caret line="73" column="50" selection-start-line="73" selection-start-column="50" selection-end-line="73" selection-end-column="50" />
+            <state relative-caret-position="352">
+              <caret line="56" column="24" selection-start-line="56" selection-start-column="24" selection-end-line="56" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -93,7 +85,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="parameters" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
   </component>
@@ -117,16 +109,17 @@
         <option value="$PROJECT_DIR$/slpa/decorators.py" />
         <option value="$PROJECT_DIR$/slpa/imports.py" />
         <option value="$PROJECT_DIR$/slpa/parameters.py" />
-        <option value="$PROJECT_DIR$/slpa/lexicon.py" />
         <option value="$PROJECT_DIR$/slpa/position_hand.py" />
         <option value="$PROJECT_DIR$/slpa/binary.py" />
         <option value="$PROJECT_DIR$/slpa/applyHandCode.py" />
         <option value="$PROJECT_DIR$/slpa/cx_setup.py" />
-        <option value="$PROJECT_DIR$/slpa/transcriptions.py" />
         <option value="$PROJECT_DIR$/slpa/constraints.py" />
         <option value="$PROJECT_DIR$/slpa/constraintwidgets.py" />
-        <option value="$PROJECT_DIR$/slpa/main.py" />
         <option value="$PROJECT_DIR$/slpa/parameterwidgets.py" />
+        <option value="$PROJECT_DIR$/slpa/lexicon.py" />
+        <option value="$PROJECT_DIR$/slpa/transcriptions.py" />
+        <option value="$PROJECT_DIR$/slpa/main.py" />
+        <option value="$PROJECT_DIR$/slpa/search.py" />
       </list>
     </option>
   </component>
@@ -163,7 +156,7 @@
     <panes />
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../PyGLWidget-master" />
   </component>
@@ -450,17 +443,16 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34919474" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34895834" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3289689" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Statistic" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33060557" sideWeight="0.5029762" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31587562" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32405892" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3289689" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3878887" sideWeight="0.48809522" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21875" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32242227" sideWeight="0.48809522" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21354167" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32890365" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.40752864" sideWeight="0.49702382" order="3" side_tool="false" content_ui="tabs" />
@@ -469,6 +461,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31587562" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
@@ -528,7 +521,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/Anaconda3/Lib/enum.py" />
     <entry file="file://$PROJECT_DIR$/slpa/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -708,14 +700,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/run_slpa.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="32" selection-start-line="3" selection-start-column="32" selection-end-line="3" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/slpa/cx_setup.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
@@ -744,16 +728,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/imports.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="13" column="70" selection-start-line="13" selection-start-column="70" selection-end-line="13" selection-end-column="70" />
-          <folding>
-            <element signature="e#0#190#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2016.2/system/python_stubs/-1313743207/PyQt5/QtWidgets/QTabWidget.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="6341">
@@ -765,7 +739,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3655">
           <caret line="216" column="45" selection-start-line="216" selection-start-column="45" selection-end-line="216" selection-end-column="45" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -773,28 +746,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
           <caret line="222" column="33" selection-start-line="222" selection-start-column="33" selection-end-line="222" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-            <marker date="1503242080477" expanded="true" signature="7618:8264" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/transcriptions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="17" column="27" selection-start-line="17" selection-start-column="27" selection-end-line="17" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/lexicon.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1313">
-          <caret line="73" column="50" selection-start-line="73" selection-start-column="50" selection-end-line="73" selection-end-column="50" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -802,34 +753,72 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="115">
           <caret line="36" column="4" selection-start-line="36" selection-start-column="4" selection-end-line="36" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/parameters.py">
+    <entry file="file://$PROJECT_DIR$/slpa/run_slpa.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="136">
+          <caret line="10" column="7" selection-start-line="10" selection-start-column="7" selection-end-line="10" selection-end-column="7" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/main.py">
+    <entry file="file://$PROJECT_DIR$/slpa/imports.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="1285" column="26" selection-start-line="1285" selection-start-column="21" selection-end-line="1285" selection-end-column="26" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-            <element signature="e#4508#4671#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="153">
+          <caret line="9" column="82" selection-start-line="9" selection-start-column="82" selection-end-line="9" selection-end-column="82" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/slpa/parameterwidgets.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="88">
-          <caret line="239" column="29" selection-start-line="239" selection-start-column="29" selection-end-line="239" selection-end-column="29" />
+        <state relative-caret-position="435">
+          <caret line="342" column="56" selection-start-line="342" selection-start-column="56" selection-end-line="342" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slpa/parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slpa/transcriptions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="65">
+          <caret line="765" column="43" selection-start-line="765" selection-start-column="43" selection-end-line="765" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slpa/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="1115" column="53" selection-start-line="1115" selection-start-column="53" selection-end-line="1115" selection-end-column="53" />
+          <folding>
+            <element signature="e#0#16#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slpa/lexicon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="56" column="24" selection-start-line="56" selection-start-column="24" selection-end-line="56" selection-end-column="24" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slpa/search.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="148">
+          <caret line="105" column="66" selection-start-line="105" selection-start-column="66" selection-end-line="105" selection-end-column="66" />
+          <folding>
+            <element signature="e#0#117#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

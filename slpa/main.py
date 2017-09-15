@@ -14,6 +14,7 @@ from transcriptions import *
 from constraints import *
 from constraintwidgets import *
 from notes import *
+from search import *
 from parameterwidgets import ParameterDialog, ParameterTreeModel
 import anytree
 #from slpa import __version__ as currentSLPAversion
@@ -784,6 +785,12 @@ class MainWindow(QMainWindow):
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
+        print(' '.join([blenderPath,
+             blenderFile,
+            '--background',
+            "--python", blenderScript,
+             ' -- ', os.getcwd(), dialog.hand]))
+
         proc = subprocess.Popen(
             [blenderPath,
              blenderFile,
@@ -1030,7 +1037,8 @@ class MainWindow(QMainWindow):
         self.notesMenu.addAction(self.addSignNotesAct)
 
         self.searchMenu = self.menuBar().addMenu('&Search')
-        self.searchMenu.addAction(self.searchCorpusAct)
+        self.searchMenu.addAction(self.searchTranscriptionAct)
+        self.searchMenu.addAction(self.searchNaturalLanguageAct)
 
         if not hasattr(sys, 'frozen'):
             self.debugMenu = self.menuBar().addMenu('&Debug')
@@ -1089,7 +1097,7 @@ class MainWindow(QMainWindow):
         transcriptions.append(self.configTabs.widget(1).hand2Transcription)
         return transcriptions
 
-    def searchCorpus(self):
+    def searchCorpus(self, searchType = 'transcription'):
         if not self.corpus:
             alert = QMessageBox()
             alert.setWindowTitle('No corpus')
@@ -1097,11 +1105,16 @@ class MainWindow(QMainWindow):
             alert.exec_()
             return
 
-        dialog = TranscriptionSearchDialog(self.corpus)
+        if searchType == 'transcription':
+            dialog = TranscriptionSearchDialog(self.corpus)
+        elif searchType == 'natural':
+            dialog = NaturalLanguageSearchDialog(self.corpus)
+
         dialog.exec_()
+
         if dialog.transcriptions is not None:
             matches = self.corpus.search(dialog.transcriptions)
-            resultsDialog = TranscriptionSearchResultDialog(matches)
+            resultsDialog = SearchResultsDialog(matches)
             resultsDialog.exec_()
             if resultsDialog.result is not None:
                 self.loadHandShape(resultsDialog.result)
@@ -1109,10 +1122,15 @@ class MainWindow(QMainWindow):
 
     def createActions(self):
 
-        self.searchCorpusAct = QAction('Search the current corpus...',
+        self.searchTranscriptionAct = QAction('Search by transcription...',
                                        self,
                                        statusTip = 'Search the current corpus',
-                                       triggered = self.searchCorpus)
+                                       triggered = lambda x: self.searchCorpus('transcription'))
+
+        self.searchNaturalLanguageAct = QAction('Search using descriptive phrases...',
+                                                self,
+                                                statusTip = 'Search the current corpus',
+                                                triggered = lambda x: self.searchCorpus('natural'))
 
         self.setBlenderPathAct = QAction('Set path to Blender...',
                                          self,
