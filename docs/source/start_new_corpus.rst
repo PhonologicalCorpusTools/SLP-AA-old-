@@ -17,9 +17,12 @@ To fill in a slot, you can either select a symbol in the pull-down menu or type 
 a symbol yourself.
 
       Notes on typing in a symbol
-
+      
       * Slots are generally case-insensitive. An exeption is Slot 11, which permits both "m" and "M".
+      
       * In Slots 20, 25, and 30, use the key 'z' for "x-"; 'c' for "x+"; and 's' for "☒".
+      
+      * For Mac users, it may be helpful to use the Tab key to move to the next slot. To enable this, go to System Preferences > Keyboard > Shortcuts. At the bottom of the page under Full Keyboard Access, select "All controls."
 
 .. _flag_slot:
 
