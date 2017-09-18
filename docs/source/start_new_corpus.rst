@@ -4,16 +4,16 @@
 Starting a new corpus
 ***************
 
-.. _transcribe_word:
+.. _transcribe_sign:
 
-Transcribing a word
+Transcribing a sign
 ------------------
 
 .. _fill_slot:
 
 1. Filling in a slot
 `````````````````
-To fill in a slot, you can either select a symbol in the pull-down menu or type in 
+To fill in a slot, you can either click on a slot to select a symbol from the pull-down menu or type in 
 a symbol yourself.
 
       Notes on typing in a symbol
