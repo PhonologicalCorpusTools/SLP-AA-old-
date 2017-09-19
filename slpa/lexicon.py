@@ -171,7 +171,6 @@ class Sign():
         #     if 'config' in key:
         for config_num in [1,2]:
             for hand_num in [1,2]:
-            # for hand_num, hand in enumerate(value):
                 hand = getattr(self, 'config{}hand{}'.format(config_num, hand_num))
                 if hand[0] == '_' or not hand[0]:
                     hand[0] = blank_space

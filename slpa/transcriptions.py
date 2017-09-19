@@ -206,8 +206,7 @@ class TranscriptionLayout(QVBoxLayout):
                 s.setText('')
 
     def values(self):
-        data = ['V' if self.slot1.isChecked() else '']
-        data.extend([slot.text() if slot.text() else '' for slot in self.slots[1:]])
+        data = [slot.getText() for slot in self.slots]
         return data
 
     def slotValues(self):
@@ -360,7 +359,7 @@ class TranscriptionSlot(QLineEdit):
         self.changeUncertaintyAct = QAction('Flag as uncertain', self, triggered=self.changeUncertainty, checkable=True)
         self.popMenu.addAction(self.changeEstimateAct)
         self.popMenu.addAction(self.changeUncertaintyAct)
-        
+
 
     def showContextMenu(self, point):
         self.popMenu.exec_(self.mapToGlobal(point))
@@ -502,11 +501,12 @@ class TranscriptionCheckBox(QCheckBox):
         self.isEstimate = False
         self.isUncertain = False
 
-    def getText(self):
-        return self.text() #this exists so that we can duck-type the transcription slots and the checkbox
+    def getText(self, empty_text='_'):
+        return 'V' if self.isChecked() else '_' #this exists so that we can duck-type the transcription slots and the checkbox
 
     def text(self):
-        return 'V' if self.isChecked() else '_'
+        return self.getText()
+
 
 
 class TranscriptionField(QGridLayout):

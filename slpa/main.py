@@ -279,6 +279,7 @@ class CorpusList(QListWidget):
 
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
+    forearmChecked = Signal(bool)
 
     def __init__(self,app):
         app.messageFromOtherInstance.connect(self.handleMessage)
@@ -369,10 +370,11 @@ class MainWindow(QMainWindow):
         self.infoPanel.addLayout(self.transcriptionInfo)
         layout.addLayout(self.infoPanel)
 
-
         #Connect transcription signals to various main window slots
         for k in [0,1]:
             self.configTabs.widget(k).hand1Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
+            self.forearmChecked.connect(self.configTabs.widget(k).hand1Transcription.slot1.setChecked)
+
             for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
@@ -382,6 +384,7 @@ class MainWindow(QMainWindow):
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
             self.configTabs.widget(k).hand2Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
+            self.forearmChecked.connect(self.configTabs.widget(k).hand2Transcription.slot1.setChecked)
             for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
@@ -445,6 +448,7 @@ class MainWindow(QMainWindow):
         self.forearmCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
         self.globalOptionsLayout.addWidget(self.forearmCheckBox)
         self.forearmCheckBox.clicked.connect(self.userMadeChanges)
+        self.forearmCheckBox.clicked.connect(self.checkForearm)
         self.partialObscurityCheckBox = QCheckBox('This sign is partially obscured')
         self.partialObscurityCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
         self.partialObscurityCheckBox.clicked.connect(self.userMadeChanges)
@@ -461,6 +465,8 @@ class MainWindow(QMainWindow):
                                      self.partialObscurityCheckBox,
                                      self.uncertainCodingCheckBox,
                                      self.incompleteCodingCheckBox]
+    def checkForearm(self):
+        self.forearmChecked.emit(self.forearmCheckBox.isChecked())
 
     def setupParameterDialog(self, model):
         try:
@@ -1190,9 +1196,9 @@ class MainWindow(QMainWindow):
                 statusTip="Load a corpus",
                 triggered=self.loadCorpus)
 
-        self.saveCorpusAct = QAction( "&Save corpus",
+        self.saveCorpusAct = QAction( "&Save current word",
                 self,
-                statusTip="Save current corpus",
+                statusTip="Save current word and update corpus",
                 triggered=self.saveCorpus)
 
         self.saveCorpusAsAct = QAction("Save corpus &as...",
@@ -1279,13 +1285,20 @@ class MainWindow(QMainWindow):
 
     def exportCorpus(self):
 
+        if not self.corpus:
+            alert = QMessageBox()
+            alert.setWindowTitle('No corpus')
+            alert.setText('You must save the current word to a corpus before you can export it.')
+            alert.exec_()
+            return
+
         dialog = ExportCorpusDialog()
         results = dialog.exec_()
 
         if results:
             path = dialog.fileNameEdit.text()
             include_fields = dialog.includeFields.isChecked()
-            blank_space = dialog.blankSpaceEdit.text()
+            blank_space = dialog.blankSpaceText
             x_in_box = dialog.xinboxEdit.text()
             null = dialog.nullEdit.text()
             if not blank_space:
@@ -1298,11 +1311,11 @@ class MainWindow(QMainWindow):
             output = [word.export(**kwargs) for word in self.corpus]
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
-                    #print(Sign.headers, file=f)
-                    f.write(Sign.headers)
+                    print(Sign.headers, file=f)
+                    #f.write(Sign.headers)
                     for word in output:
-                        f.write(word)
-                        #print(word, file=f)
+                        #f.write(word)
+                        print(word, file=f)
                 if self.showSaveAlert:
                     QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
             except PermissionError:
@@ -1366,13 +1379,34 @@ class ExportCorpusDialog(QDialog):
         layout.addLayout(fileNameLayout)
 
         outputOptionsLayout = QVBoxLayout()
-        blankSpaceLabel = QLabel('\n\nWhich character should be used to represent empty transcription slots?\n'
-                                 'Mouse over the text box for details.')
-        blankSpaceLabel.setWordWrap(True)
-        self.blankSpaceEdit = QLineEdit('')
-        self.blankSpaceEdit.setMaximumWidth(100)
-        self.blankSpaceEdit.setToolTip('If you want empty slots to appear as blank spaces, then type one space.'
-                                  '\nIf you do not want empty slots represented at all in the output, type nothing.')
+
+        blankSpaceLayout = QVBoxLayout()
+        blankSpaceLabel = QLabel('How should empty transcription slots be represented in your output?')
+        # blankSpaceLabel.setWordWrap(True)
+        blankSpaceLayout.addWidget(blankSpaceLabel)
+
+        blankRadioButtonLayout = QHBoxLayout()
+        noBlanksOption = QRadioButton('Do not show empty slots in the output')
+        blankRadioButtonLayout.addWidget(noBlanksOption)
+        noBlanksOption.setChecked(True)
+        blankSpaceOption = QRadioButton('Print a blank space')
+        blankRadioButtonLayout.addWidget(blankSpaceOption)
+        otherBlankOption = QRadioButton('Print this character: ')
+        blankRadioButtonLayout.addWidget(otherBlankOption)
+        self.blankOptionEdit = QLineEdit()
+        self.blankOptionEdit.setMaxLength(1)
+        self.blankOptionEdit.setMaximumWidth(30)
+        self.blankOptionEdit.setText('_')
+        blankRadioButtonLayout.addWidget(self.blankOptionEdit)
+        self.blankOptionButtons = QButtonGroup()
+        self.blankOptionButtons.addButton(noBlanksOption)
+        self.blankOptionButtons.addButton(blankSpaceOption)
+        self.blankOptionButtons.addButton(otherBlankOption)
+        self.blankOptionButtons.setId(noBlanksOption, 0)
+        self.blankOptionButtons.setId(blankSpaceOption, 1)
+        self.blankOptionButtons.setId(otherBlankOption, 2)
+
+        blankSpaceLayout.addLayout(blankRadioButtonLayout)
 
         self.includeFields = QCheckBox('Include fields in transcription?')
         self.includeFields.setToolTip('If checked, transcriptions will be delimited by square brackets '
@@ -1391,9 +1425,9 @@ class ExportCorpusDialog(QDialog):
         self.nullEdit.setMaximumWidth(170)
         self.nullEdit.setPlaceholderText('Alternative empty set symbol')
 
+
         outputOptionsLayout.addWidget(self.includeFields)
-        outputOptionsLayout.addWidget(blankSpaceLabel)
-        outputOptionsLayout.addWidget(self.blankSpaceEdit)
+        outputOptionsLayout.addLayout(blankSpaceLayout)
 
         outputOptionsLayout.addWidget(altSymbolsLabel)
         outputOptionsLayout.addWidget(self.xinboxEdit)
@@ -1420,6 +1454,24 @@ class ExportCorpusDialog(QDialog):
         self.fileNameEdit.setText(path)
 
     def accept(self):
+        selectedButton = self.blankOptionButtons.checkedButton()
+        id = self.blankOptionButtons.id(selectedButton)
+        if id == 0:
+            self.blankSpaceText = ''
+        elif id == 1:
+            self.blankSpaceText = ' '
+        elif id == 2:
+            if not self.blankOptionEdit.text():
+                alert = QMessageBox()
+                alert.setWindowTitle('Missing information')
+                alert.setText('You selected to replace empty transcription slots with a symbol of your choosing, but no'
+                              ' symbol was typed into the text box. Please enter a symbol, or choose a different'
+                              ' option.')
+                alert.exec_()
+                return
+            else:
+                self.blankSpaceText = self.blankOptionEdit.text()
+
         if os.path.exists(os.path.split(self.fileNameEdit.text())[0]):
             super().accept()
         else:
