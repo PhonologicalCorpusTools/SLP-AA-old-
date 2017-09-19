@@ -3,6 +3,8 @@ from collections import namedtuple
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
+STANDARD_SYMBOLS = ['_', '+', '-', '/', '1', '2', '3', '4', '<', '=', '?', 'E', 'F', 'H', 'L', 'M', 'O', 'U', 'V', 'b',
+                    'd', 'f', 'i', 'm', 'p', 'r', 't', 'u', 'x', 'x+', 'x-', '{', NULL, X_IN_BOX]
 Flag = namedtuple('Flag', ['isUncertain', 'isEstimate'])
 
 class TranscriptionLayout(QVBoxLayout):
@@ -139,10 +141,10 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
         self.slot10 = TranscriptionSlot(10, 3, '[-tfbru\\?]', list('-tfbru?'))
         self.slot11 = TranscriptionSlot(11, 3, '[-dmpM\\?]', list('-dmpM?'))
-        self.slot12 = TranscriptionSlot(12, 3, '[-1\s]', ['-','1'])
-        self.slot13 = TranscriptionSlot(13, 3, '[-2\s]', ['-','2'])
-        self.slot14 = TranscriptionSlot(14, 3, '[-3\s]', ['-','3'])
-        self.slot15 = TranscriptionSlot(15, 3, '[-4\s]', ['-','4'])
+        self.slot12 = TranscriptionSlot(12, 3, '[-1\s\\?]', ['-','1','?'])
+        self.slot13 = TranscriptionSlot(13, 3, '[-2\s\\?]', ['-','2','?'])
+        self.slot14 = TranscriptionSlot(14, 3, '[-3\s\\?]', ['-','3','?'])
+        self.slot15 = TranscriptionSlot(15, 3, '[-4\s\\?]', ['-','4','?'])
 
         #FIELD 4 (Index)
         self.slot16 = TranscriptionSlot(16, 4, '1', ['1'])
@@ -356,8 +358,9 @@ class TranscriptionSlot(QLineEdit):
         self.popMenu = QMenu(self)
         self.changeEstimateAct = QAction('Flag as estimate', self, triggered=self.changeEstimate, checkable=True)
         self.changeUncertaintyAct = QAction('Flag as uncertain', self, triggered=self.changeUncertainty, checkable=True)
-        self.popMenu.addAction(self.changeUncertaintyAct)
         self.popMenu.addAction(self.changeEstimateAct)
+        self.popMenu.addAction(self.changeUncertaintyAct)
+        
 
     def showContextMenu(self, point):
         self.popMenu.exec_(self.mapToGlobal(point))
@@ -384,7 +387,10 @@ class TranscriptionSlot(QLineEdit):
         self.slotFlagged.emit(self.num-1, True)
 
     def __eq__(self, other):
-        return self.text() == other.text()
+        if isinstance(other, str):
+            return self.text() == other
+        else:
+            return self.text() == other.text()
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -496,8 +502,11 @@ class TranscriptionCheckBox(QCheckBox):
         self.isEstimate = False
         self.isUncertain = False
 
+    def getText(self):
+        return self.text() #this exists so that we can duck-type the transcription slots and the checkbox
+
     def text(self):
-        return 'V' if self.isChecked() else ''
+        return 'V' if self.isChecked() else '_'
 
 
 class TranscriptionField(QGridLayout):
@@ -602,42 +611,47 @@ class TranscriptionInfo(QGridLayout):
                             33: 'Pinky PIP flexion',
                             34: 'Pinky DIP flexion'}
         self.optionsDict = {1: 'Either on or off (checkbox)',
-                              2: 'L (lateral)\nU (unopposed)\nO (opposed)',
-                              3: '{ (full abduction)\n< (neutral)\n= (adducted)',
-                              4: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              5: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              6: 't (tip)\nf (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
-                              7: 'd (distal)\np (proximal)\nM (meta-carpal)',
+                              2: 'L (lateral)\nU (unopposed)\nO (opposed)\nx (crossed)\n? (obscured)',
+                              3: '{ (full abduction)\n< (neutral)\n= (adducted))\n? (obscured)',
+                              4: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed))\n? (obscured)',
+                              5: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed))\n? (obscured)',
+                              6: ('-(no contact)\nt (tip)\nf (friction surface)\nb (back surface)'
+                                  '\nr (radial surface)\nu (ulnar surface)\n? (obscured)'),
+                              7: '-(no contact)\nd (distal)\np (proximal)\nM (meta-carpal)\n? (obscured)',
                               #8 always null,
                               #9 always forward slash,
-                              10: 't (tip)\nf (friction surface)\nb (back surface)\nr (radial surface)\nu (ulnar surface)',
-                              11: 'd (distal)\nm (medial)\np (proximal)\nM (meta-carpal)',
-                              12: '1 (if contact with index)\n- (if no contact)',
-                              13: '2 (if contact with middle)\n- (if no contact)',
-                              14: '3 (if contact with ring)\n- (if no contact)',
-                              15: '4 (if contact with pinky)\n- (if no contact)',
+                              10: ('-(no contact)\nt (tip)\nf (friction surface)\nb (back surface)\nr (radial surface)'
+                                   '\nu (ulnar surface)\n? (obscured)'),
+                              11: '-(no contact)\nd (distal)\nm (medial)\np (proximal)\nM (meta-carpal)\n? (obscured)',
+                              12: '- (no contact)\n1 (contact with index)\n? (obscured)',
+                              13: '- (no contact)\n2 (contact with middle)\n? (obscured)',
+                              14: '- (no contact)\n3 (contact with ring)\n? (obscured)',
+                              15: '- (no contact)\n4 (contact with pinky)\n? (obscured)',
                               #16 always 1,
-                              17: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              18: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              19: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              17: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              18: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              19: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
                               20: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
-                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
+                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'
+                                    '\n? (obscured)'),
                               #21 always 2,
-                              22: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              23: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              24: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              25: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
-                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
+                              22: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              23: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              24: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              25: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx (crossed with contact)\n'
+                                   'x- (slightly crossed with contact)\nx+ (ultracrossed with contact)\n'
+                                   '\u2327 (crossed without contact)\n? (obscured)'),
                               #26 always 3,
-                              27: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              28: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              29: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
+                              27: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              28: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              29: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
                               30: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
-                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'),
+                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'
+                                   '\n? (obscured)'),
                               #31 always 4,
-                              32: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              33: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)',
-                              34: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)'
+                              32: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              33: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              34: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)'
                               }
 
     @Slot(int)

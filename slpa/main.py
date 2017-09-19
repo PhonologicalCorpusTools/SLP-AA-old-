@@ -731,6 +731,25 @@ class MainWindow(QMainWindow):
         if not dialog.selectedTranscription:
             return
 
+        nonstandard = list()
+        for slot in dialog.selectedTranscription:
+            symbol = slot.text()
+            if symbol not in STANDARD_SYMBOLS:
+                nonstandard.append(symbol)
+
+        if nonstandard:
+            nonstandard = '   '.join(nonstandard)
+            alert = QMessageBox()
+            alert.setWindowTitle('Nonstandard symbols')
+            alert.setText('The transcription you selected contains the following non-standard symbols:\n\n{}\n\n'
+                          'Unfortunately, SLPAnnotator cannot interpret these symbols, and therefore cannot create a '
+                          '3D image of this handshape. Sorry about that!\n\n'
+                          'The accepted "standard" symbols are those found in transcription dropdown boxes and next to'
+                          ' the image of the hand. '.format(nonstandard))
+
+            alert.exec_()
+            return
+
         if self.blenderPath is not None:
             blenderPath = os.path.join(self.blenderPath, 'blender.exe')
             blenderPlayerPath = os.path.join(self.blenderPath, 'blenderplayer.exe')
