@@ -415,7 +415,7 @@ class TranscriptionSlot(QLineEdit):
         key = e.key()
 
         #don't do anything if under unrestricted settings
-        if self.validatorType == 'unrestricted':
+        if not hasattr(self, 'validatorType') or self.validatorType == 'unrestricted':
             self.completer().complete()
             super().keyPressEvent(e)
             return
