@@ -70,6 +70,8 @@ Similarly, to paste the transcription, click on the Past button at the top right
    
    First, click on the Copy button. In the new window, select Hand 1, Config 1, and click OK.
 
+
+.. image::
    
    Second, click on the Paste button. In the new window, you can see the copied transcription in the first line introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select Hand 2, Config 1, and click OK.
 
