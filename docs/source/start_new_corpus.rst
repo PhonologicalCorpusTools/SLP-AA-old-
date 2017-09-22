@@ -9,9 +9,15 @@ Starting a new corpus
 Transcribing a sign
 ------------------
 
+.. _enter_gloss:
+
+1. Entering a Gloss
+`````````````````
+To enter a gloss for a sign, simply click on the text box named "Gloss" and type in. This box is case-sensitive.
+
 .. _fill_slot:
 
-1. Filling in a slot
+2. Filling in a slot
 `````````````````
 To fill in a slot, you can either click on a slot to select a symbol from the pull-down menu or type in 
 a symbol yourself. For more infomation about slots and symbols, see :ref:`field_and_slot`
@@ -26,7 +32,7 @@ a symbol yourself. For more infomation about slots and symbols, see :ref:`field_
 
 .. _flag_slot:
 
-2. Flagging a slot
+3. Flagging a slot
 `````````````````
 You can optionally flag individual slots. "Flag as uncertain" will colour the slot, and 
 "Flag as estimate" will mark the slot with a dotted line. 
@@ -49,3 +55,23 @@ Alternatively, go to Transcription in the menu bar and select "Set transcription
    :width: 90%
    :align: center
 
+
+.. _copy_and_paste:
+
+4. Copying and Pasting
+`````````````````
+Using the Copy and Paste buttons at the top right corner, you can copy your transcription for one Config and paste it to to another Config within the same sign.
+For example
+To copy your transcription, click on the Copy button at the top right corner. A new window "Copy transcription" will appear. Select a Config that you would like to copy, and click OK.
+
+Similarly, to paste the transcription, click on the Past button at the top right corner. A new window "Paste transcription" will appear. Make sure that the intended trasnscription has been copied, and select a Config to which you would like to paste that transcription. Click OK. Note that any existing symbols in the Config will be overwritten.
+
+   For example, let's say you would like to copy your transcription for Hand 1, Config 1 and paste it to Hand 2, Config 1:
+   
+   First, click on the Copy button. In the new window, select Hand 1, Config 1, and click OK.
+   
+   Second, click on the Paste button. In the new window, you can see the copied transcription in the first line introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select Hand 2, Config 1, and click OK.
+
+.. image:: static/paste.png
+   :width: 90%
+   :align: center
