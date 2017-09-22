@@ -8,7 +8,8 @@ class ConfigComboBox(QComboBox):
         super().__init__()
         self.addItem('Config 1')
         self.addItem('Config 2')
-        self.addItem('Any config')
+        self.addItem('Either config')
+        self.addItem('Both configs')
 
 class HandComboBox(QComboBox):
 
@@ -16,12 +17,14 @@ class HandComboBox(QComboBox):
         super().__init__()
         self.addItem('Hand 1')
         self.addItem('Hand 2')
-        self.addItem('Any hand')
+        self.addItem('Either hand')
+        self.addItem('Both hands')
 
 class FingerComboBox(QComboBox):
 
     def __init__(self):
         super().__init__()
+        self.addItem('Thumb')
         self.addItem('Index')
         self.addItem('Middle')
         self.addItem('Ring')
@@ -35,6 +38,8 @@ class FlexionComboBox(QComboBox):
         self.addItem('Extended')
         self.addItem('Intermediate')
         self.addItem('Flexed')
+        self.addItem('Obscured')
+        self.addItem('Blank')
 
 class QuantifierComboBox(QComboBox):
 
@@ -82,33 +87,34 @@ class FingerSearchLayout(QHBoxLayout):
         self.flexions = FlexionComboBox()
         self.configs = ConfigComboBox()
         self.hands = HandComboBox()
-        self.addWidget(QLabel('For '))
+        self.addWidget(QLabel('In '))
         self.addWidget(self.configs)
         self.addWidget(self.hands)
         self.addWidget(self.quantifiers)
         self.addWidget(QLabel(' of the joints on the '))
         self.addWidget(self.fingers)
-        self.addWidget(QLabel(' finger are '))
+        self.addWidget(QLabel(' are '))
         self.addWidget(self.flexions)
 
-
-class NaturalLanguageSearchDialog(QDialog):
-
-    def __init__(self, corpus):
+class PhraseDialog(QDialog):
+    def __init__(self):
         super().__init__()
-        self.corpus = corpus
-        self.setWindowTitle('Search')
-        self.searchLayouts = list()
+
+        self.descriptionLayouts = list()
+        self.introduction = QLabel()
+        self.introduction.setFont(QFont('Arial', 15))
+        #this label is used by subclasses to present different information to the user
 
         self.layout = QVBoxLayout()
+        self.layout.addWidget(self.introduction)
+
+        self.metaLayout = QVBoxLayout()
+        self.layout.addLayout(self.metaLayout)
 
         buttonLayout = QHBoxLayout()
-        addFingerDescription = QPushButton('Add search description')
-        addFingerDescription.clicked.connect(self.addFingerLayout)
-        buttonLayout.addWidget(addFingerDescription)
-        # addJointDescription = QPushButton('Add search description (joint-based)')
-        # addJointDescription.clicked.connect(self.addJointLayout)
-        # buttonLayout.addWidget(addJointDescription)
+        self.addDescription = QPushButton('')
+        self.addDescription.clicked.connect(self.addFingerLayout)
+        buttonLayout.addWidget(self.addDescription)
         ok = QPushButton('OK')
         buttonLayout.addWidget(ok)
         ok.clicked.connect(self.accept)
@@ -119,23 +125,105 @@ class NaturalLanguageSearchDialog(QDialog):
 
         self.setLayout(self.layout)
 
-    def addFingerLayout(self):
+    def addFingerLayout(self, disable_quantifiers=False):
         newLayout = FingerSearchLayout()
-        self.searchLayouts.append(newLayout)
-        self.layout.addLayout(newLayout)
+        if disable_quantifiers:
+            newLayout.quantifiers.removeItem(2)
+            newLayout.quantifiers.removeItem(1)
+            newLayout.configs.removeItem(2)
+            newLayout.hands.removeItem(2)
+        self.descriptionLayouts.append(newLayout)
+        self.metaLayout.addLayout(newLayout)
 
     def addJointLayout(self):
         newLayout = JointSearchLayout()
-        self.searchLayouts.append(newLayout)
-        self.layout.addLayout(newLayout)
+        self.descriptionLayouts.append(newLayout)
+        self.metaLayout.addLayout(newLayout)
+
+    def findSlotNumbers(self, finger):
+        if finger == 'thumb':
+            slots = (4, 5)
+        elif finger == 'index':
+            slots = (17,18,19)
+        elif finger == 'middle':
+            slots = (22, 23, 24)
+        elif finger == 'ring':
+            slots = (27, 28, 29)
+        elif finger == 'pinky':
+            slots = (32, 33, 34)
+        return slots
+
+    def findTranscriptionSymbol(self, description):
+        if description == 'Obscured':
+            symbol = '?'
+        elif description == 'Blank':
+            symbol = ''
+        else:
+            symbol = description[0]
+            if symbol == 'I': #intermediate has to be lowercase, but the other flexion values do not
+                symbol = 'i'
+
+        return symbol
+
+    def generateTranscriptions(self):
+        pass #overloaded function, see subclasses
 
     def accept(self):
-        self.transcriptions = None
+        self.transcriptions = self.generateTranscriptions()
         super().accept()
 
     def reject(self):
         self.transcriptions = None
         super().reject()
+
+class PhraseSearchDialog(PhraseDialog):
+
+    def __init__(self, corpus):
+        super().__init__()
+        self.corpus = corpus
+        self.setWindowTitle('Seach by descriptive phrase')
+        self.addDescription.setText('Add search description')
+        self.introduction.setText('Find a handshape with the following properties...')
+        self.addFingerLayout()
+
+    def generateTranscription(self):
+        pass
+
+class AutoFillDialog(PhraseDialog):
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Autofill')
+        self.addDescription.setText('Add autofill operation')
+        self.introduction.setText('Fill in the current transcription so that...')
+        self.addFingerLayout()
+
+    def addFingerLayout(self):
+        super().addFingerLayout(disable_quantifiers=True)
+
+    def generateTranscriptions(self):
+
+        transcriptions = {'config1hand1': [None for n in range(34)],
+                          'config1hand2': [None for n in range(34)],
+                          'config2hand1': [None for n in range(34)],
+                          'config2hand2': [None for n in range(34)]}
+
+        for layout in self.descriptionLayouts:
+            quantifier = layout.quantifiers.currentText().lower()
+            config = layout.configs.currentText().lower().replace(' ', '')
+            hand = layout.hands.currentText().lower().replace(' ', '')
+            slots = self.findSlotNumbers(layout.fingers.currentText().lower())
+            symbol = self.findTranscriptionSymbol(layout.flexions.currentText())
+
+            configs = ['config1', 'config2'] if config == 'bothconfigs' else [config]
+            hands = ['hand1', 'hand2'] if hand == 'bothhands' else [hand]
+
+            for c in configs:
+                for h in hands:
+                    for slot in slots:
+                        transcriptions[c+h][slot-1] = symbol
+
+        return transcriptions
 
 
 class TranscriptionSearchDialog(QDialog):

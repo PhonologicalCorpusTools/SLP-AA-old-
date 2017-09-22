@@ -405,7 +405,7 @@ class MainWindow(QMainWindow):
         self.makeCorpusDock()
 
         self.showMaximized()
-        self.defineTabOrder()
+        #self.defineTabOrder()
 
     def setGloss(self, text):
         self.gloss.glossEdit.setText(text)
@@ -1009,7 +1009,7 @@ class MainWindow(QMainWindow):
         return kwargs
 
     def createMenus(self):
-        self.fileMenu = self.menuBar().addMenu("&Menu")
+        self.fileMenu = self.menuBar().addMenu('&File')
         self.fileMenu.addAction(self.newCorpusAct)
         self.fileMenu.addAction(self.loadCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAct)
@@ -1017,6 +1017,11 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.newGlossAct)
         self.fileMenu.addAction(self.exportCorpusAct)
         self.fileMenu.addAction(self.quitAct)
+
+        self.editMenu = self.menuBar().addMenu('&Edit')
+        self.editMenu.addAction(self.copyAct)
+        self.editMenu.addAction(self.pasteAct)
+        self.editMenu.addAction(self.autofillAct)
 
         self.constraintsMenu = self.menuBar().addMenu('&Constraints')
         self.constraintsMenu.addAction(self.setConstraintsAct)
@@ -1037,8 +1042,8 @@ class MainWindow(QMainWindow):
         self.notesMenu.addAction(self.addSignNotesAct)
 
         self.searchMenu = self.menuBar().addMenu('&Search')
-        self.searchMenu.addAction(self.searchTranscriptionAct)
-        self.searchMenu.addAction(self.searchNaturalLanguageAct)
+        self.searchMenu.addAction(self.transcriptionSearchAct)
+        self.searchMenu.addAction(self.phraseSearchAct)
 
         if not hasattr(sys, 'frozen'):
             self.debugMenu = self.menuBar().addMenu('&Debug')
@@ -1108,7 +1113,7 @@ class MainWindow(QMainWindow):
         if searchType == 'transcription':
             dialog = TranscriptionSearchDialog(self.corpus)
         elif searchType == 'natural':
-            dialog = NaturalLanguageSearchDialog(self.corpus)
+            dialog = PhraseSearchDialog(self.corpus)
 
         dialog.exec_()
 
@@ -1120,14 +1125,52 @@ class MainWindow(QMainWindow):
                 self.loadHandShape(resultsDialog.result)
         return
 
+    def autoFillTranscription(self):
+        dialog = AutoFillDialog()
+        dialog.exec_()
+        if not dialog.transcriptions:
+            return
+        currentTranscriptions = self.getTranscriptions()
+        # for t in currentTranscriptions
+        #     if not t.isEmpty():
+        #         alert = QMessageBox()
+        #         alert.setWindowTitle('Warning')
+        #         alert.setText('This autofill operation is going to overwrite a portion of your existing transcription. '
+        #                     'Are you sure you want to continue?')
+        #         alert.addButton('OK')
+        #         alert.addButton('Cancel')
+        mapping = {'config1hand1': (0, 'hand1Transcription'),
+                   'config1hand2': (0, 'hand2Transcription'),
+                   'config2hand1': (1, 'hand1Transcription'),
+                   'config2hand2': (1, 'hand2Transcription')}
+        for confighand in mapping:
+            widgetnum, attribute_name = mapping[confighand]
+            if any(x is not None for x in dialog.transcriptions[confighand]):
+                current = currentTranscriptions[0]
+                for slot, symbol in enumerate(dialog.transcriptions[confighand]):
+                    if symbol is not None:
+                        getattr(self.configTabs.widget(widgetnum), attribute_name)[slot].setText(symbol)
+
     def createActions(self):
 
-        self.searchTranscriptionAct = QAction('Search by transcription...',
+        self.copyAct = QAction('Copy a transcription',
+                              self,
+                              triggered = self.copyTranscription)
+
+        self.pasteAct = QAction('Paste a transcription',
+                                self,
+                                triggered = self.pasteTranscription)
+
+        self.autofillAct = QAction('Autofill transcription slots',
+                               self,
+                               triggered = self.autoFillTranscription)
+
+        self.transcriptionSearchAct = QAction('Search by transcription...',
                                        self,
                                        statusTip = 'Search the current corpus',
                                        triggered = lambda x: self.searchCorpus('transcription'))
 
-        self.searchNaturalLanguageAct = QAction('Search using descriptive phrases...',
+        self.phraseSearchAct = QAction('Search using descriptive phrases...',
                                                 self,
                                                 statusTip = 'Search the current corpus',
                                                 triggered = lambda x: self.searchCorpus('natural'))
@@ -1343,6 +1386,7 @@ class MainWindow(QMainWindow):
         for widget in self.globalOptionsWidgets:
             widget.setChecked(False)
         self.askSaveChanges = False
+        self.showMaximized()
 
 class ExportCorpusDialog(QDialog):
 
