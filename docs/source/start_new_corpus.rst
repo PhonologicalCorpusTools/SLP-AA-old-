@@ -82,4 +82,6 @@ Similarly, to paste the transcription, click on the Past button at the top right
 .. image:: static/paste.png
    :width: 90%
    :align: center
+   
+   t
 
