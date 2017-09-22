@@ -14,7 +14,7 @@ Transcribing a sign
 1. Filling in a slot
 `````````````````
 To fill in a slot, you can either click on a slot to select a symbol from the pull-down menu or type in 
-a symbol yourself. For more infomation about slots and symbols, see :ref:'field_and_slot'
+a symbol yourself. For more infomation about slots and symbols, see :ref:`field_and_slot`
 
       Notes on typing in a symbol
       
