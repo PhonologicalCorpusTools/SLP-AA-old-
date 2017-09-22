@@ -61,7 +61,7 @@ Alternatively, go to Transcription in the menu bar and select "Set transcription
 4. Copying and Pasting
 `````````````````
 Using the Copy and Paste buttons at the top right corner, you can copy your transcription for one Config and paste it to to another Config within the same sign.
-For example
+
 To copy your transcription, click on the Copy button at the top right corner. A new window "Copy transcription" will appear. Select a Config that you would like to copy, and click OK.
 
 Similarly, to paste the transcription, click on the Past button at the top right corner. A new window "Paste transcription" will appear. Make sure that the intended trasnscription has been copied, and select a Config to which you would like to paste that transcription. Click OK. Note that any existing symbols in the Config will be overwritten.
@@ -70,12 +70,16 @@ Similarly, to paste the transcription, click on the Past button at the top right
    
    First, click on the Copy button. In the new window, select Hand 1, Config 1, and click OK.
 
+
 .. image:: static/copy.png
    :width: 90%
    :align: center
    
+   
    Second, click on the Paste button. In the new window, you can see the copied transcription in the first line introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select Hand 2, Config 1, and click OK.
+
 
 .. image:: static/paste.png
    :width: 90%
    :align: center
+
