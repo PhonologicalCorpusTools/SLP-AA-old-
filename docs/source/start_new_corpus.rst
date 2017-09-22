@@ -14,7 +14,7 @@ Transcribing a sign
 1. Filling in a slot
 `````````````````
 To fill in a slot, you can either click on a slot to select a symbol from the pull-down menu or type in 
-a symbol yourself.
+a symbol yourself. For more infomation about slots and symbols, see :ref:'field_and_slot'
 
       Notes on typing in a symbol
       
@@ -29,13 +29,19 @@ a symbol yourself.
 2. Flagging a slot
 `````````````````
 You can optionally flag individual slots. "Flag as uncertain" will colour the slot, and 
-"Flag as estimate" will mark the slot with a dotted line. To do this, click on a slot 
-while holding a control key. A pull-down menu will appear, and you can select or unselect these options:
+"Flag as estimate" will mark the slot with a dotted line. 
+
+To do this, control-click or rightclick a slot. A pull-down menu will appear, and you can select or unselect these options:
 
 .. image:: static/flag.png
    :width: 90%
    :align: center
 
+Alternatively, go to Transcription in the menu bar and select "Set transcription flags...". A new window will appear. You can expand and scroll through the window to flag any slot in any Config. Click OK.
+
+.. image:: static/set_flag.png
+   :width: 90%
+   :align: center
 
 "Flag as uncertain" is intended to stand for the transcriber's subjective uncertainty about their choice of a sylbol. "Flag as estimate" is intended to note that, because of obscurity, a symbol has been estimated in some way (based on knpowledge of hand anatomy, a preceeding hand configuration, the other hand in a two-handed symmetrical sign, etc.). Therefore, it is certainly possible to use these two options simultaneously when the transcriber is uncertain about their estimation.
 
