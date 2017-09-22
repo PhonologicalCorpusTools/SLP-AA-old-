@@ -69,6 +69,10 @@ Similarly, to paste the transcription, click on the Past button at the top right
    For example, let's say you would like to copy your transcription for Hand 1, Config 1 and paste it to Hand 2, Config 1:
    
    First, click on the Copy button. In the new window, select Hand 1, Config 1, and click OK.
+
+.. image:: static/copy.png
+   :width: 90%
+   :align: center
    
    Second, click on the Paste button. In the new window, you can see the copied transcription in the first line introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select Hand 2, Config 1, and click OK.
 
