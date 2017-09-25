@@ -15,6 +15,7 @@ from constraints import *
 from constraintwidgets import *
 from notes import *
 from search import *
+from image import *
 from parameterwidgets import ParameterDialog, ParameterTreeModel
 import anytree
 #from slpa import __version__ as currentSLPAversion
@@ -198,37 +199,6 @@ class VideoPlayer(QWidget):
     def changeMedia(self):
         pass
 
-class HandShapeImage(QLabel):
-
-    def __init__(self, path, reversed=False, parent=None):
-        super().__init__()
-        self.image = QPixmap(path)
-        self.isReversed = False
-        self.setPixmap(self.image)
-        self.mapping = {0: 'hand.png',
-                        1: 'hand.png',
-                        2: 'hand_thumb_selected.png',
-                        3: 'hand_thumb_finger_contact.png',
-                        4: 'hand_index_selected.png',
-                        5: 'hand_middle_selected.png',
-                        6: 'hand_ring_selected.png',
-                        7: 'hand_pinky_selected.png'}
-        self.reversed_mapping = {n:'reversed_'+self.mapping[n] for n in self.mapping}
-        self.mappingChoice = self.mapping
-
-    @Slot(int)
-    def transcriptionSlotChanged(self, e):
-        file_name = 'hand_slot{}.png'.format(e)
-        self.setPixmap(QPixmap(getMediaFilePath(file_name)))
-
-    @Slot(int)
-    def useReverseImage(self, e):
-        self.mappingChoice = self.reversed_mapping
-
-    @Slot(int)
-    def useNormalImage(self, e):
-        self.mappingChoice = self.mapping
-
 class BlenderOutputWindow(QDialog):
 
     def __init__(self, image_name, gloss):
@@ -286,6 +256,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
+        self.setContentsMargins(0,0,0,0)
 
         #Set "global" variables
         self.askSaveChanges = False
@@ -406,6 +377,9 @@ class MainWindow(QMainWindow):
 
         self.showMaximized()
         #self.defineTabOrder()
+
+    def resizeEvent(self, e):
+        self.showMaximized()
 
     def setGloss(self, text):
         self.gloss.glossEdit.setText(text)
@@ -1128,17 +1102,19 @@ class MainWindow(QMainWindow):
     def autoFillTranscription(self):
         dialog = AutoFillDialog()
         dialog.exec_()
-        if not dialog.transcriptions:
+        if not dialog.transcriptions: #user cancelled
             return
         currentTranscriptions = self.getTranscriptions()
-        # for t in currentTranscriptions
-        #     if not t.isEmpty():
-        #         alert = QMessageBox()
-        #         alert.setWindowTitle('Warning')
-        #         alert.setText('This autofill operation is going to overwrite a portion of your existing transcription. '
-        #                     'Are you sure you want to continue?')
-        #         alert.addButton('OK')
-        #         alert.addButton('Cancel')
+        if any(not t.isEmpty() for t in currentTranscriptions):
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('This autofill operation is going to overwrite a portion of your existing transcription.')
+            alert.setInformativeText('Do you want to continue?')
+            alert.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+            choice = alert.exec_()
+            if choice == QMessageBox.Cancel:
+                return
+
         mapping = {'config1hand1': (0, 'hand1Transcription'),
                    'config1hand2': (0, 'hand2Transcription'),
                    'config2hand1': (1, 'hand1Transcription'),
@@ -1153,15 +1129,15 @@ class MainWindow(QMainWindow):
 
     def createActions(self):
 
-        self.copyAct = QAction('Copy a transcription',
+        self.copyAct = QAction('Copy a transcription...',
                               self,
                               triggered = self.copyTranscription)
 
-        self.pasteAct = QAction('Paste a transcription',
+        self.pasteAct = QAction('Paste a transcription...',
                                 self,
                                 triggered = self.pasteTranscription)
 
-        self.autofillAct = QAction('Autofill transcription slots',
+        self.autofillAct = QAction('Autofill transcription slots...',
                                self,
                                triggered = self.autoFillTranscription)
 
@@ -1548,39 +1524,3 @@ def clean(item):
             item.deleteLater()
         except (RuntimeError, AttributeError): # deleted or no deleteLater method
             pass
-
-def sortData(data):
-    if data == 'gloss':
-        return 0
-    elif data == 'config1':
-        return 1
-    elif data == 'config2':
-        return 2
-    elif data == 'major':
-        return 3
-    elif data == 'minor':
-        return 4
-    elif data == 'oneHandMovement':
-        return 5
-    elif data == 'twoHandMovement':
-        return 6
-    elif data == 'orientation':
-        return 7
-
-def loadcsvCorpus(path):
-    with open(path, mode='r', encoding='utf-8') as file:
-        headers = file.readline().strip().split(',')
-        for line in file:
-            line = line.split(',')
-            data = {headers[n]: line[n] for n in range(len(headers))}
-            button = DataButton(data)
-            button.sendData.connect(self.loadHandShape)
-            self.corpusDock.widget().layout().addWidget(button)
-
-def getMediaFilePath(filename):
-    if hasattr(sys, 'frozen'):
-        dir = os.path.dirname(sys.executable)
-        path = os.path.join(dir, 'media', filename)
-    else:
-        path = os.path.join(os.getcwd(), 'media', filename)
-    return path

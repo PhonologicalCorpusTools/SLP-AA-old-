@@ -37,7 +37,7 @@ class Corpus():
             return value
 
     def search(self, query):
-        query = [ [query[0], query[1]], [query[2], query[3]]  ]
+        query = [ [query[0], query[1]], [query[2], query[3]] ]
         match_list = list()
         for word in self:
             matches = [ [False, False], [False, False] ]

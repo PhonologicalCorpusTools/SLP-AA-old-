@@ -1,5 +1,5 @@
-from imports import *
 from collections import namedtuple
+from imports import *
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
@@ -20,6 +20,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         self.lineLayout = QHBoxLayout()
         self.addLayout(self.lineLayout)
+        self.lineLayout.setSpacing(1)
 
         self.generateSlots()
         self.generateViolationLabels()
@@ -27,6 +28,8 @@ class TranscriptionLayout(QVBoxLayout):
 
         self.flagList = [False for n in range(34)]
         self.connectSlotSignals()
+
+        self.setSpacing(1)
 
     def updateFlags(self, flags):
         for flag, slot in zip(flags[1:], self.slots[1:]):
@@ -177,6 +180,7 @@ class TranscriptionLayout(QVBoxLayout):
         for slot in self.slots[1:]:
             if slot.num in [8,9,16,21,26,31]:
                 continue
+                #these slots have automatically filled values, and they cannot be edited by the user
             if slot.text():
                 return False
         return True
@@ -243,7 +247,6 @@ class TranscriptionCompleter(QCompleter):
 
     def __init__(self, options, lineEditWidget):
         super().__init__(options, lineEditWidget)
-        #self.setCaseSensitivity(Qt.CaseSensitive)
         self.setCaseSensitivity(Qt.CaseInsensitive)
         self.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
 
@@ -496,7 +499,6 @@ class TranscriptionCheckBox(QCheckBox):
     def text(self):
         return 'V' if self.isChecked() else ''
 
-
 class TranscriptionField(QGridLayout):
 
     slotSelectionChanged = Signal(int)
@@ -506,14 +508,22 @@ class TranscriptionField(QGridLayout):
         self.number = number
         self.name = 'field{}'.format(self.number)
         self.left_bracket = QLabel('[')
+        self.left_bracket.setContentsMargins(0, 0, 0, 0)
         self.right_bracket = QLabel(']<font size="5"><b><sub>{}</sub></b></font>'.format(self.number))
+        self.right_bracket.setContentsMargins(0, 0, 0, 0)
         self.transcription = QHBoxLayout()
         self.violations = QHBoxLayout()
+        self.transcription.setSpacing(0)
+        self.transcription.setContentsMargins(0,0,0,0)
+        self.violations.setSpacing(0)
 
         self.addWidget(self.left_bracket, 0, 0)
         self.addLayout(self.transcription, 0, 1)
         self.addWidget(self.right_bracket, 0, 10)
         self.addLayout(self.violations, 1, 1)
+
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setSpacing(2)
 
     def addSlot(self, slot):
         self.transcription.addWidget(slot)
@@ -740,6 +750,7 @@ class TranscriptionConfigTab(QWidget):
         self.hand2Transcription = TranscriptionLayout(hand=2)
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
         self.setLayout(self.configLayout)
+
 
     def clearAll(self, clearFlags=False):
         self.hand1Transcription.clearTranscriptionSlots()

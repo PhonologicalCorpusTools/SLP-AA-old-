@@ -1,6 +1,10 @@
-from imports import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, QPushButton, QFont, QListWidget, QComboBox
-from transcriptions import TranscriptionConfigTab
+from imports import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, QPushButton, QFont, QListWidget, QComboBox, Qt,
+                     QCheckBox)
+from transcriptions import TranscriptionConfigTab, TranscriptionInfo
+from image import *
 
+FONT_NAME = 'Arial'
+FONT_SIZE = 12
 
 class ConfigComboBox(QComboBox):
 
@@ -234,10 +238,11 @@ class TranscriptionSearchDialog(QDialog):
         self.corpus = corpus
         self.transcriptions = None
         self.setWindowTitle('Search')
-
+        self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
 
         layout = QVBoxLayout()
 
+        #Set up up top layout
         self.topLayout = QHBoxLayout()
         explanation = QLabel()
         text = ('Enter the transcription you want to match in your corpus.')
@@ -246,10 +251,36 @@ class TranscriptionSearchDialog(QDialog):
         self.topLayout.addWidget(explanation)
         layout.addLayout(self.topLayout)
 
+        #Set up config tabs
         self.configTabs = QTabWidget()
         self.configTabs.addTab(TranscriptionConfigTab(1), 'Config 1')
         self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
+
+        # Add "global" handshape options (as checkboxes)
+        self.globalOptionsLayout = QHBoxLayout()
+        self.setupGlobalOptions()
+        layout.addLayout(self.globalOptionsLayout)
+
+        #Add hand image
+        self.infoPanel = QHBoxLayout()
+        self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
+        self.infoPanel.addWidget(self.handImage)
+        self.transcriptionInfo = TranscriptionInfo()
+        self.infoPanel.addLayout(self.transcriptionInfo)
+        layout.addLayout(self.infoPanel)
+
+        #Connects some slots and signals
+        for k in [0,1]:
+            for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
+                slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
+                slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+                slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
+
+            for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
+                slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
+                slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
+                slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
 
         buttonLayout = QVBoxLayout()
         ok = QPushButton('Search')
@@ -261,17 +292,43 @@ class TranscriptionSearchDialog(QDialog):
         layout.addLayout(buttonLayout)
         self.setLayout(layout)
 
+        self.showMaximized()
+
+    def setupGlobalOptions(self):
+        globalOptionsLabel = QLabel('Global handshape options:')
+        globalOptionsLabel.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.globalOptionsLayout.addWidget(globalOptionsLabel)
+        self.forearmCheckBox = QCheckBox('Forearm is involved (slot 1/field 1)')
+        self.forearmCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.globalOptionsLayout.addWidget(self.forearmCheckBox)
+        self.partialObscurityCheckBox = QCheckBox('This sign is partially obscured')
+        self.partialObscurityCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.globalOptionsLayout.addWidget(self.partialObscurityCheckBox)
+        self.uncertainCodingCheckBox = QCheckBox('The coding for this sign is uncertain')
+        self.uncertainCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.globalOptionsLayout.addWidget(self.uncertainCodingCheckBox)
+        self.incompleteCodingCheckBox = QCheckBox('The coding for this sign is incomplete')
+        self.incompleteCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.globalOptionsLayout.addWidget(self.incompleteCodingCheckBox)
+        self.globalOptionsWidgets = [self.forearmCheckBox,
+                                     self.partialObscurityCheckBox,
+                                     self.uncertainCodingCheckBox,
+                                     self.incompleteCodingCheckBox]
+
     def search(self):
-        self.transcriptions = self.getTranscriptions()
+        self.getTranscriptions()
         super().accept()
 
     def getTranscriptions(self):
-        transcriptions = list()
-        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
-        return transcriptions
+        self.transcriptions = list()
+        self.transcriptions.append(self.configTabs.widget(0).hand1Transcription)
+        self.transcriptions.append(self.configTabs.widget(0).hand2Transcription)
+        self.transcriptions.append(self.configTabs.widget(1).hand1Transcription)
+        self.transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        self.forearmInvolved = self.forearmCheckBox.isChecked()
+        self.partialObscurity = self.partialObscurityCheckBox.isChecked()
+        self.uncertainCoding = self.uncertainCodingCheckBox.isChecked()
+        self.incompleteCoding = self.incompleteCodingCheckBox.isChecked()
 
 class SearchResultsDialog(QDialog):
 
