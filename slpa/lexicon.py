@@ -1,5 +1,5 @@
 #from slpa import __version__ as currentSLPAversion
-import os
+import os, re
 from collections import OrderedDict
 from random import choice
 from parameters import defaultParameterTree, defaultParameters
@@ -36,21 +36,19 @@ class Corpus():
         else:
             return value
 
-    def search(self, query):
-        query = [ [query[0], query[1]], [query[2], query[3]] ]
+    def regExSearch(self, query):
+        expressions = [ [query[0], query[1]], [query[2], query[3]] ]
         match_list = list()
         for word in self:
-            matches = [ [False, False], [False, False] ]
-            for config_num in [1, 2]:
-                for hand_num in [1, 2]:
-                    slot_list = getattr(word, 'config{}hand{}'.format(config_num, hand_num))
-                    compare_list = query[config_num-1][hand_num-1]
-                    compare_list = [slot.text() for slot in compare_list.slots]
-                    if slot_list == compare_list:
-                       matches[config_num-1][hand_num-1] = True
-            matches = [item for sublist in matches for item in sublist]
-            if all(matches):
+            for config_num, hand_num in [(1,1), (1,2), (2,1), (2,2)]:
+                slots = getattr(word, 'config{}hand{}'.format(config_num, hand_num))
+                slots = ''.join([slot if slot else '_' for slot in slots])
+                regex = re.compile(expressions[config_num - 1][hand_num - 1])
+                if regex.match(slots) is None:
+                    break
+            else:
                 match_list.append(word)
+
         return match_list
 
     def getWord(self, text):

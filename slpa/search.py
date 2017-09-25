@@ -315,8 +315,24 @@ class TranscriptionSearchDialog(QDialog):
                                      self.uncertainCodingCheckBox,
                                      self.incompleteCodingCheckBox]
 
+    def generateRegEx(self):
+        expressions = list()
+
+        for transcription in self.transcriptions:
+            regex = list()
+            for slot in transcription.slots:
+                symbol = slot.text()
+                if not symbol or symbol == ' ':
+                    symbol = '.'
+                regex.append(symbol)
+            regex = ''.join(regex)
+            expressions.append(regex)
+        self.regularExpressions = expressions
+
+
     def search(self):
         self.getTranscriptions()
+        self.generateRegEx()
         super().accept()
 
     def getTranscriptions(self):

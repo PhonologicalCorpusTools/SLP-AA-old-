@@ -1092,11 +1092,17 @@ class MainWindow(QMainWindow):
         dialog.exec_()
 
         if dialog.transcriptions is not None:
-            matches = self.corpus.search(dialog.transcriptions)
-            resultsDialog = SearchResultsDialog(matches)
-            resultsDialog.exec_()
-            if resultsDialog.result is not None:
-                self.loadHandShape(resultsDialog.result)
+            matches = self.corpus.regExSearch(dialog.regularExpressions)
+            if matches:
+                resultsDialog = SearchResultsDialog(matches)
+                resultsDialog.exec_()
+                if resultsDialog.result:
+                    self.loadHandShape(resultsDialog.result)
+            else:
+                alert = QMessageBox()
+                alert.setWindowTitle('Search results')
+                alert.setText('No matching transcriptions were found in your corpus')
+                alert.exec_()
         return
 
     def autoFillTranscription(self):
