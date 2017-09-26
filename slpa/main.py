@@ -1089,7 +1089,7 @@ class MainWindow(QMainWindow):
         elif searchType == 'natural':
             dialog = PhraseSearchDialog(self.corpus)
 
-        dialog.exec_()
+        result = dialog.exec_()
 
         if dialog.transcriptions is not None:
             matches = self.corpus.regExSearch(dialog.regularExpressions)

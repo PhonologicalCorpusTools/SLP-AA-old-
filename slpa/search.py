@@ -146,15 +146,15 @@ class PhraseDialog(QDialog):
 
     def findSlotNumbers(self, finger):
         if finger == 'thumb':
-            slots = (4, 5)
+            slots = [4, 5]
         elif finger == 'index':
-            slots = (17,18,19)
+            slots = [17,18,19]
         elif finger == 'middle':
-            slots = (22, 23, 24)
+            slots = [22, 23, 24]
         elif finger == 'ring':
-            slots = (27, 28, 29)
+            slots = [27, 28, 29]
         elif finger == 'pinky':
-            slots = (32, 33, 34)
+            slots = [32, 33, 34]
         return slots
 
     def findTranscriptionSymbol(self, description):
@@ -173,11 +173,12 @@ class PhraseDialog(QDialog):
         pass #overloaded function, see subclasses
 
     def accept(self):
-        self.transcriptions = self.generateTranscriptions()
+        self.transcriptions = True
+        self.generateRegEx()
         super().accept()
 
     def reject(self):
-        self.transcriptions = None
+        self.transcriptions = False
         super().reject()
 
 class PhraseSearchDialog(PhraseDialog):
@@ -192,6 +193,59 @@ class PhraseSearchDialog(PhraseDialog):
 
     def generateTranscription(self):
         pass
+
+    def generateRegEx(self):
+        mapping = {'config1hand1': (0, 'hand1Transcription'),
+                   'config1hand2': (0, 'hand2Transcription'),
+                   'config2hand1': (1, 'hand1Transcription'),
+                   'config2hand2': (1, 'hand2Transcription')}
+
+        for layout in self.descriptionLayouts:
+            transcriptions = {'config1hand1': [None for n in range(34)],
+                              'config1hand2': [None for n in range(34)],
+                              'config2hand1': [None for n in range(34)],
+                              'config2hand2': [None for n in range(34)]}
+
+            finger = layout.fingers.currentText().lower()
+            quantifier = layout.quantifiers.currentText().lower()
+            config = layout.configs.currentText().lower().replace(' ', '')
+            hand = layout.hands.currentText().lower().replace(' ', '')
+            slots = self.findSlotNumbers(layout.fingers.currentText().lower())
+            symbol = self.findTranscriptionSymbol(layout.flexions.currentText())
+
+            configs = ['config1', 'config2'] if config == 'bothconfigs' else [config]
+            hands = ['hand1', 'hand2'] if hand == 'bothhands' else [hand]
+
+            if quantifier == 'all':
+                pass #symbol is normal
+            elif quantifier == 'any':
+                if finger == 'thumb':
+                    symbol = '{}|.(?={})'.format(symbol, symbol)
+                    slots = [slots[0], -1*slots[1]]
+                else:
+                    symbol = '{}|.(?={})|.(?=.{})'.format(symbol, symbol, symbol)
+                    slots = [slots[0], -1*slots[1], -1*slots[2]]
+                #this new "symbol" acts as a regex that looks ahead 2 or 3 slots, depending on the selected finger
+                #we don't want to put this regex in each of those slots, but rather only in the first one
+            elif quantifier == 'none':
+                symbol = '[^{}]'.format(symbol)
+
+            for c in configs:
+                for h in hands:
+                    for slot in slots:
+                        if slot < 0:
+                            transcriptions[c+h].pop(slot-1*-1)
+                        else:
+                            transcriptions[c+h][slot-1] = symbol
+
+            for key, value in transcriptions.items():
+                regex = ['.' if v is None else v for v in value]
+                transcriptions[key] = regex
+
+            for key in sorted(list(transcriptions.keys())):
+                print(transcriptions[key], len(transcriptions[key]))
+
+            self.regularExpressions = [''.join(transcriptions[key]) for key in sorted(list(transcriptions.keys()))]
 
 class AutoFillDialog(PhraseDialog):
 
