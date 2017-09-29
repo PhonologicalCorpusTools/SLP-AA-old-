@@ -9,6 +9,6 @@ from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction,
                             QLineEdit, QFileDialog, QComboBox, QListWidget,
                             QProgressDialog, QCheckBox, QMenu, QMenuBar, QSizePolicy, QToolTip, QCompleter,
                             QBoxLayout, QStackedWidget, QTabWidget, QTableWidget, QTableWidgetItem,
-                            QGraphicsScene, QGraphicsView)
+                            QGraphicsScene, QGraphicsView, QSpacerItem)
 from PyQt5.QtMultimedia import (QMediaPlayer, QMediaPlaylist, QMediaContent, QAbstractVideoSurface, QVideoSurfaceFormat)
 from PyQt5.QtMultimediaWidgets import QVideoWidget, QGraphicsVideoItem

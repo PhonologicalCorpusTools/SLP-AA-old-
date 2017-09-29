@@ -109,6 +109,9 @@ class PhraseDialog(QDialog):
         self.introduction.setFont(QFont('Arial', 15))
         #this label is used by subclasses to present different information to the user
 
+        self.transcriptions = None
+        self.regularExpressions = None
+
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.introduction)
 
@@ -172,28 +175,6 @@ class PhraseDialog(QDialog):
     def generateTranscriptions(self):
         pass #overloaded function, see subclasses
 
-    def accept(self):
-        self.transcriptions = True
-        self.generateRegEx()
-        super().accept()
-
-    def reject(self):
-        self.transcriptions = False
-        super().reject()
-
-class PhraseSearchDialog(PhraseDialog):
-
-    def __init__(self, corpus):
-        super().__init__()
-        self.corpus = corpus
-        self.setWindowTitle('Seach by descriptive phrase')
-        self.addDescription.setText('Add search description')
-        self.introduction.setText('Find a handshape with the following properties...')
-        self.addFingerLayout()
-
-    def generateTranscription(self):
-        pass
-
     def generateRegEx(self):
         mapping = {'config1hand1': (0, 'hand1Transcription'),
                    'config1hand2': (0, 'hand2Transcription'),
@@ -242,10 +223,33 @@ class PhraseSearchDialog(PhraseDialog):
                 regex = ['.' if v is None else v for v in value]
                 transcriptions[key] = regex
 
-            for key in sorted(list(transcriptions.keys())):
-                print(transcriptions[key], len(transcriptions[key]))
+            # for key in sorted(list(transcriptions.keys())):
+            #     print(transcriptions[key], len(transcriptions[key]))
 
             self.regularExpressions = [''.join(transcriptions[key]) for key in sorted(list(transcriptions.keys()))]
+
+    def accept(self):
+        self.accepted = True
+        super().accept()
+
+    def reject(self):
+        self.accepted = False
+        super().reject()
+
+class PhraseSearchDialog(PhraseDialog):
+
+    def __init__(self, corpus):
+        super().__init__()
+        self.corpus = corpus
+        self.setWindowTitle('Seach by descriptive phrase')
+        self.addDescription.setText('Add search description')
+        self.introduction.setText('Find a handshape with the following properties...')
+        self.addFingerLayout()
+        self.regularExpressions = list()
+
+    def accept(self):
+        self.generateRegEx()
+        super().accept()
 
 class AutoFillDialog(PhraseDialog):
 
@@ -255,6 +259,10 @@ class AutoFillDialog(PhraseDialog):
         self.addDescription.setText('Add autofill operation')
         self.introduction.setText('Fill in the current transcription so that...')
         self.addFingerLayout()
+
+    def accept(self):
+        self.generateTranscriptions()
+        super().accept()
 
     def addFingerLayout(self):
         super().addFingerLayout(disable_quantifiers=True)
@@ -280,9 +288,7 @@ class AutoFillDialog(PhraseDialog):
                 for h in hands:
                     for slot in slots:
                         transcriptions[c+h][slot-1] = symbol
-
-        return transcriptions
-
+        self.transcriptions = transcriptions
 
 class TranscriptionSearchDialog(QDialog):
 

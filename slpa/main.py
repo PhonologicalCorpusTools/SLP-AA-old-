@@ -6,6 +6,7 @@ import subprocess
 import collections
 import parameters
 import decorators
+import anytree
 from imports import *
 from handshapes import *
 from lexicon import *
@@ -17,7 +18,6 @@ from notes import *
 from search import *
 from image import *
 from parameterwidgets import ParameterDialog, ParameterTreeModel
-import anytree
 #from slpa import __version__ as currentSLPAversion
 
 __currentSLPAversion__ = 0.1
@@ -1076,7 +1076,7 @@ class MainWindow(QMainWindow):
         transcriptions.append(self.configTabs.widget(1).hand2Transcription)
         return transcriptions
 
-    def searchCorpus(self, searchType = 'transcription'):
+    def searchCorpus(self, searchType = 'transcriptions'):
         if not self.corpus:
             alert = QMessageBox()
             alert.setWindowTitle('No corpus')
@@ -1084,14 +1084,16 @@ class MainWindow(QMainWindow):
             alert.exec_()
             return
 
-        if searchType == 'transcription':
+        if searchType == 'transcriptions':
             dialog = TranscriptionSearchDialog(self.corpus)
-        elif searchType == 'natural':
+        elif searchType == 'phrases':
             dialog = PhraseSearchDialog(self.corpus)
 
-        result = dialog.exec_()
+        dialog.exec_()
+        if not dialog.accepted:
+            return
 
-        if dialog.transcriptions is not None:
+        if dialog.transcriptions or dialog.regularExpressions:
             matches = self.corpus.regExSearch(dialog.regularExpressions)
             if matches:
                 resultsDialog = SearchResultsDialog(matches)
@@ -1108,13 +1110,14 @@ class MainWindow(QMainWindow):
     def autoFillTranscription(self):
         dialog = AutoFillDialog()
         dialog.exec_()
-        if not dialog.transcriptions: #user cancelled
+        if not dialog.accepted:
             return
+
         currentTranscriptions = self.getTranscriptions()
         if any(not t.isEmpty() for t in currentTranscriptions):
             alert = QMessageBox()
             alert.setWindowTitle('Warning')
-            alert.setText('This autofill operation is going to overwrite a portion of your existing transcription.')
+            alert.setText('This autofill operation may overwrite a portion of your existing transcription.')
             alert.setInformativeText('Do you want to continue?')
             alert.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
             choice = alert.exec_()
@@ -1150,12 +1153,12 @@ class MainWindow(QMainWindow):
         self.transcriptionSearchAct = QAction('Search by transcription...',
                                        self,
                                        statusTip = 'Search the current corpus',
-                                       triggered = lambda x: self.searchCorpus('transcription'))
+                                       triggered = lambda x: self.searchCorpus('transcriptions'))
 
         self.phraseSearchAct = QAction('Search using descriptive phrases...',
                                                 self,
                                                 statusTip = 'Search the current corpus',
-                                                triggered = lambda x: self.searchCorpus('natural'))
+                                                triggered = lambda x: self.searchCorpus('phrases'))
 
         self.setBlenderPathAct = QAction('Set path to Blender...',
                                          self,

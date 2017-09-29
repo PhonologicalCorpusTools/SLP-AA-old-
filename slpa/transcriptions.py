@@ -11,8 +11,9 @@ class TranscriptionLayout(QVBoxLayout):
     fontMetric = QFontMetricsF(defaultFont)
 
     def __init__(self, hand=None):
-        QVBoxLayout.__init__(self)
+        super().__init__()
 
+        self.setSpacing(0)
         self.hand = hand
         self.fields = list()
         self.slots = list()
@@ -20,7 +21,8 @@ class TranscriptionLayout(QVBoxLayout):
 
         self.lineLayout = QHBoxLayout()
         self.addLayout(self.lineLayout)
-        self.lineLayout.setSpacing(1)
+        self.lineLayout.setSpacing(0)
+        self.lineLayout.setContentsMargins(0, 0, 0, 0)
 
         self.generateSlots()
         self.generateViolationLabels()
@@ -28,8 +30,6 @@ class TranscriptionLayout(QVBoxLayout):
 
         self.flagList = [False for n in range(34)]
         self.connectSlotSignals()
-
-        self.setSpacing(1)
 
     def updateFlags(self, flags):
         for flag, slot in zip(flags[1:], self.slots[1:]):
@@ -499,7 +499,7 @@ class TranscriptionCheckBox(QCheckBox):
     def text(self):
         return 'V' if self.isChecked() else ''
 
-class TranscriptionField(QGridLayout):
+class TranscriptionField(QVBoxLayout):
 
     slotSelectionChanged = Signal(int)
 
@@ -507,23 +507,28 @@ class TranscriptionField(QGridLayout):
         super().__init__()
         self.number = number
         self.name = 'field{}'.format(self.number)
-        self.left_bracket = QLabel('[')
-        self.left_bracket.setContentsMargins(0, 0, 0, 0)
-        self.right_bracket = QLabel(']<font size="5"><b><sub>{}</sub></b></font>'.format(self.number))
-        self.right_bracket.setContentsMargins(0, 0, 0, 0)
-        self.transcription = QHBoxLayout()
-        self.violations = QHBoxLayout()
-        self.transcription.setSpacing(0)
-        self.transcription.setContentsMargins(0,0,0,0)
-        self.violations.setSpacing(0)
-
-        self.addWidget(self.left_bracket, 0, 0)
-        self.addLayout(self.transcription, 0, 1)
-        self.addWidget(self.right_bracket, 0, 10)
-        self.addLayout(self.violations, 1, 1)
-
         self.setContentsMargins(0, 0, 0, 0)
-        self.setSpacing(2)
+        self.setSpacing(0)
+
+        self.fieldLayout = QHBoxLayout()
+        self.addLayout(self.fieldLayout)
+
+        self.left_bracket = QLabel('[')
+        self.fieldLayout.addWidget(self.left_bracket)
+
+        self.transcription = QHBoxLayout()
+        self.transcription.setSpacing(0)
+        self.fieldLayout.addLayout(self.transcription)
+
+        self.right_bracket = QLabel(']<font size="5"><b><sub>{}</sub></b></font>'.format(self.number))
+        self.fieldLayout.addWidget(self.right_bracket)
+        self.fieldLayout.setSpacing(2)
+        #self.fieldLayout.setContentsMargins(0, 0, 0, 0)
+        self.fieldLayout.insertSpacerItem(-1, QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.violations = QHBoxLayout()
+        self.violations.setSpacing(0)
+        self.addLayout(self.violations)
 
     def addSlot(self, slot):
         self.transcription.addWidget(slot)
