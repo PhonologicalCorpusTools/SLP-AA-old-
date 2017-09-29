@@ -66,20 +66,27 @@ To copy your transcription, click on the Copy button at the top right corner. A 
 
 Similarly, to paste the transcription, click on the Past button at the top right corner. A new window "Paste transcription" will appear. Make sure that the intended trasnscription has been copied, and select a Config to which you would like to paste that transcription. Click OK. Note that any existing symbols in the Config will be overwritten.
 
-   For example, let's say you would like to copy your transcription for Hand 1, Config 1 and paste it to Hand 2, Config 1:
+   For example, let's say you would like to copy your transcription for Config 1 of Hand 1 and paste it to Config 1 of Hand 2.
    
-   First, click on the Copy button. In the new window, select Hand 1, Config 1, and click OK.
+   First, click on the Copy button. In the new window, select Config 1, Hand 1, and click OK.
    
    .. image:: static/copy.png
       :width: 90%
       :align: center
 
-   
-   Second, click on the Paste button. In the new window, you can see the copied transcription in the first line introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select Hand 2, Config 1, and click OK.
+  
+   Second, click on the Paste button. In the new window, you can see the copied transcription in the first line introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select Config 1, Hand 2, and click OK.
       
    .. image:: static/paste.png
       :width: 90%
       :align: center
+   
+   This feature may be particularly useful for transcribing symmetrical signs.
+   
+   .. image:: static/paste_result.png
+      :width: 90%
+      :align: center
+   
 
 
    
