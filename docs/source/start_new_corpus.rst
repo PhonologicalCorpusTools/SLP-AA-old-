@@ -86,7 +86,13 @@ Similarly, to paste the transcription, click on the Past button at the top right
    .. image:: static/paste_result.png
       :width: 90%
       :align: center
-   
+      
+
+.. _check_global_handshape:
+
+5. Checking Global handshape options
+`````````````````
+Global handshape options (see:ref: `global_handshape_options`) can be checked by simply cliking the box next to a description.
 
 
    
