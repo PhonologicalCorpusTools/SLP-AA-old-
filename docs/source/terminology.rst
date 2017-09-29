@@ -10,7 +10,14 @@ Global handshape options
 ------------------
 
 Global handshape options encode information about the whole sign. 
-They should be checked when relevant.
+They can be checked when relevant.
+
+Available options are:
+
+* Forearm is involved
+* This sign is partially obscured
+* The coding for this sign is uncertain
+* The coding for this sign is incomplete
 
 .. _hand_and_config:
 
