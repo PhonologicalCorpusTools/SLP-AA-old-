@@ -49,7 +49,11 @@ Alternatively, go to Transcription in the menu bar and select "Set transcription
    :width: 90%
    :align: center
 
-"Flag as uncertain" is intended to stand for the transcriber's subjective uncertainty about their choice of a sylbol. "Flag as estimate" is intended to note that, because of obscurity, a symbol has been estimated in some way (based on knpowledge of hand anatomy, a preceeding hand configuration, the other hand in a two-handed symmetrical sign, etc.). Therefore, it is certainly possible to use these two options simultaneously when the transcriber is uncertain about their estimation.
+"Flag as estimate" is intended to note that, because of obscurity, a symbol has been estimated in some way (based on
+knpowledge of hand anatomy, a preceeding hand configuration, the other hand in a two-handed symmetrical sign, etc.).
+"Flag as uncertain" is intended to stand for the transcriber's subjective uncertainty about their choice of a sylbol.
+Therefore, it is certainly possible to use these two options simultaneously when the transcriber is uncertain about their
+estimation.
 
 .. image:: static/use_both.png
    :width: 90%
@@ -93,7 +97,45 @@ Similarly, to paste the transcription, click on the Past button at the top right
 5. Checking Global handshape options
 `````````````````
 Global handshape options (see:ref: `global_handshape_options`) can be checked by simply cliking the box next to a description.
+The options "This sign is partially obscured" and "The coding for this sign is uncertain" can be thought of as a global
+counterpart of the slot options "Flag as estimate" and "Flag as uncertain," respectively (see:ref: `_flag_slot`).
+In other words, it may be useful, for example, to check these Global handshape options when estimation or uncertainty applies
+to a whole sign or a whole finger(s) rather than individual slots.
 
 
-   
+.. _other_parameters:
 
+6. Transcribing other parameters
+`````````````````
+To transcribe parameters other than handshapes, click on "View Parameters button at the top right corner. A new window will
+appear, and you can select relevant values.
+
+.. image:: static/.png
+      :width: 90%
+      :align: center
+
+If you would like to have the parameters window open while transcribing handshapes, go to Options in the menu bar and select
+"Keep parameters window on top."
+
+.. _add_sign_notes:
+
+7. Adding Sign and Corpus notes
+`````````````````
+To add a note to a sign that you are transcribing, go to Notes in the menu bar and click on "Edit sign notes..." A new window
+will appear, and you can type in your comments. 
+
+.. image:: static/sign_notes.png
+      :width: 90%
+      :align: center
+        
+Sign notes are automatically saved when the signs are saved, and you can go back and edit them by following the above step.
+It may be useful, for example, to use this sign notes to describe reasons for checking the Global handshape options.    
+
+Similarly, Notes>"Edit corpus notes..." will allow you to add a note to the entire corpus.
+
+
+.. _check_transcription:
+
+8. Checking transcription
+`````````````````
+To check your transcription against your selected constraints (see :ref:_constraints), click on "check transcription" button.
