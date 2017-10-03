@@ -1,3 +1,4 @@
+.idea/
 *.py[cod]
 /idea
 !requirements.txt

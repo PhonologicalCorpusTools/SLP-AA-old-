@@ -47,7 +47,7 @@ def checkForGloss(function):
 
 def checkForUnsavedChanges(function):
     def ask(*args, **kwargs):
-        if args[0].askSaveChanges and not args[0].autoSave:
+        if args[0].askSaveChanges:
             alert = QMessageBox()
             alert.setWindowTitle('Warning')
             alert.setText('The current gloss has unsaved changes.\n What would you like to do?')
