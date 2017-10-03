@@ -1,8 +1,8 @@
+.idea/
 *.py[cod]
 !requirements.txt
 *.corpus
 *.feature
-*.idea/
 *.iml
 *.exe
 *.msi

@@ -665,7 +665,7 @@ class MainWindow(QMainWindow):
 
     def checkBackwardsComptibility(self):
 
-        for attribute, default_value in Corpus.corpus_attributes.items():
+        for attribute, default_value in sorted(Corpus.corpus_attributes.items()):
             if not hasattr(self.corpus, attribute):
                 setattr(self.corpus, attribute, Corpus.copyValue(Corpus, default_value))
 
@@ -677,9 +677,11 @@ class MainWindow(QMainWindow):
             return
 
         for word in self.corpus:
-            for attribute, default_value in Sign.sign_attributes.items():
+            for attribute, default_value in sorted(Sign.sign_attributes.items()):
                 if not hasattr(word, attribute):
                     setattr(word, attribute, Sign.copyValue(Sign, default_value))
+                if attribute == 'parameters' and not isinstance(getattr(word, attribute), ParameterTreeModel):
+                    pass
                 # if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
                 #     setattr(word, attribute, default_value)
 
@@ -961,7 +963,12 @@ class MainWindow(QMainWindow):
         self.askSaveChanges = False
 
     def loadHandShape(self, gloss):
-        gloss = '' if not gloss else gloss.text()
+        try:
+            gloss = gloss.text()
+        except AttributeError:
+            if not gloss:
+                gloss = ''
+            #else it's just a string
         sign = self.corpus[gloss]
         self.gloss.setText(sign['gloss'])
         self.signNotes.setText(sign['signNotes'])
@@ -1004,10 +1011,10 @@ class MainWindow(QMainWindow):
                 'forearmInvolved': False, 'partialObscurity': False,
                 'uncertainCoding': False, 'incompleteCoding': False}
 
-        config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
+        config1 = self.configTabs.widget(0)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
 
-        config2 = self.configTabs.widget(1)#.findChildren(TranscriptionLayout)
+        config2 = self.configTabs.widget(1)
         kwargs['config2'] = [config2.hand1(), config2.hand2()]
 
         gloss = self.gloss.glossEdit.text().strip()
@@ -1026,6 +1033,12 @@ class MainWindow(QMainWindow):
         kwargs['incompleteCoding'] = self.incompleteCodingCheckBox.isChecked()
         kwargs['uncertainCoding'] = self.uncertainCodingCheckBox.isChecked()
         return kwargs
+
+    def overwriteAllGlosses(self):
+        #this is a debugging function and should not normally be called
+        for word in self.corpus:
+            self.loadHandShape(word.gloss)
+            self.saveCorpus()
 
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&Menu")
@@ -1063,6 +1076,21 @@ class MainWindow(QMainWindow):
             self.debugMenu = self.menuBar().addMenu('&Debug')
             self.debugMenu.addAction(self.resetSettingsAct)
             self.debugMenu.addAction(self.forceBackCompatCheckAct)
+            self.debugMenu.addAction(self.printCorpusObjectAct)
+            self.debugMenu.addAction(self.overwriteAllGlossesAct)
+
+    def printCorpusObject(self):
+        if self.corpus is None:
+            print('No corpus loaded')
+        else:
+            print('CORPUS ATTRIBUTES')
+            for key, value in sorted(self.corpus.__dict__.items()):
+                print(key, type(value), value)
+            print('\nWORD ATTRIBUTES')
+            #word = self.corpus.randomWord()
+            word = self.corpus[self.currentGloss()]
+            for key, value in sorted(word.__dict__.items()):
+                print(key, type(value), value)
 
     def alertOnCorpusSave(self):
         if self.alertOnCorpusSaveAct.isChecked():
@@ -1135,6 +1163,14 @@ class MainWindow(QMainWindow):
         return
 
     def createActions(self):
+
+        self.overwriteAllGlossesAct = QAction('Resave all glosses in new style',
+                                              self,
+                                              triggered = self.overwriteAllGlosses)
+
+        self.printCorpusObjectAct = QAction('Print corpus.__dict__',
+                                         self,
+                                         triggered = self.printCorpusObject)
 
         self.importCorpusAct = QAction('Import corpus from csv...',
                                        self,
