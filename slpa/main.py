@@ -532,17 +532,16 @@ class MainWindow(QMainWindow):
         transcriptions.append(self.configTabs.widget(1).hand2Transcription)
         dialog = TranscriptionPasteDialog(self.clipboard, transcriptions)
         result = dialog.exec_()
-        print('Result', result)
         if result:
-            print('dialog ID', dialog.transcriptionID)
+            include_flags = dialog.includeFlags.isChecked()
             if dialog.transcriptionID == 0:
-                self.configTabs.widget(0).hand1Transcription.updateFromCopy(self.clipboard)
+                self.configTabs.widget(0).hand1Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
             elif dialog.transcriptionID == 1:
-                self.configTabs.widget(0).hand2Transcription.updateFromCopy(self.clipboard)
+                self.configTabs.widget(0).hand2Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
             if dialog.transcriptionID == 2:
-                self.configTabs.widget(1).hand1Transcription.updateFromCopy(self.clipboard)
+                self.configTabs.widget(1).hand1Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
             if dialog.transcriptionID == 3:
-                self.configTabs.widget(1).hand2Transcription.updateFromCopy(self.clipboard)
+                self.configTabs.widget(1).hand2Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
 
     def userMadeChanges(self, e):
         self.askSaveChanges = True
@@ -1036,6 +1035,7 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.saveCorpusAsAct)
         self.fileMenu.addAction(self.newGlossAct)
         self.fileMenu.addAction(self.exportCorpusAct)
+        self.fileMenu.addAction(self.importCorpusAct)
         self.fileMenu.addAction(self.quitAct)
 
         self.constraintsMenu = self.menuBar().addMenu('&Constraints')
@@ -1135,6 +1135,11 @@ class MainWindow(QMainWindow):
         return
 
     def createActions(self):
+
+        self.importCorpusAct = QAction('Import corpus from csv...',
+                                       self,
+                                       statusTip = 'Import from csv file',
+                                       triggered = self.importCorpus)
 
         self.searchCorpusAct = QAction('Search the current corpus...',
                                        self,
@@ -1325,6 +1330,26 @@ class MainWindow(QMainWindow):
                 alert.setText('The file {} is already open in a program on your computer. Please close the file before '
                               'saving, or else choose a different file name.'.format(filename))
                 alert.exec_()
+
+    def importCorpus(self):
+        if self.corpus is not None:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText(('You currently have an open corpus, and you will lose any unsaved changes. '
+                            'What would you like to do?'))
+            alert.addButton('Return to corpus', QMessageBox.NoRole)
+            alert.addButton('Continue', QMessageBox.YesRole)
+            alert.exec_()
+            if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
+                return
+        filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from CSV', os.getcwd(), '*.csv')
+        filename = filepath[0]
+        corpus = Corpus()
+        with open(filename, mode='r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                line = line.split(',')
+
 
     def sizeHint(self):
         sz = QMainWindow.sizeHint(self)

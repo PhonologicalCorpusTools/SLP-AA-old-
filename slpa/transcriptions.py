@@ -226,13 +226,21 @@ class TranscriptionLayout(QVBoxLayout):
                                                                      ''.join([self[n].getText() for n in range(29,34)]))
         return transcription
 
-    def updateFromCopy(self, other):
+    def updateFromCopy(self, other, include_flags = True):
         self.clearTranscriptionSlots()
         if other.slot1.isChecked():
             self.slot1.setChecked(True)
-        for slot in other.slots[1:]:
-            text = slot.getText(empty_text='')
-            getattr(self, 'slot{}'.format(slot.num)).setText(text)
+        for other_slot in other.slots[1:]:
+            text = other_slot.getText(empty_text='')
+            this_slot = getattr(self, 'slot{}'.format(other_slot.num))
+            this_slot.setText(text)
+            if include_flags:
+                if other_slot.isEstimate:
+                    this_slot.changeEstimateAct.setChecked(True)
+                    this_slot.changeEstimate()
+                if other_slot.isUncertain:
+                    this_slot.changeUncertaintyAct.setChecked(True)
+                    this_slot.changeUncertainty()
 
     def __str__(self):
         return ','.join(self.values())
@@ -613,8 +621,8 @@ class TranscriptionInfo(QGridLayout):
         self.optionsDict = {1: 'Either on or off (checkbox)',
                               2: 'L (lateral)\nU (unopposed)\nO (opposed)\nx (crossed)\n? (obscured)',
                               3: '{ (full abduction)\n< (neutral)\n= (adducted))\n? (obscured)',
-                              4: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed))\n? (obscured)',
-                              5: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed))\n? (obscured)',
+                              4: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
+                              5: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
                               6: ('-(no contact)\nt (tip)\nf (friction surface)\nb (back surface)'
                                   '\nr (radial surface)\nu (ulnar surface)\n? (obscured)'),
                               7: '-(no contact)\nd (distal)\np (proximal)\nM (meta-carpal)\n? (obscured)',
@@ -722,6 +730,10 @@ class TranscriptionPasteDialog(QDialog):
         radioLayout.addWidget(hand2config1, 2, 1)
         radioLayout.addWidget(QLabel('Config 2, Hand 2'), 3, 0)
         radioLayout.addWidget(hand2config2, 3, 1)
+
+        self.includeFlags = QCheckBox('Paste in highlighting for uncertain and estimated slots')
+        self.includeFlags.setChecked(True)
+        radioLayout.addWidget(self.includeFlags)
 
         buttonLayout = QHBoxLayout()
         layout.addLayout(buttonLayout)
@@ -911,6 +923,7 @@ class TranscriptionSelectDialog(QDialog):
         radioLayout.addWidget(QLabel('Config 2, Hand 2'), 3, 0)
         radioLayout.addWidget(config2hand2, 3, 1)
 
+
         buttonLayout = QHBoxLayout()
         layout.addLayout(buttonLayout)
         ok = QPushButton('OK')
@@ -920,13 +933,14 @@ class TranscriptionSelectDialog(QDialog):
         buttonLayout.addWidget(ok)
         buttonLayout.addWidget(cancel)
 
+
         self.setLayout(layout)
 
     def accept(self):
         selectedButton = self.transcriptionRadioButtons.checkedButton()
         self.id = self.transcriptionRadioButtons.id(selectedButton)
         self.selectedTranscription = self.transcriptions[self.id]
-        if self.id in [0,2]:
+        if self.id in (0,2):
             self.hand = 'R'
         else:
             self.hand = 'L'
@@ -946,7 +960,7 @@ class TranscriptionFlagDialog(QDialog):
         self.flagTable.setRowCount(4)
         self.flagTable.setColumnCount(34)
         self.flagTable.setHorizontalHeaderLabels(['Slot {}'.format(n) for n in range(1,35)])
-        verticalLabels = ['Hand 1, Config 1', 'Hand 1, Config 2', 'Hand 2, Config 1', 'Hand 2, Config 2']
+        verticalLabels = ['Config 1, Hand 1', 'Config 1, Hand 2', 'Config 2, Hand 1', 'Config 2, Hand 2']
         self.flagTable.setVerticalHeaderLabels(verticalLabels)
         for row in range(self.flagTable.rowCount()):
             for col in range(self.flagTable.columnCount()):
