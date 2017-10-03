@@ -138,4 +138,18 @@ Similarly, Notes>"Edit corpus notes..." will allow you to add a note to the enti
 
 8. Checking transcription
 `````````````````
-To check your transcription against your selected constraints (see :ref:`constraints`), click on "check transcription" button.
+To check your transcription against your selected constraints (see :ref:`constraints`), click on "Check transcription" button.
+
+
+.. _visualize_transcription:
+
+9. Visualizing transcription
+`````````````````
+To see a graphic image of transcribed handshapes, click on "Visualize transcription" button. A new window titled 
+"Handshape visualization" appears. Select a Config and Hand you would like to visualize, and click OK.
+
+.. image:: static/visualization.png
+      :width: 90%
+      :align: center
+
+
