@@ -266,6 +266,9 @@ class MainWindow(QMainWindow):
         self.createActions()
         self.createMenus()
         self.readSettings()
+        self.recentPhraseSearches = collections.deque(self.recentPhraseSearches, maxlen=self.recentSearchMax)
+        self.recentTranscriptionSearches = collections.deque(self.recentTranscriptionSearches, maxlen=self.recentSearchMax)
+        #these variables are reinitialized because we don't know the maxlen value until after the readSettings() call
 
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
         self.corpus = None
@@ -379,7 +382,6 @@ class MainWindow(QMainWindow):
         self.makeCorpusDock()
 
         self.showMaximized()
-        #self.defineTabOrder()
         #self.defineTabOrder()
 
     def resizeEvent(self, e):
@@ -589,6 +591,12 @@ class MainWindow(QMainWindow):
         self.settings.setValue('blenderPath', self.blenderPath)
         self.settings.endGroup()
 
+        self.settings.beginGroup('recentSearches')
+        self.settings.setValue('recentTranscriptionSearches', list(self.recentTranscriptionSearches))
+        self.settings.setValue('recentPhraseSearches', list(self.recentPhraseSearches))
+        self.settings.setValue('recentSearchMax', self.recentSearchMax)
+        self.settings.endGroup()
+
     def readSettings(self, reset=False):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
         if reset:
@@ -617,6 +625,15 @@ class MainWindow(QMainWindow):
         self.autoSave = self.settings.value('autosave', type=bool)
         self.autoSaveAct.setChecked(self.autoSave)
         self.blenderPath = self.settings.value('blenderPath')
+        self.settings.endGroup()
+
+        self.settings.beginGroup('recentSearches')
+        self.recentTranscriptionSearches = self.settings.value('recentTranscriptionSearches',
+                                                               defaultValue=list(), type=list)
+        self.recentPhraseSearches = self.settings.value('recentPhraseSearches',
+                                                        defaultValue=list(), type=list)
+        self.recentSearchMax = self.settings.value('recentSearchMax',
+                                                   defaultValue=10, type=int)
         self.settings.endGroup()
 
     @decorators.checkForUnsavedChanges
@@ -1133,27 +1150,30 @@ class MainWindow(QMainWindow):
             return
 
         if searchType == 'transcriptions':
-            dialog = TranscriptionSearchDialog(self.corpus)
+            dialog = TranscriptionSearchDialog(self.corpus, self.recentTranscriptionSearches)
+            listToUpdate = self.recentTranscriptionSearches
         elif searchType == 'phrases':
-            dialog = PhraseSearchDialog(self.corpus)
+            dialog = PhraseSearchDialog(self.corpus, self.recentPhraseSearches)
+            listToUpdate = self.recentPhraseSearches
 
         dialog.exec_()
         if not dialog.accepted:
             return
 
-        if dialog.transcriptions or dialog.regularExpressions:
-            matches = self.corpus.regExSearch(dialog.regularExpressions)
-            if matches:
-                resultsDialog = SearchResultsDialog(matches)
-                resultsDialog.exec_()
-                if resultsDialog.result:
-                    self.loadHandShape(resultsDialog.result)
-            else:
-                alert = QMessageBox()
-                alert.setWindowTitle('Search results')
-                alert.setText('No matching transcriptions were found in your corpus')
-                alert.exec_()
-        return
+        matches = self.corpus.regExSearch(dialog.regularExpressions)
+        search = RecentSearch(dialog.transcriptions, dialog.regularExpressions, matches)
+        listToUpdate.appendleft(search)
+
+        if matches:
+            resultsDialog = SearchResultsDialog(matches)
+            resultsDialog.exec_()
+            if resultsDialog.result:
+                self.loadHandShape(resultsDialog.result)
+        else:
+            alert = QMessageBox()
+            alert.setWindowTitle('Search results')
+            alert.setText('No matching transcriptions were found in your corpus')
+            alert.exec_()
 
     def autoFillTranscription(self):
         dialog = AutoFillDialog()
@@ -1199,6 +1219,13 @@ class MainWindow(QMainWindow):
                                triggered = self.autoFillTranscription)
 
         self.transcriptionSearchAct = QAction('Search by transcription...',
+                                              self,
+                                              triggered = lambda x: self.searchCorpus(searchType = 'transcriptions'))
+
+        self.phraseSearchAct = QAction('Search by descriptive phrase...',
+                                       self,
+                                       triggered = lambda x: self.searchCorpus(searchType = 'phrases'))
+
         self.overwriteAllGlossesAct = QAction('Resave all glosses in new style',
                                               self,
                                               triggered = self.overwriteAllGlosses)
