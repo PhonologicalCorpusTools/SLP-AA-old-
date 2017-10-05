@@ -1,5 +1,5 @@
-from imports import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, QPushButton, QFont, QListWidget, QComboBox, Qt,
-                     QCheckBox)
+from imports import (Qt, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, QPushButton, QFont, QListWidget,
+                     QComboBox, QCheckBox, QTableWidget, QTableWidgetItem, QAbstractItemView)
 from transcriptions import TranscriptionConfigTab, TranscriptionInfo
 from image import *
 
@@ -100,6 +100,36 @@ class FingerSearchLayout(QHBoxLayout):
         self.addWidget(QLabel(' are '))
         self.addWidget(self.flexions)
 
+class SearchDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.transcriptions = None
+        self.regularExpressions = None
+
+    def showRecentSearches(self):
+        dialog = RecentSearchDialog(self.recents)
+        dialog.exec_()
+        if dialog.result is not None:
+            results = dialog.result.recentData.segmentedTranscription
+            results = [[results[0], results[1]], [results[2], results[3]]]
+            for config in [0,1]:
+                for hand in [0,1]:
+                    widget = getattr(self.configTabs.widget(config), 'hand{}Transcription'.format(hand+1))
+                    for n,symbol in enumerate(results[config][hand]):
+                        slot = getattr(widget, 'slot{}'.format(n+1))
+                        slot.setText(symbol)
+
+    def accept(self):
+        self.accepted = True
+        self.getTranscriptions()
+        self.generateRegEx()
+        super().accept()
+
+    def reject(self):
+        self.accepted = False
+        super().reject()
+
+
 class PhraseDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -173,7 +203,14 @@ class PhraseDialog(QDialog):
         return symbol
 
     def generateTranscriptions(self):
-        pass #overloaded function, see subclasses
+        transcription = [ [] , [] ]
+        for regex in self.regularExpressions:
+            t = list()
+            for symbol in regex:
+                if symbol == '.':
+                    t.append('_')
+                else:
+                    t.append(symbol)
 
     def generateRegEx(self):
         mapping = {'config1hand1': (0, 'hand1Transcription'),
@@ -223,9 +260,6 @@ class PhraseDialog(QDialog):
                 regex = ['.' if v is None else v for v in value]
                 transcriptions[key] = regex
 
-            # for key in sorted(list(transcriptions.keys())):
-            #     print(transcriptions[key], len(transcriptions[key]))
-
             self.regularExpressions = [''.join(transcriptions[key]) for key in sorted(list(transcriptions.keys()))]
 
     def accept(self):
@@ -238,9 +272,10 @@ class PhraseDialog(QDialog):
 
 class PhraseSearchDialog(PhraseDialog):
 
-    def __init__(self, corpus):
+    def __init__(self, corpus, recents):
         super().__init__()
         self.corpus = corpus
+        self.recents = recents
         self.setWindowTitle('Seach by descriptive phrase')
         self.addDescription.setText('Add search description')
         self.introduction.setText('Find a handshape with the following properties...')
@@ -290,13 +325,13 @@ class AutoFillDialog(PhraseDialog):
                         transcriptions[c+h][slot-1] = symbol
         self.transcriptions = transcriptions
 
-class TranscriptionSearchDialog(QDialog):
+class TranscriptionSearchDialog(SearchDialog):
 
-    def __init__(self, corpus):
+    def __init__(self, corpus, recents):
         super().__init__()
 
         self.corpus = corpus
-        self.transcriptions = None
+        self.recents = recents
         self.setWindowTitle('Search')
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
 
@@ -343,15 +378,17 @@ class TranscriptionSearchDialog(QDialog):
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
 
         buttonLayout = QVBoxLayout()
+        showRecents = QPushButton('Show recent searches...')
+        showRecents.clicked.connect(self.showRecentSearches)
         ok = QPushButton('Search')
-        ok.clicked.connect(self.search)
+        ok.clicked.connect(self.accept)
         cancel = QPushButton('Cancel')
         cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(showRecents)
         buttonLayout.addWidget(ok)
         buttonLayout.addWidget(cancel)
         layout.addLayout(buttonLayout)
         self.setLayout(layout)
-
         self.showMaximized()
 
     def setupGlobalOptions(self):
@@ -390,11 +427,6 @@ class TranscriptionSearchDialog(QDialog):
         self.regularExpressions = expressions
 
 
-    def search(self):
-        self.getTranscriptions()
-        self.generateRegEx()
-        super().accept()
-
     def getTranscriptions(self):
         self.transcriptions = list()
         self.transcriptions.append(self.configTabs.widget(0).hand1Transcription)
@@ -405,6 +437,61 @@ class TranscriptionSearchDialog(QDialog):
         self.partialObscurity = self.partialObscurityCheckBox.isChecked()
         self.uncertainCoding = self.uncertainCodingCheckBox.isChecked()
         self.incompleteCoding = self.incompleteCodingCheckBox.isChecked()
+
+class RecentSearch:
+
+    def __init__(self, transcriptions, regex, results):
+        top = ','.join([t.str_with_underscores() for t in transcriptions[0:2]])
+        bottom = ','.join([t.str_with_underscores() for t in transcriptions[2:-1]])
+        self.transcriptions = '\n'.join([top, bottom])
+        self.segmentedTranscription = [[slot.getText(empty_text='') for slot in transcription] for transcription in transcriptions]
+        self.regularExpression = regex
+        self.results = ', '.join([r.gloss for r in results])
+
+    def __str__(self):
+        return self.transcriptions
+
+class RecentSearchItem(QTableWidgetItem):
+
+    def __init__(self, recentData, textType):
+        super().__init__()
+        self.recentData = recentData
+        self.setText(getattr(self.recentData, textType))
+
+class RecentSearchDialog(QDialog):
+
+    def __init__(self, recents):
+        super().__init__()
+        self.setWindowTitle('Recent Searches')
+        self.result = None
+        layout = QVBoxLayout()
+
+        self.recentTable = QTableWidget()
+        self.recentTable.setColumnCount(2)
+        self.recentTable.setRowCount(len(recents))
+        self.recentTable.setHorizontalHeaderLabels(['Search', 'Results'])
+        for row, recent in enumerate(recents):
+            self.recentTable.setItem(row, 0, RecentSearchItem(recent, 'transcriptions'))
+            self.recentTable.setItem(row, 1, RecentSearchItem(recent, 'results'))
+        self.recentTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.recentTable.resizeColumnToContents(0)
+        layout.addWidget(self.recentTable)
+
+        ok = QPushButton('Use selected search')
+        ok.clicked.connect(self.accept)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        layout.addWidget(ok)
+        layout.addWidget(cancel)
+        self.setLayout(layout)
+
+        self.resize(self.recentTable.width()*1.5, self.height())
+
+    def accept(self):
+        row = self.recentTable.currentRow()
+        self.result = self.recentTable.item(row, 0)
+        super().accept()
+
 
 class SearchResultsDialog(QDialog):
 

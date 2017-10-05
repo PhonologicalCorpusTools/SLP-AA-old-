@@ -731,7 +731,7 @@ class MainWindow(QMainWindow):
 
         nonstandard = list()
         for slot in dialog.selectedTranscription:
-            symbol = slot.text()
+            symbol = slot.getText(empty_text='_')
             if symbol not in STANDARD_SYMBOLS:
                 nonstandard.append(symbol)
 
