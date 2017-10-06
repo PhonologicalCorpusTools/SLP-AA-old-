@@ -36,7 +36,7 @@ Options
 In "Options" on the menu bar, click on each option to select or unselect them.
 
 * "Autosave"
-* "Show save alert" gives you a confirmation message when a word has been saved. 
+* "Show save alert" gives you a confirmation message when a sign has been saved. 
 * "Keep parameters window on top"
 * "Warn about duplicate glosses" warns you when you try to save a sign with a gloss already existing in your corpus. It gives you options to either "Go back and edit the gloss" or "Overwrite existing word."
 
