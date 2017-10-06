@@ -159,7 +159,7 @@ To see a graphic image of transcribed handshapes, click on "Visualize transcript
 `````````````````
 Note that each sign should be saved before a next sign can be transcribed. To save a sign, either click on "Save word to
 corpus" button or go to Menu and select "Save current word". You will get a message "Corpus successfully updated!" if "Show
-save alert" is selected in your setting (see :ref:).
+save alert" is selected in your setting (see :ref:`options`).
 
 
 If you do not have a corpus loaded beforehand, you will get a warning message: "You must have a corpus loaded before you can
@@ -171,7 +171,7 @@ save words. What woule you like to do?". You can either "Create a new corpus" or
 
 
 If you have a sign with the same gloss already saved in the same corpus and "Warn about duplicate glosses" is selected in your
-setting (see :ref:), you will get a warning message: "A word with the gloss XXX already exists in your corpus. What do you want to do?".
+setting (see :ref:`options`), you will get a warning message: "A word with the gloss XXX already exists in your corpus. What do you want to do?".
 You can either "Go back and edit the gloss" or "Overwrite existing word".
 
 .. image:: static/duplicate_warning.png
