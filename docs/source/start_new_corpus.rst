@@ -177,3 +177,11 @@ You can either "Go back and edit the gloss" or "Overwrite existing word".
 .. image:: static/duplicate_warning.png
       :width: 90%
       :align: center
+
+
+.. _next_sign:
+
+11. Transcribing the next sign
+`````````````````
+Once a sign has been saved, if you would like to continue on transcribing the next sign, you can either click on 
+the "New gloss" button or go to Menu and select "New gloss".
