@@ -112,6 +112,7 @@ class Sign():
                 headers.append('config{}hand{}slot{}'.format(config_num, hand_num, slot_num))
             headers.append('config{}hand{}uncertain'.format(config_num, hand_num))
             headers.append('config{}hand{}estimated'.format(config_num, hand_num))
+    headers.extend(['forearmInvolved','partialObscurity','uncertainCoding', 'incompleteCoding'])
     headers.append('parameters')
     headers.append('notes')
     headers = ','.join(headers)
@@ -212,6 +213,10 @@ class Sign():
                 output.append(uncertain)
                 output.append(estimates)
 
+        output.append('True' if self.forearmInvolved else 'False')
+        output.append('True' if self.partialObscurity else 'False')
+        output.append('True' if self.uncertainCoding else 'False')
+        output.append('True' if self.incompleteCoding else 'False')
         parameters = self.parameters.exportTree()
         output.append(parameters)
         output.append(self.notes)

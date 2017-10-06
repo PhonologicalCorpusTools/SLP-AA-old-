@@ -742,8 +742,8 @@ class MainWindow(QMainWindow):
             alert.setText('The transcription you selected contains the following non-standard symbols:\n\n{}\n\n'
                           'Unfortunately, SLPAnnotator cannot interpret these symbols, and therefore cannot create a '
                           '3D image of this handshape. Sorry about that!\n\n'
-                          'The accepted "standard" symbols are those found in transcription dropdown boxes and next to'
-                          ' the image of the hand. '.format(nonstandard))
+                          'The accepted "standard" symbols are those found in transcription dropdown boxes and next to '
+                          'the image of the hand. '.format(nonstandard))
 
             alert.exec_()
             return
@@ -843,19 +843,22 @@ class MainWindow(QMainWindow):
         self.corpusDock.setWidget(self.dockWrapper)
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
-    def loadCorpus(self):
+    def loadCorpus(self, showFileDialog = True):
         file_path = QFileDialog.getOpenFileName(self,
                 'Open Corpus File', os.getcwd(), '*.corpus')
         file_path = file_path[0]
         if not file_path:
             return None
+        self.corpus = load_binary(file_path)
+        self.corpus.path = file_path
+        self.setupNewCorpus()
+
+    def setupNewCorpus(self):
         self.askSaveChanges = False
         self.corpusList.clear()
         self.newGloss()
-        self.corpus = load_binary(file_path)
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
-        self.corpus.path = file_path
         self.corpusList.sortItems()
         self.corpusList.setCurrentRow(0)
         self.corpusList.itemClicked.emit(self.corpusList.currentItem())
@@ -1447,12 +1450,49 @@ class MainWindow(QMainWindow):
                 return
         filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from CSV', os.getcwd(), '*.csv')
         filename = filepath[0]
-        corpus = Corpus()
+        corpus = Corpus({'name': filename, 'path':filepath})
         with open(filename, mode='r', encoding='utf-8') as f:
+            headers = f.readline().strip()
+            headers = headers.split(',')
             for line in f:
                 line = line.strip()
                 line = line.split(',')
-
+                data = {h:l for (h,l) in zip(headers, line)}
+                kwargs = dict()
+                flags = dict()
+                transcriptions = [ [[None for n in range(34)], [None for n in range(34)]],
+                                   [[None for n in range(34)], [None for n in range(34)]] ]
+                for config in [1,2]:
+                    for hand in [1,2]:
+                        for n in range(1,35):
+                            name = 'config{}hand{}slot{}'.format(config, hand, n)
+                            transcriptions[config-1][hand-1][n-1] = data[name]
+                        uncertain = data['config{}hand{}uncertain'.format(config, hand)]
+                        if uncertain == 'None':
+                            uncertain = list()
+                        else:
+                            uncertain = [int(n) for n in uncertain.split('-')]
+                        estimated = data['config{}hand{}estimated'.format(config, hand)]
+                        if estimated == 'None':
+                            estimated = list()
+                        else:
+                            estimated = [int(n) for n in estimated.split('-')]
+                        confighand = 'config{}hand{}'.format(config, hand)
+                        flags[confighand] = [Flag(True if n in uncertain else False, True if n in estimated else False)
+                                             for n in range(34)]
+                kwargs['config1'] = transcriptions[0]
+                kwargs['config2'] = transcriptions[1]
+                kwargs['flags'] = flags
+                kwargs['gloss'] = data['gloss']
+                kwargs['signNotes'] = data['notes']
+                kwargs['forearmInvolved'] = True if data['forearmInvolved'] == 'True' else False
+                kwargs['partialObscurity'] = True if data['partialObscurity'] == 'True' else False
+                kwargs['uncertainCoding'] = True if data['uncertainCoding'] == 'True' else False
+                kwargs['incompleteCoding'] = True if data['incompleteCoding'] == 'True' else False
+                sign = Sign(kwargs)
+                corpus.addWord(sign)
+        self.corpus = corpus
+        self.setupNewCorpus()
 
     def sizeHint(self):
         sz = QMainWindow.sizeHint(self)
