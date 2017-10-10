@@ -1,7 +1,7 @@
-.. _start_new_corpus:
+.. _transcription_process:
 
 ***************
-Starting a new corpus
+Transcription process
 ***************
 
 
