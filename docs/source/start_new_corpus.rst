@@ -175,6 +175,11 @@ You can either "Go back and edit the gloss" or "Overwrite existing word".
       :align: center
 
 
+Finally, if you click on "New gloss" (see :ref:`next_sign`) without saving the current sign, you will get a warning message: 
+"The current gloss has unsaved changes. what would you like to do?" It gives you options to either "Go back" to the current 
+sign or to "Continue without saving". 
+If this is the first time the sign is transcribed, the latter option will delete a sign.
+
 .. _next_sign:
 
 11. Transcribing the next sign
