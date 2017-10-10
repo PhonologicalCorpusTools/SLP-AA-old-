@@ -36,3 +36,13 @@ To export a corpus, go to Menu and select "Export corpus as cvx..." A new window
    :width: 90%
    :align: center
 
+
+
+Click on the "Select save location..." button to open another window, "Export Corpus as CVX", where you can specify
+a file name and a saving location for your CVX file.
+
+.. image:: static/save_location.png
+   :width: 90%
+   :align: center
+
+
