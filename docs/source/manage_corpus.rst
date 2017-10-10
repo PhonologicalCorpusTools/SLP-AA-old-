@@ -33,7 +33,7 @@ Duplicating a corpus
 To duplicate a corpus and save it with a different file name, go to Menu and select "Save corpus as...". A new window opens, 
 titled "Save Corpus File As". 
 
-.. image:: static/save_corpus_as.png
+.. image:: static/save_corpus.png
    :width: 90%
    :align: center
 
