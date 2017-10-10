@@ -26,7 +26,7 @@ Hand and Config
 
 Hand 1 and Hand 2 are synonymous to the dominant and nondominant hands,
 respectively. Config (short for configuration) refers to handshape. 
-For example, Hand 1 Config 2 is the second handshape of the dominant hand. 
+For example, Config 2, Hand 1 is the second handshape of the dominant hand. 
 Depending on the signs, you do not necessarily have to fill all four of them.
 
 .. _field_and_slot:
