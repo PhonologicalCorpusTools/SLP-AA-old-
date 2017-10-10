@@ -5,11 +5,20 @@ Transcription process
 ***************
 
 
+.. _load_corpus:
+
+Loading an existing corpus 
+`````````````````
+If you have a existing corpus that you would like to continue on expanding, you can load the corpus at this point. 
+To do that, go to Menu and select "Load corpus...".
+
+
 .. _enter_gloss:
 
 1. Entering a Gloss
 `````````````````
 To enter a gloss for a sign, simply click on the text box named "Gloss" and type in. This box is case-sensitive.
+
 
 .. _fill_slot:
 
@@ -25,6 +34,7 @@ a symbol yourself. For more infomation about slots and symbols, see :ref:`field_
       * In Slots 20, 25, and 30, use the key 'z' for "x-"; 'c' for "x+"; and 's' for "☒".
       
       * For Mac users, it may be helpful to use the Tab key to move to the next slot. To enable this, go to System Preferences > Keyboard > Shortcuts. At the bottom of the page under Full Keyboard Access, select "All controls."
+
 
 .. _flag_slot:
 
@@ -113,6 +123,7 @@ appear, and you can select relevant values.
 If you would like to have the parameters window open while transcribing handshapes, go to Options in the menu bar and select
 "Keep parameters window on top."
 
+
 .. _add_sign_notes:
 
 7. Adding Sign and Corpus notes
@@ -179,6 +190,7 @@ Finally, if you click on "New gloss" (see :ref:`next_sign`) without saving the c
 "The current gloss has unsaved changes. what would you like to do?" It gives you options to either "Go back" to the current 
 sign or to "Continue without saving". 
 If this is the first time the sign is transcribed, the latter option will delete a sign.
+
 
 .. _next_sign:
 
