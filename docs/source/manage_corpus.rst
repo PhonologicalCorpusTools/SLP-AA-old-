@@ -55,7 +55,7 @@ can enter them below." As noted in the text boxes themselves, type in your choic
 ultracrossed symbol (☒) in the first box and the one for the empty set symbol (∅) in the second box.
 
 
-If you click on the "Select save location..." button, another window will open, titled "Export Corpus as CVX". 
+If you click on the "Select save location..." button, another window will open, titled "Export Corpus as CSV". 
 Specify a file name and a saving location for your CSV file, and click "Save". This will take you back to the "Export Corpus", 
 and you will find that the saving location is automatically entered.
 
