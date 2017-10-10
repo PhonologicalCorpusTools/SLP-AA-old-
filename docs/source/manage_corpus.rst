@@ -26,6 +26,15 @@ that your intended sign is loaded. Then click the "Delete word from corpus" butt
 a confirmation message and that a deleted sign cannot be recovered.
 
 
+.. _new_corpus:
+
+Switching to another corpus
+`````````````````
+If you once started transcribing signs in one corpus but would like to switch to another corpus and continue on transcribing
+your next sign, go to Menu and select "New corpus". This function refreshes the program, and you will see that there is no 
+sign listed in the Corpus column on the right. You can then load another corpus (see :ref:`load_corpus`).
+
+
 .. _save_corpus:
 
 Duplicating a corpus
