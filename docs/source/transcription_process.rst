@@ -4,13 +4,7 @@
 Transcription process
 ***************
 
-
-.. _load_corpus:
-
-Loading an existing corpus 
-`````````````````
-If you have a existing corpus that you would like to continue on expanding, you can load the corpus at this point. 
-To do that, go to Menu and select "Load corpus...".
+      Note that if you already have a corpus that you would like to continue on expanding, you can load the corpus at this point (see :ref:`add_signs`)
 
 
 .. _enter_gloss:
