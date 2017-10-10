@@ -4,10 +4,6 @@
 Starting a new corpus
 ***************
 
-.. _transcribe_sign:
-
-Transcribing a sign
-------------------
 
 .. _enter_gloss:
 
@@ -185,6 +181,8 @@ You can either "Go back and edit the gloss" or "Overwrite existing word".
 `````````````````
 Once a sign has been saved, if you would like to continue on transcribing a next sign, you can either click on 
 the "New gloss" button or go to Menu and select "New gloss".
+
+You can repeat the transcribing process from :ref:`enter_gloss`.
 
 
 
