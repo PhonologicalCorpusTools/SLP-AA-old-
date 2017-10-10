@@ -30,19 +30,38 @@ a confirmation message and that a deleted sign cannot be recovered.
 
 Exporting a corpus
 `````````````````
-To export a corpus, go to Menu and select "Export corpus as cvx..." A new window titled "Export corpus" will appear.
+To export a corpus, go to Menu and select "Export corpus as csv..." A new window titled "Export corpus" will appear.
 
 .. image:: static/export.png
    :width: 90%
    :align: center
 
+If you mouse over the check box next to "Include fields in transcription?", you can see what this means; "If checked, 
+transctiptions will be delimited by square brackets and numbers representing fields. If not checked transcriptions will be one 
+long string"." See also :ref:`field_and_slot`
+
+.. image:: static/mouse_over.png
+   :width: 90%
+   :align: center
+
+Under the question "How should empty slots be represented in your output?", you will see three options: 1. "Do not show empty 
+slots in the output"; 2. "Print a blank space"; and 3. Print this character". If you choose the third option, specify your 
+choice of character in the text box. See also :ref:`field_and_slot`
 
 
-Click on the "Select save location..." button to open another window, "Export Corpus as CVX", where you can specify
-a file name and a saving location for your CVX file.
+Under the options for empty slots, you will find a description on special symbols. "Some programs have trouble displaying 
+the "ultracrossed symbol (x-in-a-box) and the empty set symbol. If you would like to use alternatives in the output file, you 
+can enter them below." As noted in the text boxes themselves, type in your choice of an alternative symbol for the 
+ultracrossed symbol (☒) in the first box and the one for the empty set symbol (∅) in the second box.
+
+
+If you click on the "Select save location..." button, another window will open, titled "Export Corpus as CVX". 
+Specify a file name and a saving location for your CSV file, and click "Save". This will take you back to the "Export Corpus", 
+and you will find that the saving location is automatically entered.
 
 .. image:: static/save_location.png
    :width: 90%
    :align: center
 
-
+Once you have specified the saving location, representation of empty slots, (and alternative symbols for ☒ and ∅ ), click OK 
+to create a CSV file.
