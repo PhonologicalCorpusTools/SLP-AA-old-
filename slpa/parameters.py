@@ -119,7 +119,6 @@ MajorLocation.addChildren([SignSpaceLocation, BodyLocation, WeakHandLocation])
 
 defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation]
 
-
 def addChild(parentNode, childParameter):
     node = anytree.Node(childParameter.name, parent=parentNode)
     for child in childParameter.children:
@@ -130,3 +129,11 @@ for parameter in defaultParameters:
     parentNode = anytree.Node(parameter.name, parent = defaultParameterTree)
     for childParameter in parameter.children:
         addChild(parentNode, childParameter)
+
+
+def getParameterFromXML(element):
+    for p in defaultParameters:
+        if element.attrib['name'] == p.name and element.attrib['parent'] == p.parent.name:
+            return p
+    else:
+        raise AttributeError('No parameter named {} exists'.format(element.attrib['name']))

@@ -1450,6 +1450,8 @@ class MainWindow(QMainWindow):
                 return
         filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from CSV', os.getcwd(), '*.csv')
         filename = filepath[0]
+        if not filename:
+            return
         corpus = Corpus({'name': filename, 'path':filepath})
         with open(filename, mode='r', encoding='utf-8') as f:
             headers = f.readline().strip()
@@ -1489,6 +1491,7 @@ class MainWindow(QMainWindow):
                 kwargs['partialObscurity'] = True if data['partialObscurity'] == 'True' else False
                 kwargs['uncertainCoding'] = True if data['uncertainCoding'] == 'True' else False
                 kwargs['incompleteCoding'] = True if data['incompleteCoding'] == 'True' else False
+                kwargs['parameters'] = ParameterTreeModel(data['parameters'], fromXML=True)
                 sign = Sign(kwargs)
                 corpus.addWord(sign)
         self.corpus = corpus
@@ -1557,11 +1560,11 @@ class ExportCorpusDialog(QDialog):
         blankRadioButtonLayout = QHBoxLayout()
         noBlanksOption = QRadioButton('Do not show empty slots in the output')
         blankRadioButtonLayout.addWidget(noBlanksOption)
-        noBlanksOption.setChecked(True)
         blankSpaceOption = QRadioButton('Print a blank space')
         blankRadioButtonLayout.addWidget(blankSpaceOption)
         otherBlankOption = QRadioButton('Print this character: ')
         blankRadioButtonLayout.addWidget(otherBlankOption)
+        otherBlankOption.setChecked(True)
         self.blankOptionEdit = QLineEdit()
         self.blankOptionEdit.setMaxLength(1)
         self.blankOptionEdit.setMaximumWidth(30)

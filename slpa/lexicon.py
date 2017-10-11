@@ -166,8 +166,6 @@ class Sign():
     def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL):
         output = list()
         output.append(self.gloss)
-        # for key,value in self.data().items():
-        #     if 'config' in key:
         for config_num in [1,2]:
             for hand_num in [1,2]:
                 hand = getattr(self, 'config{}hand{}'.format(config_num, hand_num))
@@ -217,9 +215,12 @@ class Sign():
         output.append('True' if self.partialObscurity else 'False')
         output.append('True' if self.uncertainCoding else 'False')
         output.append('True' if self.incompleteCoding else 'False')
-        parameters = self.parameters.exportTree()
+        parameters = self.parameters.exportXML()
         output.append(parameters)
         output.append(self.notes)
+        for i,o in enumerate(output):
+            if o is None:
+                print(i)
 
         output = ','.join(output)
 
