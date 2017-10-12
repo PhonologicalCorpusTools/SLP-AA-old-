@@ -266,6 +266,10 @@ class MainWindow(QMainWindow):
         self.createActions()
         self.createMenus()
         self.readSettings()
+        if not self.recentPhraseSearches:
+            self.recentPhraseSearches = list()
+        if not self.recentTranscriptionSearches:
+            self.recentTranscriptionSearches = list()
         self.recentPhraseSearches = collections.deque(self.recentPhraseSearches, maxlen=self.recentSearchMax)
         self.recentTranscriptionSearches = collections.deque(self.recentTranscriptionSearches, maxlen=self.recentSearchMax)
         #these variables are reinitialized because we don't know the maxlen value until after the readSettings() call
