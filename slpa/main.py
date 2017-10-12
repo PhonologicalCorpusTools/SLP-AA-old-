@@ -765,13 +765,13 @@ class MainWindow(QMainWindow):
                 blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
                 blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
                 foundPath = True
-            elif os.path.exists('/Applications/blender.app'):
-                blenderPath = '/Applications/blender.app'
-                blenderPlayerPath = '/Applications/blenderplayer.app'
+            elif os.path.exists('/Applications/Blender'):
+                blenderPath = '/Applications/Blender/blender.app/Contents/MacOS/blender'
+                blenderPlayerPath = '/Applications/Blender/blenderplayer.app/Contents/MacOS/blenderplayer'
                 foundPath = True
-            elif os.path.exists(os.path.expanduser('/Applications/blender.app')):
-                blenderPath = os.path.expanduser('/Applications/blender.app')
-                blenderPlayerPath = os.path.expanduser('/Applications/blenderplayer.app')
+            elif os.path.exists(os.path.expanduser('/Applications/Blender')):
+                blenderPath = os.path.expanduser('/Applications/Blender/blender.app/Conents/MacOS/blender')
+                blenderPlayerPath = os.path.expanduser('/Applications/Blender/blenderplayer.app/Contents/MacOS/blenderplayer')
                 foundPath = True
 
         if not foundPath:
