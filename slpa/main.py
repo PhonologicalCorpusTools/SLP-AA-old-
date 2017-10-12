@@ -596,6 +596,10 @@ class MainWindow(QMainWindow):
         self.settings.endGroup()
 
         self.settings.beginGroup('recentSearches')
+        if not self.recentTranscriptionSearches:
+            self.recentTranscriptionSearches = list()
+        if not self.recentPhraseSearches:
+            self.recentPhraseSearches = list()
         self.settings.setValue('recentTranscriptionSearches', list(self.recentTranscriptionSearches))
         self.settings.setValue('recentPhraseSearches', list(self.recentPhraseSearches))
         self.settings.setValue('recentSearchMax', self.recentSearchMax)

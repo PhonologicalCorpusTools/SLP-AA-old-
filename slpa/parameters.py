@@ -116,16 +116,17 @@ allParameters.extend(LocalMovement.children)
 
 #MAJOR LOCATION PARAMETERS
 MajorLocation = Parameter(name='Major Location')
-SignSpaceLocation = Parameter(name='Signing space location',  is_default=True)
-WeakHandLocation = Parameter(name='Non-dominant hand location')
+SignSpaceLocation = Parameter(name='Signing space location',  is_default=True, parent=MajorLocation)
+WeakHandLocation = Parameter(name='Non-dominant hand location', parent=MajorLocation)
 allParameters.extend([MajorLocation, SignSpaceLocation, WeakHandLocation])
 
-BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of forehead', 'Nose', 'Cheek', 'Ear', 'Mouth', 'Lip', 'Jaw', 'Chin', 'Neck', 'Shoulder', 'Sternum', 'Chest', 'Trunk', 'Upper arm', 'Forearm', 'Abdomen', 'Leg'], default='Trunk', parent=WeakHandLocation)
-ForwardDistance = Parameter(name='Degrees of forward distance', children=['Unspecified', 'Proximal', 'Medial', 'Distal', 'Extended'], default='Unspecified', parent=WeakHandLocation)
-SideToSide = Parameter(name='Side-to-side dimension', children=['No offset', 'In line with breast', 'In line with shoulder'], default='No offset', parent=WeakHandLocation)
-Height = Parameter(name='Height', children=['Top of head', 'Forehead', 'Nose', 'Mouth', 'Chin', 'Neck', 'Sternum', 'Chest', 'Trunk', 'Abdomen'], default='Trunk', parent=WeakHandLocation)
-Vector = Parameter(name='Vector', children=['L3', 'L2', 'L1', '0', 'R1', 'R2', 'R3'], default='0', parent=WeakHandLocation)
-SignSpaceLocation.addChildren([ForwardDistance, SideToSide, Height, Vector])
+BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of forehead', 'Nose', 'Cheek', 'Ear', 'Mouth', 'Lip', 'Jaw', 'Chin', 'Neck', 'Shoulder', 'Sternum', 'Chest', 'Trunk', 'Upper arm', 'Forearm', 'Abdomen', 'Leg'], default='Trunk', parent=MajorLocation)
+
+ForwardDistance = Parameter(name='Degrees of forward distance', children=['Unspecified', 'Proximal', 'Medial', 'Distal', 'Extended'], default='Unspecified', parent=SignSpaceLocation)
+SideToSide = Parameter(name='Side-to-side dimension', children=['No offset', 'In line with breast', 'In line with shoulder'], default='No offset', parent=SignSpaceLocation)
+Height = Parameter(name='Height', children=['Top of head', 'Forehead', 'Nose', 'Mouth', 'Chin', 'Neck', 'Sternum', 'Chest', 'Trunk', 'Abdomen'], default='Trunk', parent=SignSpaceLocation)
+Vector = Parameter(name='Vector', children=['L3', 'L2', 'L1', '0', 'R1', 'R2', 'R3'], default='0', parent=SignSpaceLocation)
+SignSpaceLocation.addChildren([ForwardDistance, Height, SideToSide, Vector])
 allParameters.extend([BodyLocation, ForwardDistance, SideToSide, Height, Vector])
 allParameters.extend(BodyLocation.children)
 allParameters.extend(ForwardDistance.children)
@@ -171,16 +172,10 @@ for parameter in defaultParameters:
 
 
 def getParameterFromXML(element):
-    print('XML element: ', element.attrib['name'])
-    print('XML element parent: ', element.attrib['parent'])
     for p in getAllParameters():
-        print(p.name)
         if element.attrib['name'] == p.name:
-            print('parameter name: ', p.name)
-            print('parameter parent name: ', p.parent)
             parentName = 'Parameters' if p.parent is None else p.parent.name
             if element.attrib['parent'] == parentName:
-                print('matched {} with {}'.format(element.attrib['name'], p.name))
                 return p
     else:
         raise AttributeError('No parameter named {} exists'.format(element.attrib['name']))
