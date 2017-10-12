@@ -628,10 +628,10 @@ class MainWindow(QMainWindow):
         self.settings.endGroup()
 
         self.settings.beginGroup('recentSearches')
-        self.recentTranscriptionSearches = self.settings.value('recentTranscriptionSearches',
-                                                               defaultValue=list(), type=list)
-        self.recentPhraseSearches = self.settings.value('recentPhraseSearches',
-                                                        defaultValue=list(), type=list)
+        self.recentTranscriptionSearches = self.settings.value('recentTranscriptionSearches')
+                                                               #defaultValue=list(), type=list)
+        self.recentPhraseSearches = self.settings.value('recentPhraseSearches')
+                                                        #defaultValue=list(), type=list)
         self.recentSearchMax = self.settings.value('recentSearchMax',
                                                    defaultValue=10, type=int)
         self.settings.endGroup()
@@ -1022,6 +1022,8 @@ class MainWindow(QMainWindow):
         kwargs['parameters'] = self.parameterDialog.treeWidget.model
         kwargs['corpusNotes'] = self.corpusNotes.getText()
         kwargs['signNotes'] = self.signNotes.getText()
+        if not kwargs['signNotes']:
+            kwargs['signNotes'] == 'None'
         kwargs['forearmInvolved'] = self.forearmCheckBox.isChecked()
         kwargs['partialObscurity'] = self.partialObscurityCheckBox.isChecked()
         kwargs['incompleteCoding'] = self.incompleteCodingCheckBox.isChecked()
@@ -1209,23 +1211,23 @@ class MainWindow(QMainWindow):
 
     def createActions(self):
 
-        self.copyAct = QAction('Copy a transcription...',
+        self.copyAct = QAction('&Copy a transcription...',
                               self,
                               triggered = self.copyTranscription)
 
-        self.pasteAct = QAction('Paste a transcription...',
+        self.pasteAct = QAction('&Paste a transcription...',
                                 self,
                                 triggered = self.pasteTranscription)
 
-        self.autofillAct = QAction('Autofill transcription slots...',
+        self.autofillAct = QAction('&Autofill transcription slots...',
                                self,
                                triggered = self.autoFillTranscription)
 
-        self.transcriptionSearchAct = QAction('Search by transcription...',
+        self.transcriptionSearchAct = QAction('Search by &transcription...',
                                               self,
                                               triggered = lambda x: self.searchCorpus(searchType = 'transcriptions'))
 
-        self.phraseSearchAct = QAction('Search by descriptive phrase...',
+        self.phraseSearchAct = QAction('Search by descriptive &phrase...',
                                        self,
                                        triggered = lambda x: self.searchCorpus(searchType = 'phrases'))
 
@@ -1237,20 +1239,10 @@ class MainWindow(QMainWindow):
                                          self,
                                          triggered = self.printCorpusObject)
 
-        self.importCorpusAct = QAction('Import corpus from csv...',
+        self.importCorpusAct = QAction('&Import corpus from csv...',
                                        self,
                                        statusTip = 'Import from csv file',
                                        triggered = self.importCorpus)
-
-        self.searchCorpusAct = QAction('Search the current corpus...',
-                                       self,
-                                       statusTip = 'Search the current corpus',
-                                       triggered = lambda x: self.searchCorpus('transcriptions'))
-
-        self.phraseSearchAct = QAction('Search using descriptive phrases...',
-                                                self,
-                                                statusTip = 'Search the current corpus',
-                                                triggered = lambda x: self.searchCorpus('phrases'))
 
         self.setBlenderPathAct = QAction('Set path to Blender...',
                                          self,
@@ -1486,12 +1478,12 @@ class MainWindow(QMainWindow):
                 kwargs['config2'] = transcriptions[1]
                 kwargs['flags'] = flags
                 kwargs['gloss'] = data['gloss']
-                kwargs['signNotes'] = data['notes']
                 kwargs['forearmInvolved'] = True if data['forearmInvolved'] == 'True' else False
                 kwargs['partialObscurity'] = True if data['partialObscurity'] == 'True' else False
                 kwargs['uncertainCoding'] = True if data['uncertainCoding'] == 'True' else False
                 kwargs['incompleteCoding'] = True if data['incompleteCoding'] == 'True' else False
                 kwargs['parameters'] = ParameterTreeModel(data['parameters'], fromXML=True)
+                kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
                 sign = Sign(kwargs)
                 corpus.addWord(sign)
         self.corpus = corpus

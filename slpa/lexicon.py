@@ -113,8 +113,8 @@ class Sign():
             headers.append('config{}hand{}uncertain'.format(config_num, hand_num))
             headers.append('config{}hand{}estimated'.format(config_num, hand_num))
     headers.extend(['forearmInvolved','partialObscurity','uncertainCoding', 'incompleteCoding'])
-    headers.append('parameters')
     headers.append('notes')
+    headers.append('parameters')
     headers = ','.join(headers)
 
     def __init__(self, kwargs):
@@ -215,12 +215,9 @@ class Sign():
         output.append('True' if self.partialObscurity else 'False')
         output.append('True' if self.uncertainCoding else 'False')
         output.append('True' if self.incompleteCoding else 'False')
+        output.append(self.notes)
         parameters = self.parameters.exportXML()
         output.append(parameters)
-        output.append(self.notes)
-        for i,o in enumerate(output):
-            if o is None:
-                print(i)
 
         output = ','.join(output)
 

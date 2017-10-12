@@ -370,6 +370,7 @@ class ParameterTreeModel:
     def exportXML(self):
         elements = list()
         for node in anytree.PreOrderIter(self.tree):
+            nodeName = parameters.encodeXMLName(node.name)
             if not elements:
                 top = xmlElement(self.tree.name)
                 top.attrib['name'] = self.tree.name
@@ -379,18 +380,18 @@ class ParameterTreeModel:
                 continue
             for e in elements:
                 if e.attrib['name'] == node.parent.name:
-                    se = xmlSubElement(e, node.name)
+                    se = xmlSubElement(e, nodeName)
                     se.attrib['name'] = node.name
                     se.attrib['is_checked'] = 'True' if node.is_checked else 'False'
                     se.attrib['is_default'] = 'True' if node.is_default else 'False'
                     se.attrib['parent'] = e.attrib['name']
                     elements.append(se)
                     break
-            else:
-                print('could not find parent for {}'.format(node.name))
+            # else:
+            #     print('could not find parent for {}'.format(node.name))
 
-        string = xmlElementTree.tostring(top, encoding='utf8', method='xml')
-        return str(string)
+        string = xmlElementTree.tostring(top, encoding='unicode', method='xml')
+        return string
 
     def __str__(self):
         return self.exportTree()
@@ -426,13 +427,13 @@ class ParameterTreeModel:
     def addNodeFromXML(self, element, parentNode):
         parameter = parameters.getParameterFromXML(element)
         self.parameterList.append(parameter)
-        if element.children:
+        for child in element:
             newNode = ParameterNode(parameter, parent=parentNode)
             if element.attrib['is_default'] == 'True':
                 newNode.is_default = True
             if element.attrib['is_checked'] == 'True':
                 newNode.is_checked = True
-            for subelement in element.children:
+            for subelement in element:
                 self.addNodeFromXML(subelement, newNode)
         else:
             newNode = ParameterNode(parameters.TerminalParameter(parameter.name, parentNode), parent=parentNode)
@@ -441,10 +442,12 @@ class ParameterTreeModel:
             if element.attrib['is_checked'] == 'True':
                 newNode.is_checked = True
 
-    def parseXML(self, topElement):
+    def parseXML(self, xmlstring):
+        topElement = xmlElementTree.fromstring(xmlstring)
         self.tree = anytree.Node('Parameters', parent=None)
 
-        for topChild in topElement.children:
+        for topChild in topElement:
+            print(topChild)
             p = parameters.getParameterFromXML(topChild)
             self.parameterList.append(p)
             parentNode = ParameterNode(p, parent = self.tree)
@@ -453,7 +456,7 @@ class ParameterTreeModel:
             if topChild.attrib['is_checked'] == 'True':
                 parentNode.is_checked = True
             setattr(self, p.name, parentNode)
-            for child in topChild.children:
+            for child in topChild:
                 self.addNodeFromXML(child, parentNode)
 
 

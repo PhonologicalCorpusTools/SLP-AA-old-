@@ -74,12 +74,19 @@ class TerminalParameter:
         return self.name > other.name
 
 
+allParameters = list()
+
 #QUALITY PARAMETERS
 Quality = Parameter(name='Quality')
 Temporal = Parameter(name='Temporal', children = ['None', 'Prolonged', 'Shortened', 'Accelerating'], default='None', parent=Quality)
 NonTemporal = Parameter(name='Non-temporal', children = ['None', 'Tensed', 'Reduced', 'Enlarged'], default='None', parent=Quality)
 Contact = Parameter(name='Contact', children=['None', 'Contacting'], default='None', parent=Quality)
 Quality.addChildren([Temporal, NonTemporal, Contact])
+allParameters.append(Quality)
+allParameters.extend(Quality.children)
+allParameters.extend(Temporal.children)
+allParameters.extend(NonTemporal.children)
+allParameters.extend(Contact.children)
 
 
 #MAJOR MOVEMENT PARAMETERS
@@ -91,17 +98,27 @@ ContourPlane.sortChildren()
 Repetition = Parameter(name='Repetition',children=['None', 'Once', 'Twice', 'Multiple'], default='None', parent=MajorMovement)
 Direction = Parameter(name = 'Direction', children = ['None', 'Forward', 'Backward'], default='None', parent=MajorMovement)
 MajorMovement.addChildren([ContourMovement, ContourPlane, Repetition, Direction])
+allParameters.append(MajorMovement)
+allParameters.append(ContourMovement)
+allParameters.extend(ContourMovement.children)
+allParameters.append(ContourPlane)
+allParameters.extend(ContourPlane.children)
+allParameters.append(Repetition)
+allParameters.extend(Repetition.children)
+allParameters.append(Direction)
+allParameters.extend(Direction.children)
 
 #LOCAL MOVEMENT PARAMETERS
 LocalMovement = Parameter(name='Local Movement', children=['Hold', 'Wiggling', 'Hooking', 'Flattening', 'Twisting', 'Nodding', 'Releasing', 'Rubbing', 'Circling', 'Shaking'], default='Hold')
 LocalMovement.sortChildren()
+allParameters.append(LocalMovement)
+allParameters.extend(LocalMovement.children)
 
 #MAJOR LOCATION PARAMETERS
 MajorLocation = Parameter(name='Major Location')
 SignSpaceLocation = Parameter(name='Signing space location',  is_default=True)
 WeakHandLocation = Parameter(name='Non-dominant hand location')
-
-HandPart = Parameter(name = 'Hand part', children = ['Hand', 'Fingers', 'Thumb', 'Index', 'Middle', 'Ring', 'Pinky'], parent=WeakHandLocation)
+allParameters.extend([MajorLocation, SignSpaceLocation, WeakHandLocation])
 
 BodyLocation = Parameter(name='Body location', children=['Back of head', 'Top of head', 'Forehead', 'Side of forehead', 'Nose', 'Cheek', 'Ear', 'Mouth', 'Lip', 'Jaw', 'Chin', 'Neck', 'Shoulder', 'Sternum', 'Chest', 'Trunk', 'Upper arm', 'Forearm', 'Abdomen', 'Leg'], default='Trunk', parent=WeakHandLocation)
 ForwardDistance = Parameter(name='Degrees of forward distance', children=['Unspecified', 'Proximal', 'Medial', 'Distal', 'Extended'], default='Unspecified', parent=WeakHandLocation)
@@ -109,15 +126,37 @@ SideToSide = Parameter(name='Side-to-side dimension', children=['No offset', 'In
 Height = Parameter(name='Height', children=['Top of head', 'Forehead', 'Nose', 'Mouth', 'Chin', 'Neck', 'Sternum', 'Chest', 'Trunk', 'Abdomen'], default='Trunk', parent=WeakHandLocation)
 Vector = Parameter(name='Vector', children=['L3', 'L2', 'L1', '0', 'R1', 'R2', 'R3'], default='0', parent=WeakHandLocation)
 SignSpaceLocation.addChildren([ForwardDistance, SideToSide, Height, Vector])
+allParameters.extend([BodyLocation, ForwardDistance, SideToSide, Height, Vector])
+allParameters.extend(BodyLocation.children)
+allParameters.extend(ForwardDistance.children)
+allParameters.extend(SideToSide.children)
+allParameters.extend(Height.children)
+allParameters.extend(Vector.children)
 
 HandPart = Parameter(name='Hand part location', children = ['Hand', 'Fingers', 'Thumb', 'Index', 'Middle', 'Pinky'], default='Hand', parent=WeakHandLocation)
 SigningSpaceZone = Parameter(name='Zone', children = ['Inside', 'Pad', 'Back', 'Radial', 'Ulnar', 'Tips', 'Knuckle', 'Base', 'Heel', 'Web', 'Palm', 'Arm'], default='Palm', parent=WeakHandLocation)
 SigningSpaceZone.sortChildren()
 WeakHandLocation.addChildren([HandPart, SigningSpaceZone])
+allParameters.extend([HandPart, SigningSpaceZone])
+allParameters.extend(HandPart.children)
+allParameters.extend(SigningSpaceZone.children)
+
+def getAllParameters():
+    return allParameters[:]
 
 MajorLocation.addChildren([SignSpaceLocation, BodyLocation, WeakHandLocation])
 
 defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation]
+
+def encodeXMLName(name):
+    if name == 0 or name == '0':
+        name = 'Zero'
+    return name.replace(' ', '_')
+
+def decodeXMLName(name):
+    if name == 'Zero':
+        name = '0'
+    return name.replace('_', ' ')
 
 def addChild(parentNode, childParameter):
     node = anytree.Node(childParameter.name, parent=parentNode)
@@ -132,8 +171,16 @@ for parameter in defaultParameters:
 
 
 def getParameterFromXML(element):
-    for p in defaultParameters:
-        if element.attrib['name'] == p.name and element.attrib['parent'] == p.parent.name:
-            return p
+    print('XML element: ', element.attrib['name'])
+    print('XML element parent: ', element.attrib['parent'])
+    for p in getAllParameters():
+        print(p.name)
+        if element.attrib['name'] == p.name:
+            print('parameter name: ', p.name)
+            print('parameter parent name: ', p.parent)
+            parentName = 'Parameters' if p.parent is None else p.parent.name
+            if element.attrib['parent'] == parentName:
+                print('matched {} with {}'.format(element.attrib['name'], p.name))
+                return p
     else:
         raise AttributeError('No parameter named {} exists'.format(element.attrib['name']))
