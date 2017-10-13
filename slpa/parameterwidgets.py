@@ -447,7 +447,6 @@ class ParameterTreeModel:
         self.tree = anytree.Node('Parameters', parent=None)
 
         for topChild in topElement:
-            print(topChild)
             p = parameters.getParameterFromXML(topChild)
             self.parameterList.append(p)
             parentNode = ParameterNode(p, parent = self.tree)

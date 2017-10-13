@@ -871,6 +871,8 @@ class MainWindow(QMainWindow):
         self.corpusList.setCurrentRow(0)
         self.corpusList.itemClicked.emit(self.corpusList.currentItem())
         self.corpusNotes.setText(self.corpus.notes)
+        self.signNotes.setText(self.currentHandShape().notes)
+        save_binary(self.corpus, self.corpus.path)
         self.showMaximized()
 
     @decorators.checkForGloss
@@ -1449,11 +1451,40 @@ class MainWindow(QMainWindow):
             if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
                 return
         filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from CSV', os.getcwd(), '*.csv')
-        filename = filepath[0]
-        if not filename:
+        filepath = filepath[0]
+        if not filepath:
             return
-        corpus = Corpus({'name': filename, 'path':filepath})
-        with open(filename, mode='r', encoding='utf-8') as f:
+        filepath, filename = os.path.split(filepath)
+        filename = filename.split('.')[0]
+
+        corpora = [f for f in os.listdir(filepath) if f.endswith('.corpus')]
+        for c in corpora:
+            if c.split('.')[0] == filename:
+                showAlert = True
+                break
+        else:
+            showAlert = False
+
+        if showAlert:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('The current folder already contains a corpus called \"{}\". To avoid overwriting this file, '
+                          'your imported corpus will be called \"{}-import\". You can rename your corpus in '
+                          'SLPAnnotator by selecting File > Save as...\n\n'
+                          'What do you want to do?'.format(filename, filename))
+
+            alert.addButton('Import CSV file', QMessageBox.AcceptRole)
+            alert.addButton('Cancel', QMessageBox.RejectRole)
+            alert.exec_()
+            if alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
+                return
+
+        if showAlert:
+            corpus = Corpus({'name':filename+'-1', 'path': os.path.join(filepath, filename+'-1.corpus')})
+        else:
+            corpus = Corpus({'name': filename, 'path':os.path.join(filepath, filename+'.corpus')})
+
+        with open(os.path.join(filepath, filename+'.csv'), mode='r', encoding='utf-8') as f:
             headers = f.readline().strip()
             headers = headers.split(',')
             for line in f:

@@ -170,7 +170,6 @@ for parameter in defaultParameters:
     for childParameter in parameter.children:
         addChild(parentNode, childParameter)
 
-
 def getParameterFromXML(element):
     for p in getAllParameters():
         if element.attrib['name'] == p.name:
@@ -178,4 +177,4 @@ def getParameterFromXML(element):
             if element.attrib['parent'] == parentName:
                 return p
     else:
-        raise AttributeError('No parameter named {} exists'.format(element.attrib['name']))
+        raise AttributeError('XML Error: Cannot find parameter {} with parent {}'.format(element.attrib['name']))
