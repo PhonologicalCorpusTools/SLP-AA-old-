@@ -138,7 +138,7 @@ if __name__ == '__main__':
     codepath = args[0]#'C:\\Users\\Scott\\Documents\\GitHub\\SLP-Annotator\\slpa'
     hand = args[1]#'R'
     # Read handshape coding and parse into thumb/fingers
-    with open(os.path.join(codepath, 'handCode.txt'), 'r') as inFile:
+    with open(os.path.join(codepath, 'handCode.txt'), 'r', encoding='utf-8') as inFile:
         code = inFile.read()
         parseCode = re.split('\]\d\[+', code[1:])
         [armShape, thumbShape, thumbFingerContact, indexShape, middleShape, ringShape, pinkyShape] = parseCode[:]

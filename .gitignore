@@ -1,5 +1,7 @@
 .idea/
+*.idea
 *.py[cod]
+/idea
 !requirements.txt
 *.corpus
 *.feature
