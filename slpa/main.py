@@ -1449,7 +1449,6 @@ class ExportCorpusDialog(QDialog):
         blankRadioButtonLayout = QHBoxLayout()
         noBlanksOption = QRadioButton('Do not show empty slots in the output')
         blankRadioButtonLayout.addWidget(noBlanksOption)
-        noBlanksOption.setChecked(True)
         blankSpaceOption = QRadioButton('Print a blank space')
         blankRadioButtonLayout.addWidget(blankSpaceOption)
         otherBlankOption = QRadioButton('Print this character: ')
@@ -1466,7 +1465,7 @@ class ExportCorpusDialog(QDialog):
         self.blankOptionButtons.setId(noBlanksOption, 0)
         self.blankOptionButtons.setId(blankSpaceOption, 1)
         self.blankOptionButtons.setId(otherBlankOption, 2)
-
+        otherBlankOption.setChecked(True)
         blankSpaceLayout.addLayout(blankRadioButtonLayout)
 
         self.includeFields = QCheckBox('Include fields in transcription?')
@@ -1486,13 +1485,30 @@ class ExportCorpusDialog(QDialog):
         self.nullEdit.setMaximumWidth(170)
         self.nullEdit.setPlaceholderText('Alternative empty set symbol')
 
+        parametersLayout = QVBoxLayout()
+        exportParamsLabel = QLabel('What format should be used for parameters?')
+        parametersLayout.addWidget(exportParamsLabel)
+        parameterOptionsLayout = QHBoxLayout()
+        self.parameterOptions = QButtonGroup()
+        plainTextOption = QRadioButton('plain text')
+        xmlOption = QRadioButton('xml')
+        parameterOptionsLayout.addWidget(plainTextOption)
+        parameterOptionsLayout.addWidget(xmlOption)
+        parameterOptionsLayout.insertSpacing(-1, 100)
+        parametersLayout.addLayout(parameterOptionsLayout)
+        self.parameterOptions.addButton(plainTextOption)
+        self.parameterOptions.addButton(xmlOption)
+        self.parameterOptions.setId(plainTextOption, 0)
+        self.parameterOptions.setId(xmlOption, 1)
+        xmlOption.setChecked(True)
 
         outputOptionsLayout.addWidget(self.includeFields)
         outputOptionsLayout.addLayout(blankSpaceLayout)
-
+        outputOptionsLayout.addLayout(parametersLayout)
         outputOptionsLayout.addWidget(altSymbolsLabel)
         outputOptionsLayout.addWidget(self.xinboxEdit)
         outputOptionsLayout.addWidget(self.nullEdit)
+
         layout.addLayout(outputOptionsLayout)
 
         buttonLayout = QHBoxLayout()
@@ -1532,6 +1548,13 @@ class ExportCorpusDialog(QDialog):
                 return
             else:
                 self.blankSpaceText = self.blankOptionEdit.text()
+
+        selectedButton = self.parameterOptions.checkedButton()
+        id = self.parameterOptions.id(selectedButton)
+        if id == 0:
+            self.parameterFormat = 'txt'
+        else:
+            self.parameterFormat = 'xml'
 
         if os.path.exists(os.path.split(self.fileNameEdit.text())[0]):
             super().accept()
