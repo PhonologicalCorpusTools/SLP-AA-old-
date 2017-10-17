@@ -107,7 +107,7 @@ to a whole sign or a whole finger(s) rather than individual slots.
 
 6. Transcribing other parameters
 `````````````````
-To transcribe parameters other than handshapes, click on "View Parameters button at the top right corner. A new window will
+To transcribe parameters other than handshapes, click on "View Parameters" button at the top right corner. A new window will
 appear, and you can select relevant values.
 
 .. image:: static/.png
