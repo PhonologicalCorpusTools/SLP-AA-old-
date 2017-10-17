@@ -33,9 +33,9 @@ Available options are:
 Hand and Config
 ------------------
 
-Hand 1 and Hand 2 are synonymous to the dominant and nondominant hands,
-respectively. Config (short for configuration) refers to handshape. 
-For example, Config 2, Hand 1 is the second handshape of the dominant hand. 
+"Hand 1" and "Hand 2" are synonymous to the dominant and nondominant hands,
+respectively. "Config" (short for configuration) refers to handshape. 
+For example, "Config 2, Hand 1" is the second handshape of the dominant hand. 
 Depending on the signs, you do not necessarily have to fill all four of them.
 
 
@@ -44,7 +44,7 @@ Depending on the signs, you do not necessarily have to fill all four of them.
 Field and Slot
 ------------------
 
-Field refers to the square brackets numbered from 1 to 7. Slots are square boxes
+"Field" refers to the square brackets numbered from 1 to 7. "Slots" are square boxes
 inside a field. Slot 1 in Field 1 is a global handshape option (see :ref:`global_handshape_options`) 
 for forearm involvement. Field 2 to 7 are devoted to the thumb, thumb-finger contact, the index finger, the middle finger, 
 the ring finger and the pinky finger, respectively.
@@ -66,5 +66,4 @@ and permitted characters are H (hyperextended), E (extended), i (intermediate), 
 Parameters
 ------------------
 
-"Parameters," as in "View parameters" (see :ref:`other_parameters`) and Options > "Keep parameters
-window on top" (see :ref:`options`), refers to parameters other than handshapes.
+"Parameters" refers to parameters other than handshapes (see :ref:`other_parameters` and :ref:`options`).
