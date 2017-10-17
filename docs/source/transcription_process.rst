@@ -78,6 +78,7 @@ in highlighting for uncertain and estimated slots". Click "OK". Note that any ex
 
    For example, let's say you would like to copy your transcription for Config 1 of Hand 1 and paste it to Config 1 of Hand 2.
    
+   
    First, click on the Copy button. In the new window, select Config 1, Hand 1, and click OK.
    
    .. image:: static/copy.png
@@ -91,7 +92,8 @@ in highlighting for uncertain and estimated slots". Click "OK". Note that any ex
       :width: 90%
       :align: center
    
-   This feature may be particularly useful for transcribing symmetrical signs.
+   
+   This function may be particularly useful for transcribing symmetrical signs.
    
    .. image:: static/paste_result.png
       :width: 90%
