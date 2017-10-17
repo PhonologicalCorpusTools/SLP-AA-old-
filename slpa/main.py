@@ -6,6 +6,7 @@ import subprocess
 import collections
 import parameters
 import decorators
+import anytree
 from imports import *
 from handshapes import *
 from lexicon import *
@@ -14,8 +15,9 @@ from transcriptions import *
 from constraints import *
 from constraintwidgets import *
 from notes import *
+from search import *
+from image import *
 from parameterwidgets import ParameterDialog, ParameterTreeModel
-import anytree
 #from slpa import __version__ as currentSLPAversion
 
 __currentSLPAversion__ = 0.1
@@ -197,37 +199,6 @@ class VideoPlayer(QWidget):
     def changeMedia(self):
         pass
 
-class HandShapeImage(QLabel):
-
-    def __init__(self, path, reversed=False, parent=None):
-        super().__init__()
-        self.image = QPixmap(path)
-        self.isReversed = False
-        self.setPixmap(self.image)
-        self.mapping = {0: 'hand.png',
-                        1: 'hand.png',
-                        2: 'hand_thumb_selected.png',
-                        3: 'hand_thumb_finger_contact.png',
-                        4: 'hand_index_selected.png',
-                        5: 'hand_middle_selected.png',
-                        6: 'hand_ring_selected.png',
-                        7: 'hand_pinky_selected.png'}
-        self.reversed_mapping = {n:'reversed_'+self.mapping[n] for n in self.mapping}
-        self.mappingChoice = self.mapping
-
-    @Slot(int)
-    def transcriptionSlotChanged(self, e):
-        file_name = 'hand_slot{}.png'.format(e)
-        self.setPixmap(QPixmap(getMediaFilePath(file_name)))
-
-    @Slot(int)
-    def useReverseImage(self, e):
-        self.mappingChoice = self.reversed_mapping
-
-    @Slot(int)
-    def useNormalImage(self, e):
-        self.mappingChoice = self.mapping
-
 class BlenderOutputWindow(QDialog):
 
     def __init__(self, image_name, gloss):
@@ -277,6 +248,19 @@ class CorpusList(QListWidget):
                     self.setCurrentItem(originalItem)
                     self.itemClicked.emit(originalItem)
 
+class MergeCorpusMessageBox(QMessageBox):
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Duplicate entry')
+        self.baseText = 'Your current corpus already has a sign called {}.\n\nWhat do you want to do?'
+        self.addButton('Keep the current sign', QMessageBox.AcceptRole)
+        self.addButton('Overwrite with the new sign', QMessageBox.ResetRole)
+        self.alwaysMergeCheckBox = QCheckBox('Do this for all future duplicates')
+        self.setCheckBox(self.alwaysMergeCheckBox)
+
+
+
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
     forearmChecked = Signal(bool)
@@ -286,6 +270,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
+        self.setContentsMargins(0,0,0,0)
 
         #Set "global" variables
         self.askSaveChanges = False
@@ -294,6 +279,13 @@ class MainWindow(QMainWindow):
         self.createActions()
         self.createMenus()
         self.readSettings()
+        if not self.recentPhraseSearches:
+            self.recentPhraseSearches = list()
+        if not self.recentTranscriptionSearches:
+            self.recentTranscriptionSearches = list()
+        self.recentPhraseSearches = collections.deque(self.recentPhraseSearches, maxlen=self.recentSearchMax)
+        self.recentTranscriptionSearches = collections.deque(self.recentTranscriptionSearches, maxlen=self.recentSearchMax)
+        #these variables are reinitialized because we don't know the maxlen value until after the readSettings() call
 
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
         self.corpus = None
@@ -409,6 +401,9 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         #self.defineTabOrder()
 
+    def resizeEvent(self, e):
+        self.showMaximized()
+
     def setGloss(self, text):
         self.gloss.glossEdit.setText(text)
 
@@ -429,6 +424,16 @@ class MainWindow(QMainWindow):
             alert.setText('The current word has not been saved to the corpus yet, so it cannot be deleted. If you '
                           'want to clear the main window, click on "New Gloss".')
             alert.exec_()
+            return
+
+        alert = QMessageBox()
+        alert.setWindowTitle('Warning')
+        alert.setText('Are you sure you want to delete this entry from your corpus? This action cannot be undone.')
+        alert.addButton('Yes, delete it', QMessageBox.YesRole)
+        alert.addButton('No, go back', QMessageBox.NoRole)
+        alert.exec_()
+        if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
+            return
         else:
             del self.corpus.wordlist[gloss]
             for n in range(self.corpusList.count()):
@@ -437,8 +442,8 @@ class MainWindow(QMainWindow):
                     goodbye = self.corpusList.takeItem(n)
                     del goodbye
                     break
+            save_binary(self.corpus, self.corpus.path)
             self.newGloss()
-
 
     def setupGlobalOptions(self):
         globalOptionsLabel = QLabel('Global handshape options:')
@@ -613,6 +618,16 @@ class MainWindow(QMainWindow):
         self.settings.setValue('blenderPath', self.blenderPath)
         self.settings.endGroup()
 
+        self.settings.beginGroup('recentSearches')
+        if not self.recentTranscriptionSearches:
+            self.recentTranscriptionSearches = list()
+        if not self.recentPhraseSearches:
+            self.recentPhraseSearches = list()
+        self.settings.setValue('recentTranscriptionSearches', list(self.recentTranscriptionSearches))
+        self.settings.setValue('recentPhraseSearches', list(self.recentPhraseSearches))
+        self.settings.setValue('recentSearchMax', self.recentSearchMax)
+        self.settings.endGroup()
+
     def readSettings(self, reset=False):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
         if reset:
@@ -641,6 +656,15 @@ class MainWindow(QMainWindow):
         self.autoSave = self.settings.value('autosave', type=bool)
         self.autoSaveAct.setChecked(self.autoSave)
         self.blenderPath = self.settings.value('blenderPath')
+        self.settings.endGroup()
+
+        self.settings.beginGroup('recentSearches')
+        self.recentTranscriptionSearches = self.settings.value('recentTranscriptionSearches')
+                                                               #defaultValue=list(), type=list)
+        self.recentPhraseSearches = self.settings.value('recentPhraseSearches')
+                                                        #defaultValue=list(), type=list)
+        self.recentSearchMax = self.settings.value('recentSearchMax',
+                                                   defaultValue=10, type=int)
         self.settings.endGroup()
 
     @decorators.checkForUnsavedChanges
@@ -680,8 +704,6 @@ class MainWindow(QMainWindow):
             for attribute, default_value in sorted(Sign.sign_attributes.items()):
                 if not hasattr(word, attribute):
                     setattr(word, attribute, Sign.copyValue(Sign, default_value))
-                if attribute == 'parameters' and not isinstance(getattr(word, attribute), ParameterTreeModel):
-                    pass
                 # if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
                 #     setattr(word, attribute, default_value)
 
@@ -740,7 +762,7 @@ class MainWindow(QMainWindow):
 
         nonstandard = list()
         for slot in dialog.selectedTranscription:
-            symbol = slot.text()
+            symbol = slot.getText(empty_text='_')
             if symbol not in STANDARD_SYMBOLS:
                 nonstandard.append(symbol)
 
@@ -751,8 +773,8 @@ class MainWindow(QMainWindow):
             alert.setText('The transcription you selected contains the following non-standard symbols:\n\n{}\n\n'
                           'Unfortunately, SLPAnnotator cannot interpret these symbols, and therefore cannot create a '
                           '3D image of this handshape. Sorry about that!\n\n'
-                          'The accepted "standard" symbols are those found in transcription dropdown boxes and next to'
-                          ' the image of the hand. '.format(nonstandard))
+                          'The accepted "standard" symbols are those found in transcription dropdown boxes and next to '
+                          'the image of the hand. '.format(nonstandard))
 
             alert.exec_()
             return
@@ -774,13 +796,13 @@ class MainWindow(QMainWindow):
                 blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
                 blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
                 foundPath = True
-            elif os.path.exists('/Applications/blender.app'):
-                blenderPath = '/Applications/blender.app'
-                blenderPlayerPath = '/Applications/blenderplayer.app'
+            elif os.path.exists('/Applications/Blender'):
+                blenderPath = '/Applications/Blender/blender.app/Contents/MacOS/blender'
+                blenderPlayerPath = '/Applications/Blender/blenderplayer.app/Contents/MacOS/blenderplayer'
                 foundPath = True
-            elif os.path.exists(os.path.expanduser('/Applications/blender.app')):
-                blenderPath = os.path.expanduser('/Applications/blender.app')
-                blenderPlayerPath = os.path.expanduser('/Applications/blenderplayer.app')
+            elif os.path.exists(os.path.expanduser('/Applications/Blender')):
+                blenderPath = os.path.expanduser('/Applications/Blender/blender.app/Conents/MacOS/blender')
+                blenderPlayerPath = os.path.expanduser('/Applications/Blender/blenderplayer.app/Contents/MacOS/blenderplayer')
                 foundPath = True
 
         if not foundPath:
@@ -852,23 +874,28 @@ class MainWindow(QMainWindow):
         self.corpusDock.setWidget(self.dockWrapper)
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
-    def loadCorpus(self):
+    def loadCorpus(self, showFileDialog = True):
         file_path = QFileDialog.getOpenFileName(self,
                 'Open Corpus File', os.getcwd(), '*.corpus')
         file_path = file_path[0]
         if not file_path:
             return None
+        self.corpus = load_binary(file_path)
+        self.corpus.path = file_path
+        self.setupNewCorpus()
+
+    def setupNewCorpus(self):
         self.askSaveChanges = False
         self.corpusList.clear()
         self.newGloss()
-        self.corpus = load_binary(file_path)
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
-        self.corpus.path = file_path
         self.corpusList.sortItems()
         self.corpusList.setCurrentRow(0)
         self.corpusList.itemClicked.emit(self.corpusList.currentItem())
         self.corpusNotes.setText(self.corpus.notes)
+        self.signNotes.setText(self.currentHandShape().notes)
+        save_binary(self.corpus, self.corpus.path)
         self.showMaximized()
 
     @decorators.checkForGloss
@@ -1028,6 +1055,8 @@ class MainWindow(QMainWindow):
         kwargs['parameters'] = self.parameterDialog.treeWidget.model
         kwargs['corpusNotes'] = self.corpusNotes.getText()
         kwargs['signNotes'] = self.signNotes.getText()
+        if not kwargs['signNotes']:
+            kwargs['signNotes'] == 'None'
         kwargs['forearmInvolved'] = self.forearmCheckBox.isChecked()
         kwargs['partialObscurity'] = self.partialObscurityCheckBox.isChecked()
         kwargs['incompleteCoding'] = self.incompleteCodingCheckBox.isChecked()
@@ -1041,15 +1070,21 @@ class MainWindow(QMainWindow):
             self.saveCorpus()
 
     def createMenus(self):
-        self.fileMenu = self.menuBar().addMenu("&Menu")
+        self.fileMenu = self.menuBar().addMenu('&File')
         self.fileMenu.addAction(self.newCorpusAct)
         self.fileMenu.addAction(self.loadCorpusAct)
+        self.fileMenu.addAction(self.mergeCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAsAct)
         self.fileMenu.addAction(self.newGlossAct)
         self.fileMenu.addAction(self.exportCorpusAct)
         self.fileMenu.addAction(self.importCorpusAct)
         self.fileMenu.addAction(self.quitAct)
+
+        self.editMenu = self.menuBar().addMenu('&Edit')
+        self.editMenu.addAction(self.copyAct)
+        self.editMenu.addAction(self.pasteAct)
+        self.editMenu.addAction(self.autofillAct)
 
         self.constraintsMenu = self.menuBar().addMenu('&Constraints')
         self.constraintsMenu.addAction(self.setConstraintsAct)
@@ -1070,7 +1105,8 @@ class MainWindow(QMainWindow):
         self.notesMenu.addAction(self.addSignNotesAct)
 
         self.searchMenu = self.menuBar().addMenu('&Search')
-        self.searchMenu.addAction(self.searchCorpusAct)
+        self.searchMenu.addAction(self.transcriptionSearchAct)
+        self.searchMenu.addAction(self.phraseSearchAct)
 
         if not hasattr(sys, 'frozen'):
             self.debugMenu = self.menuBar().addMenu('&Debug')
@@ -1144,7 +1180,7 @@ class MainWindow(QMainWindow):
         transcriptions.append(self.configTabs.widget(1).hand2Transcription)
         return transcriptions
 
-    def searchCorpus(self):
+    def searchCorpus(self, searchType = 'transcriptions'):
         if not self.corpus:
             alert = QMessageBox()
             alert.setWindowTitle('No corpus')
@@ -1152,17 +1188,118 @@ class MainWindow(QMainWindow):
             alert.exec_()
             return
 
-        dialog = TranscriptionSearchDialog(self.corpus)
+        if searchType == 'transcriptions':
+            dialog = TranscriptionSearchDialog(self.corpus, self.recentTranscriptionSearches)
+            listToUpdate = self.recentTranscriptionSearches
+        elif searchType == 'phrases':
+            dialog = PhraseSearchDialog(self.corpus, self.recentPhraseSearches)
+            listToUpdate = self.recentPhraseSearches
+
         dialog.exec_()
-        if dialog.transcriptions is not None:
-            matches = self.corpus.search(dialog.transcriptions)
-            resultsDialog = TranscriptionSearchResultDialog(matches)
+        if not dialog.accepted:
+            return
+
+        matches = self.corpus.regExSearch(dialog.regularExpressions)
+        search = RecentSearch(dialog.transcriptions, dialog.regularExpressions, matches)
+        listToUpdate.appendleft(search)
+
+        if matches:
+            resultsDialog = SearchResultsDialog(matches)
             resultsDialog.exec_()
-            if resultsDialog.result is not None:
+            if resultsDialog.result:
                 self.loadHandShape(resultsDialog.result)
-        return
+        else:
+            alert = QMessageBox()
+            alert.setWindowTitle('Search results')
+            alert.setText('No matching transcriptions were found in your corpus')
+            alert.exec_()
+
+    def autoFillTranscription(self):
+        dialog = AutoFillDialog()
+        dialog.exec_()
+        if not dialog.accepted:
+            return
+
+        currentTranscriptions = self.getTranscriptions()
+        if any(not t.isEmpty() for t in currentTranscriptions):
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('This autofill operation may overwrite a portion of your existing transcription.')
+            alert.setInformativeText('Do you want to continue?')
+            alert.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+            choice = alert.exec_()
+            if choice == QMessageBox.Cancel:
+                return
+
+        mapping = {'config1hand1': (0, 'hand1Transcription'),
+                   'config1hand2': (0, 'hand2Transcription'),
+                   'config2hand1': (1, 'hand1Transcription'),
+                   'config2hand2': (1, 'hand2Transcription')}
+        for confighand in mapping:
+            widgetnum, attribute_name = mapping[confighand]
+            if any(x is not None for x in dialog.transcriptions[confighand]):
+                current = currentTranscriptions[0]
+                for slot, symbol in enumerate(dialog.transcriptions[confighand]):
+                    if symbol is not None:
+                        getattr(self.configTabs.widget(widgetnum), attribute_name)[slot].setText(symbol)
+
+    def mergeCorpus(self):
+        if self.corpus is None:
+            alert = QMessageBox()
+            alert.setWindowTitle('No corpus loaded')
+            alert.setText('You must have a corpus already loaded in order to merge.')
+            alert.exec_()
+            return
+
+        dialog = MergeCorpusDialog()
+        dialog.exec_()
+
+        if dialog.filename:
+            corpus2 = load_binary(dialog.filename)
+            for sign in corpus2:
+                if sign.gloss in self.corpus:
+                    alert = MergeCorpusMessageBox()
+                    alert.setText(alert.baseText.format(sign.gloss))
+                    alert.exec_()
+                else:
+                    self.corpus.addWord(sign)
+            save_binary(self.corpus, self.corpus.path)
+            currentGloss = self.currentGloss()
+            self.setupNewCorpus()
+
+            for n in range(self.corpusList.count()):
+                item = self.corpusList.item(n)
+                if item.text() == currentGloss:
+                    self.corpusList.setCurrentRow(n)
+                    break
+            else:
+                self.corpusList.setCurrentRow(0)
 
     def createActions(self):
+
+        self.mergeCorpusAct = QAction('&Merge corpus...',
+                                self,
+                                triggered = self.mergeCorpus)
+
+        self.copyAct = QAction('&Copy a transcription...',
+                              self,
+                              triggered = self.copyTranscription)
+
+        self.pasteAct = QAction('&Paste a transcription...',
+                                self,
+                                triggered = self.pasteTranscription)
+
+        self.autofillAct = QAction('&Autofill transcription slots...',
+                               self,
+                               triggered = self.autoFillTranscription)
+
+        self.transcriptionSearchAct = QAction('Search by &transcription...',
+                                              self,
+                                              triggered = lambda x: self.searchCorpus(searchType = 'transcriptions'))
+
+        self.phraseSearchAct = QAction('Search by descriptive &phrase...',
+                                       self,
+                                       triggered = lambda x: self.searchCorpus(searchType = 'phrases'))
 
         self.overwriteAllGlossesAct = QAction('Resave all glosses in new style',
                                               self,
@@ -1172,15 +1309,10 @@ class MainWindow(QMainWindow):
                                          self,
                                          triggered = self.printCorpusObject)
 
-        self.importCorpusAct = QAction('Import corpus from csv...',
+        self.importCorpusAct = QAction('&Import corpus from csv...',
                                        self,
                                        statusTip = 'Import from csv file',
                                        triggered = self.importCorpus)
-
-        self.searchCorpusAct = QAction('Search the current corpus...',
-                                       self,
-                                       statusTip = 'Search the current corpus',
-                                       triggered = self.searchCorpus)
 
         self.setBlenderPathAct = QAction('Set path to Blender...',
                                          self,
@@ -1344,19 +1476,19 @@ class MainWindow(QMainWindow):
             null = dialog.nullEdit.text()
             if not blank_space:
                 blank_space = ''
-            kwargs = {'include_fields': include_fields, 'blank_space': blank_space}
+            kwargs = {'include_fields': include_fields,
+                      'blank_space': blank_space,
+                      'parameter_format': dialog.parameterFormat}
             if x_in_box:
                 kwargs['x_in_box'] = x_in_box
             if null:
                 kwargs['null'] = null
-            output = [word.export(**kwargs) for word in self.corpus]
+            #output = [word.export(**kwargs) for word in self.corpus]
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
                     print(Sign.headers, file=f)
-                    #f.write(Sign.headers)
-                    for word in output:
-                        #f.write(word)
-                        print(word, file=f)
+                    for word in self.corpus:
+                        print(word.export(**kwargs), file=f)
                 if self.showSaveAlert:
                     QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
             except PermissionError:
@@ -1379,13 +1511,82 @@ class MainWindow(QMainWindow):
             if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
                 return
         filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from CSV', os.getcwd(), '*.csv')
-        filename = filepath[0]
-        corpus = Corpus()
-        with open(filename, mode='r', encoding='utf-8') as f:
+        filepath = filepath[0]
+        if not filepath:
+            return
+        filepath, filename = os.path.split(filepath)
+        filename = filename.split('.')[0]
+
+        corpora = [f for f in os.listdir(filepath) if f.endswith('.corpus')]
+        for c in corpora:
+            if c.split('.')[0] == filename:
+                showAlert = True
+                break
+        else:
+            showAlert = False
+
+        if showAlert:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('The current folder already contains a corpus called \"{}\". To avoid overwriting this file, '
+                          'your imported corpus will be called \"{}-import\". You can rename your corpus in '
+                          'SLPAnnotator by selecting File > Save as...\n\n'
+                          'What do you want to do?'.format(filename, filename))
+
+            alert.addButton('Import CSV file', QMessageBox.AcceptRole)
+            alert.addButton('Cancel', QMessageBox.RejectRole)
+            alert.exec_()
+            if alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
+                return
+
+        if showAlert:
+            corpus = Corpus({'name':filename+'-import', 'path': os.path.join(filepath, filename+'-1.corpus')})
+        else:
+            corpus = Corpus({'name': filename, 'path':os.path.join(filepath, filename+'.corpus')})
+
+        with open(os.path.join(filepath, filename+'.csv'), mode='r', encoding='utf-8') as f:
+            headers = f.readline().strip()
+            headers = headers.split(',')
             for line in f:
                 line = line.strip()
                 line = line.split(',')
-
+                data = {h:l for (h,l) in zip(headers, line)}
+                kwargs = dict()
+                flags = dict()
+                transcriptions = [ [[None for n in range(34)], [None for n in range(34)]],
+                                   [[None for n in range(34)], [None for n in range(34)]] ]
+                for config in [1,2]:
+                    for hand in [1,2]:
+                        for n in range(1,35):
+                            name = 'config{}hand{}slot{}'.format(config, hand, n)
+                            transcriptions[config-1][hand-1][n-1] = data[name]
+                        uncertain = data['config{}hand{}uncertain'.format(config, hand)]
+                        if uncertain == 'None':
+                            uncertain = list()
+                        else:
+                            uncertain = [int(n) for n in uncertain.split('-')]
+                        estimated = data['config{}hand{}estimated'.format(config, hand)]
+                        if estimated == 'None':
+                            estimated = list()
+                        else:
+                            estimated = [int(n) for n in estimated.split('-')]
+                        confighand = 'config{}hand{}'.format(config, hand)
+                        flags[confighand] = [Flag(True if n in uncertain else False, True if n in estimated else False)
+                                             for n in range(34)]
+                kwargs['config1'] = transcriptions[0]
+                kwargs['config2'] = transcriptions[1]
+                kwargs['flags'] = flags
+                kwargs['gloss'] = data['gloss']
+                kwargs['forearmInvolved'] = True if data['forearmInvolved'] == 'True' else False
+                kwargs['partialObscurity'] = True if data['partialObscurity'] == 'True' else False
+                kwargs['uncertainCoding'] = True if data['uncertainCoding'] == 'True' else False
+                kwargs['incompleteCoding'] = True if data['incompleteCoding'] == 'True' else False
+                kwargs['parameters'] = ParameterTreeModel(data['parameters'], fromXML=True)
+                kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
+                sign = Sign(kwargs)
+                corpus.addWord(sign)
+        self.corpus = corpus
+        self.setupNewCorpus()
 
     def sizeHint(self):
         sz = QMainWindow.sizeHint(self)
@@ -1420,6 +1621,55 @@ class MainWindow(QMainWindow):
         for widget in self.globalOptionsWidgets:
             widget.setChecked(False)
         self.askSaveChanges = False
+        self.showMaximized()
+
+class MergeCorpusDialog(QDialog):
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Merge corpus')
+        layout = QVBoxLayout()
+
+        findLayout = QHBoxLayout()
+        findButton = QPushButton('Select corpus file...')
+        findButton.clicked.connect(self.getFileName)
+        self.fileNameEdit = QLineEdit()
+        findLayout.addWidget(findButton)
+        findLayout.addWidget(self.fileNameEdit)
+        layout.addLayout(findLayout)
+
+        buttonLayout = QHBoxLayout()
+        ok = QPushButton('OK')
+        ok.clicked.connect(self.accept)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+    def getFileName(self):
+        filename = QFileDialog.getOpenFileName(self, 'Merge Corpus Files', os.getcwd(), '*.corpus')
+        path = filename[0]
+        if not path:
+            return
+        if not path.endswith('.corpus'):
+            path = path + '.corpus'
+        self.fileNameEdit.setText(path)
+
+    def accept(self):
+        self.filename = self.fileNameEdit.text()
+        if not self.filename:
+            alert = QMessageBox()
+            alert.setWindowTitle('Error')
+            alert.setText('You must select a valid corpus file')
+            alert.exec_()
+            return
+        super().accept()
+
+    def reject(self):
+        self.filename = None
+        super().reject()
 
 class ExportCorpusDialog(QDialog):
 
@@ -1453,6 +1703,7 @@ class ExportCorpusDialog(QDialog):
         blankRadioButtonLayout.addWidget(blankSpaceOption)
         otherBlankOption = QRadioButton('Print this character: ')
         blankRadioButtonLayout.addWidget(otherBlankOption)
+        otherBlankOption.setChecked(True)
         self.blankOptionEdit = QLineEdit()
         self.blankOptionEdit.setMaxLength(1)
         self.blankOptionEdit.setMaximumWidth(30)
@@ -1473,18 +1724,6 @@ class ExportCorpusDialog(QDialog):
                                   'and numbers representing fields.\n'
                                   'If not checked, transcriptions will be one long string.')
 
-        altSymbolsLabel = QLabel('Some programs have trouble displaying the "ultracrossed" symbol (x-in-a-box) and the '
-                            'empty set symbol. If you would like to use alternatives in the output file, you can '
-                            'enter them below.')
-        altSymbolsLabel.setWordWrap(True)
-        self.xinboxEdit = QLineEdit('')
-        self.xinboxEdit.setMaximumWidth(170)
-        self.xinboxEdit.setPlaceholderText('Alternative ultracrossed symbol')
-
-        self.nullEdit = QLineEdit('')
-        self.nullEdit.setMaximumWidth(170)
-        self.nullEdit.setPlaceholderText('Alternative empty set symbol')
-
         parametersLayout = QVBoxLayout()
         exportParamsLabel = QLabel('What format should be used for parameters?')
         parametersLayout.addWidget(exportParamsLabel)
@@ -1502,12 +1741,30 @@ class ExportCorpusDialog(QDialog):
         self.parameterOptions.setId(xmlOption, 1)
         xmlOption.setChecked(True)
 
+        altSymbolsLabel = QLabel('Some programs have trouble displaying the "ultracrossed" symbol (x-in-a-box) and the '
+                                 'empty set symbol. If you would like to use alternatives in the output file, you can '
+                                 'enter them below.')
+        altSymbolsLabel.setWordWrap(True)
+        self.xinboxEdit = QLineEdit('')
+        self.xinboxEdit.setMaximumWidth(170)
+        self.xinboxEdit.setPlaceholderText('Alternative ultracrossed symbol')
+
+        self.nullEdit = QLineEdit('')
+        self.nullEdit.setMaximumWidth(170)
+        self.nullEdit.setPlaceholderText('Alternative empty set symbol')
+
         outputOptionsLayout.addWidget(self.includeFields)
         outputOptionsLayout.addLayout(blankSpaceLayout)
         outputOptionsLayout.addLayout(parametersLayout)
         outputOptionsLayout.addWidget(altSymbolsLabel)
         outputOptionsLayout.addWidget(self.xinboxEdit)
         outputOptionsLayout.addWidget(self.nullEdit)
+
+        noteLabel = QLabel('NOTE: If you are exporting a corpus that you want to re-import into SLP-Annotator, you '
+                           'must use the default options (no fields, underscore for blanks, xml parameters, no '
+                           'alternative symbols).')
+        noteLabel.setWordWrap(True)
+        outputOptionsLayout.addWidget(noteLabel)
 
         layout.addLayout(outputOptionsLayout)
 
@@ -1643,39 +1900,3 @@ def clean(item):
             item.deleteLater()
         except (RuntimeError, AttributeError): # deleted or no deleteLater method
             pass
-
-def sortData(data):
-    if data == 'gloss':
-        return 0
-    elif data == 'config1':
-        return 1
-    elif data == 'config2':
-        return 2
-    elif data == 'major':
-        return 3
-    elif data == 'minor':
-        return 4
-    elif data == 'oneHandMovement':
-        return 5
-    elif data == 'twoHandMovement':
-        return 6
-    elif data == 'orientation':
-        return 7
-
-def loadcsvCorpus(path):
-    with open(path, mode='r', encoding='utf-8') as file:
-        headers = file.readline().strip().split(',')
-        for line in file:
-            line = line.split(',')
-            data = {headers[n]: line[n] for n in range(len(headers))}
-            button = DataButton(data)
-            button.sendData.connect(self.loadHandShape)
-            self.corpusDock.widget().layout().addWidget(button)
-
-def getMediaFilePath(filename):
-    if hasattr(sys, 'frozen'):
-        dir = os.path.dirname(sys.executable)
-        path = os.path.join(dir, 'media', filename)
-    else:
-        path = os.path.join(os.getcwd(), 'media', filename)
-    return path

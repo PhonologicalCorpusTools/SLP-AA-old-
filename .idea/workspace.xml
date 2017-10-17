@@ -2,15 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b8e444d6-1c9c-4d8b-802c-7e3ca1254927" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/slpa/leftHand.blend" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/slpa/rightHand.blend" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/slpa/image.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/slpa/search.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/testOut3.blend1" afterPath="$PROJECT_DIR$/slpa/testOut3.blend1" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/applyHandCode.py" afterPath="$PROJECT_DIR$/slpa/applyHandCode.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/imports.py" afterPath="$PROJECT_DIR$/slpa/imports.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/lexicon.py" afterPath="$PROJECT_DIR$/slpa/lexicon.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/main.py" afterPath="$PROJECT_DIR$/slpa/main.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/parameters.py" afterPath="$PROJECT_DIR$/slpa/parameters.py" />
@@ -35,11 +28,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/slpa/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18853">
-              <caret line="1109" column="13" selection-start-line="1109" selection-start-column="13" selection-end-line="1109" selection-end-column="13" />
+            <state relative-caret-position="238">
+              <caret line="444" column="54" selection-start-line="444" selection-start-column="54" selection-end-line="444" selection-end-column="54" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
               </folding>
@@ -47,31 +40,41 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="transcriptions.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="decorators.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/slpa/decorators.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-119">
+              <caret line="7" column="31" selection-start-line="7" selection-start-column="31" selection-end-line="7" selection-end-column="31" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="parameterwidgets.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/slpa/parameterwidgets.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="170">
+              <caret line="368" column="0" selection-start-line="368" selection-start-column="0" selection-end-line="368" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="lexicon.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/slpa/lexicon.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="316">
+              <caret line="220" column="29" selection-start-line="220" selection-start-column="13" selection-end-line="220" selection-end-column="29" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="transcriptions.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/slpa/transcriptions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="299">
-              <caret line="526" column="26" selection-start-line="526" selection-start-column="26" selection-end-line="526" selection-end-column="26" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="imports.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/slpa/imports.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="11" column="70" selection-start-line="11" selection-start-column="70" selection-end-line="11" selection-end-column="70" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="search.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/slpa/search.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6358">
-              <caret line="377" column="8" selection-start-line="377" selection-start-column="8" selection-end-line="377" selection-end-column="8" />
+            <state relative-caret-position="333">
+              <caret line="528" column="49" selection-start-line="528" selection-start-column="49" selection-end-line="528" selection-end-column="49" />
               <folding />
             </state>
           </provider>
@@ -121,11 +124,11 @@
         <option value="$PROJECT_DIR$/slpa/constraints.py" />
         <option value="$PROJECT_DIR$/slpa/constraintwidgets.py" />
         <option value="$PROJECT_DIR$/slpa/parameterwidgets.py" />
-        <option value="$PROJECT_DIR$/slpa/lexicon.py" />
         <option value="$PROJECT_DIR$/slpa/search.py" />
-        <option value="$PROJECT_DIR$/slpa/main.py" />
         <option value="$PROJECT_DIR$/slpa/imports.py" />
         <option value="$PROJECT_DIR$/slpa/transcriptions.py" />
+        <option value="$PROJECT_DIR$/slpa/lexicon.py" />
+        <option value="$PROJECT_DIR$/slpa/main.py" />
       </list>
     </option>
   </component>
@@ -760,24 +763,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/decorators.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret line="36" column="4" selection-start-line="36" selection-start-column="4" selection-end-line="36" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/slpa/run_slpa.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
           <caret line="10" column="7" selection-start-line="10" selection-start-column="7" selection-end-line="10" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/parameterwidgets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="342" column="56" selection-start-line="342" selection-start-column="56" selection-end-line="342" selection-end-column="56" />
         </state>
       </provider>
     </entry>
@@ -802,13 +791,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/lexicon.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="23" column="16" selection-start-line="23" selection-start-column="16" selection-end-line="23" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/slpa/search.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="6358">
@@ -825,21 +807,45 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/main.py">
+    <entry file="file://$PROJECT_DIR$/slpa/transcriptions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18853">
-          <caret line="1109" column="13" selection-start-line="1109" selection-start-column="13" selection-end-line="1109" selection-end-column="13" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="333">
+          <caret line="528" column="49" selection-start-line="528" selection-start-column="49" selection-end-line="528" selection-end-column="49" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slpa/transcriptions.py">
+    <entry file="file://$PROJECT_DIR$/slpa/parameterwidgets.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
-          <caret line="526" column="26" selection-start-line="526" selection-start-column="26" selection-end-line="526" selection-end-column="26" />
+        <state relative-caret-position="170">
+          <caret line="368" column="0" selection-start-line="368" selection-start-column="0" selection-end-line="368" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slpa/lexicon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="316">
+          <caret line="220" column="29" selection-start-line="220" selection-start-column="13" selection-end-line="220" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slpa/decorators.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-119">
+          <caret line="7" column="31" selection-start-line="7" selection-start-column="31" selection-end-line="7" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slpa/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="444" column="54" selection-start-line="444" selection-start-column="54" selection-end-line="444" selection-end-column="54" />
+          <folding>
+            <element signature="e#0#16#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

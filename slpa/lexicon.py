@@ -1,5 +1,5 @@
 #from slpa import __version__ as currentSLPAversion
-import os
+import os, re
 from collections import OrderedDict
 from random import choice
 from parameters import defaultParameterTree, defaultParameters
@@ -36,21 +36,19 @@ class Corpus():
         else:
             return value
 
-    def search(self, query):
-        query = [ [query[0], query[1]], [query[2], query[3]]  ]
+    def regExSearch(self, query):
+        expressions = [ [query[0], query[1]], [query[2], query[3]] ]
         match_list = list()
         for word in self:
-            matches = [ [False, False], [False, False] ]
-            for config_num in [1, 2]:
-                for hand_num in [1, 2]:
-                    slot_list = getattr(word, 'config{}hand{}'.format(config_num, hand_num))
-                    compare_list = query[config_num-1][hand_num-1]
-                    compare_list = [slot.text() for slot in compare_list.slots]
-                    if slot_list == compare_list:
-                       matches[config_num-1][hand_num-1] = True
-            matches = [item for sublist in matches for item in sublist]
-            if all(matches):
+            for config_num, hand_num in [(1,1), (1,2), (2,1), (2,2)]:
+                slots = getattr(word, 'config{}hand{}'.format(config_num, hand_num))
+                slots = ''.join([slot if slot else '_' for slot in slots])
+                regex = re.compile(expressions[config_num - 1][hand_num - 1])
+                if regex.match(slots) is None:
+                    break
+            else:
                 match_list.append(word)
+
         return match_list
 
     def getWord(self, text):
@@ -114,8 +112,9 @@ class Sign():
                 headers.append('config{}hand{}slot{}'.format(config_num, hand_num, slot_num))
             headers.append('config{}hand{}uncertain'.format(config_num, hand_num))
             headers.append('config{}hand{}estimated'.format(config_num, hand_num))
-    headers.append('parameters')
+    headers.extend(['forearmInvolved','partialObscurity','uncertainCoding', 'incompleteCoding'])
     headers.append('notes')
+    headers.append('parameters')
     headers = ','.join(headers)
 
     def __init__(self, kwargs):
@@ -164,11 +163,9 @@ class Sign():
     def data(self):
         return OrderedDict([(key, getattr(self, key)) for key in Sign.sorted_attributes])
 
-    def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL):
+    def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
         output = list()
         output.append(self.gloss)
-        # for key,value in self.data().items():
-        #     if 'config' in key:
         for config_num in [1,2]:
             for hand_num in [1,2]:
                 hand = getattr(self, 'config{}hand{}'.format(config_num, hand_num))
@@ -214,9 +211,16 @@ class Sign():
                 output.append(uncertain)
                 output.append(estimates)
 
-        parameters = self.parameters.exportTree()
-        output.append(parameters)
+        output.append('True' if self.forearmInvolved else 'False')
+        output.append('True' if self.partialObscurity else 'False')
+        output.append('True' if self.uncertainCoding else 'False')
+        output.append('True' if self.incompleteCoding else 'False')
         output.append(self.notes)
+        if parameter_format == 'xml':
+            parameters = self.parameters.exportXML()
+        elif parameter_format == 'txt':
+            parameters = self.parameters.exportTree()
+        output.append(parameters)
 
         output = ','.join(output)
 

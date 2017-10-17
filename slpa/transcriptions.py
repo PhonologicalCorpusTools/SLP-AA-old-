@@ -1,5 +1,5 @@
-from imports import *
 from collections import namedtuple
+from imports import *
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
@@ -13,8 +13,9 @@ class TranscriptionLayout(QVBoxLayout):
     fontMetric = QFontMetricsF(defaultFont)
 
     def __init__(self, hand=None):
-        QVBoxLayout.__init__(self)
+        super().__init__()
 
+        self.setSpacing(0)
         self.hand = hand
         self.fields = list()
         self.slots = list()
@@ -22,6 +23,8 @@ class TranscriptionLayout(QVBoxLayout):
 
         self.lineLayout = QHBoxLayout()
         self.addLayout(self.lineLayout)
+        self.lineLayout.setSpacing(0)
+        self.lineLayout.setContentsMargins(0, 0, 0, 0)
 
         self.generateSlots()
         self.generateViolationLabels()
@@ -179,6 +182,7 @@ class TranscriptionLayout(QVBoxLayout):
         for slot in self.slots[1:]:
             if slot.num in [8,9,16,21,26,31]:
                 continue
+                #these slots have automatically filled values, and they cannot be edited by the user
             if slot.text():
                 return False
         return True
@@ -255,7 +259,6 @@ class TranscriptionCompleter(QCompleter):
 
     def __init__(self, options, lineEditWidget):
         super().__init__(options, lineEditWidget)
-        #self.setCaseSensitivity(Qt.CaseSensitive)
         self.setCaseSensitivity(Qt.CaseInsensitive)
         self.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
 
@@ -516,8 +519,7 @@ class TranscriptionCheckBox(QCheckBox):
         return self.getText()
 
 
-
-class TranscriptionField(QGridLayout):
+class TranscriptionField(QVBoxLayout):
 
     slotSelectionChanged = Signal(int)
 
@@ -525,15 +527,28 @@ class TranscriptionField(QGridLayout):
         super().__init__()
         self.number = number
         self.name = 'field{}'.format(self.number)
-        self.left_bracket = QLabel('[')
-        self.right_bracket = QLabel(']<font size="5"><b><sub>{}</sub></b></font>'.format(self.number))
-        self.transcription = QHBoxLayout()
-        self.violations = QHBoxLayout()
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setSpacing(0)
 
-        self.addWidget(self.left_bracket, 0, 0)
-        self.addLayout(self.transcription, 0, 1)
-        self.addWidget(self.right_bracket, 0, 10)
-        self.addLayout(self.violations, 1, 1)
+        self.fieldLayout = QHBoxLayout()
+        self.addLayout(self.fieldLayout)
+
+        self.left_bracket = QLabel('[')
+        self.fieldLayout.addWidget(self.left_bracket)
+
+        self.transcription = QHBoxLayout()
+        self.transcription.setSpacing(0)
+        self.fieldLayout.addLayout(self.transcription)
+
+        self.right_bracket = QLabel(']<font size="5"><b><sub>{}</sub></b></font>'.format(self.number))
+        self.fieldLayout.addWidget(self.right_bracket)
+        self.fieldLayout.setSpacing(2)
+        #self.fieldLayout.setContentsMargins(0, 0, 0, 0)
+        self.fieldLayout.insertSpacerItem(-1, QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.violations = QHBoxLayout()
+        self.violations.setSpacing(0)
+        self.addLayout(self.violations)
 
     def addSlot(self, slot):
         self.transcription.addWidget(slot)
@@ -770,6 +785,7 @@ class TranscriptionConfigTab(QWidget):
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
         self.setLayout(self.configLayout)
 
+
     def clearAll(self, clearFlags=False):
         self.hand1Transcription.clearTranscriptionSlots()
         self.hand1Transcription.clearViolationLabels()
@@ -793,91 +809,6 @@ class TranscriptionConfigTab(QWidget):
 
     def hands(self):
         return [self.hand1(), self.hand2()]
-
-class TranscriptionSearchDialog(QDialog):
-
-    def __init__(self, corpus):
-        super().__init__()
-
-        self.corpus = corpus
-        self.transcriptions = None
-        self.setWindowTitle('Search')
-
-
-        layout = QVBoxLayout()
-
-        self.topLayout = QHBoxLayout()
-        explanation = QLabel()
-        text = ('Enter the transcription you want to match in your corpus.')
-        explanation.setText(text)
-        explanation.setFont(QFont('Arial', 16))
-        self.topLayout.addWidget(explanation)
-        layout.addLayout(self.topLayout)
-
-        self.configTabs = QTabWidget()
-        self.configTabs.addTab(TranscriptionConfigTab(1), 'Config 1')
-        self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
-        layout.addWidget(self.configTabs)
-
-        buttonLayout = QVBoxLayout()
-        ok = QPushButton('Search')
-        ok.clicked.connect(self.search)
-        cancel = QPushButton('Cancel')
-        cancel.clicked.connect(self.reject)
-        buttonLayout.addWidget(ok)
-        buttonLayout.addWidget(cancel)
-        layout.addLayout(buttonLayout)
-        self.setLayout(layout)
-
-    def search(self):
-        self.transcriptions = self.getTranscriptions()
-        super().accept()
-
-    def getTranscriptions(self):
-        transcriptions = list()
-        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
-        return transcriptions
-
-class TranscriptionSearchResultDialog(QDialog):
-
-    def __init__(self, results):
-        super().__init__()
-        self.setWindowTitle('Search Results')
-        layout = QVBoxLayout()
-        self.result = None
-
-        resultsLayout = QHBoxLayout()
-
-        self.resultsList = QListWidget()
-        for r in results:
-            self.resultsList.addItem(r.gloss)
-
-        resultsLayout.addWidget(self.resultsList)
-        layout.addLayout(resultsLayout)
-
-        buttonLayout = QHBoxLayout()
-        okButton = QPushButton('Go to this entry')
-        cancelButton = QPushButton('Cancel')
-        okButton.clicked.connect(self.accept)
-        cancelButton.clicked.connect(self.reject)
-        buttonLayout.addWidget(okButton)
-        buttonLayout.addWidget(cancelButton)
-
-        layout.addLayout(buttonLayout)
-
-        self.setLayout(layout)
-
-    def accept(self):
-        item = self.resultsList.currentItem()
-        self.result = item
-        super().accept()
-
-    def reject(self):
-        self.result = None
-        super().reject()
 
 class TranscriptionSelectDialog(QDialog):
 

@@ -1,7 +1,11 @@
 from imports import *
 from collections import defaultdict
+from xml.etree.ElementTree import Element as xmlElement, SubElement as xmlSubElement
+from xml.etree import ElementTree as xmlElementTree
+from xml.dom import minidom
 import parameters
 import anytree
+
 
 class ParameterTreeWidget(QTreeWidget):
     itemChecked = Signal(object, int)
@@ -340,8 +344,13 @@ class ParameterTreeWidgetItem(QTreeWidgetItem):
 
 class ParameterTreeModel:
 
-    def __init__(self, parameterList, startNode = None):
+    def __init__(self, parameterList, fromXML = False):
         self.tree = anytree.Node('Parameters', parent=None)
+        self.parameterList = list()
+        if fromXML:
+            self.parseXML(parameterList)
+            return
+
         self.parameterList = parameterList
         for p in parameterList:
             parameterNode = ParameterNode(p, parent=self.tree) #anytree.Node(p.name, parent=self.tree)
@@ -351,8 +360,6 @@ class ParameterTreeModel:
 
     def exportTree(self):
         export = list()
-        # r = anytree.Resolver('name')
-        # top = r.get(self.tree, '/Parameters')
         for pre, fill, node in anytree.RenderTree(self.tree):
             if node.is_leaf:
                 if node.is_checked:
@@ -360,14 +367,40 @@ class ParameterTreeModel:
         export = ','.join(export)
         return export
 
+    def exportXML(self):
+        elements = list()
+        for node in anytree.PreOrderIter(self.tree):
+            nodeName = parameters.encodeXMLName(node.name)
+            if not elements:
+                top = xmlElement(self.tree.name)
+                top.attrib['name'] = self.tree.name
+                top.attrib['is_checked'] = 'False'
+                top.attrib['is_default'] = 'False'
+                elements.append(top)
+                continue
+            for e in elements:
+                if e.attrib['name'] == node.parent.name:
+                    se = xmlSubElement(e, nodeName)
+                    se.attrib['name'] = node.name
+                    se.attrib['is_checked'] = 'True' if node.is_checked else 'False'
+                    se.attrib['is_default'] = 'True' if node.is_default else 'False'
+                    se.attrib['parent'] = e.attrib['name']
+                    elements.append(se)
+                    break
+            # else:
+            #     print('could not find parent for {}'.format(node.name))
+
+        string = xmlElementTree.tostring(top, encoding='unicode', method='xml')
+        return string
+
     def __str__(self):
         return self.exportTree()
 
     def printTree(self, nodeName='Quality'):
         treeText = list()
         r = anytree.Resolver('name')
-        quality = r.get(self.tree, nodeName)
-        for pre, fill, node in anytree.RenderTree(quality):
+        startNode = r.get(self.tree, nodeName)
+        for pre, fill, node in anytree.RenderTree(startNode):
             if node.is_leaf:
                 if node.is_checked:
                     treeText.append("{}{}".format(pre, node.name))
@@ -376,7 +409,6 @@ class ParameterTreeModel:
 
         treeText = '\n'.join(treeText)
         print(treeText)
-
 
     def getTree(self):
         return self.tree
@@ -391,6 +423,41 @@ class ParameterTreeModel:
                 self.addNode(c, newNode)
         else:
             newNode = ParameterNode(parameters.TerminalParameter(parameter.name, parentNode), parent=parentNode) #anytree.Node(parameter, parent=parentNode)
+
+    def addNodeFromXML(self, element, parentNode):
+        parameter = parameters.getParameterFromXML(element)
+        self.parameterList.append(parameter)
+        for child in element:
+            newNode = ParameterNode(parameter, parent=parentNode)
+            if element.attrib['is_default'] == 'True':
+                newNode.is_default = True
+            if element.attrib['is_checked'] == 'True':
+                newNode.is_checked = True
+            for subelement in element:
+                self.addNodeFromXML(subelement, newNode)
+        else:
+            newNode = ParameterNode(parameters.TerminalParameter(parameter.name, parentNode), parent=parentNode)
+            if element.attrib['is_default'] == 'True':
+                newNode.is_default = True
+            if element.attrib['is_checked'] == 'True':
+                newNode.is_checked = True
+
+    def parseXML(self, xmlstring):
+        topElement = xmlElementTree.fromstring(xmlstring)
+        self.tree = anytree.Node('Parameters', parent=None)
+
+        for topChild in topElement:
+            p = parameters.getParameterFromXML(topChild)
+            self.parameterList.append(p)
+            parentNode = ParameterNode(p, parent = self.tree)
+            if topChild.attrib['is_default'] == 'True':
+                parentNode.is_default = True
+            if topChild.attrib['is_checked'] == 'True':
+                parentNode.is_checked = True
+            setattr(self, p.name, parentNode)
+            for child in topChild:
+                self.addNodeFromXML(child, parentNode)
+
 
     def __getitem__(self, item):
         for node in self.tree.children:
