@@ -19,7 +19,7 @@ To enter a gloss for a sign, simply click on the text box named "Gloss" and type
 2. Filling in a slot
 `````````````````
 To fill in a slot, you can either click on a slot to select a symbol from the pull-down menu or type in 
-a symbol yourself. For more infomation about slots and symbols, see :ref:`field_and_slot`
+a symbol yourself (see :ref:`field_and_slot` as relevant).
 
       Notes on typing in a symbol
       
@@ -27,7 +27,7 @@ a symbol yourself. For more infomation about slots and symbols, see :ref:`field_
       
       * In Slots 20, 25, and 30, use the key 'z' for "x-"; 'c' for "x+"; and 's' for "☒".
       
-      * For Mac users, it may be helpful to use the Tab key to move to the next slot. To enable this, go to System Preferences > Keyboard > Shortcuts. At the bottom of the page under Full Keyboard Access, select "All controls."
+      * For Mac users, it may be helpful to use the Tab key to move to the next slot. To enable this, go to System Preferences > Keyboard > Shortcuts. At the bottom of the page under Full Keyboard Access, select "All controls".
 
 
 .. _flag_slot:
@@ -43,7 +43,7 @@ To do this, control-click or rightclick a slot. A pull-down menu will appear, an
    :width: 90%
    :align: center
 
-Alternatively, go to Transcription in the menu bar and select "Set transcription flags...". A new window will appear. You can expand and scroll through the window to flag any slot in any Config. Click OK.
+Alternatively, go to "Transcription" in the menu bar and select "Set transcription flags...". A new window will appear. You can expand and scroll through the window to flag any slot in any Config. Click "OK".
 
 .. image:: static/set_flag.png
    :width: 90%
@@ -86,7 +86,7 @@ in highlighting for uncertain and estimated slots". Click "OK". Note that any ex
       :align: center
 
   
-   Second, click on the Paste button. In the new window, you can see the copied transcription in the first line introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select Config 1, Hand 2, and click OK.
+   Second, click on the Paste button. In the new window, you can see the copied transcription in the first line, introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select "Config 1, Hand 2", and click "OK".
       
    .. image:: static/paste.png
       :width: 90%
@@ -127,8 +127,8 @@ appear, and you can select relevant values. To transcribe handshapes and paramet
 
 7. Adding Sign and Corpus notes
 `````````````````
-To add a note to a sign that you are transcribing, go to Notes in the menu bar and click on "Edit sign notes..." A new window
-will appear, and you can type in your comments. 
+To add a note to a sign that you are transcribing, go to "Notes" in the menu bar and click on "Edit sign notes..." A new 
+window will appear, and you can type in your comments. 
 
 .. image:: static/sign_notes.png
       :width: 90%
@@ -137,7 +137,7 @@ will appear, and you can type in your comments.
 Sign notes are automatically saved when the signs are saved, and you can go back and edit them by following the above step.
 It may be useful, for example, to use this sign notes to describe reasons for checking the Global handshape options.    
 
-Similarly, Notes>"Edit corpus notes..." will allow you to add a note to the entire corpus.
+Similarly, "Notes" > "Edit corpus notes..." will allow you to add a note to the entire corpus.
 
 
 .. _check_transcription:
@@ -152,7 +152,7 @@ To check your transcription against your selected constraints (see :ref:`constra
 9. Visualizing transcription
 `````````````````
 To see a graphic image of transcribed handshapes, click on "Visualize transcription" button. A new window titled 
-"Handshape visualization" appears. Select a Config and Hand you would like to visualize, and click OK.
+"Handshape visualization" appears. Select a Config and Hand you would like to visualize, and click "OK".
 
 .. image:: static/visualization.png
       :width: 90%
@@ -164,8 +164,8 @@ To see a graphic image of transcribed handshapes, click on "Visualize transcript
 10. Saving a sign to a corpus
 `````````````````
 Note that each sign should be saved before a next sign can be transcribed. To save a sign, either click on "Save word to
-corpus" button or go to Menu and select "Save current word". You will get a message "Corpus successfully updated!" if "Show
-save alert" is selected in your setting (see :ref:`options`).
+corpus" button or go to "File" in the menu bar and select "Save current word". You will get a message 
+"Corpus successfully updated!" if "Show save alert" is selected in your setting (see :ref:`options`).
 
 
 If you do not have a corpus loaded beforehand, you will get a warning message: "You must have a corpus loaded before you can
@@ -188,7 +188,7 @@ You can either "Go back and edit the gloss" or "Overwrite existing word".
 Finally, if you click on "New gloss" (see :ref:`next_sign`) without saving the current sign, you will get a warning message: 
 "The current gloss has unsaved changes. what would you like to do?" It gives you options to either "Go back" to the current 
 sign or to "Continue without saving". 
-If this is the first time the sign is transcribed, the latter option will delete a sign.
+If this is the first time the sign is transcribed in the corpus, the latter option will delete a sign.
 
 
 .. _next_sign:
@@ -196,7 +196,7 @@ If this is the first time the sign is transcribed, the latter option will delete
 11. Transcribing the next sign
 `````````````````
 Once a sign has been saved, if you would like to continue on transcribing a next sign, you can either click on 
-the "New gloss" button or go to Menu and select "New gloss".
+the "New gloss" button or go to "File" and select "New gloss".
 
 You can repeat the transcribing process from :ref:`enter_gloss`.
 
