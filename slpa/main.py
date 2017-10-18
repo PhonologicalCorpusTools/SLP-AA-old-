@@ -1140,7 +1140,7 @@ class MainWindow(QMainWindow):
             self.parameterDialog.show()
         else:
             self.parameterDialog.setWindowFlags(self.parameterDialog.windowFlags() ^ Qt.WindowStaysOnTopHint)
-            self.parametersDialog.hide()
+            self.parameterDialog.hide()
 
     def resetSettings(self):
         self.readSettings(reset = True)
