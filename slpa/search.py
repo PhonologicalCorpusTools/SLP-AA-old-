@@ -86,11 +86,13 @@ class FingerSearchLayout(QHBoxLayout):
 
     def __init__(self):
         super().__init__()
+        self.deleteMe = QCheckBox()
         self.quantifiers = QuantifierComboBox()
         self.fingers = FingerComboBox()
         self.flexions = FlexionComboBox()
         self.configs = ConfigComboBox()
         self.hands = HandComboBox()
+        self.addWidget(self.deleteMe)
         self.addWidget(QLabel('In '))
         self.addWidget(self.configs)
         self.addWidget(self.hands)
@@ -152,6 +154,9 @@ class PhraseDialog(QDialog):
         self.addDescription = QPushButton('')
         self.addDescription.clicked.connect(self.addFingerLayout)
         buttonLayout.addWidget(self.addDescription)
+        remove = QPushButton('Remove all selected phrases')
+        buttonLayout.addWidget(remove)
+        remove.clicked.connect(self.removeFingerLayout)
         ok = QPushButton('OK')
         buttonLayout.addWidget(ok)
         ok.clicked.connect(self.accept)
@@ -161,6 +166,21 @@ class PhraseDialog(QDialog):
         self.layout.addLayout(buttonLayout)
 
         self.setLayout(self.layout)
+
+    def removeFingerLayout(self):
+        removals = list()
+        for n in range(self.metaLayout.count()):
+            layout = self.metaLayout.itemAt(n)
+            print(n, type(layout), layout.quantifiers.currentText(), layout.deleteMe.isChecked())
+            if layout.deleteMe.isChecked():
+                removals.append(layout)
+        for layout in removals:
+            self.metaLayout.removeItem(layout)
+            for n in range(layout.count()):
+                item = layout.itemAt(n)
+                layout.removeItem(item)
+                del item
+                print(layout.count())
 
     def addFingerLayout(self, disable_quantifiers=False):
         newLayout = FingerSearchLayout()
