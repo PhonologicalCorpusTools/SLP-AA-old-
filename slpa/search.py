@@ -139,7 +139,7 @@ class PhraseDialog(QDialog):
         self.introduction.setFont(QFont('Arial', 15))
         #this label is used by subclasses to present different information to the user
 
-        self.transcriptions = None
+        self.transcriptions = list()
         self.regularExpressions = None
 
         self.layout = QVBoxLayout()
@@ -203,7 +203,7 @@ class PhraseDialog(QDialog):
         return symbol
 
     def generateTranscriptions(self):
-        transcription = [ [] , [] ]
+        transcriptions = list()
         for regex in self.regularExpressions:
             t = list()
             for symbol in regex:
@@ -211,6 +211,8 @@ class PhraseDialog(QDialog):
                     t.append('_')
                 else:
                     t.append(symbol)
+            transcriptions.append(t)
+        self.transcriptions = transcriptions
 
     def generateRegEx(self):
         mapping = {'config1hand1': (0, 'hand1Transcription'),
@@ -276,6 +278,8 @@ class PhraseSearchDialog(PhraseDialog):
         super().__init__()
         self.corpus = corpus
         self.recents = recents
+        self.regularExpressions = None
+        self.transcriptions = list()
         self.setWindowTitle('Seach by descriptive phrase')
         self.addDescription.setText('Add search description')
         self.introduction.setText('Find a handshape with the following properties...')
@@ -284,6 +288,7 @@ class PhraseSearchDialog(PhraseDialog):
 
     def accept(self):
         self.generateRegEx()
+        self.generateTranscriptions()
         super().accept()
 
 class AutoFillDialog(PhraseDialog):
@@ -427,7 +432,7 @@ class TranscriptionSearchDialog(SearchDialog):
         self.regularExpressions = expressions
 
 
-    def getTranscriptions(self):
+    def generateTranscriptions(self):
         self.transcriptions = list()
         self.transcriptions.append(self.configTabs.widget(0).hand1Transcription)
         self.transcriptions.append(self.configTabs.widget(0).hand2Transcription)
@@ -441,10 +446,17 @@ class TranscriptionSearchDialog(SearchDialog):
 class RecentSearch:
 
     def __init__(self, transcriptions, regex, results):
-        top = ','.join([t.str_with_underscores() for t in transcriptions[0:2]])
-        bottom = ','.join([t.str_with_underscores() for t in transcriptions[2:-1]])
+        try:
+            top = ','.join([t.str_with_underscores() for t in transcriptions[0:2]])
+            bottom = ','.join([t.str_with_underscores() for t in transcriptions[2:-1]])
+            self.segmentedTranscription = [[slot.getText(empty_text='') for slot in transcription] for transcription in
+                                           transcriptions]
+        except AttributeError:
+            top = ','.join([''.join(t) for t in transcriptions[0:2]])
+            bottom = ','.join([''.join(t) for t in transcriptions[2:-1]])
+            self.segmentedTranscription = [[slot for slot in transcription] for transcription in transcriptions]
         self.transcriptions = '\n'.join([top, bottom])
-        self.segmentedTranscription = [[slot.getText(empty_text='') for slot in transcription] for transcription in transcriptions]
+
         self.regularExpression = regex
         self.results = ', '.join([r.gloss for r in results])
 
