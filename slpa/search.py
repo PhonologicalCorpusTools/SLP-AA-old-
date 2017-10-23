@@ -102,6 +102,17 @@ class FingerSearchLayout(QHBoxLayout):
         self.addWidget(QLabel(' are '))
         self.addWidget(self.flexions)
 
+    def generatePhrase(self):
+        phrase = list()
+        for n in range(self.count()):
+            widget = self.itemAt(n).widget()
+            if isinstance(widget, QLabel):
+                phrase.append(widget.text().strip())
+            elif isinstance(widget, QComboBox):
+                phrase.append(widget.currentText())
+        return ' '.join(phrase)
+
+
 class SearchDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -111,19 +122,11 @@ class SearchDialog(QDialog):
     def showRecentSearches(self):
         dialog = RecentSearchDialog(self.recents)
         dialog.exec_()
-        if dialog.result is not None:
-            results = dialog.result.recentData.segmentedTranscription
-            results = [[results[0], results[1]], [results[2], results[3]]]
-            for config in [0,1]:
-                for hand in [0,1]:
-                    widget = getattr(self.configTabs.widget(config), 'hand{}Transcription'.format(hand+1))
-                    for n,symbol in enumerate(results[config][hand]):
-                        slot = getattr(widget, 'slot{}'.format(n+1))
-                        slot.setText(symbol)
+        return dialog.result
 
     def accept(self):
         self.accepted = True
-        self.getTranscriptions()
+        self.generateTranscriptions()
         self.generateRegEx()
         super().accept()
 
@@ -150,37 +153,50 @@ class PhraseDialog(QDialog):
         self.metaLayout = QVBoxLayout()
         self.layout.addLayout(self.metaLayout)
 
-        buttonLayout = QHBoxLayout()
+        self.buttonLayout = QVBoxLayout()
+        self.topButtonLayout = QHBoxLayout()
         self.addDescription = QPushButton('')
         self.addDescription.clicked.connect(self.addFingerLayout)
-        buttonLayout.addWidget(self.addDescription)
+        self.topButtonLayout.addWidget(self.addDescription)
         remove = QPushButton('Remove all selected phrases')
-        buttonLayout.addWidget(remove)
-        remove.clicked.connect(self.removeFingerLayout)
+        self.topButtonLayout.addWidget(remove)
+        remove.clicked.connect(self.removeFingerLayouts)
+        self.buttonLayout.addLayout(self.topButtonLayout)
+
+        bottomButtonLayout = QHBoxLayout()
         ok = QPushButton('OK')
-        buttonLayout.addWidget(ok)
+        bottomButtonLayout.addWidget(ok)
         ok.clicked.connect(self.accept)
         cancel = QPushButton('Cancel')
-        buttonLayout.addWidget(cancel)
+        bottomButtonLayout.addWidget(cancel)
         cancel.clicked.connect(self.reject)
-        self.layout.addLayout(buttonLayout)
+        self.buttonLayout.addLayout(bottomButtonLayout)
+
+        self.layout.addLayout(self.buttonLayout)
 
         self.setLayout(self.layout)
 
-    def removeFingerLayout(self):
-        removals = list()
-        for n in range(self.metaLayout.count()):
+    def clearLayout(self, layout):
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+                else:
+                    self.clearLayout(item.layout())
+
+    def removeFingerLayouts(self):
+        layoutCount = self.metaLayout.count()
+        for n in reversed(range(layoutCount)):
             layout = self.metaLayout.itemAt(n)
-            print(n, type(layout), layout.quantifiers.currentText(), layout.deleteMe.isChecked())
             if layout.deleteMe.isChecked():
-                removals.append(layout)
-        for layout in removals:
-            self.metaLayout.removeItem(layout)
-            for n in range(layout.count()):
-                item = layout.itemAt(n)
-                layout.removeItem(item)
-                del item
-                print(layout.count())
+                layout = self.metaLayout.takeAt(n)
+                while layout.count():
+                    item = layout.takeAt(0)
+                    widget = item.widget()
+                    if widget is not None:
+                        widget.deleteLater()
 
     def addFingerLayout(self, disable_quantifiers=False):
         newLayout = FingerSearchLayout()
@@ -233,6 +249,9 @@ class PhraseDialog(QDialog):
                     t.append(symbol)
             transcriptions.append(t)
         self.transcriptions = transcriptions
+
+    def generatePhrases(self):
+        self.phrases = [layout.generatePhrase() for layout in self.descriptionLayouts]
 
     def generateRegEx(self):
         mapping = {'config1hand1': (0, 'hand1Transcription'),
@@ -292,10 +311,10 @@ class PhraseDialog(QDialog):
         self.accepted = False
         super().reject()
 
-class PhraseSearchDialog(PhraseDialog):
+class PhraseSearchDialog(PhraseDialog, SearchDialog):
 
     def __init__(self, corpus, recents):
-        super().__init__()
+        PhraseDialog.__init__(self)
         self.corpus = corpus
         self.recents = recents
         self.regularExpressions = None
@@ -305,10 +324,55 @@ class PhraseSearchDialog(PhraseDialog):
         self.introduction.setText('Find a handshape with the following properties...')
         self.addFingerLayout()
         self.regularExpressions = list()
+        showRecents = QPushButton('Show recent searches...')
+        showRecents.clicked.connect(self.recentSearches)
+        self.topButtonLayout.addWidget(showRecents)
+
+    def recentSearches(self):
+        result = self.showRecentSearches()
+        if result is not None:
+            results = result.recentData.segmentedTranscription
+            if len(self.descriptionLayouts) > len(results):
+                self.descriptionLayouts = self.descriptionLayouts[:len(results)]
+                for n in range(self.metaLayout.count()):
+                    layout = self.metaLayout.itemAt(n)
+                    if n+1 <= len(results):
+                        layout.deleteMe.setChecked(False)
+                    else:
+                        layout.deleteMe.setChecked(True)
+                self.removeFingerLayouts()
+
+            for i, result in enumerate(results):
+                config = ' '.join([result[1], result[2]])
+                hand = ' '.join([result[3], result[4]])
+                quantifier = result[5]
+                finger = result[11]
+                flexion = result[13]
+                try:
+                    layout = self.descriptionLayouts[i]
+                except IndexError:
+                    layout = FingerSearchLayout()
+                    self.descriptionLayouts.append(layout)
+                    self.metaLayout.addLayout(layout)
+
+                index = layout.configs.findText(config)
+                layout.configs.setCurrentIndex(index)
+
+                index = layout.hands.findText(hand)
+                layout.hands.setCurrentIndex(index)
+
+                index = layout.quantifiers.findText(quantifier)
+                layout.quantifiers.setCurrentIndex(index)
+
+                index = layout.fingers.findText(finger)
+                layout.fingers.setCurrentIndex(index)
+
+                index = layout.flexions.findText(flexion)
+                layout.flexions.setCurrentIndex(index)
 
     def accept(self):
         self.generateRegEx()
-        self.generateTranscriptions()
+        self.generatePhrases()
         super().accept()
 
 class AutoFillDialog(PhraseDialog):
@@ -404,7 +468,7 @@ class TranscriptionSearchDialog(SearchDialog):
 
         buttonLayout = QVBoxLayout()
         showRecents = QPushButton('Show recent searches...')
-        showRecents.clicked.connect(self.showRecentSearches)
+        showRecents.clicked.connect(self.recentSearches)
         ok = QPushButton('Search')
         ok.clicked.connect(self.accept)
         cancel = QPushButton('Cancel')
@@ -415,6 +479,18 @@ class TranscriptionSearchDialog(SearchDialog):
         layout.addLayout(buttonLayout)
         self.setLayout(layout)
         self.showMaximized()
+
+    def recentSearches(self):
+        result = self.showRecentSearches()
+        if result is not None:
+            results = result.recentData.segmentedTranscription
+            results = [[results[0], results[1]], [results[2], results[3]]]
+            for config in [0,1]:
+                for hand in [0,1]:
+                    widget = getattr(self.configTabs.widget(config), 'hand{}Transcription'.format(hand+1))
+                    for n,symbol in enumerate(results[config][hand]):
+                        slot = getattr(widget, 'slot{}'.format(n+1))
+                        slot.setText(symbol)
 
     def setupGlobalOptions(self):
         globalOptionsLabel = QLabel('Global handshape options:')
@@ -472,10 +548,14 @@ class RecentSearch:
             self.segmentedTranscription = [[slot.getText(empty_text='') for slot in transcription] for transcription in
                                            transcriptions]
         except AttributeError:
-            top = ','.join([''.join(t) for t in transcriptions[0:2]])
-            bottom = ','.join([''.join(t) for t in transcriptions[2:-1]])
-            self.segmentedTranscription = [[slot for slot in transcription] for transcription in transcriptions]
-        self.transcriptions = '\n'.join([top, bottom])
+            if transcriptions[0].startswith('In Config'):
+                self.segmentedTranscription = [transcription.split(' ') for transcription in transcriptions]
+                self.transcriptions = '\n'.join(transcriptions)
+            else:
+                top = ','.join([''.join(t) for t in transcriptions[0:2]])
+                bottom = ','.join([''.join(t) for t in transcriptions[2:-1]])
+                self.segmentedTranscription = [[slot for slot in transcription] for transcription in transcriptions]
+                self.transcriptions = '\n'.join([top, bottom])
 
         self.regularExpression = regex
         self.results = ', '.join([r.gloss for r in results])
@@ -523,6 +603,10 @@ class RecentSearchDialog(QDialog):
         row = self.recentTable.currentRow()
         self.result = self.recentTable.item(row, 0)
         super().accept()
+
+    def reject(self):
+        self.result = None
+        super().reject()
 
 
 class SearchResultsDialog(QDialog):

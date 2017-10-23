@@ -1166,18 +1166,20 @@ class MainWindow(QMainWindow):
 
         if searchType == 'transcriptions':
             dialog = TranscriptionSearchDialog(self.corpus, self.recentTranscriptionSearches)
-            listToUpdate = self.recentTranscriptionSearches
         elif searchType == 'phrases':
             dialog = PhraseSearchDialog(self.corpus, self.recentPhraseSearches)
-            listToUpdate = self.recentPhraseSearches
 
         dialog.exec_()
         if not dialog.accepted:
             return
 
         matches = self.corpus.regExSearch(dialog.regularExpressions)
-        search = RecentSearch(dialog.transcriptions, dialog.regularExpressions, matches)
-        listToUpdate.appendleft(search)
+        if searchType == 'transcriptions':
+            search = RecentSearch(dialog.transcriptions, dialog.regularExpressions, matches)
+            self.recentTranscriptionSearches.appendleft(search)
+        elif searchType == 'phrases':
+            search = RecentSearch(dialog.phrases, dialog.regularExpressions, matches)
+            self.recentPhraseSearches.appendleft(search)
 
         if matches:
             resultsDialog = SearchResultsDialog(matches)
