@@ -60,7 +60,7 @@ To export a corpus, go to Menu and select "Export corpus as csv..." A new window
    :align: center
 
 If you mouse over the check box next to "Include fields in transcription?", you can see what this means; "If checked, 
-transctiptions will be delimited by square brackets and numbers representing fields. If not checked transcriptions will be one 
+transctiptions will be delimited by square brackets and numbers representing fields. If not checked, transcriptions will be one 
 long string." See also :ref:`field_and_slot`
 
 .. image:: static/mouse_over.png
