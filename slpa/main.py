@@ -603,6 +603,8 @@ class MainWindow(QMainWindow):
         self.settings.setValue('recentTranscriptionSearches', list(self.recentTranscriptionSearches))
         self.settings.setValue('recentPhraseSearches', list(self.recentPhraseSearches))
         self.settings.setValue('recentSearchMax', self.recentSearchMax)
+        self.settings.setValue('transcriptionSearchBlankOption', self.transcriptionSearchBlankOption)
+        self.settings.setValue('transcriptionSearchWildcard', self.transcriptionSearchWildcard)
         self.settings.endGroup()
 
     def readSettings(self, reset=False):
@@ -642,6 +644,8 @@ class MainWindow(QMainWindow):
                                                         #defaultValue=list(), type=list)
         self.recentSearchMax = self.settings.value('recentSearchMax',
                                                    defaultValue=10, type=int)
+        self.transcriptionSearchBlankOption = self.settings.value('transcriptionSearchBlankOption')
+        self.transcriptionSearchWildcard = self.settings.value('transcriptionSearchWildcard')
         self.settings.endGroup()
 
     @decorators.checkForUnsavedChanges
@@ -1165,7 +1169,8 @@ class MainWindow(QMainWindow):
             return
 
         if searchType == 'transcriptions':
-            dialog = TranscriptionSearchDialog(self.corpus, self.recentTranscriptionSearches)
+            dialog = TranscriptionSearchDialog(self.corpus, self.recentTranscriptionSearches,
+                                               self.transcriptionSearchBlankOption, self.transcriptionSearchWildcard)
         elif searchType == 'phrases':
             dialog = PhraseSearchDialog(self.corpus, self.recentPhraseSearches)
 
@@ -1177,6 +1182,8 @@ class MainWindow(QMainWindow):
         if searchType == 'transcriptions':
             search = RecentSearch(dialog.transcriptions, dialog.regularExpressions, matches)
             self.recentTranscriptionSearches.appendleft(search)
+            self.transcriptionSearchBlankOption = dialog.blankValue
+            self.transcriptionSearchWildcard = dialog.wildcard
         elif searchType == 'phrases':
             search = RecentSearch(dialog.phrases, dialog.regularExpressions, matches)
             self.recentPhraseSearches.appendleft(search)
@@ -1186,6 +1193,7 @@ class MainWindow(QMainWindow):
             resultsDialog.exec_()
             if resultsDialog.result:
                 self.loadHandShape(resultsDialog.result)
+
         else:
             alert = QMessageBox()
             alert.setWindowTitle('Search results')

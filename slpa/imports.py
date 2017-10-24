@@ -2,7 +2,7 @@ from PyQt5.QtCore import (Qt, QIODevice, QEvent, QUrl, QSizeF, QFileInfo, QRegEx
                           pyqtSignal as Signal, pyqtSlot as Slot, QItemSelectionModel)
 from PyQt5.QtNetwork import QLocalSocket, QLocalServer
 from PyQt5.QtGui import (QFont, QFontMetrics, QIcon, QFontMetricsF, QPixmap, QRegExpValidator, QCloseEvent, QKeyEvent)
-from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction, QDockWidget,
+from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction, QDockWidget, QFrame,
                             QApplication, QWidget, QMessageBox, QTreeWidget, QTreeWidgetItem,
                             QDialog, QGroupBox, QVBoxLayout, QButtonGroup, QTextEdit, QPlainTextEdit,
                             QPushButton, QFrame, QGridLayout,QRadioButton,

@@ -1,5 +1,6 @@
 from imports import (Qt, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, QPushButton, QFont, QListWidget,
-                     QComboBox, QCheckBox, QTableWidget, QTableWidgetItem, QAbstractItemView)
+                     QComboBox, QCheckBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QFrame, QButtonGroup,
+                     QRadioButton, QLineEdit)
 from transcriptions import TranscriptionConfigTab, TranscriptionInfo
 from image import *
 
@@ -142,7 +143,7 @@ class PhraseDialog(QDialog):
         self.descriptionLayouts = list()
         self.introduction = QLabel()
         self.introduction.setFont(QFont('Arial', 15))
-        #this label is used by subclasses to present different information to the user
+        #the introduction label is used by subclasses to present different information to the user
 
         self.transcriptions = list()
         self.regularExpressions = None
@@ -152,6 +153,11 @@ class PhraseDialog(QDialog):
 
         self.metaLayout = QVBoxLayout()
         self.layout.addLayout(self.metaLayout)
+
+        sepFrame = QFrame()
+        sepFrame.setFrameShape(QFrame.HLine)
+        sepFrame.setLineWidth(2)
+        self.layout.addWidget(sepFrame)
 
         self.buttonLayout = QVBoxLayout()
         self.topButtonLayout = QHBoxLayout()
@@ -187,11 +193,11 @@ class PhraseDialog(QDialog):
                     self.clearLayout(item.layout())
 
     def removeFingerLayouts(self):
-        layoutCount = self.metaLayout.count()
-        for n in reversed(range(layoutCount)):
+        for n in reversed(range(len(self.descriptionLayouts))):
             layout = self.metaLayout.itemAt(n)
             if layout.deleteMe.isChecked():
                 layout = self.metaLayout.takeAt(n)
+                self.descriptionLayouts.pop(n)
                 while layout.count():
                     item = layout.takeAt(0)
                     widget = item.widget()
@@ -332,28 +338,25 @@ class PhraseSearchDialog(PhraseDialog, SearchDialog):
         result = self.showRecentSearches()
         if result is not None:
             results = result.recentData.segmentedTranscription
-            if len(self.descriptionLayouts) > len(results):
-                self.descriptionLayouts = self.descriptionLayouts[:len(results)]
-                for n in range(self.metaLayout.count()):
-                    layout = self.metaLayout.itemAt(n)
-                    if n+1 <= len(results):
-                        layout.deleteMe.setChecked(False)
-                    else:
-                        layout.deleteMe.setChecked(True)
-                self.removeFingerLayouts()
 
+            #iterate through the results and get the relevant parts of each phrase
+            #each result is a list of strings that, e.g.:
+            #['in','config','1','hand','2','all','of','the','joints','on','the','index','finger','are','flexed']
             for i, result in enumerate(results):
                 config = ' '.join([result[1], result[2]])
                 hand = ' '.join([result[3], result[4]])
                 quantifier = result[5]
                 finger = result[11]
                 flexion = result[13]
+                #this try/except is to check for cases where there are more phrases in the result than there are
+                #currently displayed on screen. in such a case we need to add a new layout.
                 try:
                     layout = self.descriptionLayouts[i]
                 except IndexError:
                     layout = FingerSearchLayout()
                     self.descriptionLayouts.append(layout)
                     self.metaLayout.addLayout(layout)
+
 
                 index = layout.configs.findText(config)
                 layout.configs.setCurrentIndex(index)
@@ -369,6 +372,17 @@ class PhraseSearchDialog(PhraseDialog, SearchDialog):
 
                 index = layout.flexions.findText(flexion)
                 layout.flexions.setCurrentIndex(index)
+
+        # if the recent search had fewer results than the current display, we need to delete any extra layouts
+        if len(results) < len(self.descriptionLayouts):
+            self.descriptionLayouts = self.descriptionLayouts[:len(results)]
+            for n in range(self.metaLayout.count()):
+                layout = self.metaLayout.itemAt(n)
+                if n + 1 <= len(results):
+                    layout.deleteMe.setChecked(False)
+                else:
+                    layout.deleteMe.setChecked(True)
+            self.removeFingerLayouts()
 
     def accept(self):
         self.generateRegEx()
@@ -414,13 +428,87 @@ class AutoFillDialog(PhraseDialog):
                         transcriptions[c+h][slot-1] = symbol
         self.transcriptions = transcriptions
 
+class TranscriptionsSearchOptionsDialog(QDialog):
+
+    def __init__(self, blankOptionSelection = None, wildcard = None):
+        super().__init__()
+
+        self.blankOptionSelection = blankOptionSelection
+        self.wildcard = wildcard
+
+        self.setWindowTitle('Search Options')
+        layout = QVBoxLayout()
+
+        blankOptionsLabel = QLabel('How should blank spaces be interpreted in your search?')
+        layout.addWidget(blankOptionsLabel)
+
+        blankOptionsLayout = QVBoxLayout()
+        self.blankOptionsGroup = QButtonGroup()
+
+        asBlankOption = QRadioButton('Interpret as literal blanks, and only match blank slots')
+        blankOptionsLayout.addWidget(asBlankOption)
+        self.blankOptionsGroup.addButton(asBlankOption)
+        self.blankOptionsGroup.setId(asBlankOption, 0)
+        if self.blankOptionSelection == 'literal':
+            asBlankOption.setChecked(True)
+
+        asWildcardOption = QRadioButton('Interpret as wildcards, and match anything')
+        blankOptionsLayout.addWidget(asWildcardOption)
+        self.blankOptionsGroup.addButton(asWildcardOption)
+        self.blankOptionsGroup.setId(asWildcardOption, 1)
+        if self.blankOptionSelection == 'wildcard' or self.blankOptionSelection is None:
+            asWildcardOption.setChecked(True)
+
+        miniLayout = QHBoxLayout()
+        asBlankWithWildcard = QRadioButton('Interpret as literal blanks, and use this character for wildcards: ')
+        self.wildcardLineEdit = QLineEdit()
+        self.wildcardLineEdit.setMaxLength(1)
+        self.wildcardLineEdit.setMaximumWidth(30)
+        self.blankOptionsGroup.addButton(asBlankWithWildcard)
+        self.blankOptionsGroup.setId(asBlankWithWildcard, 2)
+        if self.blankOptionSelection == 'both':
+            asBlankWithWildcard.setChecked(True)
+            self.wildcardLineEdit.setText(self.wildcard)
+        miniLayout.addWidget(asBlankWithWildcard)
+        miniLayout.addWidget(self.wildcardLineEdit)
+        blankOptionsLayout.addLayout(miniLayout)
+
+        layout.addLayout(blankOptionsLayout)
+
+        buttonLayout = QHBoxLayout()
+        ok = QPushButton('OK')
+        ok.clicked.connect(self.accept)
+        buttonLayout.addWidget(ok)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(cancel)
+        layout.addLayout(buttonLayout)
+
+        self.setLayout(layout)
+
+    def accept(self):
+        selectedButton = self.blankOptionsGroup.checkedButton()
+        id_ = self.blankOptionsGroup.id(selectedButton)
+        if id_ == 0:
+            self.blankOptionSelection = 'literal'
+            self.wildcard = None
+        elif id_ == 1:
+            self.blankOptionSelection = 'wildcard'
+            self.wildcard = '_'
+        elif id_ == 2:
+            self.blankOptionSelection = 'both'
+            self.wildcard = self.wildcardLineEdit.text()
+        super().accept()
+
 class TranscriptionSearchDialog(SearchDialog):
 
-    def __init__(self, corpus, recents):
+    def __init__(self, corpus, recents, blankValue, wildcard):
         super().__init__()
 
         self.corpus = corpus
         self.recents = recents
+        self.blankValue = blankValue
+        self.wildcard = wildcard
         self.setWindowTitle('Search')
         self.setWindowFlags(Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
 
@@ -460,13 +548,18 @@ class TranscriptionSearchDialog(SearchDialog):
                 slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
+                slot.changeValidatorState(True)
 
             for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
                 slot.slotSelectionChanged.connect(self.transcriptionInfo.transcriptionSlotChanged)
+                slot.changeValidatorState(True)
 
-        buttonLayout = QVBoxLayout()
+        buttonLayout = QHBoxLayout()
+        blankOptionsButton = QPushButton('Search options...')
+        blankOptionsButton.clicked.connect(self.showSearchOptions)
+        buttonLayout.addWidget(blankOptionsButton)
         showRecents = QPushButton('Show recent searches...')
         showRecents.clicked.connect(self.recentSearches)
         ok = QPushButton('Search')
@@ -479,6 +572,12 @@ class TranscriptionSearchDialog(SearchDialog):
         layout.addLayout(buttonLayout)
         self.setLayout(layout)
         self.showMaximized()
+
+    def showSearchOptions(self):
+        dialog = TranscriptionsSearchOptionsDialog(self.blankValue, self.wildcard)
+        if dialog.exec_():
+            self.blankValue = dialog.blankOptionSelection
+            self.wildcard = dialog.wildcard
 
     def recentSearches(self):
         result = self.showRecentSearches()
@@ -521,6 +620,11 @@ class TranscriptionSearchDialog(SearchDialog):
             for slot in transcription.slots:
                 symbol = slot.text()
                 if not symbol or symbol == ' ':
+                    if self.blankValue == 'literal' or self.blankValue == 'both':
+                        symbol = '_'
+                    elif self.blankValue == 'wildcard':
+                        symbol = '.'
+                if symbol == self.wildcard:
                     symbol = '.'
                 regex.append(symbol)
             regex = ''.join(regex)
@@ -543,14 +647,18 @@ class RecentSearch:
 
     def __init__(self, transcriptions, regex, results):
         try:
+            #assume that this is a list of Transcription objects
             top = ','.join([t.str_with_underscores() for t in transcriptions[0:2]])
             bottom = ','.join([t.str_with_underscores() for t in transcriptions[2:-1]])
             self.segmentedTranscription = [[slot.getText(empty_text='') for slot in transcription] for transcription in
                                            transcriptions]
+            self.transcriptions = '\n'.join([top, bottom])
         except AttributeError:
+            #if that fails, then it might be a descriptive phrase
             if transcriptions[0].startswith('In Config'):
                 self.segmentedTranscription = [transcription.split(' ') for transcription in transcriptions]
                 self.transcriptions = '\n'.join(transcriptions)
+            #and if that's not the case, then it must be a list of transcriptions as strings
             else:
                 top = ','.join([''.join(t) for t in transcriptions[0:2]])
                 bottom = ','.join([''.join(t) for t in transcriptions[2:-1]])
