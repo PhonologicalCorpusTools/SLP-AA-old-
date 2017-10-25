@@ -1,6 +1,6 @@
 from imports import (Qt, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, QPushButton, QFont, QListWidget,
                      QComboBox, QCheckBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QFrame, QButtonGroup,
-                     QRadioButton, QLineEdit)
+                     QRadioButton, QLineEdit, QMenu, QAction)
 from transcriptions import TranscriptionConfigTab, TranscriptionInfo
 from image import *
 
@@ -673,39 +673,110 @@ class RecentSearch:
 
 class RecentSearchItem(QTableWidgetItem):
 
-    def __init__(self, recentData, textType):
+    def __init__(self, recentData, textType, menuText):
         super().__init__()
         self.recentData = recentData
         self.setText(getattr(self.recentData, textType))
+        self.makeMenu()
+
+    def makeMenu(self, text):
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
+        self.popMenu = QMenu(self)
+        if 'Add' in text:
+            function = self.addToFavourites
+        elif 'Remove' in text:
+            function = self.removeFromFavourites
+        action = QAction(text, self, triggered = function)
+        self.popMenu.addAction(action)
+
+    def showContextMenu(self, point):
+        self.popMenu.exec_(self.mapToGlobal(point))
+
+    def addToFavourites(self):
+        pass
+
+    def removeFromFavourites(self):
+        pass
+
+class RecentSearchTable(QTableWidget):
+
+    def __init__(self, searches):
+        super().__init__()
+        self.setupTable(searches)
+
+    def setupTable(self, searches):
+        self.setColumnCount(2)
+        self.setRowCount(len(searches))
+        self.setHorizontalHeaderLabels(['Search', 'Results'])
+        for row, recent in enumerate(searches):
+            self.setItem(row, 0, RecentSearchItem(recent, 'transcriptions'))
+            self.setItem(row, 1, RecentSearchItem(recent, 'results'))
+
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.resizeColumnToContents(0)
+        self.row
+
 
 class RecentSearchDialog(QDialog):
 
-    def __init__(self, recents):
+    def __init__(self, recents, favourites = None):
+        if favourites is None:
+            favourites = list()
         super().__init__()
         self.setWindowTitle('Recent Searches')
         self.result = None
         layout = QVBoxLayout()
 
-        self.recentTable = QTableWidget()
-        self.recentTable.setColumnCount(2)
-        self.recentTable.setRowCount(len(recents))
-        self.recentTable.setHorizontalHeaderLabels(['Search', 'Results'])
-        for row, recent in enumerate(recents):
-            self.recentTable.setItem(row, 0, RecentSearchItem(recent, 'transcriptions'))
-            self.recentTable.setItem(row, 1, RecentSearchItem(recent, 'results'))
-        self.recentTable.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.recentTable.resizeColumnToContents(0)
-        layout.addWidget(self.recentTable)
+        tableLayout = QHBoxLayout()
 
+        self.recentTable = RecentSearchTable(recents, 'Add to favourites')
+        tableLayout.addWidget(self.recentTable)
+
+        self.favouriteTable = RecentSearchTable(favourites, 'Remove from favourites')
+        tableLayout.addWidget(self.favouriteTable)
+
+        buttonLayout = QHBoxLayout()
         ok = QPushButton('Use selected search')
         ok.clicked.connect(self.accept)
         cancel = QPushButton('Cancel')
         cancel.clicked.connect(self.reject)
-        layout.addWidget(ok)
-        layout.addWidget(cancel)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+
+        layout.addLayout(tableLayout)
+        layout.addLayout(buttonLayout)
+
         self.setLayout(layout)
 
         self.resize(self.recentTable.width()*1.5, self.height())
+
+    def addToFavourites(self):
+        pass
+
+    def removeFromFavourites(self):
+        pass
+
+    def setupTable(self, table, searches):
+        table.setColumnCount(2)
+        table.setRowCount(len(searches))
+        table.setHorizontalHeaderLabels(['Search', 'Results'])
+        for row, recent in enumerate(searches):
+            table.setItem(row, 0, RecentSearchItem(recent, 'transcriptions'))
+            table.setItem(row, 1, RecentSearchItem(recent, 'results'))
+
+        table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        table.resizeColumnToContents(0)
+
+    def makeMenu(self, table, text, function):
+        table.setContextMenuPolicy(Qt.CustomContextMenu)
+        table.customContextMenuRequested.connect(self.showContextMenu)
+        table.popMenu = QMenu(self)
+        action = QAction(text, self, triggered = function)
+        table.popMenu.addAction(action)
+
+    def showContextMenu(self, table, point):
+        table.popMenu.exec_(self.mapToGlobal(point))
 
     def accept(self):
         row = self.recentTable.currentRow()

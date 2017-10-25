@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b8e444d6-1c9c-4d8b-802c-7e3ca1254927" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/imports.py" afterPath="$PROJECT_DIR$/slpa/imports.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/main.py" afterPath="$PROJECT_DIR$/slpa/main.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slpa/search.py" afterPath="$PROJECT_DIR$/slpa/search.py" />
     </list>
     <ignored path="SLP-Annotator.iws" />
@@ -27,8 +25,8 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/slpa/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="124">
-              <caret line="1257" column="18" selection-start-line="1257" selection-start-column="13" selection-end-line="1257" selection-end-column="18" />
+            <state relative-caret-position="-199">
+              <caret line="1232" column="0" selection-start-line="1232" selection-start-column="0" selection-end-line="1232" selection-end-column="0" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
               </folding>
@@ -39,8 +37,8 @@
       <file leaf-file-name="transcriptions.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/slpa/transcriptions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="124">
-              <caret line="413" column="37" selection-start-line="413" selection-start-column="36" selection-end-line="413" selection-end-column="37" />
+            <state relative-caret-position="889">
+              <caret line="374" column="18" selection-start-line="374" selection-start-column="18" selection-end-line="374" selection-end-column="18" />
               <folding />
             </state>
           </provider>
@@ -49,10 +47,10 @@
       <file leaf-file-name="search.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/slpa/search.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="124">
-              <caret line="575" column="20" selection-start-line="575" selection-start-column="19" selection-end-line="575" selection-end-column="20" />
+            <state relative-caret-position="277">
+              <caret line="717" column="16" selection-start-line="717" selection-start-column="16" selection-end-line="717" selection-end-column="16" />
               <folding>
-                <element signature="e#0#274#0" expanded="true" />
+                <element signature="e#0#290#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -105,8 +103,8 @@
         <option value="$PROJECT_DIR$/slpa/lexicon.py" />
         <option value="$PROJECT_DIR$/slpa/transcriptions.py" />
         <option value="$PROJECT_DIR$/slpa/imports.py" />
-        <option value="$PROJECT_DIR$/slpa/search.py" />
         <option value="$PROJECT_DIR$/slpa/main.py" />
+        <option value="$PROJECT_DIR$/slpa/search.py" />
       </list>
     </option>
   </component>
@@ -799,8 +797,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/slpa/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="124">
-          <caret line="1257" column="18" selection-start-line="1257" selection-start-column="13" selection-end-line="1257" selection-end-column="18" />
+        <state relative-caret-position="-199">
+          <caret line="1232" column="0" selection-start-line="1232" selection-start-column="0" selection-end-line="1232" selection-end-column="0" />
           <folding>
             <element signature="e#0#16#0" expanded="true" />
           </folding>
@@ -809,18 +807,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/slpa/transcriptions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="124">
-          <caret line="413" column="37" selection-start-line="413" selection-start-column="36" selection-end-line="413" selection-end-column="37" />
+        <state relative-caret-position="889">
+          <caret line="374" column="18" selection-start-line="374" selection-start-column="18" selection-end-line="374" selection-end-column="18" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/slpa/search.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="124">
-          <caret line="575" column="20" selection-start-line="575" selection-start-column="19" selection-end-line="575" selection-end-column="20" />
+        <state relative-caret-position="277">
+          <caret line="717" column="16" selection-start-line="717" selection-start-column="16" selection-end-line="717" selection-end-column="16" />
           <folding>
-            <element signature="e#0#274#0" expanded="true" />
+            <element signature="e#0#290#0" expanded="true" />
           </folding>
         </state>
       </provider>
