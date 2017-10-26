@@ -1630,6 +1630,9 @@ class MergeCorpusDialog(QDialog):
         self.setWindowTitle('Merge corpus')
         layout = QVBoxLayout()
 
+        explanation = QLabel('Select a corpus file to merge into the corpus that you currently have open.\n')
+        layout.addWidget(explanation)
+
         findLayout = QHBoxLayout()
         findButton = QPushButton('Select corpus file...')
         findButton.clicked.connect(self.getFileName)
