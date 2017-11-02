@@ -845,7 +845,7 @@ class MainWindow(QMainWindow):
         proc = subprocess.Popen(
             [blenderPlayerPath,
              '-w',
-             os.path.join(os.getcwd(), 'testOut3.blend')])
+             os.path.join(os.getcwd(), 'handImage.blend')])
         proc.communicate()
         # self.blenderDialog = BlenderOutputWindow('hand_output.png',self.currentGloss())
         # self.blenderDialog.show()
