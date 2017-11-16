@@ -116,13 +116,13 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
 
     # Sample Code: Tshape:[L=EH]
     if Tshape[0] == 'O' and Tshape[1] == '=':
-        handShapeParams['thumb.02.' + hand] = [0, 50, 0]
+        handShapeParams['thumb.02.' + hand] = [0, 0, 0]
         handShapeParams['thumb.03.' + hand] = [0, 0, 0]
-        handShapeParams['thumb.01.' + hand + '.001'] = [0, 0, 0]
+        handShapeParams['thumb.01.' + hand + '.001'] = [50, -90, 0]
     elif Tshape[0] == 'O' and Tshape[1] == '<':
         handShapeParams['thumb.01.' + hand + '.001'] = [0, -20, -50]
     elif Tshape[0] == 'L' and Tshape[1] == '=':
-        handShapeParams['thumb.01.' + hand + '.001'] = [0, 20, 0]
+        handShapeParams['thumb.01.' + hand + '.001'] = [0, 50, 0]
     elif Tshape[0] == 'L' and Tshape[1] == '<':
         handShapeParams['thumb.01.' + hand + '.001'] = [-20, 20, 0]
     return handShapeParams
@@ -196,6 +196,7 @@ if __name__ == '__main__':
             deactThisBone.select = False
 
         bpy.ops.object.posemode_toggle()
+        print(codepath)
         bpy.ops.wm.save_as_mainfile(filepath=os.path.join(codepath,'handImage.blend'), copy=True)
     # Now use world matrix location to do thumb-finger contact
     """
