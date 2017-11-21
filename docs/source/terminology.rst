@@ -34,9 +34,11 @@ Hand and Config
 ------------------
 
 "Hand 1" and "Hand 2" are synonymous to the dominant and nondominant hands,
-respectively. "Config" (short for configuration) refers to handshape. 
-For example, "Config 2, Hand 1" is the second handshape of the dominant hand. 
-Depending on the signs, you do not necessarily have to fill all four of them.
+respectively. "Config" (short for configuration) refers to handshape. Config 1 and 
+For example, "Config 2, Hand 1" is the second handshape of the dominant hand.
+Hand 1 is transcribed in the upper row of each Config and Hand 2 the bottom row. Configs can be switched by clicking
+on the buttons at the centre below the Gloss, named "Config 1" and "Config 2".
+Depending on the signs, you do not necessarily have to fill all four rows.
 
 
 .. _field_and_slot:
@@ -66,4 +68,4 @@ and permitted characters are H (hyperextended), E (extended), i (intermediate), 
 Parameters
 ------------------
 
-"Parameters" refers to parameters other than handshapes (see :ref:`other_parameters` and :ref:`options`).
+"Parameters" refer to parameters other than handshapes (see :ref:`other_parameters` and :ref:`options`).
