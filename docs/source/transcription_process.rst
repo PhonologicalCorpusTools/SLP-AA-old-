@@ -23,8 +23,7 @@ a symbol yourself (see :ref:`field_and_slot` as relevant).
 
       Notes on typing in a symbol
       
-      * Slots are generally case-insensitive. An exeption is Slot 11, which has both [m] and [M] 
-      in its list of permitted characters.
+      * Slots are generally case-insensitive. An exeption is Slot 11, which has both [m] and [M] in its list of permitted characters.
       
       * In Slots 20, 25, and 30, use the key 'z' for [x-]; 'c' for [x+]; and 's' for [☒].
       
