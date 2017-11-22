@@ -23,11 +23,14 @@ a symbol yourself (see :ref:`field_and_slot` as relevant).
 
       Notes on typing in a symbol
       
-      * Slots are generally case-insensitive. An exeption is Slot 11, which permits both "m" and "M".
+      * Slots are generally case-insensitive. An exeption is Slot 11, which has both [m] and [M] 
+      in its list of permitted characters.
       
-      * In Slots 20, 25, and 30, use the key 'z' for "x-"; 'c' for "x+"; and 's' for "☒".
+      * In Slots 20, 25, and 30, use the key 'z' for [x-]; 'c' for [x+]; and 's' for [☒].
       
-      * For Mac users, it may be helpful to use the Tab key to move to the next slot. To enable this, go to System Preferences > Keyboard > Shortcuts. At the bottom of the page under Full Keyboard Access, select "All controls".
+      * It may be helpful to use the Tab key to move to the next slot. To do this on Mac, go to 
+      System Preferences > Keyboard > Shortcuts. At the bottom of the page under "Full Keyboard Access", 
+      select "All controls".
 
 
 .. _flag_slot:
@@ -73,8 +76,10 @@ and click "OK".
 
 Similarly, to paste the transcription, click on the "Paste" button at the top right corner or go to "Edit" in the menu bar and 
 select "Paste a transcription...". A new window "Paste transcription" will appear. Make sure that the intended trasnscription 
-has been copied, and select a Config to which you would like to paste that transcription. You can optionally choose to "Paste 
-in highlighting for uncertain and estimated slots". Click "OK". Note that any existing symbols in the Config will be overwritten.
+has been copied, and select a Config to which you would like to paste that transcription. If you would like to paste 
+only the symbols and not the flags, then uncheck the option "Paste in highlighting for uncertain and estimated slots". 
+Click "OK". 
+Note that any existing symbols in the Config will be overwritten.
 
    For example, let's say you would like to copy your transcription for Config 1 of Hand 1 and paste it to Config 1 of Hand 2.
    
@@ -86,14 +91,17 @@ in highlighting for uncertain and estimated slots". Click "OK". Note that any ex
       :align: center
 
   
-   Second, click on the Paste button. In the new window, you can see the copied transcription in the first line, introduced by    "The currently copied transcription is". Make sure it is the correct one. Then select "Config 1, Hand 2", and click "OK".
+   Second, click on the Paste button. In the new window, you can see the copied transcription in the first line, 
+   introduced by    "The currently copied transcription is". Make sure that it is the correct one. 
+   Then select "Config 1, Hand 2", and click "OK".
       
    .. image:: static/paste.png
       :width: 90%
       :align: center
    
    
-   This function may be particularly useful for transcribing symmetrical signs.
+   This function may be particularly useful for transcribing symmetrical signs or assymmetrical signs in which
+   only the dominant hand changes its handshape.
    
    .. image:: static/paste_result.png
       :width: 90%
