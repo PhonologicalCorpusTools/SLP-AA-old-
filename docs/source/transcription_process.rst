@@ -159,7 +159,7 @@ To check your transcription against your selected constraints (see :ref:`constra
 9. Visualizing transcription
 `````````````````
 To see a graphic image of transcribed handshapes, click on "Visualize transcription" button. A new window titled 
-"Handshape visualization" appears. Select a Config and Hand you would like to visualize, and click "OK".
+"Handshape visualization" appears. Select a combination of Config and Hand you would like to visualize, and click "OK".
 
 .. image:: static/visualization.png
       :width: 90%
