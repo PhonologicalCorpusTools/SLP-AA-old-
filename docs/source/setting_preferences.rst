@@ -47,6 +47,16 @@ background.
 
 Transcriptions
 ------------------
+.. _unrestricted transcriptions:
 
+Allowing unrestricted transcriptions
+``````````````````````````````````````````````````````
 If you go to "Transcriptions" on the menu bar and select "Allow unrestricted transcriptions", it will
 allow you to type in symbols that are not on the list of Permitted characters (see :ref:`field_and_slot`).
+
+
+.. _blender:
+
+Setting path to Blender
+``````````````````````````````````````````````````````
+"Set path to Blender..."
