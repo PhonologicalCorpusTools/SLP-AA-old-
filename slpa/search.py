@@ -1,6 +1,6 @@
 from imports import (Qt, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, QPushButton, QFont, QListWidget,
                      QComboBox, QCheckBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QFrame, QButtonGroup,
-                     QRadioButton, QLineEdit, QMenu, QAction)
+                     QRadioButton, QLineEdit, QMenu, QAction, QCompleter, QStringListModel)
 from transcriptions import TranscriptionConfigTab, TranscriptionInfo
 from image import *
 
@@ -373,16 +373,16 @@ class PhraseSearchDialog(PhraseDialog, SearchDialog):
                 index = layout.flexions.findText(flexion)
                 layout.flexions.setCurrentIndex(index)
 
-        # if the recent search had fewer results than the current display, we need to delete any extra layouts
-        if len(results) < len(self.descriptionLayouts):
-            self.descriptionLayouts = self.descriptionLayouts[:len(results)]
-            for n in range(self.metaLayout.count()):
-                layout = self.metaLayout.itemAt(n)
-                if n + 1 <= len(results):
-                    layout.deleteMe.setChecked(False)
-                else:
-                    layout.deleteMe.setChecked(True)
-            self.removeFingerLayouts()
+                # if the recent search had fewer results than the current display, we need to delete any extra layouts
+            if len(results) < len(self.descriptionLayouts):
+                self.descriptionLayouts = self.descriptionLayouts[:len(results)]
+                for n in range(self.metaLayout.count()):
+                    layout = self.metaLayout.itemAt(n)
+                    if n + 1 <= len(results):
+                        layout.deleteMe.setChecked(False)
+                    else:
+                        layout.deleteMe.setChecked(True)
+                self.removeFingerLayouts()
 
     def accept(self):
         self.generateRegEx()
@@ -499,6 +499,51 @@ class TranscriptionsSearchOptionsDialog(QDialog):
             self.blankOptionSelection = 'both'
             self.wildcard = self.wildcardLineEdit.text()
         super().accept()
+
+class GlossSearchDialog(QDialog):
+
+    def __init__(self, corpus):
+        super().__init__()
+        self.setWindowTitle('Search by gloss')
+
+        layout = QVBoxLayout()
+
+        searchLayout = QHBoxLayout()
+
+        searchLabel = QLabel('Enter gloss to search for: ')
+        searchLayout.addWidget(searchLabel)
+
+        self.searchEdit = QLineEdit()
+        completer = QCompleter()
+        model = QStringListModel()
+        model.setStringList([word.gloss for word in corpus])
+        completer.setModel(model)
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.searchEdit.setCompleter(completer)
+        searchLayout.addWidget(self.searchEdit)
+
+        buttonLayout = QHBoxLayout()
+        ok = QPushButton('OK')
+        ok.clicked.connect(self.accept)
+        buttonLayout.addWidget(ok)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(cancel)
+
+        layout.addLayout(searchLayout)
+        layout.addLayout(buttonLayout)
+
+        self.setLayout(layout)
+
+    def reject(self):
+        self.accepted = False
+        super().reject()
+
+    def accept(self):
+        self.accepted = True
+        self.searchWord = self.searchEdit.text()
+        super().accept()
+
 
 class TranscriptionSearchDialog(SearchDialog):
 
@@ -677,7 +722,7 @@ class RecentSearchItem(QTableWidgetItem):
         super().__init__()
         self.recentData = recentData
         self.setText(getattr(self.recentData, textType))
-        self.makeMenu()
+        #self.makeMenu(menuText)
 
     def makeMenu(self, text):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -701,8 +746,9 @@ class RecentSearchItem(QTableWidgetItem):
 
 class RecentSearchTable(QTableWidget):
 
-    def __init__(self, searches):
+    def __init__(self, searches, menuText):
         super().__init__()
+        self.menuText = menuText
         self.setupTable(searches)
 
     def setupTable(self, searches):
@@ -710,13 +756,11 @@ class RecentSearchTable(QTableWidget):
         self.setRowCount(len(searches))
         self.setHorizontalHeaderLabels(['Search', 'Results'])
         for row, recent in enumerate(searches):
-            self.setItem(row, 0, RecentSearchItem(recent, 'transcriptions'))
-            self.setItem(row, 1, RecentSearchItem(recent, 'results'))
+            self.setItem(row, 0, RecentSearchItem(recent, 'transcriptions', self.menuText))
+            self.setItem(row, 1, RecentSearchItem(recent, 'results', self.menuText))
 
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.resizeColumnToContents(0)
-        self.row
-
 
 class RecentSearchDialog(QDialog):
 

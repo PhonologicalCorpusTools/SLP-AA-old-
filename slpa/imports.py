@@ -1,5 +1,5 @@
 from PyQt5.QtCore import (Qt, QIODevice, QEvent, QUrl, QSizeF, QFileInfo, QRegExp, QSettings, QVariant,
-                          pyqtSignal as Signal, pyqtSlot as Slot, QItemSelectionModel)
+                          pyqtSignal as Signal, pyqtSlot as Slot, QItemSelectionModel, QStringListModel)
 from PyQt5.QtNetwork import QLocalSocket, QLocalServer
 from PyQt5.QtGui import (QFont, QFontMetrics, QIcon, QFontMetricsF, QPixmap, QRegExpValidator, QCloseEvent, QKeyEvent)
 from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction, QDockWidget, QFrame,

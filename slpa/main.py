@@ -667,6 +667,13 @@ class MainWindow(QMainWindow):
         save_binary(newCorpus, newCorpus.path)
         self.corpus =  load_binary(newCorpus.path)
 
+    def checkForFlags(self):
+        for word in self.corpus:
+            newflags = {k:list() for k in word.flags.keys()}
+            for key,value in word.flags.items():
+                newflags[key] = [Flag(v, False) for v in value]
+                #SET TO UNCERTAIN
+            word.flags = newflags
 
     def checkBackwardsComptibility(self):
 
@@ -675,6 +682,7 @@ class MainWindow(QMainWindow):
                 setattr(self.corpus, attribute, Corpus.copyValue(Corpus, default_value))
 
         word = self.corpus.randomWord()
+
         for attribute, default_value in Sign.sign_attributes.items():
             if not hasattr(word, attribute):
                 break
@@ -685,8 +693,7 @@ class MainWindow(QMainWindow):
             for attribute, default_value in sorted(Sign.sign_attributes.items()):
                 if not hasattr(word, attribute):
                     setattr(word, attribute, Sign.copyValue(Sign, default_value))
-                # if attribute == 'parameters' and not isinstance(getattr(word, attribute), anytree.Node):
-                #     setattr(word, attribute, default_value)
+
 
             if hasattr(word, 'movement'):
                 setattr(word, 'oneHandMovement', word.movement)
@@ -863,6 +870,8 @@ class MainWindow(QMainWindow):
             return None
         self.corpus = load_binary(file_path)
         self.corpus.path = file_path
+        #self.checkBackwardsComptibility()
+        #self.checkForFlags()
         self.setupNewCorpus()
 
     def setupNewCorpus(self):
@@ -1087,6 +1096,7 @@ class MainWindow(QMainWindow):
         self.searchMenu = self.menuBar().addMenu('&Search')
         self.searchMenu.addAction(self.transcriptionSearchAct)
         self.searchMenu.addAction(self.phraseSearchAct)
+        self.searchMenu.addAction(self.glossSearchAct)
 
         if not hasattr(sys, 'frozen'):
             self.debugMenu = self.menuBar().addMenu('&Debug')
@@ -1174,19 +1184,31 @@ class MainWindow(QMainWindow):
         elif searchType == 'phrases':
             dialog = PhraseSearchDialog(self.corpus, self.recentPhraseSearches)
 
+        elif searchType == 'gloss':
+            dialog = GlossSearchDialog(self.corpus)
+
         dialog.exec_()
         if not dialog.accepted:
             return
 
-        matches = self.corpus.regExSearch(dialog.regularExpressions)
+
         if searchType == 'transcriptions':
+            matches = self.corpus.regExSearch(dialog.regularExpressions)
             search = RecentSearch(dialog.transcriptions, dialog.regularExpressions, matches)
             self.recentTranscriptionSearches.appendleft(search)
             self.transcriptionSearchBlankOption = dialog.blankValue
             self.transcriptionSearchWildcard = dialog.wildcard
         elif searchType == 'phrases':
+            matches = self.corpus.regExSearch(dialog.regularExpressions)
             search = RecentSearch(dialog.phrases, dialog.regularExpressions, matches)
             self.recentPhraseSearches.appendleft(search)
+        elif searchType == 'gloss':
+            if dialog.searchWord in self.corpus: #this is a case-insensitive search
+                self.loadHandShape(dialog.searchWord)
+                return
+            else:
+                matches = False
+
 
         if matches:
             resultsDialog = SearchResultsDialog(matches)
@@ -1197,7 +1219,7 @@ class MainWindow(QMainWindow):
         else:
             alert = QMessageBox()
             alert.setWindowTitle('Search results')
-            alert.setText('No matching transcriptions were found in your corpus')
+            alert.setText('No matches were found in your corpus.')
             alert.exec_()
 
     def autoFillTranscription(self):
@@ -1242,6 +1264,10 @@ class MainWindow(QMainWindow):
         self.autofillAct = QAction('&Autofill transcription slots...',
                                self,
                                triggered = self.autoFillTranscription)
+
+        self.glossSearchAct = QAction('Search by &gloss...',
+                                      self,
+                                      triggered = lambda x: self.searchCorpus(searchType = 'gloss'))
 
         self.transcriptionSearchAct = QAction('Search by &transcription...',
                                               self,
