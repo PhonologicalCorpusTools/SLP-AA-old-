@@ -114,16 +114,15 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
         else:
             flexionDict = {'H':[0, 0], 'E':[50, 0], 'e': [0, 0], 'i':[60, 0], 'F':[80, 0], '_':[0, 0]}
 
-
     # Sample Code: Tshape:[L=EH]
     if Tshape[0] == 'O' and Tshape[1] == '=':
-        handShapeParams['thumb.02.' + hand] = [flexionDict[Tshape[2]][1], 0, 0]
-        handShapeParams['thumb.03.' + hand] = [flexionDict[Tshape[3]][0], 0, 0]
-        handShapeParams['thumb.01.' + hand + '.001'] = [0, 0, -50]
+        handShapeParams['thumb.02.' + hand] = [0, 0, 0]
+        handShapeParams['thumb.03.' + hand] = [0, 0, 0]
+        handShapeParams['thumb.01.' + hand + '.001'] = [50, -90, 0]
     elif Tshape[0] == 'O' and Tshape[1] == '<':
         handShapeParams['thumb.01.' + hand + '.001'] = [0, -20, -50]
     elif Tshape[0] == 'L' and Tshape[1] == '=':
-        handShapeParams['thumb.01.' + hand + '.001'] = [0, 20, 0]
+        handShapeParams['thumb.01.' + hand + '.001'] = [0, 50, 0]
     elif Tshape[0] == 'L' and Tshape[1] == '<':
         handShapeParams['thumb.01.' + hand + '.001'] = [-20, 20, 0]
     return handShapeParams
@@ -151,7 +150,7 @@ if __name__ == '__main__':
         handShapeParams = translate_finger_code_to_degrees('middle', hand, middleShape, handShapeParams)
         handShapeParams = translate_finger_code_to_degrees('ring', hand, ringShape, handShapeParams)
         handShapeParams = translate_finger_code_to_degrees('pinky', hand, pinkyShape, handShapeParams)
-        #handShapeParams = translate_thumb_code_to_degrees(hand, thumbShape, handShapeParams)
+        handShapeParams = translate_thumb_code_to_degrees(hand, thumbShape, handShapeParams)
 
         #Write to debugging file
         #outf.write(str(handShapeParams) + '\r\n')
@@ -197,7 +196,8 @@ if __name__ == '__main__':
             deactThisBone.select = False
 
         bpy.ops.object.posemode_toggle()
-        bpy.ops.wm.save_as_mainfile(filepath=os.path.join(codepath,'testOut3.blend'), copy=True)
+        print(codepath)
+        bpy.ops.wm.save_as_mainfile(filepath=os.path.join(codepath,'handImage.blend'), copy=True)
     # Now use world matrix location to do thumb-finger contact
     """
     outf.write(thumbFingerContact)

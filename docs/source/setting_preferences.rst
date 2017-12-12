@@ -13,10 +13,10 @@ them anytime during transcription.
 Constraints
 ------------------
 
-When you click on Constraints > Select anatomical/phonological constraints, a new window
-appears. You can switch pages between Transcription Constraints, Simple Constraints, and 
-Conditional Constraints using the pull-down menu. Check individual constraints you would 
-like to apply to your corpus, or use the Select all/Unselect all buttons. Click OK.
+When you go to "Constraints" and click on "Select anatomical/phonological constraints", a new window
+appears, titled "Select constraints". You can switch pages between "Transcription Constraints", "Simple Constraints", and 
+"Conditional Constraints" using the pull-down menu. Check individual constraints that you would 
+like to apply to your corpus, or use the "Select all" and "Unselect all" buttons. Click "OK".
 
 
 .. image:: static/select_constraints.png
@@ -24,8 +24,8 @@ like to apply to your corpus, or use the Select all/Unselect all buttons. Click 
    :align: center
 
 Note that the constraints will NOT be automatically applied. To look for violations of 
-the selected constraints, click on the "Check transcription" 
-button  (see :ref:`checking_transcriptions`).
+the selected constraints in each sign, click on the "Check transcription" 
+button (see :ref:`checking_transcriptions`).
 
 
 .. _options:
@@ -36,15 +36,27 @@ Options
 In "Options" on the menu bar, click on each option to select or unselect them.
 
 * "Autosave"
-* "Show save alert" gives you a confirmation message when a word has been saved. 
-* "Keep parameters window on top"
-* "Warn about duplicate glosses" warns you when you try to save a sign with a gloss already existing in your corpus. It gives you options to either "Go back and edit the gloss" or "Overwrite existing word."
+* "Show save alert" gives you a confirmation message when a sign has been saved. 
+* "Keep parameters window on top" keeps the parameters window open while still allowing you to transcribe handshapes on the 
+background.
+* "Warn about duplicate glosses" warns you when you try to save a sign with a gloss already existing in your corpus (see 
+:ref:`save_sign`)
 
 
 .. _transcriptions:
 
 Transcriptions
 ------------------
+.. _unrestricted transcriptions:
 
-If you select Transcriptions > Allow unrestricted transcriptions, it will
+Allowing unrestricted transcriptions
+``````````````````````````````````````````````````````
+If you go to "Transcriptions" on the menu bar and select "Allow unrestricted transcriptions", it will
 allow you to type in symbols that are not on the list of Permitted characters (see :ref:`field_and_slot`).
+
+
+.. _blender:
+
+Setting path to Blender
+``````````````````````````````````````````````````````
+"Set path to Blender..."

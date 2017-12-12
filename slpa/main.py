@@ -249,6 +249,19 @@ class CorpusList(QListWidget):
                     self.setCurrentItem(originalItem)
                     self.itemClicked.emit(originalItem)
 
+class MergeCorpusMessageBox(QMessageBox):
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Duplicate entry')
+        self.baseText = 'Your current corpus already has a sign called {}.\n\nWhat do you want to do?'
+        self.addButton('Keep the current sign', QMessageBox.AcceptRole)
+        self.addButton('Overwrite with the new sign', QMessageBox.ResetRole)
+        self.alwaysMergeCheckBox = QCheckBox('Do this for all future duplicates')
+        self.setCheckBox(self.alwaysMergeCheckBox)
+
+
+
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
     forearmChecked = Signal(bool)
@@ -412,6 +425,16 @@ class MainWindow(QMainWindow):
             alert.setText('The current word has not been saved to the corpus yet, so it cannot be deleted. If you '
                           'want to clear the main window, click on "New Gloss".')
             alert.exec_()
+            return
+
+        alert = QMessageBox()
+        alert.setWindowTitle('Warning')
+        alert.setText('Are you sure you want to delete this entry from your corpus? This action cannot be undone.')
+        alert.addButton('Yes, delete it', QMessageBox.YesRole)
+        alert.addButton('No, go back', QMessageBox.NoRole)
+        alert.exec_()
+        if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
+            return
         else:
             del self.corpus.wordlist[gloss]
             for n in range(self.corpusList.count()):
@@ -420,8 +443,8 @@ class MainWindow(QMainWindow):
                     goodbye = self.corpusList.takeItem(n)
                     del goodbye
                     break
+            save_binary(self.corpus, self.corpus.path)
             self.newGloss()
-
 
     def setupGlobalOptions(self):
         globalOptionsLabel = QLabel('Global handshape options:')
@@ -834,7 +857,7 @@ class MainWindow(QMainWindow):
         proc = subprocess.Popen(
             [blenderPlayerPath,
              '-w',
-             os.path.join(os.getcwd(), 'testOut3.blend')])
+             os.path.join(os.getcwd(), 'handImage.blend')])
         proc.communicate()
         # self.blenderDialog = BlenderOutputWindow('hand_output.png',self.currentGloss())
         # self.blenderDialog.show()
@@ -871,8 +894,6 @@ class MainWindow(QMainWindow):
             return None
         self.corpus = load_binary(file_path)
         self.corpus.path = file_path
-        #self.checkBackwardsComptibility()
-        #self.checkForFlags()
         self.setupNewCorpus()
 
     def setupNewCorpus(self):
@@ -1064,6 +1085,7 @@ class MainWindow(QMainWindow):
         self.fileMenu = self.menuBar().addMenu('&File')
         self.fileMenu.addAction(self.newCorpusAct)
         self.fileMenu.addAction(self.loadCorpusAct)
+        self.fileMenu.addAction(self.mergeCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAsAct)
         self.fileMenu.addAction(self.newGlossAct)
@@ -1217,7 +1239,6 @@ class MainWindow(QMainWindow):
             resultsDialog.exec_()
             if resultsDialog.result:
                 self.loadHandShape(resultsDialog.result)
-
         else:
             alert = QMessageBox()
             alert.setWindowTitle('Search results')
@@ -1253,46 +1274,43 @@ class MainWindow(QMainWindow):
                     if symbol is not None:
                         getattr(self.configTabs.widget(widgetnum), attribute_name)[slot].setText(symbol)
 
-    def funcLoad(self):
-        from math import log2 as log
-        dialog = FunctionalLoadDialog(self.corpus)
-        dialog.exec_()
-        # for finger,slot in [('INDEX', 18), ('MIDDLE', 23), ('RING', 28), ('PINKY', 33)]:
-        #     print('{} DISTAL JOINTS'.format(finger))
-        #     print('Starting size = {}\nStarting entropy = {}'.format(corpus_size, starting_h))
-        #     new_corpus = collections.defaultdict(int)
-        #     for word in self.corpus:
-        #         ch = word.config1hand1.copy()
-        #         ch[slot] = 'X' #index proximal joint
-        #         # ch[23] = 'X' #middle proximal joint
-        #         # ch[28] = 'X' #ring proximal joint
-        #         # ch[33] = 'X' #pinky promximal
-        #         new_corpus[''.join(ch)] += 1
-        #
-        #     new_corpus_size = len(new_corpus)
-        #     ending_h = sum([new_corpus[word]/new_corpus_size*log(new_corpus[word]/new_corpus_size)
-        #                     for word in new_corpus])*-1
-        #     print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
-        #     print('Change in entropy = {}\n'.format(starting_h-ending_h))
+    def mergeCorpus(self):
+        if self.corpus is None:
+            alert = QMessageBox()
+            alert.setWindowTitle('No corpus loaded')
+            alert.setText('You must have a corpus already loaded in order to merge.')
+            alert.exec_()
+            return
 
-        # for joint,slot in [('PROXIMAL', 16), ('MEDIAL', 17), ('DISTAL', 18)]:
-        #     print('ALL {} JOINTS'.format(joint))
-        #     print('Starting size = {}\nStarting entropy = {}'.format(corpus_size, starting_h))
-        #     new_corpus = collections.defaultdict(int)
-        #     for word in self.corpus:
-        #         ch = word.config1hand1.copy()
-        #         ch[slot+5] = 'X'
-        #         ch[slot+10] = 'X'
-        #         ch[slot+15] = 'X'
-        #         new_corpus[''.join(ch)] += 1
-        #
-        #     new_corpus_size = len(new_corpus)
-        #     ending_h = sum([new_corpus[word]/new_corpus_size*log(new_corpus[word]/new_corpus_size)
-        #                     for word in new_corpus])*-1
-        #     print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
-        #     print('Change in entropy = {}\n'.format(starting_h-ending_h))
+        dialog = MergeCorpusDialog()
+        dialog.exec_()
+
+        if dialog.filename:
+            corpus2 = load_binary(dialog.filename)
+            for sign in corpus2:
+                if sign.gloss in self.corpus:
+                    alert = MergeCorpusMessageBox()
+                    alert.setText(alert.baseText.format(sign.gloss))
+                    alert.exec_()
+                else:
+                    self.corpus.addWord(sign)
+            save_binary(self.corpus, self.corpus.path)
+            currentGloss = self.currentGloss()
+            self.setupNewCorpus()
+
+            for n in range(self.corpusList.count()):
+                item = self.corpusList.item(n)
+                if item.text() == currentGloss:
+                    self.corpusList.setCurrentRow(n)
+                    break
+            else:
+                self.corpusList.setCurrentRow(0)
 
     def createActions(self):
+
+        self.mergeCorpusAct = QAction('&Merge corpus...',
+                                self,
+                                triggered = self.mergeCorpus)
 
         self.funcloadAct = QAction('Calculate functional load...',
                                    self,
@@ -1497,19 +1515,19 @@ class MainWindow(QMainWindow):
             null = dialog.nullEdit.text()
             if not blank_space:
                 blank_space = ''
-            kwargs = {'include_fields': include_fields, 'blank_space': blank_space}
+            kwargs = {'include_fields': include_fields,
+                      'blank_space': blank_space,
+                      'parameter_format': dialog.parameterFormat}
             if x_in_box:
                 kwargs['x_in_box'] = x_in_box
             if null:
                 kwargs['null'] = null
-            output = [word.export(**kwargs) for word in self.corpus]
+            #output = [word.export(**kwargs) for word in self.corpus]
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
                     print(Sign.headers, file=f)
-                    #f.write(Sign.headers)
-                    for word in output:
-                        #f.write(word)
-                        print(word, file=f)
+                    for word in self.corpus:
+                        print(word.export(**kwargs), file=f)
                 if self.showSaveAlert:
                     QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
             except PermissionError:
@@ -1561,7 +1579,7 @@ class MainWindow(QMainWindow):
                 return
 
         if showAlert:
-            corpus = Corpus({'name':filename+'-1', 'path': os.path.join(filepath, filename+'-1.corpus')})
+            corpus = Corpus({'name':filename+'-import', 'path': os.path.join(filepath, filename+'-1.corpus')})
         else:
             corpus = Corpus({'name': filename, 'path':os.path.join(filepath, filename+'.corpus')})
 
@@ -1644,6 +1662,57 @@ class MainWindow(QMainWindow):
         self.askSaveChanges = False
         self.showMaximized()
 
+class MergeCorpusDialog(QDialog):
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Merge corpus')
+        layout = QVBoxLayout()
+
+        explanation = QLabel('Select a corpus file to merge into the corpus that you currently have open.\n')
+        layout.addWidget(explanation)
+
+        findLayout = QHBoxLayout()
+        findButton = QPushButton('Select corpus file...')
+        findButton.clicked.connect(self.getFileName)
+        self.fileNameEdit = QLineEdit()
+        findLayout.addWidget(findButton)
+        findLayout.addWidget(self.fileNameEdit)
+        layout.addLayout(findLayout)
+
+        buttonLayout = QHBoxLayout()
+        ok = QPushButton('OK')
+        ok.clicked.connect(self.accept)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+    def getFileName(self):
+        filename = QFileDialog.getOpenFileName(self, 'Merge Corpus Files', os.getcwd(), '*.corpus')
+        path = filename[0]
+        if not path:
+            return
+        if not path.endswith('.corpus'):
+            path = path + '.corpus'
+        self.fileNameEdit.setText(path)
+
+    def accept(self):
+        self.filename = self.fileNameEdit.text()
+        if not self.filename:
+            alert = QMessageBox()
+            alert.setWindowTitle('Error')
+            alert.setText('You must select a valid corpus file')
+            alert.exec_()
+            return
+        super().accept()
+
+    def reject(self):
+        self.filename = None
+        super().reject()
+
 class ExportCorpusDialog(QDialog):
 
     def __init__(self):
@@ -1689,7 +1758,7 @@ class ExportCorpusDialog(QDialog):
         self.blankOptionButtons.setId(noBlanksOption, 0)
         self.blankOptionButtons.setId(blankSpaceOption, 1)
         self.blankOptionButtons.setId(otherBlankOption, 2)
-
+        otherBlankOption.setChecked(True)
         blankSpaceLayout.addLayout(blankRadioButtonLayout)
 
         self.includeFields = QCheckBox('Include fields in transcription?')
@@ -1697,9 +1766,26 @@ class ExportCorpusDialog(QDialog):
                                   'and numbers representing fields.\n'
                                   'If not checked, transcriptions will be one long string.')
 
+        parametersLayout = QVBoxLayout()
+        exportParamsLabel = QLabel('What format should be used for parameters?')
+        parametersLayout.addWidget(exportParamsLabel)
+        parameterOptionsLayout = QHBoxLayout()
+        self.parameterOptions = QButtonGroup()
+        plainTextOption = QRadioButton('plain text')
+        xmlOption = QRadioButton('xml')
+        parameterOptionsLayout.addWidget(plainTextOption)
+        parameterOptionsLayout.addWidget(xmlOption)
+        parameterOptionsLayout.insertSpacing(-1, 100)
+        parametersLayout.addLayout(parameterOptionsLayout)
+        self.parameterOptions.addButton(plainTextOption)
+        self.parameterOptions.addButton(xmlOption)
+        self.parameterOptions.setId(plainTextOption, 0)
+        self.parameterOptions.setId(xmlOption, 1)
+        xmlOption.setChecked(True)
+
         altSymbolsLabel = QLabel('Some programs have trouble displaying the "ultracrossed" symbol (x-in-a-box) and the '
-                            'empty set symbol. If you would like to use alternatives in the output file, you can '
-                            'enter them below.')
+                                 'empty set symbol. If you would like to use alternatives in the output file, you can '
+                                 'enter them below.')
         altSymbolsLabel.setWordWrap(True)
         self.xinboxEdit = QLineEdit('')
         self.xinboxEdit.setMaximumWidth(170)
@@ -1709,13 +1795,19 @@ class ExportCorpusDialog(QDialog):
         self.nullEdit.setMaximumWidth(170)
         self.nullEdit.setPlaceholderText('Alternative empty set symbol')
 
-
         outputOptionsLayout.addWidget(self.includeFields)
         outputOptionsLayout.addLayout(blankSpaceLayout)
-
+        outputOptionsLayout.addLayout(parametersLayout)
         outputOptionsLayout.addWidget(altSymbolsLabel)
         outputOptionsLayout.addWidget(self.xinboxEdit)
         outputOptionsLayout.addWidget(self.nullEdit)
+
+        noteLabel = QLabel('NOTE: If you are exporting a corpus that you want to re-import into SLP-Annotator, you '
+                           'must use the default options (no fields, underscore for blanks, xml parameters, no '
+                           'alternative symbols).')
+        noteLabel.setWordWrap(True)
+        outputOptionsLayout.addWidget(noteLabel)
+
         layout.addLayout(outputOptionsLayout)
 
         buttonLayout = QHBoxLayout()
@@ -1755,6 +1847,13 @@ class ExportCorpusDialog(QDialog):
                 return
             else:
                 self.blankSpaceText = self.blankOptionEdit.text()
+
+        selectedButton = self.parameterOptions.checkedButton()
+        id = self.parameterOptions.id(selectedButton)
+        if id == 0:
+            self.parameterFormat = 'txt'
+        else:
+            self.parameterFormat = 'xml'
 
         if os.path.exists(os.path.split(self.fileNameEdit.text())[0]):
             super().accept()

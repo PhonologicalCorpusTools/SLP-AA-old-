@@ -171,7 +171,7 @@ class Sign():
     def data(self):
         return OrderedDict([(key, getattr(self, key)) for key in Sign.sorted_attributes])
 
-    def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL):
+    def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
         output = list()
         output.append(self.gloss)
         for config_num in [1,2]:
@@ -224,7 +224,10 @@ class Sign():
         output.append('True' if self.uncertainCoding else 'False')
         output.append('True' if self.incompleteCoding else 'False')
         output.append(self.notes)
-        parameters = self.parameters.exportXML()
+        if parameter_format == 'xml':
+            parameters = self.parameters.exportXML()
+        elif parameter_format == 'txt':
+            parameters = self.parameters.exportTree()
         output.append(parameters)
 
         output = ','.join(output)
