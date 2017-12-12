@@ -1081,6 +1081,11 @@ class MainWindow(QMainWindow):
             self.loadHandShape(word.gloss)
             self.saveCorpus()
 
+    @decorators.checkForCorpus
+    def funcLoad(self):
+        dialog = FunctionalLoadDialog(self.corpus)
+        dialog.exec_()
+
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu('&File')
         self.fileMenu.addAction(self.newCorpusAct)
