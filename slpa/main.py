@@ -17,6 +17,7 @@ from constraintwidgets import *
 from notes import *
 from search import *
 from image import *
+from functional_load import *
 from parameterwidgets import ParameterDialog, ParameterTreeModel
 #from slpa import __version__ as currentSLPAversion
 
@@ -1097,6 +1098,7 @@ class MainWindow(QMainWindow):
         self.searchMenu.addAction(self.transcriptionSearchAct)
         self.searchMenu.addAction(self.phraseSearchAct)
         self.searchMenu.addAction(self.glossSearchAct)
+        self.searchMenu.addAction(self.funcloadAct)
 
         if not hasattr(sys, 'frozen'):
             self.debugMenu = self.menuBar().addMenu('&Debug')
@@ -1251,7 +1253,50 @@ class MainWindow(QMainWindow):
                     if symbol is not None:
                         getattr(self.configTabs.widget(widgetnum), attribute_name)[slot].setText(symbol)
 
+    def funcLoad(self):
+        from math import log2 as log
+        dialog = FunctionalLoadDialog(self.corpus)
+        dialog.exec_()
+        # for finger,slot in [('INDEX', 18), ('MIDDLE', 23), ('RING', 28), ('PINKY', 33)]:
+        #     print('{} DISTAL JOINTS'.format(finger))
+        #     print('Starting size = {}\nStarting entropy = {}'.format(corpus_size, starting_h))
+        #     new_corpus = collections.defaultdict(int)
+        #     for word in self.corpus:
+        #         ch = word.config1hand1.copy()
+        #         ch[slot] = 'X' #index proximal joint
+        #         # ch[23] = 'X' #middle proximal joint
+        #         # ch[28] = 'X' #ring proximal joint
+        #         # ch[33] = 'X' #pinky promximal
+        #         new_corpus[''.join(ch)] += 1
+        #
+        #     new_corpus_size = len(new_corpus)
+        #     ending_h = sum([new_corpus[word]/new_corpus_size*log(new_corpus[word]/new_corpus_size)
+        #                     for word in new_corpus])*-1
+        #     print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
+        #     print('Change in entropy = {}\n'.format(starting_h-ending_h))
+
+        # for joint,slot in [('PROXIMAL', 16), ('MEDIAL', 17), ('DISTAL', 18)]:
+        #     print('ALL {} JOINTS'.format(joint))
+        #     print('Starting size = {}\nStarting entropy = {}'.format(corpus_size, starting_h))
+        #     new_corpus = collections.defaultdict(int)
+        #     for word in self.corpus:
+        #         ch = word.config1hand1.copy()
+        #         ch[slot+5] = 'X'
+        #         ch[slot+10] = 'X'
+        #         ch[slot+15] = 'X'
+        #         new_corpus[''.join(ch)] += 1
+        #
+        #     new_corpus_size = len(new_corpus)
+        #     ending_h = sum([new_corpus[word]/new_corpus_size*log(new_corpus[word]/new_corpus_size)
+        #                     for word in new_corpus])*-1
+        #     print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
+        #     print('Change in entropy = {}\n'.format(starting_h-ending_h))
+
     def createActions(self):
+
+        self.funcloadAct = QAction('Calculate functional load...',
+                                   self,
+                                   triggered = self.funcLoad)
 
         self.copyAct = QAction('&Copy a transcription...',
                               self,
