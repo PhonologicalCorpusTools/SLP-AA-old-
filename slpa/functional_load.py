@@ -271,8 +271,9 @@ class FunctionalLoadDialog(QDialog):
                 for word in self.corpus:
                     ch = word.config1hand1.copy()
                     ch[slot] = 'X' #proximal
-                    ch[slot+2] = 'X' #medial
-                    ch[slot+3] = 'X' #distal
+                    ch[slot+1] = 'X' #medial
+                    if not finger == 'Thumb':
+                        ch[slot+2] = 'X' #distal
                     new_corpus[''.join(ch)] += 1
 
                 new_corpus_size = len(new_corpus)
@@ -312,7 +313,7 @@ class FunctionalLoadDialog(QDialog):
 
             elif finger == 'All' and joint == 'All':
 
-                for finger, slot in [('INDEX', 17), ('MIDDLE', 22), ('RING', 27), ('PINKY', 31)]:
+                for finger, slot in [('THUMB', 2), ('INDEX', 17), ('MIDDLE', 22), ('RING', 27), ('PINKY', 31)]:
                     print('ALL {} JOINTS'.format(joint.upper()))
                     print('Starting size = {}\nStarting entropy = {}'.format(corpus_size, starting_h))
                     new_corpus = defaultdict(int)
@@ -320,7 +321,8 @@ class FunctionalLoadDialog(QDialog):
                         ch = word.config1hand1.copy()
                         ch[slot] = 'X'
                         ch[slot+1] = 'X'
-                        ch[slot+2] = 'X'
+                        if not finger == 'Thumb':
+                            ch[slot+2] = 'X'
                         new_corpus[''.join(ch)] += 1
 
                     new_corpus_size = len(new_corpus)
