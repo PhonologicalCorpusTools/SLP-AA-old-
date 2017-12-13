@@ -124,14 +124,14 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
             handShapeParams['thumb.01.' + hand + '.001'] = [10, -25, 0]
 
         elif Tshape[0] == 'O' and Tshape[1] == '=':
-            handShapeParams['thumb.01.' + hand + '.001'] = [-30, -20, 20]
+            handShapeParams['thumb.01.' + hand + '.001'] = [15, -20, 5]
         elif Tshape[0] == 'O' and Tshape[1] == '<':
-            handShapeParams['thumb.01.' + hand + '.001'] = [10, -20, 40]
+            handShapeParams['thumb.01.' + hand + '.001'] = [5, -20, -10]
 
         elif Tshape[0] == 'L' and Tshape[1] == '=':
-            handShapeParams['thumb.01.' + hand + '.001'] = [10, 40, 0]
+            handShapeParams['thumb.01.' + hand + '.001'] = [15, 20, 5]
         elif Tshape[0] == 'L' and Tshape[1] == '<':
-            handShapeParams['thumb.01.' + hand + '.001'] = [-40, 45, 0]
+            handShapeParams['thumb.01.' + hand + '.001'] = [-35, 20, -10]
 
     elif hand == 'R':
         if Tshape[0] == 'U' and Tshape[1] == '=':
@@ -140,14 +140,14 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
             handShapeParams['thumb.01.' + hand + '.001'] = [10, -25, 0]
 
         elif Tshape[0] == 'O' and Tshape[1] == '=':
-            handShapeParams['thumb.01.' + hand + '.001'] = [-30, -20, 20]
+            handShapeParams['thumb.01.' + hand + '.001'] = [-15, -30, 40]
         elif Tshape[0] == 'O' and Tshape[1] == '<':
-            handShapeParams['thumb.01.' + hand + '.001'] = [10, -20, 40]
+            handShapeParams['thumb.01.' + hand + '.001'] = [-5, -20, 50]
 
         elif Tshape[0] == 'L' and Tshape[1] == '=':
-            handShapeParams['thumb.01.' + hand + '.001'] = [-10, 45, 0]
+            handShapeParams['thumb.01.' + hand + '.001'] = [-15, 20, -5]
         elif Tshape[0] == 'L' and Tshape[1] == '<':
-            handShapeParams['thumb.01.' + hand + '.001'] = [40, 40, 0]
+            handShapeParams['thumb.01.' + hand + '.001'] = [30, 20, 10]
 
     return handShapeParams
 
