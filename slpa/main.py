@@ -1081,8 +1081,9 @@ class MainWindow(QMainWindow):
             self.loadHandShape(word.gloss)
             self.saveCorpus()
 
-    @decorators.checkForCorpus
     def funcLoad(self):
+        if not self.corpus:
+            return 
         dialog = FunctionalLoadDialog(self.corpus)
         dialog.exec_()
 
