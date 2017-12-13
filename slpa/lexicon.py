@@ -65,10 +65,18 @@ class Corpus():
         if hasattr(item, 'gloss'):
             return item.gloss in self.wordlist
         else:
-            return item in self.wordlist
+            return item.upper() in [w.upper() for w in self.wordlist]
 
     def __getitem__(self, key):
-        return self.wordlist[key]
+        try:
+            word = self.wordlist[key]
+        except KeyError:
+            try:
+                word = self.wordlist[key.upper()]
+            except KeyError:
+                word = self.wordlist[key.lower()]
+                #if this fails, then a KeyError is raised as usual
+        return word
 
     def __iter__(self):
         wordlist = sorted(self.wordlist.keys())
