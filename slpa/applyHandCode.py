@@ -115,16 +115,40 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
             flexionDict = {'H':[0, 0], 'E':[50, 0], 'e': [0, 0], 'i':[60, 0], 'F':[80, 0], '_':[0, 0]}
 
     # Sample Code: Tshape:[L=EH]
-    if Tshape[0] == 'O' and Tshape[1] == '=':
-        handShapeParams['thumb.02.' + hand] = [0, 0, 0]
-        handShapeParams['thumb.03.' + hand] = [0, 0, 0]
-        handShapeParams['thumb.01.' + hand + '.001'] = [50, -90, 0]
-    elif Tshape[0] == 'O' and Tshape[1] == '<':
-        handShapeParams['thumb.01.' + hand + '.001'] = [0, -20, -50]
-    elif Tshape[0] == 'L' and Tshape[1] == '=':
-        handShapeParams['thumb.01.' + hand + '.001'] = [0, 50, 0]
-    elif Tshape[0] == 'L' and Tshape[1] == '<':
-        handShapeParams['thumb.01.' + hand + '.001'] = [-20, 20, 0]
+    #handShapeParams['thumb.02.' + hand] = [0, 0, 0]
+    #handShapeParams['thumb.03.' + hand] = [0, 0, 0]    
+    if hand == 'L':
+        if Tshape[0] == 'U' and Tshape[1] == '=':
+            handShapeParams['thumb.01.' + hand + '.001'] = [-10, -25, 0]
+        elif Tshape[0] == 'U' and Tshape[1] == '<':
+            handShapeParams['thumb.01.' + hand + '.001'] = [10, -25, 0]
+
+        elif Tshape[0] == 'O' and Tshape[1] == '=':
+            handShapeParams['thumb.01.' + hand + '.001'] = [15, -20, 5]
+        elif Tshape[0] == 'O' and Tshape[1] == '<':
+            handShapeParams['thumb.01.' + hand + '.001'] = [5, -20, -10]
+
+        elif Tshape[0] == 'L' and Tshape[1] == '=':
+            handShapeParams['thumb.01.' + hand + '.001'] = [15, 20, 5]
+        elif Tshape[0] == 'L' and Tshape[1] == '<':
+            handShapeParams['thumb.01.' + hand + '.001'] = [-35, 20, -10]
+
+    elif hand == 'R':
+        if Tshape[0] == 'U' and Tshape[1] == '=':
+            handShapeParams['thumb.01.' + hand + '.001'] = [-10, -25, 0]
+        elif Tshape[0] == 'U' and Tshape[1] == '<':
+            handShapeParams['thumb.01.' + hand + '.001'] = [10, -25, 0]
+
+        elif Tshape[0] == 'O' and Tshape[1] == '=':
+            handShapeParams['thumb.01.' + hand + '.001'] = [-15, -30, 40]
+        elif Tshape[0] == 'O' and Tshape[1] == '<':
+            handShapeParams['thumb.01.' + hand + '.001'] = [-5, -20, 50]
+
+        elif Tshape[0] == 'L' and Tshape[1] == '=':
+            handShapeParams['thumb.01.' + hand + '.001'] = [-15, 20, -5]
+        elif Tshape[0] == 'L' and Tshape[1] == '<':
+            handShapeParams['thumb.01.' + hand + '.001'] = [30, 20, 10]
+
     return handShapeParams
 
 ## Start Script
