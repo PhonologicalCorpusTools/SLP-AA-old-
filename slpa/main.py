@@ -1086,6 +1086,9 @@ class MainWindow(QMainWindow):
             return 
         dialog = FunctionalLoadDialog(self.corpus)
         dialog.exec_()
+        resultsTable = FunctionalLoadResultsTable(dialog.results)
+        resultsTable.exec_()
+
 
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu('&File')

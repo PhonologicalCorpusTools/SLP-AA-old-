@@ -2,7 +2,7 @@ from collections import defaultdict
 from math import log2 as log
 from transcriptions import STANDARD_SYMBOLS
 from imports import (QDialog, QHBoxLayout, QVBoxLayout, QGroupBox, QRadioButton, QButtonGroup, QPushButton,
-                    QStackedWidget, QWidget, QComboBox, QMessageBox, QLabel, QLineEdit)
+                    QStackedWidget, QWidget, QComboBox, QMessageBox, QLabel, QLineEdit, QTableWidget, QTableWidgetItem)
 
 
 class FunctionalLoadDialog(QDialog):
@@ -10,6 +10,7 @@ class FunctionalLoadDialog(QDialog):
     def __init__(self, corpus):
         super().__init__()
         self.corpus = corpus
+        self.results = list()
 
         self.setWindowTitle('Functional Load')
         layout = QVBoxLayout()
@@ -137,12 +138,26 @@ class FunctionalLoadDialog(QDialog):
             self.calcByDuction()
 
         elif index == 4:
-            self.calcCustom()
+            slots = self.customSlots.text()
+            alert = QMessageBox()
+            alert.setWindowTitle('Invalid slot numbers')
+            alert.setText('Slot numbers must be between 1 and 34 (inclusive)')
+
+            try:
+                slots = [int(x.strip()) for x in slots.split(',')]
+            except ValueError:
+                alert.exec_()
+                return
+
+            if any(n > 34 or n < 1 for n in slots):
+                alert.exec_()
+                return
+            self.calcCustom(slots)
 
         super().accept()
 
-    def calculateEntropy(self):
-        corpus_size = len(self.corpus)
+    def calculateEntropy(self, corpus=None):
+        corpus_size = len(corpus) if corpus is not None else len(self.corpus)
         return corpus_size, sum([1 / corpus_size * log(1 / corpus_size) for n in range(corpus_size)]) * -1
 
 
@@ -150,7 +165,7 @@ class FunctionalLoadDialog(QDialog):
         corpus_size, starting_h = self.calculateEntropy()
         duction = self.ductionFingerSelection.currentText()
         if duction == 'Thumb/Finger':
-            slot = 2
+            slot = 3
         elif duction == 'Index/Middle':
             slot = 19
         elif duction == 'Middle/Ring':
@@ -168,9 +183,8 @@ class FunctionalLoadDialog(QDialog):
                 ch = word.config1hand1.copy()
                 ch[slot] = 'X'
                 new_corpus[''.join(ch)] += 1
-            new_corpus_size = len(new_corpus)
-            ending_h = sum([new_corpus[word] / new_corpus_size * log(new_corpus[word] / new_corpus_size)
-                            for word in new_corpus]) * -1
+
+            new_corpus_size, ending_h = self.calculateEntropy(new_corpus)
             print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
             print('Change in entropy = {}\n'.format(starting_h - ending_h))
         else:
@@ -184,21 +198,20 @@ class FunctionalLoadDialog(QDialog):
                 ch[24] = 'X'
                 ch[29] = 'X'
                 new_corpus[''.join(ch)] += 1
-            new_corpus_size = len(new_corpus)
-            ending_h = sum([new_corpus[word] / new_corpus_size * log(new_corpus[word] / new_corpus_size)
-                            for word in new_corpus]) * -1
+            new_corpus_size, ending_h = self.calculateEntropy(new_corpus)
             print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
             print('Change in entropy = {}\n'.format(starting_h - ending_h))
 
-    def calcCustom(self):
+        result = [corpus_size, starting_h, new_corpus_size, ending_h, starting_h-ending_h]
+        self.results = [result]
+
+
+    def calcCustom(self, slots):
         corpus_size, starting_h = self.calculateEntropy()
 
-        slots = self.customSlots.text()
-        if slots:
-            slots = [int(n)-1 for n in slots.split(',')]
-        else:
-            slots = [n for n in range(34)]
-        #minus 1 because slot numbers starts at 1 but list indices start at 0
+        slots = [n-1 for n in slots]
+        # minus 1 because slot numbers starts at 1 but list indices start at 0
+
         symbolA = self.customSymbo1A.currentText()
         symbolB = self.customSymbolB.currentText()
 
@@ -213,11 +226,11 @@ class FunctionalLoadDialog(QDialog):
 
             new_corpus[''.join(ch)] += 1
 
-        new_corpus_size = len(new_corpus)
-        ending_h = sum([new_corpus[word] / new_corpus_size * log(new_corpus[word] / new_corpus_size)
-                        for word in new_corpus]) * -1
+        new_corpus_size, ending_h = self.calculateEntropy(new_corpus)
         print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
         print('Change in entropy = {}\n'.format(starting_h - ending_h))
+        result = [corpus_size, starting_h, new_corpus_size, ending_h, starting_h-ending_h]
+        self.results = [result]
 
 
     def calcByFlexion(self):
@@ -252,11 +265,10 @@ class FunctionalLoadDialog(QDialog):
                 ch[slot] = 'X'
                 new_corpus[''.join(ch)] += 1
 
-            new_corpus_size = len(new_corpus)
-            ending_h = sum([new_corpus[word] / new_corpus_size * log(new_corpus[word] / new_corpus_size)
-                            for word in new_corpus]) * -1
+            new_corpus_size, ending_h = self.calculateEntropy(new_corpus)
             print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
             print('Change in entropy = {}\n'.format(starting_h - ending_h))
+            self.results = [[corpus_size, starting_h, new_corpus_size, ending_h, starting_h-ending_h]]
 
         else: #user chose an "All" option
 
@@ -276,11 +288,10 @@ class FunctionalLoadDialog(QDialog):
                         ch[slot+2] = 'X' #distal
                     new_corpus[''.join(ch)] += 1
 
-                new_corpus_size = len(new_corpus)
-                ending_h = sum([new_corpus[word]/new_corpus_size*log(new_corpus[word]/new_corpus_size)
-                                for word in new_corpus])*-1
+                new_corpus_size, ending_h = self.calculateEntropy(new_corpus)
                 print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
                 print('Change in entropy = {}\n'.format(starting_h-ending_h))
+                self.results = [[corpus_size, starting_h, new_corpus_size, ending_h, starting_h-ending_h]]
 
             elif finger == 'All' and joint != 'All':
                 #a particular joint on all the fingers
@@ -304,15 +315,13 @@ class FunctionalLoadDialog(QDialog):
                     ch[slot+15] = 'X'
                     new_corpus[''.join(ch)] += 1
 
-                    new_corpus_size = len(new_corpus)
-                    ending_h = sum([new_corpus[word]/new_corpus_size*log(new_corpus[word]/new_corpus_size)
-                                    for word in new_corpus])*-1
+                    new_corpus_size, ending_h = self.calculateEntropy(new_corpus)
                 print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
                 print('Change in entropy = {}\n'.format(starting_h-ending_h))
-
+                self.results = [[corpus_size, starting_h, new_corpus_size, ending_h, starting_h-ending_h]]
 
             elif finger == 'All' and joint == 'All':
-
+                results = list()
                 for finger, slot in [('THUMB', 2), ('INDEX', 17), ('MIDDLE', 22), ('RING', 27), ('PINKY', 31)]:
                     print('ALL {} JOINTS'.format(joint.upper()))
                     print('Starting size = {}\nStarting entropy = {}'.format(corpus_size, starting_h))
@@ -325,8 +334,29 @@ class FunctionalLoadDialog(QDialog):
                             ch[slot+2] = 'X'
                         new_corpus[''.join(ch)] += 1
 
-                    new_corpus_size = len(new_corpus)
-                    ending_h = sum([new_corpus[word]/new_corpus_size*log(new_corpus[word]/new_corpus_size)
-                                    for word in new_corpus])*-1
+                    new_corpus_size, ending_h = self.calculateEntropy(new_corpus)
                     print('After merging size = {}\nAfter merging entropy = {}'.format(len(new_corpus), ending_h))
                     print('Change in entropy = {}\n'.format(starting_h-ending_h))
+                    results.append([corpus_size, starting_h, new_corpus_size, ending_h, starting_h-ending_h])
+                self.results = results
+
+class FunctionalLoadResultsTable(QDialog):
+
+    def __init__(self, results):
+        super().__init__()
+
+        layout = QHBoxLayout()
+
+        table = QTableWidget()
+        table.setColumnCount(5)
+        table.setHorizontalHeaderLabels(['Starting corpus size', 'Starting entropy',
+                                         'Ending corpus size', 'Ending entropy', 'Change in entropy'])
+        for result in results:
+            table.insertRow(table.rowCount())
+            for i, item in enumerate(result):
+                newItem = QTableWidgetItem(str(item))
+                table.setItem(table.rowCount()-1, i, newItem)
+
+        layout.addWidget(table)
+        self.setLayout(layout)
+
