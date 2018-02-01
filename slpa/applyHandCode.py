@@ -140,12 +140,12 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
             handShapeParams['thumb.01.' + hand + '.001'] = [10, -25, 0]
 
         elif Tshape[0] == 'O' and Tshape[1] == '=':
-            handShapeParams['thumb.01.' + hand + '.001'] = [-15, -30, 40]
+            handShapeParams['thumb.01.' + hand + '.001'] = [-45, -20, 30]
         elif Tshape[0] == 'O' and Tshape[1] == '<':
             handShapeParams['thumb.01.' + hand + '.001'] = [-5, -20, 50]
 
         elif Tshape[0] == 'L' and Tshape[1] == '=':
-            handShapeParams['thumb.01.' + hand + '.001'] = [-15, 20, -5]
+            handShapeParams['thumb.01.' + hand + '.001'] = [-12, 20, -5]
         elif Tshape[0] == 'L' and Tshape[1] == '<':
             handShapeParams['thumb.01.' + hand + '.001'] = [30, 20, 10]
 
@@ -219,8 +219,15 @@ if __name__ == '__main__':
             deactThisBone = actThisBone
             deactThisBone.select = False
 
+        # set color of hand - should create predefined colors
+        if hand == 'R':
+        	bpy.data.objects['Cube.000'].active_material.diffuse_color = (45/255, 34/255, 30/255)
+        elif hand == 'L':
+        	bpy.data.objects['Cube.005'].active_material.diffuse_color = (0.1, 0.6, 0.1)
+
         bpy.ops.object.posemode_toggle()
         print(codepath)
+        
         bpy.ops.wm.save_as_mainfile(filepath=os.path.join(codepath,'handImage.blend'), copy=True)
     # Now use world matrix location to do thumb-finger contact
     """
