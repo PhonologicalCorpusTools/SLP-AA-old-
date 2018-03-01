@@ -160,6 +160,8 @@ if __name__ == '__main__':
     args = argv[argv.index(" -- ") + 1:]
     codepath = args[0]#'C:\\Users\\Scott\\Documents\\GitHub\\SLP-Annotator\\slpa'
     hand = args[1]#'R'
+    #colorCode = args[2]
+    colorCode = (0.1, 0.6, 0.1)
     # Read handshape coding and parse into thumb/fingers
     with open(os.path.join(codepath, 'handCode.txt'), 'r', encoding='utf-8') as inFile:
         code = inFile.read()
@@ -221,9 +223,9 @@ if __name__ == '__main__':
 
         # set color of hand - should create predefined colors
         if hand == 'R':
-        	bpy.data.objects['Cube.000'].active_material.diffuse_color = (45/255, 34/255, 30/255)
+        	bpy.data.objects['Cube.000'].active_material.diffuse_color = colorCode
         elif hand == 'L':
-        	bpy.data.objects['Cube.005'].active_material.diffuse_color = (0.1, 0.6, 0.1)
+        	bpy.data.objects['Cube.005'].active_material.diffuse_color = colorCode
 
         bpy.ops.object.posemode_toggle()
         print(codepath)
