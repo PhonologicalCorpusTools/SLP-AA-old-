@@ -846,12 +846,16 @@ class MainWindow(QMainWindow):
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
+
+        colorCodeR = '0.8'
+        colorCodeG = '0.1'
+        colorCodeB = '0.1'
         proc = subprocess.Popen(
             [blenderPath,
              blenderFile,
             '--background',
-            "--python", blenderScript,
-             ' -- ', os.getcwd(), dialog.hand])
+            '--python', blenderScript,
+             os.getcwd(), dialog.hand, colorCodeR, colorCodeG, colorCodeB])
         proc.communicate()
 
         proc = subprocess.Popen(

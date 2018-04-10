@@ -152,24 +152,12 @@ def translate_thumb_code_to_degrees(hand, Tshape, handShapeParams):
     return handShapeParams
 
 ## Start Script
-#Needed inputs, blend file and hand value
-
-#def makeHandShape(codepath='C:\\Users\\Scott\\Documents\\GitHub\\SLP-Annotator\\slpa', hand='R'):
 if __name__ == '__main__':
+    # Read parameters from command line needed for modifying shape
     argv = sys.argv
-    #print(argv)
-    #args = argv[argv.index(" -- ") + 1:]
-    #print(len(argv))
     codepath = argv[-5]
     hand = argv[-4]
     colorCode = (float(argv[-3]), float(argv[-2]), float(argv[-1]))
-    print(colorCode)
-    print(type(colorCode))
-    #(0.1, 0.6, 0.1)
-
-    #codepath = args[0]#'C:\\Users\\Scott\\Documents\\GitHub\\SLP-Annotator\\slpa'
-    #hand = args[1]#'R'
-    #colorCode = args[2]
     
     # Read handshape coding and parse into thumb/fingers
     with open(os.path.join(codepath, 'handCode.txt'), 'r', encoding='utf-8') as inFile:
