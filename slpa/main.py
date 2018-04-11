@@ -7,6 +7,7 @@ import collections
 import parameters
 import decorators
 import anytree
+import random
 from imports import *
 from handshapes import *
 from lexicon import *
@@ -18,6 +19,7 @@ from notes import *
 from search import *
 from image import *
 from functional_load import *
+from colour import *
 from parameterwidgets import ParameterDialog, ParameterTreeModel
 #from slpa import __version__ as currentSLPAversion
 
@@ -846,10 +848,10 @@ class MainWindow(QMainWindow):
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
+        colourDialog = ColourPickerDialog()
+        colourDialog.exec_()
+        handColour = colourDialog.selectedColor()
 
-        colorCodeR = '0.8'
-        colorCodeG = '0.1'
-        colorCodeB = '0.1'
         proc = subprocess.Popen(
             [blenderPath,
              blenderFile,
