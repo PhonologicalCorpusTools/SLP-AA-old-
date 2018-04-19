@@ -852,6 +852,9 @@ class MainWindow(QMainWindow):
         colourDialog.exec_()
         handColour = colourDialog.selectedColor()
 
+        colorCodeR = str(float(handColour.red()/255))
+        colorCodeG = str(float(handColour.green()/255))
+        colorCodeB = str(float(handColour.blue()/255))
         proc = subprocess.Popen(
             [blenderPath,
              blenderFile,
@@ -893,6 +896,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
     def loadCorpus(self, showFileDialog = True):
+        print(sys.modules['anytree'])
         file_path = QFileDialog.getOpenFileName(self,
                 'Open Corpus File', os.getcwd(), '*.corpus')
         file_path = file_path[0]
