@@ -127,8 +127,10 @@ class SearchDialog(QDialog):
 
     def accept(self):
         self.accepted = True
+        #the generate*() functions are implemented by TranscriptionSearchDialog and PhraseSearchDialog
         self.generateTranscriptions()
         self.generateRegEx()
+        self.generateGlobalOptions()
         super().accept()
 
     def reject(self):
@@ -255,6 +257,12 @@ class PhraseDialog(QDialog):
                     t.append(symbol)
             transcriptions.append(t)
         self.transcriptions = transcriptions
+
+    def generateGlobalOptions(self):
+        self.forearmInvolved = False
+        self.partialObscurity = False
+        self.uncertainCoding = False
+        self.incompleteCoding = False
 
     def generatePhrases(self):
         self.phrases = [layout.generatePhrase() for layout in self.descriptionLayouts]
@@ -683,6 +691,8 @@ class TranscriptionSearchDialog(SearchDialog):
         self.transcriptions.append(self.configTabs.widget(0).hand2Transcription)
         self.transcriptions.append(self.configTabs.widget(1).hand1Transcription)
         self.transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+
+    def generateGlobalOptions(self):
         self.forearmInvolved = self.forearmCheckBox.isChecked()
         self.partialObscurity = self.partialObscurityCheckBox.isChecked()
         self.uncertainCoding = self.uncertainCodingCheckBox.isChecked()

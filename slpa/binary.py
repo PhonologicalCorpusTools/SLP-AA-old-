@@ -7,9 +7,7 @@ class SLPAUnpickler(pickle._Unpickler):
         super().__init__(file)
 
     def find_class(self, module, name):
-        print(module, name)
         if 'anytree' in module:
-            print(module, name)
             return getattr(anytree, name)
         else:
             return super().find_class(module, name)
@@ -17,7 +15,6 @@ class SLPAUnpickler(pickle._Unpickler):
 def load_binary(path):
     with open(path, 'rb') as f:
         up = SLPAUnpickler(f)
-        #obj = pickle.load(f)
         obj = up.load()
     return obj
 

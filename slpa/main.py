@@ -896,7 +896,6 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
     def loadCorpus(self, showFileDialog = True):
-        print(sys.modules['anytree'])
         file_path = QFileDialog.getOpenFileName(self,
                 'Open Corpus File', os.getcwd(), '*.corpus')
         file_path = file_path[0]
@@ -1254,6 +1253,14 @@ class MainWindow(QMainWindow):
 
 
         if matches:
+            remove = list()
+            attrs = ['forearmInvolved', 'partialObscurity', 'uncertainCoding', 'incompleteCoding']
+            for i,match in enumerate(matches):
+                if any(getattr(dialog, attr)!= getattr(match, attr)for attr in attrs):
+                    remove.append(i)
+            matches = [matches[i] for i in range(len(matches)) if not i in remove]
+
+
             resultsDialog = SearchResultsDialog(matches)
             resultsDialog.exec_()
             if resultsDialog.result:
