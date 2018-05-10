@@ -27,13 +27,15 @@ class HandComboBox(QComboBox):
 
 class FingerComboBox(QComboBox):
 
-    def __init__(self):
+    def __init__(self, allowAnyFinger=False):
         super().__init__()
         self.addItem('Thumb')
         self.addItem('Index')
         self.addItem('Middle')
         self.addItem('Ring')
         self.addItem('Pinky')
+        if allowAnyFinger:
+            self.addItem('Any')
 
 class FlexionComboBox(QComboBox):
 
@@ -85,11 +87,11 @@ class JointSearchLayout(QHBoxLayout):
 
 class FingerSearchLayout(QHBoxLayout):
 
-    def __init__(self):
+    def __init__(self, allowAnyFinger=False):
         super().__init__()
         self.deleteMe = QCheckBox()
         self.quantifiers = QuantifierComboBox()
-        self.fingers = FingerComboBox()
+        self.fingers = FingerComboBox(allowAnyFinger)
         self.flexions = FlexionComboBox()
         self.configs = ConfigComboBox()
         self.hands = HandComboBox()
@@ -206,8 +208,8 @@ class PhraseDialog(QDialog):
                     if widget is not None:
                         widget.deleteLater()
 
-    def addFingerLayout(self, disable_quantifiers=False):
-        newLayout = FingerSearchLayout()
+    def addFingerLayout(self, disable_quantifiers=False, allowAnyFinger=False):
+        newLayout = FingerSearchLayout(allowAnyFinger)
         if disable_quantifiers:
             newLayout.quantifiers.removeItem(2)
             newLayout.quantifiers.removeItem(1)
@@ -295,6 +297,8 @@ class PhraseDialog(QDialog):
                 if finger == 'thumb':
                     symbol = '{}|.(?={})'.format(symbol, symbol)
                     slots = [slots[0], -1*slots[1]]
+                elif finger == 'any':
+                    pass
                 else:
                     symbol = '{}|.(?={})|.(?=.{})'.format(symbol, symbol, symbol)
                     slots = [slots[0], -1*slots[1], -1*slots[2]]
@@ -679,6 +683,9 @@ class TranscriptionSearchDialog(SearchDialog):
                         symbol = '.'
                 if symbol == self.wildcard:
                     symbol = '.'
+                if symbol in ['?', '*', '$', '^', '+']:
+                    symbol = '\\'+symbol
+
                 regex.append(symbol)
             regex = ''.join(regex)
             expressions.append(regex)
