@@ -20,13 +20,14 @@ from search import *
 from image import *
 from functional_load import *
 from colour import *
+from constants import GLOBAL_OPTIONS
 from parameterwidgets import ParameterDialog, ParameterTreeModel
 #from slpa import __version__ as currentSLPAversion
 
 __currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
-GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete', 'reduplicated']
+
 
 class QApplicationMessaging(QApplication):
     messageFromOtherInstance = Signal(bytes)
@@ -1260,7 +1261,7 @@ class MainWindow(QMainWindow):
 
         if matches:
             remove = list()
-            attrs = ['forearm', 'estimated', 'uncertain', 'incomplete', 'reduplicated']
+            attrs = GLOBAL_OPTIONS
             for i,match in enumerate(matches):
                 if any(getattr(dialog, attr)!= getattr(match, attr)for attr in attrs):
                     remove.append(i)

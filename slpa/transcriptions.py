@@ -1,10 +1,10 @@
 from collections import namedtuple
 from imports import *
 
-X_IN_BOX = '\u2327'
-NULL = '\u2205'
-STANDARD_SYMBOLS = ['_', '+', '-', '/', '1', '2', '3', '4', '<', '=', '?', 'E', 'F', 'H', 'L', 'M', 'O', 'U', 'V',
-                    'b', 'd', 'e', 'f', 'i', 'm', 'p', 'r', 't', 'u', 'x', 'x+', 'x-', '{', NULL, X_IN_BOX]
+from constants import *
+
+
+
 Flag = namedtuple('Flag', ['isUncertain', 'isEstimate'])
 
 class TranscriptionLayout(QVBoxLayout):
@@ -156,21 +156,21 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot19 = TranscriptionSlot(19, 4, '[EeFfHi\\?]', list('HEeiFf?'))
 
         #FIELD 5 (Middle)
-        self.slot20 = TranscriptionSlot(20, 5, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-','\u2327', '?'])
+        self.slot20 = TranscriptionSlot(20, 5, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'])
         self.slot21 = TranscriptionSlot(21, 5, '2', ['2'])
         self.slot22 = TranscriptionSlot(22, 5, '[EeFfHi\\?]', list('HEeiFf?'))
         self.slot23 = TranscriptionSlot(23, 5, '[EeFfHi\\?]', list('HEeiFf?'))
         self.slot24 = TranscriptionSlot(24, 5, '[EeFfHi\\?]', list('HEeiFf?'))
 
         #FIELD 6 (Ring)
-        self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-','\u2327', '?'])
+        self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'])
         self.slot26 = TranscriptionSlot(26, 6, '3', ['3'])
         self.slot27 = TranscriptionSlot(27, 6, '[EeFfHi\\?]', list('HEeiFf?'))
         self.slot28 = TranscriptionSlot(28, 6, '[EeFfHi\\?]', list('HEeiFf?'))
         self.slot29 = TranscriptionSlot(29, 6, '[EeFfHi\\?]', list('HEeiFf?'))
 
         #FIELD 7 (Middle)
-        self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-','\u2327', '?'])
+        self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'])
         self.slot31 = TranscriptionSlot(31, 7, '4', ['4'])
         self.slot32 = TranscriptionSlot(32, 7, '[EeFfHi\\?]', list('HEeiFf?'))
         self.slot33 = TranscriptionSlot(33, 7, '[EeFfHi\\?]', list('HEeiFf?'))
@@ -480,8 +480,18 @@ class TranscriptionSlot(QLineEdit):
         #capitalize E, F, H in numerous slots
         #lowercase I in the same slots
         elif self.num in [4,5,17,18,19,22,23,24,27,28,29,32,33,34]:
-            if key in [69, 70, 72]: #Qt.Key_E, Qt.Key_F, Qt.Key_H
+            if key == 72: #Qt.Key_H
                 self.setText(e.text().upper())
+            elif key == 69: #Qt.Key_E:
+                if self.text() == 'E':
+                    self.setText('e')
+                else:
+                    self.setText('E')
+            elif key == 70: #Qt.Key_F:
+                if self.text() == 'F':
+                    self.setText('f')
+                else:
+                    self.setText('F')
             elif key == 73: #Qt.Key_I
                 self.setText(e.text().lower())
 
@@ -633,49 +643,47 @@ class TranscriptionInfo(QGridLayout):
                             32: 'Pinky MCP flexion',
                             33: 'Pinky PIP flexion',
                             34: 'Pinky DIP flexion'}
+
         self.optionsDict = {1: 'Either on or off (checkbox)',
-                              2: 'L (lateral)\nU (unopposed)\nO (opposed)\nx (crossed)\n? (obscured)',
-                              3: '{ (full abduction)\n< (neutral)\n= (adducted))\n? (obscured)',
-                              4: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              5: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              6: ('-(no contact)\nt (tip)\nf (friction surface)\nb (back surface)'
-                                  '\nr (radial surface)\nu (ulnar surface)\n? (obscured)'),
-                              7: '-(no contact)\nd (distal)\np (proximal)\nM (meta-carpal)\n? (obscured)',
-                              #8 always null,
-                              #9 always forward slash,
-                              10: ('-(no contact)\nt (tip)\nf (friction surface)\nb (back surface)\nr (radial surface)'
-                                   '\nu (ulnar surface)\n? (obscured)'),
-                              11: '-(no contact)\nd (distal)\nm (medial)\np (proximal)\nM (meta-carpal)\n? (obscured)',
-                              12: '- (no contact)\n1 (contact with index)\n? (obscured)',
-                              13: '- (no contact)\n2 (contact with middle)\n? (obscured)',
-                              14: '- (no contact)\n3 (contact with ring)\n? (obscured)',
-                              15: '- (no contact)\n4 (contact with pinky)\n? (obscured)',
-                              #16 always 1,
-                              17: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              18: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              19: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              20: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
-                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'
-                                    '\n? (obscured)'),
-                              #21 always 2,
-                              22: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              23: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              24: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              25: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx (crossed with contact)\n'
-                                   'x- (slightly crossed with contact)\nx+ (ultracrossed with contact)\n'
-                                   '\u2327 (crossed without contact)\n? (obscured)'),
-                              #26 always 3,
-                              27: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              28: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              29: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              30: ('{ (full abduction)\n< (neutral)\n= (adducted)\nx- (slightly crossed with contact)\n'
-                                    'x (crossed with contact)\nx+ (ultracrossed)\n\u2327 (crossed without contact)'
-                                   '\n? (obscured)'),
-                              #31 always 4,
-                              32: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              33: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)',
-                              34: 'H (hyperextended)\nE (extended)\ni (intermediate)\nF (flexed)\n? (obscured)'
+                            2: self.generateSlotDescription(['L', 'U', 'x', '?']),
+                            3: self.generateSlotDescription(['{', '<', '=', '?']),
+                            4: self.generateSlotDescription(FINGER_SYMBOLS),
+                            5: self.generateSlotDescription(FINGER_SYMBOLS),
+                            6: self.generateSlotDescription(['-', 't', 'f', 'b', 'r', 'u', '?']),
+                            7: self.generateSlotDescription(['-', 'd', 'p', 'M', '?']),
+                            #8 always null,
+                            #9 always forward slash,
+                            10: self.generateSlotDescription(['-', 't', 'f', 'b', 'r']),
+                            11: self.generateSlotDescription(['-', 'd', 'm', 'p', 'M', '?']),
+                            12: self.generateSlotDescription(['-', '1', '?']),
+                            13: self.generateSlotDescription(['-', '2', '?']),
+                            14: self.generateSlotDescription(['-', '3', '?']),
+                            15: self.generateSlotDescription(['-', '4', '?']),
+                            #16 always 1,
+                            17: self.generateSlotDescription(FINGER_SYMBOLS),
+                            18: self.generateSlotDescription(FINGER_SYMBOLS),
+                            19: self.generateSlotDescription(FINGER_SYMBOLS),
+                            20: self.generateSlotDescription(CONTACT_SYMBOLS),
+                            #21 always 2,
+                            22: self.generateSlotDescription(FINGER_SYMBOLS),
+                            23: self.generateSlotDescription(FINGER_SYMBOLS),
+                            24: self.generateSlotDescription(FINGER_SYMBOLS),
+                            25: self.generateSlotDescription(CONTACT_SYMBOLS),
+                            #26 always 3,
+                            27: self.generateSlotDescription(FINGER_SYMBOLS),
+                            28: self.generateSlotDescription(FINGER_SYMBOLS),
+                            29: self.generateSlotDescription(FINGER_SYMBOLS),
+                            30: self.generateSlotDescription(CONTACT_SYMBOLS),
+                            #31 always 4,
+                            32: self.generateSlotDescription(FINGER_SYMBOLS),
+                            33: self.generateSlotDescription(FINGER_SYMBOLS),
+                            34: self.generateSlotDescription(FINGER_SYMBOLS)
                               }
+
+
+    def generateSlotDescription(self, symbolList):
+        return '\n'.join(['\t'.join([s,SYMBOL_DESCRIPTIONS[s]]) for s in symbolList])
+
 
     @Slot(int)
     def transcriptionSlotChanged(self, e):
@@ -703,6 +711,8 @@ class TranscriptionInfo(QGridLayout):
         self.slotNumberInfo.setText(str(e))
         self.slotTypeInfo.setText(self.purposeDict[e])
         self.slotOptionsInfo.setText(self.optionsDict[e])
+
+
 
 
 class TranscriptionPasteDialog(QDialog):

@@ -3,6 +3,7 @@ from imports import (Qt, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, 
                      QRadioButton, QLineEdit, QMenu, QAction, QCompleter, QStringListModel)
 from transcriptions import TranscriptionConfigTab, TranscriptionInfo
 from image import *
+from constants import GLOBAL_OPTIONS, FINGER_SYMBOLS, CONTACT_SYMBOLS, SYMBOL_DESCRIPTIONS
 
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
@@ -41,11 +42,8 @@ class FlexionComboBox(QComboBox):
 
     def __init__(self):
         super().__init__()
-        self.addItem('Hyperextended')
-        self.addItem('Extended')
-        self.addItem('Intermediate')
-        self.addItem('Flexed')
-        self.addItem('Obscured')
+        for symbol in FINGER_SYMBOLS:
+            self.addItem(SYMBOL_DESCRIPTIONS[symbol].title())
         self.addItem('Blank')
 
 class QuantifierComboBox(QComboBox):
@@ -237,14 +235,28 @@ class PhraseDialog(QDialog):
         return slots
 
     def findTranscriptionSymbol(self, description):
-        if description == 'Obscured':
+        if description == 'Unestimatable':
             symbol = '?'
+
         elif description == 'Blank':
             symbol = ''
-        else:
-            symbol = description[0]
-            if symbol == 'I': #intermediate has to be lowercase, but the other flexion values do not
-                symbol = 'i'
+
+        elif 'extended' in description:
+            if 'hyper' in description:
+                symbol = 'H'
+            elif 'fully' in description:
+                symbol = 'E'
+            else:
+                symbol = 'e'
+
+        elif 'flexed' in description:
+            if 'fully' in description:
+                symbol = 'F'
+            else:
+                symbol = 'f'
+
+        elif 'intermediate' in description:
+            symbol = 'i'
 
         return symbol
 
@@ -261,10 +273,11 @@ class PhraseDialog(QDialog):
         self.transcriptions = transcriptions
 
     def generateGlobalOptions(self):
-        self.forearmInvolved = False
-        self.partialObscurity = False
-        self.uncertainCoding = False
-        self.incompleteCoding = False
+        self.forearm = False
+        self.estimated = False
+        self.uncertain = False
+        self.incomplete = False
+        self.reduplicated = False
 
     def generatePhrases(self):
         self.phrases = [layout.generatePhrase() for layout in self.descriptionLayouts]
@@ -649,25 +662,17 @@ class TranscriptionSearchDialog(SearchDialog):
                         slot.setText(symbol)
 
     def setupGlobalOptions(self):
+        self.globalOptionsWidgets = list()
         globalOptionsLabel = QLabel('Global handshape options:')
         globalOptionsLabel.setFont(QFont(FONT_NAME, FONT_SIZE))
         self.globalOptionsLayout.addWidget(globalOptionsLabel)
-        self.forearmCheckBox = QCheckBox('Forearm is involved (slot 1/field 1)')
-        self.forearmCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
-        self.globalOptionsLayout.addWidget(self.forearmCheckBox)
-        self.partialObscurityCheckBox = QCheckBox('This sign is partially obscured')
-        self.partialObscurityCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
-        self.globalOptionsLayout.addWidget(self.partialObscurityCheckBox)
-        self.uncertainCodingCheckBox = QCheckBox('The coding for this sign is uncertain')
-        self.uncertainCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
-        self.globalOptionsLayout.addWidget(self.uncertainCodingCheckBox)
-        self.incompleteCodingCheckBox = QCheckBox('The coding for this sign is incomplete')
-        self.incompleteCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
-        self.globalOptionsLayout.addWidget(self.incompleteCodingCheckBox)
-        self.globalOptionsWidgets = [self.forearmCheckBox,
-                                     self.partialObscurityCheckBox,
-                                     self.uncertainCodingCheckBox,
-                                     self.incompleteCodingCheckBox]
+        for option in GLOBAL_OPTIONS:
+            widget = QCheckBox(option.title())
+            option += 'CheckBox'
+            setattr(self, option, widget)
+            widget = getattr(self, option)
+            self.globalOptionsLayout.addWidget(widget)
+            self.globalOptionsWidgets.append(widget)
 
     def generateRegEx(self):
         expressions = list()
@@ -700,10 +705,11 @@ class TranscriptionSearchDialog(SearchDialog):
         self.transcriptions.append(self.configTabs.widget(1).hand2Transcription)
 
     def generateGlobalOptions(self):
-        self.forearmInvolved = self.forearmCheckBox.isChecked()
-        self.partialObscurity = self.partialObscurityCheckBox.isChecked()
-        self.uncertainCoding = self.uncertainCodingCheckBox.isChecked()
-        self.incompleteCoding = self.incompleteCodingCheckBox.isChecked()
+        self.forearm = self.forearmCheckBox.isChecked()
+        self.estimated = self.estimatedCheckBox.isChecked()
+        self.uncertain = self.uncertainCheckBox.isChecked()
+        self.incomplete = self.incompleteCheckBox.isChecked()
+        self.reduplicated = self.reduplicatedCheckBox.isChecked()
 
 class RecentSearch:
 

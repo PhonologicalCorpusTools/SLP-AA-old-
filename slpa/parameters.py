@@ -91,7 +91,7 @@ allParameters.extend(Contact.children)
 
 #MAJOR MOVEMENT PARAMETERS
 MajorMovement = Parameter(name='Major Movement')
-ContourMovement = Parameter(name='Contour of movement', children = ['Hold', 'Straight', 'Arc', 'Circle', 'Seven'], default='Hold', parent=MajorMovement)
+ContourMovement = Parameter(name='Contour of movement', children = ['Hold', 'Straight', 'Arc', 'Circle', 'Seven', 'Z-Movement'], default='Hold', parent=MajorMovement)
 ContourMovement.sortChildren()
 ContourPlane = Parameter(name='Contour planes', children = ['Hold', 'Horizontal', 'Vertical', 'Surface', 'Midline', 'Oblique'], default='Hold', parent=MajorMovement)
 ContourPlane.sortChildren()
