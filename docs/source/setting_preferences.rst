@@ -38,8 +38,7 @@ In "Options" on the menu bar, click on each option to select or unselect them.
 * "Autosave"
 * "Show save alert" gives you a confirmation message when a sign has been saved. 
 * "Keep parameters window on top" keeps the parameters window open while still allowing you to transcribe handshapes on the background.
-* "Warn about duplicate glosses" warns you when you try to save a sign with a gloss already existing in your corpus (see 
-:ref:`save_sign`)
+* "Warn about duplicate glosses" warns you when you try to save a sign with a gloss already existing in your corpus (see :ref:`save_sign`).
 
 
 .. _transcriptions:
