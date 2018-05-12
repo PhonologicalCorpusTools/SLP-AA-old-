@@ -60,7 +60,7 @@ Field number is 2; Field type is Thumb; Slot number is 5; Slot type is Thumb DIP
 and permitted characters are H (hyperextended), E (fully extended), e (somewhat extended), i (clearly intermediate), 
 F (fully flexed), f (somewhat flexed), and ? (unestimatable).
 
-.. image:: static/field_slot.png
+.. image:: static/field_slot2.png
    :width: 90%
    :align: center
    
