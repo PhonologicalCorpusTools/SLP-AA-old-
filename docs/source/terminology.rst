@@ -57,7 +57,8 @@ Further information about that particular slot will appear at the bottom right c
 For example, if you click on Slot 5 in Field 2, you will find the following information:
 
 Field number is 2; Field type is Thumb; Slot number is 5; Slot type is Thumb DIP flexion; 
-and permitted characters are H (hyperextended), E (extended), i (intermediate), and F (flexed).
+and permitted characters are H (hyperextended), E (fully extended), e (somewhat extended), i (clearly intermediate), 
+F (fully flexed), f (somewhat flexed), and ? (unestimatable).
 
 .. image:: static/field_slot.png
    :width: 90%
