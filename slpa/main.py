@@ -26,6 +26,7 @@ from parameterwidgets import ParameterDialog, ParameterTreeModel
 __currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
+GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete', 'reduplicated']
 
 class QApplicationMessaging(QApplication):
     messageFromOtherInstance = Signal(bytes)
@@ -82,6 +83,8 @@ class ConfigLayout(QGridLayout):
 
         # self.forearmButton = QCheckBox('1. Forearm')
         # self.addWidget(self.forearmButton, 0, 1)
+        ##do not delete the commented lines above - they may be useful in the future if the
+        ##forearm slot returns to the transcription lines, instead of the global options
         self.addLayout(handshapes, 0, 2)
         self.handShapeMatch = QPushButton('Make Hand 2 = Hand 1')
         self.addWidget(self.handShapeMatch, 1, 0)
@@ -449,30 +452,19 @@ class MainWindow(QMainWindow):
             self.newGloss()
 
     def setupGlobalOptions(self):
+        self.globalOptionsWidgets = list()
         globalOptionsLabel = QLabel('Global handshape options:')
         globalOptionsLabel.setFont(QFont(FONT_NAME, FONT_SIZE))
         self.globalOptionsLayout.addWidget(globalOptionsLabel)
-        self.forearmCheckBox = QCheckBox('Forearm is involved (slot 1/field 1)')
-        self.forearmCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
-        self.globalOptionsLayout.addWidget(self.forearmCheckBox)
-        self.forearmCheckBox.clicked.connect(self.userMadeChanges)
-        self.forearmCheckBox.clicked.connect(self.checkForearm)
-        self.partialObscurityCheckBox = QCheckBox('This sign is partially obscured')
-        self.partialObscurityCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
-        self.partialObscurityCheckBox.clicked.connect(self.userMadeChanges)
-        self.globalOptionsLayout.addWidget(self.partialObscurityCheckBox)
-        self.uncertainCodingCheckBox = QCheckBox('The coding for this sign is uncertain')
-        self.uncertainCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
-        self.uncertainCodingCheckBox.clicked.connect(self.userMadeChanges)
-        self.globalOptionsLayout.addWidget(self.uncertainCodingCheckBox)
-        self.incompleteCodingCheckBox = QCheckBox('The coding for this sign is incomplete')
-        self.incompleteCodingCheckBox.setFont(QFont(FONT_NAME, FONT_SIZE))
-        self.incompleteCodingCheckBox.clicked.connect(self.userMadeChanges)
-        self.globalOptionsLayout.addWidget(self.incompleteCodingCheckBox)
-        self.globalOptionsWidgets = [self.forearmCheckBox,
-                                     self.partialObscurityCheckBox,
-                                     self.uncertainCodingCheckBox,
-                                     self.incompleteCodingCheckBox]
+        for option in GLOBAL_OPTIONS:
+            widget = GlobalOptionCheckBox(option.title(), self.userMadeChanges)
+            option += 'CheckBox'
+            setattr(self, option, widget)
+            widget = getattr(self, option)
+            self.globalOptionsLayout.addWidget(widget)
+            self.globalOptionsWidgets.append(widget)
+
+
     def checkForearm(self):
         self.forearmChecked.emit(self.forearmCheckBox.isChecked())
 
@@ -720,10 +712,21 @@ class MainWindow(QMainWindow):
                 if not hasattr(word, attribute):
                     setattr(word, attribute, Sign.copyValue(Sign, default_value))
 
-
-            if hasattr(word, 'movement'):
-                setattr(word, 'oneHandMovement', word.movement)
-                del word.movement
+                if attribute == 'estimated' and hasattr(word, 'partialObscurity'):
+                    word.estimated = word.partialObscurity
+                    del word.partialObscurity
+                elif attribute == 'forearm' and hasattr(word, 'forearmInvolved'):
+                    word.forearm = word.forearmInvolved
+                    del word.forearmInvolved
+                elif attribute == 'uncertain' and hasattr(word, 'uncertainCoding'):
+                    word.uncertain = word.uncertainCoding
+                    del word.uncertainCoding
+                elif attribute == 'incomplete' and hasattr(word, 'incompleteCoding'):
+                    word.incomplete = word.incompleteCoding
+                    del word.incompleteCoding
+                elif attribute == 'oneHandMovement' and hasattr(word, 'movement'):
+                    word.oneHandMovement = word.movement
+                    del word.movement
 
         #self.corpus.path = self.getOrCreateCorpusPath()
         save_binary(self.corpus, self.corpus.path)
@@ -902,6 +905,7 @@ class MainWindow(QMainWindow):
         if not file_path:
             return None
         self.corpus = load_binary(file_path)
+        self.checkBackwardsComptibility()
         self.corpus.path = file_path
         self.setupNewCorpus()
 
@@ -1043,10 +1047,11 @@ class MainWindow(QMainWindow):
 
         model = sign.parameters
         self.setupParameterDialog(model)
-        self.forearmCheckBox.setChecked(sign['forearmInvolved'])
-        self.partialObscurityCheckBox.setChecked(sign['partialObscurity'])
-        self.incompleteCodingCheckBox.setChecked(sign['incompleteCoding'])
-        self.uncertainCodingCheckBox.setChecked(sign['uncertainCoding'])
+        self.forearmCheckBox.setChecked(sign['forearm'])
+        self.estimatedCheckBox.setChecked(sign['estimated'])
+        self.incompleteCheckBox.setChecked(sign['incomplete'])
+        self.uncertainCheckBox.setChecked(sign['uncertain'])
+        self.reduplicatedCheckBox.setChecked(sign['reduplicated'])
         self.askSaveChanges = False
         self.showMaximized()
 
@@ -1056,8 +1061,8 @@ class MainWindow(QMainWindow):
                 'config1': None, 'config2': None,
                 'flags': None, 'parameters': None,
                 'corpusNotes': None, 'signNotes': None,
-                'forearmInvolved': False, 'partialObscurity': False,
-                'uncertainCoding': False, 'incompleteCoding': False}
+                'forearm': False, 'estimated': False,
+                'uncertain': False, 'incomplete': False, 'reduplicated': False}
 
         config1 = self.configTabs.widget(0)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
@@ -1078,10 +1083,11 @@ class MainWindow(QMainWindow):
         kwargs['signNotes'] = self.signNotes.getText()
         if not kwargs['signNotes']:
             kwargs['signNotes'] == 'None'
-        kwargs['forearmInvolved'] = self.forearmCheckBox.isChecked()
-        kwargs['partialObscurity'] = self.partialObscurityCheckBox.isChecked()
-        kwargs['incompleteCoding'] = self.incompleteCodingCheckBox.isChecked()
-        kwargs['uncertainCoding'] = self.uncertainCodingCheckBox.isChecked()
+        kwargs['forearm'] = self.forearmCheckBox.isChecked()
+        kwargs['estimated'] = self.estimatedCheckBox.isChecked()
+        kwargs['incomplete'] = self.incompleteCheckBox.isChecked()
+        kwargs['uncertain'] = self.uncertainCheckBox.isChecked()
+        kwargs['reduplicated'] = self.reduplicatedCheckBox.isChecked()
         return kwargs
 
     def overwriteAllGlosses(self):
@@ -1254,7 +1260,7 @@ class MainWindow(QMainWindow):
 
         if matches:
             remove = list()
-            attrs = ['forearmInvolved', 'partialObscurity', 'uncertainCoding', 'incompleteCoding']
+            attrs = ['forearm', 'estimated', 'uncertain', 'incomplete', 'reduplicated']
             for i,match in enumerate(matches):
                 if any(getattr(dialog, attr)!= getattr(match, attr)for attr in attrs):
                     remove.append(i)
@@ -1642,10 +1648,11 @@ class MainWindow(QMainWindow):
                 kwargs['config2'] = transcriptions[1]
                 kwargs['flags'] = flags
                 kwargs['gloss'] = data['gloss']
-                kwargs['forearmInvolved'] = True if data['forearmInvolved'] == 'True' else False
-                kwargs['partialObscurity'] = True if data['partialObscurity'] == 'True' else False
-                kwargs['uncertainCoding'] = True if data['uncertainCoding'] == 'True' else False
-                kwargs['incompleteCoding'] = True if data['incompleteCoding'] == 'True' else False
+                kwargs['forearm'] = True if data['forearm'] == 'True' else False
+                kwargs['estimated'] = True if data['estimated'] == 'True' else False
+                kwargs['uncertain'] = True if data['uncertain'] == 'True' else False
+                kwargs['incomplete'] = True if data['incomplete'] == 'True' else False
+                kwargs['reduplicated'] = True if data['reduplicated'] == 'True' else False
                 kwargs['parameters'] = ParameterTreeModel(data['parameters'], fromXML=True)
                 kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
                 sign = Sign(kwargs)
@@ -1687,6 +1694,14 @@ class MainWindow(QMainWindow):
             widget.setChecked(False)
         self.askSaveChanges = False
         self.showMaximized()
+
+class GlobalOptionCheckBox(QCheckBox):
+
+    def __init__(self, text, slot):
+        super().__init__()
+        self.setText(text)
+        self.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.clicked.connect(slot)
 
 class MergeCorpusDialog(QDialog):
 

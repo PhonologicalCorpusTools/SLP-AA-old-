@@ -103,10 +103,11 @@ class Sign():
                                  'config2hand1':[Flag(False,False) for n in range(34)],
                                  'config2hand2':[Flag(False,False) for n in range(34)]},
                        'signNotes': str(),
-                       'forearmInvolved': False,
-                       'partialObscurity': False,
-                       'uncertainCoding': False,
-                       'incompleteCoding': False
+                       'forearm': False,
+                       'estimated': False,
+                       'uncertain': False,
+                       'incomplete': False,
+                       'reduplicated': False
                        }
 
     sorted_attributes = ['gloss', 'config1', 'config2',
@@ -120,7 +121,7 @@ class Sign():
                 headers.append('config{}hand{}slot{}'.format(config_num, hand_num, slot_num))
             headers.append('config{}hand{}uncertain'.format(config_num, hand_num))
             headers.append('config{}hand{}estimated'.format(config_num, hand_num))
-    headers.extend(['forearmInvolved','partialObscurity','uncertainCoding', 'incompleteCoding'])
+    headers.extend(['forearm','estimated', 'uncertain', 'incomplete', 'reduplicated'])
     headers.append('notes')
     headers.append('parameters')
     headers = ','.join(headers)
