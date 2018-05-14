@@ -46,7 +46,7 @@ Depending on the signs, you do not necessarily have to fill all four rows.
 Field and Slot
 ------------------
 
-"Field" refers to the square brackets numbered from 1 to 7. "Slots" are square boxes
+"Fields" refer to the square brackets numbered from 1 to 7. "Slots" are square boxes
 inside a field. Slot 1 in Field 1 is a global handshape option (see :ref:`global_handshape_options`) 
 for forearm involvement. Field 2 to 7 are devoted to the thumb, thumb-finger contact, the index finger, the middle finger, 
 the ring finger and the pinky finger, respectively.
