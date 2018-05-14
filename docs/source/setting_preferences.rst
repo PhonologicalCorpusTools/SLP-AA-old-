@@ -25,7 +25,7 @@ like to apply to your corpus, or use the "Select all" and "Unselect all" buttons
 
 Note that the constraints will NOT be automatically applied. To look for violations of 
 the selected constraints in each sign, click on the "Check transcription" 
-button (see :ref:`checking_transcriptions`).
+button (see:ref:`checking_transcriptions`).
 
 
 .. _options:
@@ -37,10 +37,8 @@ In "Options" on the menu bar, click on each option to select or unselect them.
 
 * "Autosave"
 * "Show save alert" gives you a confirmation message when a sign has been saved. 
-* "Keep parameters window on top" keeps the parameters window open while still allowing you to transcribe handshapes on the 
-background.
-* "Warn about duplicate glosses" warns you when you try to save a sign with a gloss already existing in your corpus (see 
-:ref:`save_sign`)
+* "Keep parameters window on top" keeps the parameters window open while still allowing you to transcribe handshapes on the background.
+* "Warn about duplicate glosses" warns you when you try to save a sign with a gloss already existing in your corpus (see :ref:`save_sign`).
 
 
 .. _transcriptions:

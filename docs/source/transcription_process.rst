@@ -27,9 +27,7 @@ a symbol yourself (see :ref:`field_and_slot` as relevant).
       
       * In Slots 20, 25, and 30, use the key 'z' for [x-]; 'c' for [x+]; and 's' for [☒].
       
-      * It may be helpful to use the Tab key to move to the next slot. To do this on Mac, go to 
-      System Preferences > Keyboard > Shortcuts. At the bottom of the page under "Full Keyboard Access", 
-      select "All controls".
+      * It may be helpful to use the Tab key to move to the next slot. To do this on Mac, go to System Preferences > Keyboard > Shortcuts. At the bottom of the page under "Full Keyboard Access", select "All controls".
 
 
 .. _flag_slot:
