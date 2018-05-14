@@ -42,9 +42,16 @@ class FlexionComboBox(QComboBox):
 
     def __init__(self):
         super().__init__()
-        for symbol in FINGER_SYMBOLS:
+        for symbol in FINGER_SYMBOLS[:-1]:
+            #the final description is ignored on this loop and then added afterwards
+            #because for the search function it's better if we re-order the options
             self.addItem(SYMBOL_DESCRIPTIONS[symbol].title())
+        self.addItem('Extended (any)')
+        self.addItem('Flexed (any)')
+        self.addItem('Intermediate (any)')
+        self.addItem('Unestimatable')#this was the description ignored earlier
         self.addItem('Blank')
+        self.setMaxVisibleItems(len(FINGER_SYMBOLS)+4)
 
 class QuantifierComboBox(QComboBox):
 
@@ -232,13 +239,16 @@ class PhraseDialog(QDialog):
             slots = [27, 28, 29]
         elif finger == 'pinky':
             slots = [32, 33, 34]
+        elif finger == 'any':
+            slots = [4, 5, 17, 18, 19, 22, 23, 24, 32, 33, 34]
         return slots
 
     def findTranscriptionSymbol(self, description):
-        if description == 'Unestimatable':
+        description = description.lower()
+        if description == 'unestimatable':
             symbol = '?'
 
-        elif description == 'Blank':
+        elif description == 'blank':
             symbol = ''
 
         elif 'extended' in description:
@@ -246,17 +256,24 @@ class PhraseDialog(QDialog):
                 symbol = 'H'
             elif 'fully' in description:
                 symbol = 'E'
-            else:
+            elif 'somewhat' in description:
                 symbol = 'e'
+            else:
+                symbol = 'HEe'
 
         elif 'flexed' in description:
             if 'fully' in description:
                 symbol = 'F'
-            else:
+            elif 'somewhat' in description:
                 symbol = 'f'
+            else:
+                symbol = 'Ff'
 
         elif 'intermediate' in description:
-            symbol = 'i'
+            if 'clearly' in description:
+                symbol = 'i'
+            else:
+                symbol = 'efi'
 
         return symbol
 
