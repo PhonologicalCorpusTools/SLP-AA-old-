@@ -51,7 +51,7 @@ Alternatively, go to "Transcription" in the menu bar and select "Set transcripti
 
 "Flag as estimate" is intended to note that, because of obscurity, a symbol has been estimated in some way (based on
 knowledge of hand anatomy, a preceeding hand configuration, the other hand in a two-handed symmetrical sign, etc.).
-"Flag as uncertain" is intended to stand for the transcriber's subjective uncertainty about their choice of a sylbol.
+"Flag as uncertain" is intended to stand for the transcriber's subjective uncertainty about their choice of a symbol.
 Therefore, it is certainly possible to use these two options simultaneously when the transcriber is uncertain about their
 estimation.
 
