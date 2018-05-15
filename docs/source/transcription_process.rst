@@ -110,10 +110,10 @@ Note that any existing symbols in the Config will be overwritten.
 5. Checking Global handshape options
 `````````````````
 Global handshape options (see :ref:`global_handshape_options`) can be checked by simply cliking the box next to a description.
-The options "This sign is partially obscured" and "The coding for this sign is uncertain" can be thought of as a global
-counterpart of the slot options "Flag as estimate" and "Flag as uncertain," respectively (see :ref:`flag_slot`).
+The options "Estimated" and "Uncertain" can be thought of as a global counterpart of the slot options "Flag as estimate" 
+and "Flag as uncertain," respectively (see :ref:`flag_slot`).
 In other words, it may be useful, for example, to check these Global handshape options when estimation or uncertainty applies
-to a whole sign or a whole finger(s) rather than individual slots.
+to a whole sign or a whole field(s) rather than individual slots.
 
 
 .. _other_parameters:
