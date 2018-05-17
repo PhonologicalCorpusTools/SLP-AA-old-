@@ -30,13 +30,10 @@ class HandShapeImage(QLabel):
 
     @Slot(int)
     def useNormalImage(self, e):
-        self.mappingChoice = self.mapping\
+        self.mappingChoice = self.mapping
 
 
 def getMediaFilePath(filename):
-    if hasattr(sys, 'frozen'):
-        dir = os.path.dirname(sys.executable)
-        path = os.path.join(dir, 'media', filename)
-    else:
-        path = os.path.join(os.getcwd(), 'media', filename)
-    return path
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, 'media', filename)
+    return os.path.join(os.path.abspath("."), 'media', filename)
