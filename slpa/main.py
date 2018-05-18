@@ -702,34 +702,55 @@ class MainWindow(QMainWindow):
 
         word = self.corpus.randomWord()
 
-        for attribute, default_value in Sign.sign_attributes.items():
-            if not hasattr(word, attribute):
+        oldParameterTreeMethods = dir(word.parameters)
+        currentParameterTreeMethods = dir(ParameterTreeModel)
+        for method in currentParameterTreeMethods:
+            if not method in oldParameterTreeMethods:
+                updateParameters = True
                 break
         else:
+            updateParameters = False
+
+
+        for attribute, default_value in Sign.sign_attributes.items():
+            if not hasattr(word, attribute):
+                updateSigns = True
+                break
+        else:
+            updateSigns = False
+
+
+        if not updateSigns and not updateParameters:
             return
 
         for word in self.corpus:
-            for attribute, default_value in sorted(Sign.sign_attributes.items()):
-                if not hasattr(word, attribute):
-                    setattr(word, attribute, Sign.copyValue(Sign, default_value))
+            if updateSigns:
+                for attribute, default_value in sorted(Sign.sign_attributes.items()):
+                    if not hasattr(word, attribute):
+                        setattr(word, attribute, Sign.copyValue(Sign, default_value))
+                    if attribute == 'estimated' and hasattr(word, 'partialObscurity'):
+                        word.estimated = word.partialObscurity
+                        del word.partialObscurity
+                    elif attribute == 'forearm' and hasattr(word, 'forearmInvolved'):
+                        word.forearm = word.forearmInvolved
+                        del word.forearmInvolved
+                    elif attribute == 'uncertain' and hasattr(word, 'uncertainCoding'):
+                        word.uncertain = word.uncertainCoding
+                        del word.uncertainCoding
+                    elif attribute == 'incomplete' and hasattr(word, 'incompleteCoding'):
+                        word.incomplete = word.incompleteCoding
+                        del word.incompleteCoding
+                    elif attribute == 'oneHandMovement' and hasattr(word, 'movement'):
+                        word.oneHandMovement = word.movement
+                        del word.movement
+            if updateParameters:
+                try:
+                    params = word.parameters.parameterList
+                    newTree = ParameterTreeModel(params)
+                except AttributeError:#occurs with older copora where ParameterNode and anytree.Nodes are intermixed
+                    newTree = ParameterTreeModel(parameters.defaultParameters)
+                word.parameters = newTree
 
-                if attribute == 'estimated' and hasattr(word, 'partialObscurity'):
-                    word.estimated = word.partialObscurity
-                    del word.partialObscurity
-                elif attribute == 'forearm' and hasattr(word, 'forearmInvolved'):
-                    word.forearm = word.forearmInvolved
-                    del word.forearmInvolved
-                elif attribute == 'uncertain' and hasattr(word, 'uncertainCoding'):
-                    word.uncertain = word.uncertainCoding
-                    del word.uncertainCoding
-                elif attribute == 'incomplete' and hasattr(word, 'incompleteCoding'):
-                    word.incomplete = word.incompleteCoding
-                    del word.incompleteCoding
-                elif attribute == 'oneHandMovement' and hasattr(word, 'movement'):
-                    word.oneHandMovement = word.movement
-                    del word.movement
-
-        #self.corpus.path = self.getOrCreateCorpusPath()
         save_binary(self.corpus, self.corpus.path)
         self.corpus = load_binary(self.corpus.path)
 
@@ -916,6 +937,7 @@ class MainWindow(QMainWindow):
         self.newGloss()
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
+
         self.corpusList.sortItems()
         self.corpusList.setCurrentRow(0)
         self.corpusList.itemClicked.emit(self.corpusList.currentItem())

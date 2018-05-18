@@ -5,6 +5,7 @@ from random import choice
 from parameters import defaultParameterTree, defaultParameters
 from parameterwidgets import ParameterTreeModel
 from transcriptions import Flag
+from constants import GLOBAL_OPTIONS
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
@@ -102,13 +103,10 @@ class Sign():
                                  'config1hand2':[Flag(False,False) for n in range(34)],
                                  'config2hand1':[Flag(False,False) for n in range(34)],
                                  'config2hand2':[Flag(False,False) for n in range(34)]},
-                       'signNotes': str(),
-                       'forearm': False,
-                       'estimated': False,
-                       'uncertain': False,
-                       'incomplete': False,
-                       'reduplicated': False
-                       }
+                       'signNotes': str()}
+    for option in GLOBAL_OPTIONS:
+        sign_attributes[option] = False
+
 
     sorted_attributes = ['gloss', 'config1', 'config2',
                          'parameters', 'flags', 'notes']
@@ -121,7 +119,7 @@ class Sign():
                 headers.append('config{}hand{}slot{}'.format(config_num, hand_num, slot_num))
             headers.append('config{}hand{}uncertain'.format(config_num, hand_num))
             headers.append('config{}hand{}estimated'.format(config_num, hand_num))
-    headers.extend(['forearm','estimated', 'uncertain', 'incomplete', 'reduplicated'])
+    headers.extend(GLOBAL_OPTIONS)
     headers.append('notes')
     headers.append('parameters')
     headers = ','.join(headers)
@@ -220,10 +218,11 @@ class Sign():
                 output.append(uncertain)
                 output.append(estimates)
 
-        output.append('True' if self.forearmInvolved else 'False')
-        output.append('True' if self.partialObscurity else 'False')
-        output.append('True' if self.uncertainCoding else 'False')
-        output.append('True' if self.incompleteCoding else 'False')
+        output.append('True' if self.forearm else 'False')
+        output.append('True' if self.estimated else 'False')
+        output.append('True' if self.uncertain else 'False')
+        output.append('True' if self.incomplete else 'False')
+        output.append('True' if self.reduplicated else 'False')
         output.append(self.notes)
         if parameter_format == 'xml':
             parameters = self.parameters.exportXML()
