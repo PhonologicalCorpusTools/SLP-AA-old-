@@ -33,16 +33,19 @@ def readMyFile(filename):
         next(csvReader)
         for row in csvReader:
             front_removed = row[5:]
-            both_removed = front_removed[:len(front_removed)-7]
-            if len(both_removed) == 144:
+            both_removed = front_removed
+            if len(both_removed) == 151:
+                both_removed = both_removed[:len(front_removed)-7]
                 both_removed = split_arr_fourths(both_removed)
                 word_dict[row[0]]=both_removed
-            if len(both_removed) == 143:
+            if len(both_removed) == 150:
                 both_removed.append("*")
+                both_removed = both_removed[:len(front_removed)-7]
                 both_removed = split_arr_fourths(both_removed)
                 word_dict[row[0]]=both_removed
-            if len(both_removed) > 144:
-                both_removed = both_removed[:144]
+            if len(both_removed) > 151:
+                both_removed = both_removed[:151]
+                both_removed = both_removed[:len(front_removed)-7]
                 both_removed = split_arr_fourths(both_removed)
                 word_dict[row[0]]=both_removed
             else:
