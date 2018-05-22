@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+
 def delete_last_two(arr):
     return arr[:int(len(arr)-2)]
     
@@ -55,13 +56,7 @@ def weird_function(rangestr):
     return proto_val
 
 def print_options_get_val():
-    print("Type in a value from 1-19 for the reliability statistic you'd like to view")
-    parts_list = ["All","Forearm","Thumb","Thumb / Finger Contact","Index Finger","Middle Finger","Ring Finger","Pinky Finger","Thumb / Finger Surfaces","Finger Contact","Extensions","Finger 1 Extensions","Finger 2 Extensions","Finger 3 Extensions","Finger 4 Extensions","Finger / Finger Contact","Proximal Joints","Medial Joints","Distal Joints"]
-    numb = 0
-    for elem in parts_list:
-        numb +=1
-        print(numb, ".", elem)
-    part_val = weird_function("1-19")
+    word_val = input("Type in the word you'd like to compare: ")
     print("\n")
 
     print("Choose from 4 types of combinations below")
@@ -71,34 +66,41 @@ def print_options_get_val():
         numb0 += 1
         print(numb0, ".", elem)
     config_val = weird_function("1-4")
+    
+    print("\n")
+    
+    print("Type in a value from 1-19 for the reliability statistic you'd like to view")
+    parts_list = ["All","Forearm","Thumb","Thumb / Finger Contact","Index Finger","Middle Finger","Ring Finger","Pinky Finger","Thumb / Finger Surfaces","Finger Contact","Extensions","Finger 1 Extensions","Finger 2 Extensions","Finger 3 Extensions","Finger 4 Extensions","Finger / Finger Contact","Proximal Joints","Medial Joints","Distal Joints"]
+    numb = 0
+    for elem in parts_list:
+        numb +=1
+        print(numb, ".", elem)
+    part_val = weird_function("1-19")
     print("\n")
 
-    word_val = input
-
-    return part_val
+    return word_val, config_val, part_val
 
 def get_range(numb):
     switcher = {
-        0: [],
-        1: [],
-        2: [],
-        3: [],
-        4: [],
-        5: [],
-        6: [],
-        7: [],
-        8: [],
-        9: [],
-        10: [],
-        11: [],
-        12: [],
-        13: [],
-        14: [],
-        15: [],
-        16: [],
-        17: [],
-        18: [],
-        19: [],
+        1: [1,"-",34],
+        2: [1],
+        3: [2,"-",5],
+        4: [6,"-",15],
+        5: [17,"-",19],
+        6: [20,"-",24],
+        7: [25,"-",29],
+        8: [30,"-",34],
+        9: [6,7,10,11],
+        10: [12,"-",15],
+        11: [4,5,17,18,19,22,23,24,27,28,29,32,33,34],
+        12: [17,18,19],
+        13: [22,23,24],
+        14: [27,28,29],
+        15: [32,33,34],
+        16: [20,25,30],
+        17: [4,17,22,27,32],
+        18: [18,23,28,33],
+        19: [5,19,24,29,34],
         
     }
     return switcher.get(argument, "nothing")
@@ -109,7 +111,9 @@ def get_range(numb):
 def reliability_analysis(word,configindex,dict1,dict2):
     mutated_arr1 = mutate_constants(dict1[word][configindex])
     mutated_arr2 = mutate_constants(dict2[word][configindex])
-    user_choice = print_options_get_val()
+    word_ch, config_ch, part_ch = print_options_get_val()
+
+    print(word_ch, config_ch, part_ch)
 
     
     
