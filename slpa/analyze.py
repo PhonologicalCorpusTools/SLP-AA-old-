@@ -1,6 +1,9 @@
 import csv
 import numpy as np
 
+parts_list = ["All","Forearm","Thumb","Thumb / Finger Contact","Index Finger","Middle Finger","Ring Finger","Pinky Finger","Thumb / Finger Surfaces","Finger Contact","Extensions","Finger 1 Extensions","Finger 2 Extensions","Finger 3 Extensions","Finger 4 Extensions","Finger / Finger Contact","Proximal Joints","Medial Joints","Distal Joints"]
+conf_list = ["Config-1 Hand-1","Config-1 Hand-2","Config-2 Hand-1","Config-2 Hand-2"]
+
 def delete_last_two(arr):
     return arr[:int(len(arr)-2)]
     
@@ -44,7 +47,6 @@ def mutate_constants(arr):
     return arr
 
 def weird_function(rangestr):
-
     range_arr = rangestr.split("-")
     proto_val = 0
     while int(range_arr[0]) > proto_val or int(range_arr[1]) < proto_val:
@@ -55,22 +57,29 @@ def weird_function(rangestr):
 
     return proto_val
 
-def print_options_get_val():
-    word_val = input("Type in the word you'd like to compare: ")
+def print_options_get_val(dict1,dict2):
+
+    word_val =""
+    while True:
+        try:
+            word_val = input("Type in the word you'd like to compare: ")
+            dict1[word_val]
+            dict2[word_val]
+            break
+        except KeyError:
+            print("Word is not located in excel sheet")
     print("\n")
 
     print("Choose from 4 types of combinations below")
-    conf_list = ["Config-1 Hand-1","Config-1 Hand-2","Config-2 Hand-1","Config-2 Hand-2"]
     numb0 = 0
     for elem in conf_list:
         numb0 += 1
         print(numb0, ".", elem)
     config_val = weird_function("1-4")
-    
+    config_val -=1
     print("\n")
     
     print("Type in a value from 1-19 for the reliability statistic you'd like to view")
-    parts_list = ["All","Forearm","Thumb","Thumb / Finger Contact","Index Finger","Middle Finger","Ring Finger","Pinky Finger","Thumb / Finger Surfaces","Finger Contact","Extensions","Finger 1 Extensions","Finger 2 Extensions","Finger 3 Extensions","Finger 4 Extensions","Finger / Finger Contact","Proximal Joints","Medial Joints","Distal Joints"]
     numb = 0
     for elem in parts_list:
         numb +=1
@@ -100,30 +109,48 @@ def get_range(numb):
         16: [20,25,30],
         17: [4,17,22,27,32],
         18: [18,23,28,33],
-        19: [5,19,24,29,34],
+        19: [5,19,24,29,34]
         
     }
-    return switcher.get(argument, "nothing")
+    return switcher[numb]
 
 
 # word is word
 # config index = [0 for config1hand1] [1 for config1hand2] [2 for config2hand1] [3 for config2hand2]
-def reliability_analysis(word,configindex,dict1,dict2):
-    mutated_arr1 = mutate_constants(dict1[word][configindex])
-    mutated_arr2 = mutate_constants(dict2[word][configindex])
-    word_ch, config_ch, part_ch = print_options_get_val()
-
-    print(word_ch, config_ch, part_ch)
-
+def reliability_analysis(dict1,dict2):
+    word_ch, config_ch, part_ch = print_options_get_val(dict1,dict2)
     
-    
+    mutated_arr1 = ["*"] + mutate_constants(dict1[word_ch][config_ch])
+    mutated_arr2 = ["*"] + mutate_constants(dict2[word_ch][config_ch])
+
+
+    range_list = get_range(part_ch)
+    single_number_list = []
+
+    if (len(range_list) == 3) and ("-" in range_list):
+        single_number_list = list(range(range_list[0],range_list[2]+1))
+    elif len(range_list) != 0:
+        single_number_list = range_list
+
+    dict1_compare_list = []
+    dict2_compare_list = []
+    for ind in single_number_list:
+        dict1_compare_list.append(mutated_arr1[ind])
+        dict2_compare_list.append(mutated_arr2[ind])
+
+    if '*' in dict1_compare_list and dict2_compare_list:
+        dict1_compare_list=list(filter(lambda a: a != "*", dict1_compare_list))
+        dict2_compare_list=list(filter(lambda a: a != "*", dict2_compare_list))
+    print("Word: ",word_ch)
+    print("Configuration: ",conf_list[config_ch])
+    print("Section: ",parts_list[part_ch-1]) 
+    print("\n")
+    print("Reliability = ", (1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100,"%")
 
 first_dict = readMyFile('export_ASL.csv')
 second_dict = readMyFile('export_ASL copy.csv')
-reliability_analysis("1_DOLLAR",0,first_dict,second_dict)
+reliability_analysis(first_dict,second_dict)
 
-#print(np.mean(np.array(first_dict["1_DOLLAR"][0]) != np.array(second_dict["1_DOLLAR"][0])))
-#print(split_arr_fourths(second_dict["1_DOLLAR"]))
 
 
 
