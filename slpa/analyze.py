@@ -29,14 +29,24 @@ def split_arr_fourths(arr):
 def readMyFile(filename):
     word_dict = dict()
     with open(filename,encoding='utf-8') as csvDataFile:
-        csvReader = csv.reader(csvDataFile)
+        csvReader = csv.reader(csvDataFile, skipinitialspace=True,delimiter=',', quoting=csv.QUOTE_NONE)
         next(csvReader)
-        
         for row in csvReader:
             front_removed = row[5:]
             both_removed = front_removed[:len(front_removed)-7]
-            both_removed = split_arr_fourths(both_removed)
-            word_dict[row[0]]=both_removed
+            if len(both_removed) == 144:
+                both_removed = split_arr_fourths(both_removed)
+                word_dict[row[0]]=both_removed
+            if len(both_removed) == 143:
+                both_removed.append("*")
+                both_removed = split_arr_fourths(both_removed)
+                word_dict[row[0]]=both_removed
+            if len(both_removed) > 144:
+                both_removed = both_removed[:144]
+                both_removed = split_arr_fourths(both_removed)
+                word_dict[row[0]]=both_removed
+            else:
+                continue
     return word_dict
 
 def mutate_constants(arr):
@@ -146,6 +156,11 @@ def reliability_analysis(dict1,dict2):
     print("Section: ",parts_list[part_ch-1]) 
     print("\n")
     print("Reliability = ", (1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100,"%")
+
+
+
+
+
 
 first_dict = readMyFile('export_ASL.csv')
 second_dict = readMyFile('export_ASL copy.csv')
