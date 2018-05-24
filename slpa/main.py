@@ -719,6 +719,7 @@ class MainWindow(QMainWindow):
         else:
             updateSigns = False
 
+        #updateParameters = True
 
         if not updateSigns and not updateParameters:
             return
@@ -927,8 +928,8 @@ class MainWindow(QMainWindow):
         if not file_path:
             return None
         self.corpus = load_binary(file_path)
-        self.checkBackwardsComptibility()
         self.corpus.path = file_path
+        self.checkBackwardsComptibility()
         self.setupNewCorpus()
 
     def setupNewCorpus(self):
