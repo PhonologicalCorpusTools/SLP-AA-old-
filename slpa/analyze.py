@@ -160,13 +160,26 @@ def reliability_analysis(dict1,dict2):
     print("\n")
     print("Reliability = ", (1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100,"%")
 
+    print("Do you want to search another word?")
+    print("\n")
+    print("1. Search another word")
+    print("2. Exit")
+    print("\n")
+    do_exit = weird_function("1-2")
+
+    if do_exit == 1:
+        reliability_analysis(dict1,dict2)
+    elif do_exit == 2:
+        exit(0)
+    
 
 
 
 
 
-first_dict = readMyFile('export_ASL.csv')
-second_dict = readMyFile('export_ASL copy.csv')
+
+first_dict = readMyFile('Sample/export_ASL.csv')
+second_dict = readMyFile('Sample/export_ASL copy.csv')
 reliability_analysis(first_dict,second_dict)
 
 
