@@ -1582,8 +1582,9 @@ class MainWindow(QMainWindow):
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
                     print(Sign.headers, file=f)
-                    for word in self.corpus:
-                        print(word.export(**kwargs), file=f)
+                    for sign in self.corpus:
+                        kwargs['sign'] = sign
+                        print(self.getSignDataForExport(**kwargs), file=f)
                 if self.showSaveAlert:
                     QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
             except PermissionError:
@@ -1593,6 +1594,79 @@ class MainWindow(QMainWindow):
                 alert.setText('The file {} is already open in a program on your computer. Please close the file before '
                               'saving, or else choose a different file name.'.format(filename))
                 alert.exec_()
+
+    def getSignDataForExport(self, sign=None, include_fields=True, blank_space='_',
+                             x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
+        def add_fields(self, transcription):
+            transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
+                                                                         ''.join(transcription[1:5]),
+                                                                         ''.join(transcription[5:15]),
+                                                                         ''.join(transcription[15:19]),
+                                                                         ''.join(transcription[19:24]),
+                                                                         ''.join(transcription[24:29]),
+                                                                         ''.join(transcription[29:34]))
+            return transcription
+
+        output = list()
+        output.append(sign.gloss)
+        for config_num in [1, 2]:
+            for hand_num in [1, 2]:
+                hand = getattr(sign, 'config{}hand{}'.format(config_num, hand_num))
+                if hand[0] == '_' or not hand[0]:
+                    hand[0] = blank_space
+                else:
+                    hand[0] = 'V'
+                transcription = [x if x else blank_space for x in hand]
+                transcription[7] = null
+                if transcription[19] == X_IN_BOX:
+                    transcription[19] = x_in_box
+                if transcription[24] == X_IN_BOX:
+                    transcription[24] = x_in_box
+                if transcription[29] == X_IN_BOX:
+                    transcription[29] = x_in_box
+                if include_fields:
+                    transcription = add_fields(transcription)
+                output.append(''.join(transcription))
+
+        for config_num in [1, 2]:
+            for hand_num in [1, 2]:
+                slot_list = getattr(sign, 'config{}hand{}'.format(config_num, hand_num))
+                for slot_num in range(34):
+                    symbol = slot_list[slot_num]
+                    if symbol == X_IN_BOX:
+                        symbol = x_in_box
+                    if symbol == NULL:
+                        symbol = null
+                    output.append(symbol)
+
+                uncertain, estimates = list(), list()
+                key_name = 'config{}hand{}'.format(config_num, hand_num)
+                for i, flag in enumerate(sign.flags[key_name]):
+                    if flag.isUncertain:
+                        uncertain.append(str(i + 1))
+                    if flag.isEstimate:
+                        estimates.append(str(i + 1))
+                uncertain = 'None' if not uncertain else '-'.join(uncertain)
+                estimates = 'None' if not estimates else '-'.join(estimates)
+                output.append(uncertain)
+                output.append(estimates)
+
+        output.append('True' if sign.forearm else 'False')
+        output.append('True' if sign.estimated else 'False')
+        output.append('True' if sign.uncertain else 'False')
+        output.append('True' if sign.incomplete else 'False')
+        output.append('True' if sign.reduplicated else 'False')
+        notes = ''.join([n.replace('\n', '  ') for n in sign.notes])
+        output.append(notes)
+        if parameter_format == 'xml':
+            parameters = sign.parameters.exportXML()
+        elif parameter_format == 'txt':
+            parameters = sign.parameters.exportTree()
+        output.append(parameters)
+
+        output = ','.join(output)
+
+        return output
 
     def importCorpus(self):
         if self.corpus is not None:
