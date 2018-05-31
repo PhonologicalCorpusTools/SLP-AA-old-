@@ -79,11 +79,11 @@ def rotation_from_matrix(matrix):
 def translate_finger_code_to_degrees(finger, hand, Fshape, handShapeParams):
     # flexionDictionary parameters: [proximal, medial, distal] joints
     if hand == 'L':
-        flexionDict = {'H':[30, 15, 10], 'E':[10, 5, 5], 'e': [5, 0, 0], 'i':[-45, -50, -60], 'F':[-80, -90, -75], '_':[0, 0, 0]}
+        flexionDict = {'H':[30, 15, 10], 'E':[10, 5, 5], 'e': [5, 0, 0], 'i':[-35, -40, -50], 'F':[-80, -90, -75], '_':[0, 0, 0]}
         abductDict = {'middle': {'=':0, '<':10, '_':0}, 'ring': {'=':0, '<':10, '_':0}, 'pinky': {'=':0, '<':20, '_':0}}
         rotDict = {'middle': {'=':0, '<':5, '_':0}, 'ring': {'=':0, '<':-5, '_':0}, 'pinky': {'=':0, '<':-10, '_':0}}
     else:
-        flexionDict = {'H':[-30, -15, -10], 'E':[-10, -5, -5], 'e': [-5, 0, 0], 'i':[45, 50, 60], 'F':[80, 90, 75], '_':[0, 0, 0]}
+        flexionDict = {'H':[-30, -15, -10], 'E':[-10, -5, -5], 'e': [-5, 0, 0], 'i':[35, 40, 50], 'F':[80, 90, 75], '_':[0, 0, 0]}
         abductDict = {'middle': {'=':0, '<':-10, '_':0}, 'ring': {'=':0, '<':-10, '_':0}, 'pinky': {'=':0, '<':-20, '_':0}}
         rotDict = {'middle': {'=':0, '<':5, '_':0}, 	'ring': {'=':0, '<':-5, '_':0}, 'pinky': {'=':0, '<':-10, '_':0}}
 
