@@ -1,6 +1,8 @@
 import sys
 import inspect
 
+
+
 class DistalMedialCorrespondanceConstraint():
     """
     Medial and distal joints must match in flexion.
@@ -209,6 +211,7 @@ def sortMasterList(listItem):
         return 4
 
 
+UnsupportedConstraints = [MajorFeaturesConstraint, SecondHandMovementConstraint]
 MasterConstraintList = inspect.getmembers(sys.modules[__name__], inspect.isclass)
 MasterConstraintList.sort(key=lambda x:x[1].name)
 MasterConstraintList.sort(key=sortMasterList)

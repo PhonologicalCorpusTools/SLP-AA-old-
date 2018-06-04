@@ -128,7 +128,7 @@ class ConstraintsDialog(QDialog):
 
 class ConstraintCheckMessageBox(QDialog):
 
-    def __init__(self, constraints, configTabs, featuresLayout):
+    def __init__(self, constraints, configTabs):
         super().__init__()
         self.setWindowTitle('Transcription verification')
         layout = QVBoxLayout()
@@ -173,65 +173,63 @@ class ConstraintCheckMessageBox(QDialog):
         self.page_maximum = self.pages.count()
         self.pages.currentChanged.connect(self.changedPage)
 
-        no_problems = True
-        for c in MasterConstraintList:
-            alert_text = list()
-            constraint_text = list()
-            if constraints[c[0]]:
-                no_problems = False
-                tab = ConstraintTab()
-                if c[1].constraint_type == 'transcription':
-                    self.transcriptionsConstraintsTab.addTab(tab, c[1].name)
-                elif c[1].constraint_type == 'simple':
-                    self.simpleConstraintsTab.addTab(tab, c[1].name)
-                elif c[1].constraint_type == 'conditional':
-                    self.conditionalConstraintsTab.addTab(tab, c[1].name)
+        #first, add all of the selected constraints to the stacked widgets
+        # selected_constraints = list()
+        # for c in MasterConstraintList:
+        #     alert_text = list()
+        #     constraint_text = list()
+        #     if constraints[c[0]]:
+        #         selected_constraints.append(c)
+        #         tab = ConstraintTab()
+        #         if c[1].constraint_type == 'transcription':
+        #             self.transcriptionsConstraintsTab.addTab(tab, c[1].name)
+        #         elif c[1].constraint_type == 'simple':
+        #             self.simpleConstraintsTab.addTab(tab, c[1].name)
+        #         elif c[1].constraint_type == 'conditional':
+        #             self.conditionalConstraintsTab.addTab(tab, c[1].name)
+        #             no_problems = True
+        #then check to see if any constraints are actually violated
+        #if they are, then add them to the self.violations set
 
-                if c[1].name == 'Major Features Constraint':
-                    problems = c[1].check(featuresLayout)
-                    if problems:
-                        problems.insert(0,'\n')
-                        constraint_text.append('\n\n'.join(problems))
+        problems = dict()
+        for constraint_name, constraint in MasterConstraintList:
+            if not constraints[constraint_name]:
+                continue
+            if constraint in UnsupportedConstraints:
+                problems[constraint_name] = [(('The constraint "{}" is not supported '
+                                            'in the current version of SLPAnnotator'.format(constraint_name)), constraint)]
+                continue
+            for j in [1,2]:
+                for k in [0,1]:
+                    transcription = 'hand{}Transcription'.format(j)
+                    transcription = getattr(configTabs.widget(k), transcription)
+                    result = constraint.check(transcription.slots)
+                    if result:
+                        handconfig = 'config{}hand{}'.format(k+1, j)
+                        for slot in result.split(', '):
+                            self.violations[handconfig][int(slot)].add(constraint.name)
+                    else:
+                        result = 'This constraint is fully satisfied.'
+                    text = 'Config {}, Hand {}: {}'.format(k+1, j, result)
+                    info = (text, constraint)
+                    try:
+                        problems[constraint_name].append(info)
+                    except (KeyError, AttributeError):
+                        problems[constraint_name] = [info]
 
-                elif c[1].name == 'Second Hand Movement Constraint':
-                    twoHandFeature = featuresLayout.twoHandMovement.currentText()
-                    problems = c[1].check(configTabs.widget(0).hand2Transcription, twoHandFeature)
-                    if problems:
-                        constraint_text.append('\nConfig 1 Hand 2 (no two hand movement specified)')
-                    problems = c[1].check(configTabs.widget(1).hand2Transcription, twoHandFeature)
-                    if problems:
-                        constraint_text.append('\nConfig 2 Hand 2 (no two hand movement specified)')
+        for name,details in problems.items():
+            tab = ConstraintTab()
+            constraint_type = details[-1][-1].constraint_type
+            labeltext = '\n'.join([d[0] for d in details])
+            tab.layout.addWidget(QLabel(labeltext))
+            if constraint_type == 'transcription':
+                self.transcriptionsConstraintsTab.addTab(tab, name)
+            elif constraint_type == 'simple':
+                self.simpleConstraintsTab.addTab(tab, name)
+            elif constraint_type == 'conditional':
+                self.conditionalConstraintsTab.addTab(tab, name)
 
-                else:
-                    for k in [1,2]:
-                        transcription = configTabs.widget(k-1).hand1Transcription.slots
-                        problems = c[1].check(transcription)
-                        if problems:
-                            constraint_text.append('\nConfig {}, Hand 1: {}'.format(k, problems))
-                            slots = [int(x) for x in problems.split(', ')]
-                            handconfig = 'config{}hand1'.format(k)
-                            for s in slots:
-                                self.violations[handconfig][s].add(c[1].name)
-
-                        transcription = configTabs.widget(k-1).hand2Transcription.slots
-                        problems = c[1].check(transcription)
-                        if problems:
-                            constraint_text.append('\nConfig {}, Hand 2: {}'.format(k, problems))
-                            slots = [int(x) for x in problems.split(', ')]
-                            handconfig = 'config{}hand2'.format(k)
-                            for s in slots:
-                                self.violations[handconfig][s].add(c[1].name)
-
-                if constraint_text:
-                    alert_text.append('The following slots are in violation of the {}\n'
-                                      '("{}")\n'.format(c[1].name, c[1].explanation))
-
-                    alert_text.append('\n'.join(constraint_text))
-                    tab.layout.addWidget(QLabel(''.join(alert_text)))
-                else:
-                    tab.layout.addWidget(QLabel(self.satisfied_message.format(c[1].explanation)))
-
-        if no_problems:
+        if not problems:
             layout.addWidget(QLabel('All constraints are satisfied!'))
         else:
             layout.addWidget(self.pages)

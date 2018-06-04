@@ -1,8 +1,10 @@
+.idea/
+*.idea
 *.py[cod]
+/idea
 !requirements.txt
 *.corpus
 *.feature
-.idea/
 *.iml
 *.exe
 *.msi
@@ -21,8 +23,14 @@
 *.doc
 *.iml
 *.keylayout
+*.xml
 *.wav
 *.DS_Store
+*.blend
+*.obj
+*.mtl
+*.3ds
+*.zip
 
 # C extensions
 *.so

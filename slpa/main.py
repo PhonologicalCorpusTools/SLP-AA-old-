@@ -5,6 +5,9 @@ import sys
 import subprocess
 import collections
 import parameters
+import decorators
+import anytree
+import random
 from imports import *
 from handshapes import *
 from lexicon import *
@@ -12,27 +15,18 @@ from binary import *
 from transcriptions import *
 from constraints import *
 from constraintwidgets import *
+from notes import *
+from search import *
+from image import *
+from functional_load import *
+from colour import *
+from constants import GLOBAL_OPTIONS
 from parameterwidgets import ParameterDialog, ParameterTreeModel
 #from slpa import __version__ as currentSLPAversion
 
 __currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
-DEFAULT_MAJOR_LOCATIONS = ['', 'Head', 'Arm', 'Trunk', 'Non-dominant', 'Neutral']
-DEFAULT_MINOR_LOCATIONS = {'':'',
-    'Head': ['Cheek', 'Nose', 'Chin', 'Eye', 'Forehead','Head top', 'Mouth', 'Under chin', 'Upper lip'],
-    'Arm': ['Elbow (back)', 'Elbow (front)', 'Forearm (back)', 'Forearm (front)','Forearm (ulnar)',
-            'Upper arm','Wrist (back)', 'Wrist (front)'],
-    'Trunk': ['Clavicle', 'Hips', 'Neck', 'None specified', 'Shoulder','Torso (bottom)', 'Torso (mid)',
-            'Torso (top)', 'Waist'],
-    'Non-dominant': ['Finger (back)', 'Finger (front)', 'Finger (radial)','Finger (ulnar)', 'Heel',
-            'Palm (front)', 'Palm (back)'],
-    'Neutral': ['Neutral', 'Upper head height', 'Mid head height', 'Low head height', 'Neck height', 'Shoulder height',
-                'Upper torso height', 'Mid torso height', 'Low torso height', 'Waist height']}
-DEFAULT_ONE_HAND_MOVEMENTS = ['','Arc', 'Circular','Straight','Back and forth', 'Multiple', 'Hold']
-DEFAULT_TWO_HAND_MOVEMENTS = ['', 'N/A', 'Hold', 'Alternating', 'Simaultaneous']
-DEFAULT_ORIENTATIONS = ['','Front', 'Back', 'Side', 'Up', 'Down']
-DEFAULT_DISLOCATIONS = ['', 'None', 'Right', 'Left']
 
 
 class QApplicationMessaging(QApplication):
@@ -81,507 +75,6 @@ class QApplicationMessaging(QApplication):
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
 
-class FeaturesDialog(QDialog):
-
-    def __init__(self, settings, parent=None):
-        super().__init__()
-        self.setWindowTitle('Define major feature values')
-        self.majorLocations = settings[0]
-        self.minorLocations = settings[1]
-        oneHandMovements = settings[2]
-        twoHandMovements = settings[3]
-        orientations = settings[4]
-        dislocations = settings[5]
-
-        layout = QVBoxLayout()
-
-        listLayout = QHBoxLayout()
-
-        majorLocationLayout = QVBoxLayout()
-        self.majorLocationList = QListWidget()
-        for location in sorted(self.majorLocations):
-            if not location:
-                continue
-            self.majorLocationList.addItem(location)
-        addMajorLocationButton = QPushButton('Add major location')
-        addMajorLocationButton.clicked.connect(self.addMajorLocation)
-        removeMajorLocationButton = QPushButton('Remove major location')
-        removeMajorLocationButton.clicked.connect(self.removeMajorLocation)
-        majorLocationLayout.addWidget(self.majorLocationList)
-        majorLocationLayout.addWidget(addMajorLocationButton)
-        majorLocationLayout.addWidget(removeMajorLocationButton)
-
-        minorLocationLayout = QVBoxLayout()
-        self.minorLocationList = QListWidget()
-        major_location = self.majorLocations[0]
-        if major_location not in self.minorLocations:
-            self.minorLocations[major_location] = ['']
-        for location in sorted(self.minorLocations[self.majorLocations[0]]):
-            if not location:
-                continue
-            self.minorLocationList.addItem(location)
-        self.minorLocationList.setCurrentRow(0)
-        addMinorLocationButton = QPushButton('Add minor location')
-        addMinorLocationButton.clicked.connect(self.addMinorLocation)
-        removeMinorLocationButton = QPushButton('Remove minor location')
-        removeMinorLocationButton.clicked.connect(self.removeMinorLocation)
-        minorLocationLayout.addWidget(self.minorLocationList)
-        minorLocationLayout.addWidget(addMinorLocationButton)
-        minorLocationLayout.addWidget(removeMinorLocationButton)
-        self.majorLocationList.currentItemChanged.connect(self.changeMinorList)
-        self.majorLocationList.setCurrentItem(self.majorLocationList.item(0))
-
-        oneHandMovementLayout = QVBoxLayout()
-        self.oneHandMovementList = QListWidget()
-        for oneHandMovement in sorted(oneHandMovements):
-            if not oneHandMovement:
-                continue
-            self.oneHandMovementList.addItem(oneHandMovement)
-        self.oneHandMovementList.setCurrentRow(0)
-        addOneHandMovementButton = QPushButton('Add one hand movement')
-        addOneHandMovementButton.clicked.connect(self.addOneHandMovement)
-        removeOneHandMovementButton = QPushButton('Remove one hand movement')
-        removeOneHandMovementButton.clicked.connect(self.removeOneHandMovement)
-        oneHandMovementLayout.addWidget(self.oneHandMovementList)
-        oneHandMovementLayout.addWidget(addOneHandMovementButton)
-        oneHandMovementLayout.addWidget(removeOneHandMovementButton)
-
-        twoHandMovementLayout = QVBoxLayout()
-        self.twoHandMovementList = QListWidget()
-        for twoHandMovement in sorted(twoHandMovements):
-            if not twoHandMovement:
-                continue
-            self.twoHandMovementList.addItem(twoHandMovement)
-        self.twoHandMovementList.setCurrentRow(0)
-        addTwoHandMovementButton = QPushButton('Add two hand movement')
-        addTwoHandMovementButton.clicked.connect(self.addTwoHandMovement)
-        removeTwoHandMovementButton = QPushButton('Remove two hand movement')
-        removeTwoHandMovementButton.clicked.connect(self.removeTwoHandMovement)
-        twoHandMovementLayout.addWidget(self.twoHandMovementList)
-        twoHandMovementLayout.addWidget(addTwoHandMovementButton)
-        twoHandMovementLayout.addWidget(removeTwoHandMovementButton)
-
-
-        orientationLayout = QVBoxLayout()
-        self.orientationList = QListWidget()
-        for orientation in sorted(orientations):
-            if not orientation:
-                continue
-            self.orientationList.addItem(orientation)
-        self.orientationList.setCurrentRow(0)
-        addOrientationButton = QPushButton('Add orientation')
-        addOrientationButton.clicked.connect(self.addOrientation)
-        removeOrientationButton = QPushButton('Remove orientation')
-        removeOrientationButton.clicked.connect(self.removeOrientation)
-        orientationLayout.addWidget(self.orientationList)
-        orientationLayout.addWidget(addOrientationButton)
-        orientationLayout.addWidget(removeOrientationButton)
-
-        dislocationLayout = QVBoxLayout()
-        self.dislocationList = QListWidget()
-        for dislocation in sorted(dislocations):
-            if not dislocation:
-                continue
-            self.dislocationList.addItem(dislocation)
-        self.dislocationList.setCurrentRow(0)
-        addDislocationButton = QPushButton('Add dislocation')
-        addDislocationButton.clicked.connect(self.addDislocation)
-        removeDislocationButton = QPushButton('Remove dislocation')
-        removeDislocationButton.clicked.connect(self.removeDislocation)
-        dislocationLayout.addWidget(self.dislocationList)
-        dislocationLayout.addWidget(addDislocationButton)
-        dislocationLayout.addWidget(removeDislocationButton)
-
-        listLayout.addLayout(majorLocationLayout)
-        listLayout.addLayout(minorLocationLayout)
-        listLayout.addLayout(oneHandMovementLayout)
-        listLayout.addLayout(twoHandMovementLayout)
-        listLayout.addLayout(orientationLayout)
-        listLayout.addLayout(dislocationLayout)
-
-        layout.addLayout(listLayout)
-
-        buttonLayout = QHBoxLayout()
-        okButton = QPushButton('OK')
-        cancelButton = QPushButton('Cancel')
-        buttonLayout.addWidget(okButton)
-        buttonLayout.addWidget(cancelButton)
-        okButton.clicked.connect(self.accept)
-        cancelButton.clicked.connect(self.reject)
-        restoreDefaultsButtons = QPushButton('Restore defaults')
-        restoreDefaultsButtons.clicked.connect(self.restoreDefaultFeatures)
-        buttonLayout.addWidget(restoreDefaultsButtons)
-        layout.addLayout(buttonLayout)
-
-        self.setLayout(layout)
-
-        self.cannotRemove = QMessageBox()
-        self.cannotRemove.setWindowTitle('Warning')
-        self.cannotRemove.setText('This feature cannot be removed.')
-
-        self.removeWarning = QMessageBox()
-        self.removeWarning.setWindowTitle('Warning')
-        self.removeWarningText = ('This will remove the {} from the list.\n'
-                                 'This may cause problems if any signs in your corpus use this feature.\n'
-                                 'Are you sure?')
-        self.removeWarning.addButton('OK', QMessageBox.AcceptRole)
-        self.removeWarning.addButton('Cancel', QMessageBox.RejectRole)
-
-        self.emptyListWarning = QMessageBox()
-        self.emptyListWarning.setWindowTitle('Warning')
-        self.emptyListWarning.setText(('This feature cannot be deleted. '
-                                      'You must have at least one feature in each list.'))
-
-    def restoreDefaultFeatures(self):
-        alert = QMessageBox()
-        alert.setWindowTitle('Warning')
-        alert.setText('This will remove all current features and restore the default values.\n'
-                      'Are you sure you want to do this?')
-        alert.addButton('OK', QMessageBox.AcceptRole)
-        alert.addButton('Cancel', QMessageBox.RejectRole)
-        alert.exec_()
-        role = alert.buttonRole(alert.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-        #the empty string options are not reset here, in order that they not be displayed in the GUI
-        #instead, empty string are added in the "if result" clause of MainWindow.defineFeatures()
-        self.minorLocations = DEFAULT_MINOR_LOCATIONS
-        self.minorLocations.pop('')
-        self.minorLocationList.clear()
-
-        self.majorLocations = DEFAULT_MAJOR_LOCATIONS[1:]
-        self.majorLocationList.clear()
-        for location in sorted(self.majorLocations):
-            self.majorLocationList.addItem(location)
-        self.majorLocationList.setCurrentRow(0)
-
-        self.oneHandMovements = DEFAULT_ONE_HAND_MOVEMENTS[1:]
-        self.oneHandMovementList.clear()
-        for movement in sorted(self.oneHandMovements):
-            self.oneHandMovementList.addItem(movement)
-        self.oneHandMovementList.setCurrentRow(0)
-
-        self.twoHandMovements = DEFAULT_TWO_HAND_MOVEMENTS[1:]
-        self.twoHandMovementList.clear()
-        for movement in sorted(self.twoHandMovements):
-            self.twoHandMovementList.addItem(movement)
-        self.twoHandMovementList.setCurrentRow(0)
-
-        self.orientations = DEFAULT_ORIENTATIONS[1:]
-        self.orientationList.clear()
-        for orientation in sorted(self.orientations):
-            self.orientationList.addItem(orientation)
-        self.orientationList.setCurrentRow(0)
-
-        self.dislocations = DEFAULT_DISLOCATIONS[1:]
-        self.dislocationList.clear()
-        for dislocation in sorted(self.dislocations):
-            self.dislocationList.addItem(dislocation)
-        self.dislocationList.setCurrentRow(0)
-
-    def changeMinorList(self):
-        selectedMajorFeature = self.majorLocationList.currentItem()
-        if selectedMajorFeature is None:
-            return
-            #this happens when restoring default values
-            #the major list has no items but currentIndexChanged() is still emitted
-        name = selectedMajorFeature.text()
-        self.minorLocationList.clear()
-        try:
-            for location in self.minorLocations[name]:
-                self.minorLocationList.addItem(location)
-            self.minorLocationList.sortItems()
-        except KeyError:
-            self.minorLocationList.clear()
-
-    def addMajorLocation(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.majorLocationList.addItem(name)
-                self.minorLocations[name] = list()
-                self.majorLocationList.setCurrentRow(len(self.majorLocationList)-1)
-                self.majorLocationList.sortItems()
-
-    def removeMajorLocation(self):
-
-        listItems = self.majorLocationList.selectedItems()
-        feature_name = listItems[0].text()
-
-        if not feature_name:
-            self.cannotRemove.exec_()
-            return
-
-        if len(self.majorLocationList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-
-        text = 'the major feature \"{}\" and any associated minor features'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-
-        for item in listItems:
-            self.majorLocationList.takeItem(self.majorLocationList.row(item))
-            try:
-                del self.minorLocations[item.text()]
-            except KeyError:
-                pass
-        self.majorLocationList.sortItems()
-        self.majorLocationList.setCurrentRow(0)
-
-    def addMinorLocation(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.minorLocationList.addItem(name)
-                major = self.majorLocationList.currentItem().text()
-                self.minorLocations[major].append(name)
-                self.minorLocationList.setCurrentRow(len(self.minorLocationList) - 1)
-                self.minorLocationList.sortItems()
-
-    def removeMinorLocation(self):
-        if len(self.minorLocationList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.minorLocationList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the minor location \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-
-        major = selectedMajorFeature = self.majorLocationList.currentItem().text()
-        for item in listItems:
-            self.minorLocationList.takeItem(self.minorLocationList.row(item))
-            self.minorLocations[major].remove(item.text())
-        self.minorLocationList.sortItems()
-        self.minorLocationList.setCurrentRow(0)
-
-
-    def addOneHandMovement(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.oneHandMovementList.addItem(name)
-                self.oneHandMovementList.setCurrentRow(len(self.oneHandMovementList) - 1)
-                self.oneHandMovementList.sortItems()
-
-    def addTwoHandMovement(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.twoHandMovementList.addItem(name)
-                self.twoHandMovementList.setCurrentRow(len(self.twoHandMovementList) - 1)
-                self.twoHandMovementList.sortItems()
-
-    def removeOneHandMovement(self):
-        if len(self.oneHandMovementList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.oneHandMovementList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the one hand movement feature \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-
-        for item in listItems:
-            self.oneHandMovementList.takeItem(self.oneHandMovementList.row(item))
-        self.oneHandMovementList.sortItems()
-        self.oneHandMovementList.setCurrentRow(0)
-
-    def removeTwoHandMovement(self):
-        if len(self.twoHandMovementList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.twoHandMovementList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the two hand movement feature \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-        for item in listItems:
-            self.twoHandMovementList.takeItem(self.twoHandMovementList.row(item))
-        self.twoHandMovementList.sortItems()
-        self.twoHandMovementList.setCurrentRow(0)
-
-    def addOrientation(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.orientationList.addItem(name)
-                self.orientationList.setCurrentRow(len(self.orientationList) - 1)
-                self.orientationList.sortItems()
-
-    def removeOrientation(self):
-        if len(self.orientationList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.orientationList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the orientation feature \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-        for item in listItems:
-            self.orientationList.takeItem(self.orientationList.row(item))
-        self.orientationList.sortItems()
-        self.orientationList.setCurrentRow(0)
-
-    def addDislocation(self):
-        dialog = FeatureEntryDialog()
-        result = dialog.exec_()
-        if result:
-            name = dialog.featureNameEdit.text()
-            if name:
-                self.dislocationList.addItem(name)
-                self.dislocationList.setCurrentRow(len(self.dislocationList) - 1)
-                self.dislocationList.sortItems()
-
-    def removeDislocation(self):
-        if len(self.dislocationList) == 1:
-            self.emptyListWarning.exec_()
-            return
-
-        listItems = self.dislocationList.selectedItems()
-        feature_name = listItems[0].text()
-        text = 'the dislocation feature \"{}\"'.format(feature_name)
-        self.removeWarning.setText(self.removeWarningText.format(text))
-        self.removeWarning.exec_()
-        role = self.removeWarning.buttonRole(self.removeWarning.clickedButton())
-        if role == QMessageBox.RejectRole:
-            return
-
-        for item in listItems:
-            self.dislocationList.takeItem(self.dislocationList.row(item))
-        self.dislocationList.sortItems()
-        self.dislocationList.setCurrentRow(0)
-
-
-
-
-class FeatureEntryDialog(QDialog):
-
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('Enter new feature name')
-        layout = QHBoxLayout()
-        self.featureNameEdit = QLineEdit()
-        self.okButton = QPushButton('OK')
-        self.cancelButton = QPushButton('Cancel')
-        self.okButton.clicked.connect(self.accept)
-        self.cancelButton.clicked.connect(self.reject)
-        layout.addWidget(self.featureNameEdit)
-        layout.addWidget(self.okButton)
-        layout.addWidget(self.cancelButton)
-        self.setLayout(layout)
-
-
-class MajorFeatureLayout(QHBoxLayout):
-
-    def __init__(self, settings):
-        super().__init__()
-
-        self.majorLocations = settings[0]
-        self.minorLocations = settings[1]
-        self.oneHandMovements = settings[2]
-        self.twoHandMovements = settings[3]
-        self.orientations = settings[4]
-        self.dislocations = settings[5]
-        self.setContentsMargins(0,0,0,0)
-        self.major = QComboBox()
-        for location in self.majorLocations:
-            self.major.addItem(location)
-        self.minor = QComboBox()
-        self.oneHandMovement = QComboBox()
-        for movement in self.oneHandMovements:
-            self.oneHandMovement.addItem(movement)
-        self.twoHandMovement = QComboBox()
-        for movement in self.twoHandMovements:
-            self.twoHandMovement.addItem(movement)
-
-        self.orientation = QComboBox()
-        for orientation in self.orientations:
-            self.orientation.addItem(orientation)
-
-        self.dislocation = QComboBox()
-        for dislocation in self.dislocations:
-            self.dislocation.addItem(dislocation)
-
-        self.major.currentIndexChanged.connect(self.changeMinorLocation)
-        self.major.setCurrentIndex(0)
-        self.changeMinorLocation()
-
-        self.addWidget(QLabel('Major Location'))#, 0, 0)
-        self.addWidget(self.major)#, 0, 1)
-        self.addWidget(QLabel('Minor Location'))#, 1, 0)
-        self.addWidget(self.minor)#, 1, 1)
-
-        self.addWidget(QLabel('One Hand Movement'))#, 0, 2)# 2, 0)
-        self.addWidget(self.oneHandMovement)#, 0, 3)#2, 1)
-        self.addWidget(QLabel('Two Hand Movement'))#, 1, 2 )#3, 0)
-        self.addWidget(self.twoHandMovement)#, 1, 3 )#3, 1)
-
-        self.addWidget(QLabel('Orientation'))#, 0, 4)#4, 0)
-        self.addWidget(self.orientation)#, 0, 5)#4, 1)
-        self.addWidget(QLabel('Dislocation'))#, 1, 4)#5, 0)
-        self.addWidget(self.dislocation)#, 1, 5)#5, 1)
-
-        self.addWidget(QLabel())#, 0, 7) #adds a filler item for spacing
-        # self.setColumnStretch(7,1)
-
-
-    def changeMinorLocation(self):
-        majorText = self.major.currentText()
-        if not majorText:
-            #this is an empty string if the major box has just been cleared because the user
-            #updated the FeaturesDialog options
-            #this function is incidentally called during this process because the combo boxes are cleared
-            return
-        self.minor.clear()
-        for location in self.minorLocations[majorText]:
-            self.minor.addItem(location)
-
-    def reset(self):
-        self.major.setCurrentIndex(0)
-        self.minor.setCurrentIndex(0)
-        self.oneHandMovement.setCurrentIndex(0)
-        self.twoHandMovement.setCurrentIndex(0)
-        self.orientation.setCurrentIndex(0)
-        self.dislocation.setCurrentIndex(0)
-
 class ConfigLayout(QGridLayout):
 
     def __init__(self, n, handshapes, hand2):
@@ -591,6 +84,8 @@ class ConfigLayout(QGridLayout):
 
         # self.forearmButton = QCheckBox('1. Forearm')
         # self.addWidget(self.forearmButton, 0, 1)
+        ##do not delete the commented lines above - they may be useful in the future if the
+        ##forearm slot returns to the transcription lines, instead of the global options
         self.addLayout(handshapes, 0, 2)
         self.handShapeMatch = QPushButton('Make Hand 2 = Hand 1')
         self.addWidget(self.handShapeMatch, 1, 0)
@@ -624,43 +119,6 @@ class HandConfigurationNames(QVBoxLayout):
         self.addWidget(QLabel('5. Middle'))
         self.addWidget(QLabel('6. Ring'))
         self.addWidget(QLabel('7. Pinky'))
-
-class HandConfigTab(QWidget):
-
-    def __init__(self, hand_number):
-        QWidget.__init__(self)
-
-        self.configLayout = QGridLayout()
-
-        self.hand1Transcription = TranscriptionLayout(hand=1)
-        self.configLayout.addLayout(self.hand1Transcription, 0, 0)
-        self.hand2Transcription = TranscriptionLayout(hand=2)
-        self.configLayout.addLayout(self.hand2Transcription, 1, 0)
-        self.setLayout(self.configLayout)
-
-    def clearAll(self, clearFlags=False):
-        self.hand1Transcription.clearTranscriptionSlots()
-        self.hand1Transcription.clearViolationLabels()
-        self.hand1Transcription.fillPredeterminedSlots()
-
-        self.hand2Transcription.clearTranscriptionSlots()
-        self.hand2Transcription.clearViolationLabels()
-        self.hand2Transcription.fillPredeterminedSlots()
-
-        if clearFlags:
-            for n in range(2,35):
-                slot = 'slot{}'.format(n)
-                getattr(self.hand1Transcription, slot).removeFlag()
-                getattr(self.hand2Transcription, slot).removeFlag()
-
-    def hand1(self):
-        return self.hand1Transcription.values()
-
-    def hand2(self):
-        return self.hand2Transcription.values()
-
-    def hands(self):
-        return [self.hand1(), self.hand2()]
 
 
 class VideoPlayer(QWidget):
@@ -748,37 +206,6 @@ class VideoPlayer(QWidget):
     def changeMedia(self):
         pass
 
-class HandShapeImage(QLabel):
-
-    def __init__(self, path, reversed=False, parent=None):
-        super().__init__()
-        self.image = QPixmap(path)
-        self.isReversed = False
-        self.setPixmap(self.image)
-        self.mapping = {0: 'hand.png',
-                        1: 'hand.png',
-                        2: 'hand_thumb_selected.png',
-                        3: 'hand_thumb_finger_contact.png',
-                        4: 'hand_index_selected.png',
-                        5: 'hand_middle_selected.png',
-                        6: 'hand_ring_selected.png',
-                        7: 'hand_pinky_selected.png'}
-        self.reversed_mapping = {n:'reversed_'+self.mapping[n] for n in self.mapping}
-        self.mappingChoice = self.mapping
-
-    @Slot(int)
-    def transcriptionSlotChanged(self, e):
-        file_name = 'hand_slot{}.png'.format(e)
-        self.setPixmap(QPixmap(getMediaFilePath(file_name)))
-
-    @Slot(int)
-    def useReverseImage(self, e):
-        self.mappingChoice = self.reversed_mapping
-
-    @Slot(int)
-    def useNormalImage(self, e):
-        self.mappingChoice = self.mapping
-
 class BlenderOutputWindow(QDialog):
 
     def __init__(self, image_name, gloss):
@@ -800,9 +227,14 @@ class CorpusList(QListWidget):
         self.parent = parent
 
     def mousePressEvent(self, event):
+        originalItem =  [i for i in self.selectedItems()][0]
+        super().mousePressEvent(event)
         if event.button() == Qt.LeftButton:
-            if self.parent.askSaveChanges:
-            # if self.askSaveChanges:
+            if self.parent.autoSave:
+                self.parent.saveCorpus(checkForDuplicates=False)
+                selectedItem = [i for i in self.selectedItems()][0]
+                self.itemClicked.emit(selectedItem)
+            elif self.parent.askSaveChanges:
                 alert = QMessageBox()
                 alert.setWindowTitle('Warning')
                 alert.setText('There are unsaved changes to your current entry. What do you want to do?')
@@ -810,25 +242,42 @@ class CorpusList(QListWidget):
                 alert.addButton('Continue but don\'t save', QMessageBox.NoRole)
                 alert.addButton('Go back', QMessageBox.RejectRole)
                 result = alert.exec_()
-                if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole:
+                if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole: #continue and save
                     self.parent.saveCorpus(checkForDuplicates=False)
-                    self.parent.askSaveChanges = False
-                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
-                    # self.parent().askSaveChanges = False
-                    # index = self.indexFromItem(previous_gloss)
-                    # self.corpusList.setCurrentIndex(index)
-                    return
-        super().mousePressEvent(event)
+                    selectedItem = [i for i in self.selectedItems()][0]
+                    self.itemClicked.emit(selectedItem)
+
+                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:# continue but don't save
+                    selectedItem = [i for i in self.selectedItems()][0]
+                    self.itemClicked.emit(selectedItem)
+
+                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole: #go back and edit the gloss
+                    self.setCurrentItem(originalItem)
+                    self.itemClicked.emit(originalItem)
+
+class MergeCorpusMessageBox(QMessageBox):
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Duplicate entry')
+        self.baseText = 'Your current corpus already has a sign called {}.\n\nWhat do you want to do?'
+        self.addButton('Keep the current sign', QMessageBox.AcceptRole)
+        self.addButton('Overwrite with the new sign', QMessageBox.ResetRole)
+        self.alwaysMergeCheckBox = QCheckBox('Do this for all future duplicates')
+        self.setCheckBox(self.alwaysMergeCheckBox)
+
 
 
 class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
+    forearmChecked = Signal(bool)
 
     def __init__(self,app):
         app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
+        self.setContentsMargins(0,0,0,0)
 
         #Set "global" variables
         self.askSaveChanges = False
@@ -837,6 +286,13 @@ class MainWindow(QMainWindow):
         self.createActions()
         self.createMenus()
         self.readSettings()
+        if not self.recentPhraseSearches:
+            self.recentPhraseSearches = list()
+        if not self.recentTranscriptionSearches:
+            self.recentTranscriptionSearches = list()
+        self.recentPhraseSearches = collections.deque(self.recentPhraseSearches, maxlen=self.recentSearchMax)
+        self.recentTranscriptionSearches = collections.deque(self.recentTranscriptionSearches, maxlen=self.recentSearchMax)
+        #these variables are reinitialized because we don't know the maxlen value until after the readSettings() call
 
         self.wrapper = QWidget()#placeholder for central widget in QMainWindow
         self.corpus = None
@@ -859,6 +315,11 @@ class MainWindow(QMainWindow):
         self.saveButton.clicked.connect(self.saveCorpus)
         topLayout.addWidget(self.saveButton)
 
+        #Make delete button
+        self.deleteButton = QPushButton('Delete word from corpus')
+        self.deleteButton.clicked.connect(self.deleteFromCorpus)
+        topLayout.addWidget(self.deleteButton)
+
         # Make "check transcription" button
         self.checkTranscriptionButton = QPushButton('Check transcription')
         self.checkTranscriptionButton.clicked.connect(self.checkTranscription)
@@ -877,6 +338,7 @@ class MainWindow(QMainWindow):
         topLayout.addWidget(self.copyButton)
         topLayout.addWidget(self.pasteButton)
 
+        #Add parameters button
         paramButton = QPushButton('View Parameters')
         paramButton.clicked.connect(self.showParameterTree)
         topLayout.addWidget(paramButton)
@@ -890,19 +352,14 @@ class MainWindow(QMainWindow):
 
         #Make tabs for each configuration
         self.configTabs = QTabWidget()
-        self.configTabs.addTab(HandConfigTab(1), 'Config 1')
-        self.configTabs.addTab(HandConfigTab(2), 'Config 2')
+        self.configTabs.addTab(TranscriptionConfigTab(1), 'Config 1')
+        self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
 
-        # Add major features (location, movement, orientation, dislocation)
-        self.featuresLayout = MajorFeatureLayout([self.majorLocations, self.minorLocations,
-                                                  self.oneHandMovements, self.twoHandMovements,
-                                                  self.orientations, self.dislocations])
-        self.featuresLayout.major.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.minor.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.oneHandMovement.currentTextChanged.connect(self.userMadeChanges)
-        self.featuresLayout.orientation.currentTextChanged.connect(self.userMadeChanges)
-        layout.addLayout(self.featuresLayout)
+        #Add "global" handshape options (as checkboxes)
+        self.globalOptionsLayout = QHBoxLayout()
+        self.setupGlobalOptions()
+        layout.addLayout(self.globalOptionsLayout)
 
         #Make hand image and accompanying info
         self.infoPanel = QHBoxLayout()
@@ -912,10 +369,11 @@ class MainWindow(QMainWindow):
         self.infoPanel.addLayout(self.transcriptionInfo)
         layout.addLayout(self.infoPanel)
 
-
         #Connect transcription signals to various main window slots
         for k in [0,1]:
             self.configTabs.widget(k).hand1Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
+            self.forearmChecked.connect(self.configTabs.widget(k).hand1Transcription.slot1.setChecked)
+
             for slot in self.configTabs.widget(k).hand1Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useNormalImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
@@ -925,6 +383,7 @@ class MainWindow(QMainWindow):
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
             self.configTabs.widget(k).hand2Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
+            self.forearmChecked.connect(self.configTabs.widget(k).hand2Transcription.slot1.setChecked)
             for slot in self.configTabs.widget(k).hand2Transcription.slots[1:]:
                 slot.slotSelectionChanged.connect(self.handImage.useReverseImage)
                 slot.slotSelectionChanged.connect(self.handImage.transcriptionSlotChanged)
@@ -933,42 +392,114 @@ class MainWindow(QMainWindow):
                 slot.slotFlagged.connect(self.userMadeChanges)
                 self.transcriptionRestrictionsChanged.connect(slot.changeValidatorState)
 
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
+
         self.globalLayout.addLayout(layout)
 
         self.wrapper.setLayout(self.globalLayout)
         self.setCentralWidget(self.wrapper)
 
-        self.initParameterTree()
+        self.parameterDialog = None
+        self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
+        self.initCorpusNotes()
+        self.initSignNotes()
         self.makeCorpusDock()
 
         self.showMaximized()
-        self.defineTabOrder()
+        #self.defineTabOrder()
 
-    def initParameterTree(self):
-        #this function should only be called once, when SLP-Annotator is loaded
-        #after that, call parameterDialog.showParameterTree()
-        self.parameterModel = ParameterTreeModel(self.parameters)
-        #this needs to get the total set of parameters
-        #currently it always accepts the default set, but this
-        #should be eventually configurable, and it will have to draw from the user's Settings
-        self.parameterDialog = ParameterDialog(self.parameterModel)
-        #The paramaterDialog is modeless, and merely hides when closed.
-        #this needs to get both the model, and the specific set of parameters for the currently selected word in the corpus
-        #there needs to be room for dealing with words that are not fully specified, or which have not been specified
-        #at all (e.g. newly created words)
-        self.parameterDialog.updateAfterClosing.connect(self.updateParameters)
+    def resizeEvent(self, e):
+        self.showMaximized()
+
+    def setGloss(self, text):
+        self.gloss.glossEdit.setText(text)
+
+    def setBlenderPath(self):
+        dialog = BlenderPathDialog(self.blenderPath)
+        dialog.exec_()
+        if dialog.file_path is None:
+            self.blenderPath = None
+        else:
+            self.blenderPath = os.path.dirname(dialog.file_path)
+
+    def deleteFromCorpus(self):
+        hs = self.currentHandShape()
+        gloss = hs.gloss
+        if self.corpus is None or hs is None or not gloss in self.corpus:
+            alert = QMessageBox()
+            alert.setWindowTitle('Error')
+            alert.setText('The current word has not been saved to the corpus yet, so it cannot be deleted. If you '
+                          'want to clear the main window, click on "New Gloss".')
+            alert.exec_()
+            return
+
+        alert = QMessageBox()
+        alert.setWindowTitle('Warning')
+        alert.setText('Are you sure you want to delete this entry from your corpus? This action cannot be undone.')
+        alert.addButton('Yes, delete it', QMessageBox.YesRole)
+        alert.addButton('No, go back', QMessageBox.NoRole)
+        alert.exec_()
+        if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
+            return
+        else:
+            del self.corpus.wordlist[gloss]
+            for n in range(self.corpusList.count()):
+                item = self.corpusList.item(n)
+                if item.text() == gloss:
+                    goodbye = self.corpusList.takeItem(n)
+                    del goodbye
+                    break
+            save_binary(self.corpus, self.corpus.path)
+            self.newGloss()
+
+    def setupGlobalOptions(self):
+        self.globalOptionsWidgets = list()
+        globalOptionsLabel = QLabel('Global handshape options:')
+        globalOptionsLabel.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.globalOptionsLayout.addWidget(globalOptionsLabel)
+        for option in GLOBAL_OPTIONS:
+            widget = GlobalOptionCheckBox(option.title(), self.userMadeChanges)
+            option += 'CheckBox'
+            setattr(self, option, widget)
+            widget = getattr(self, option)
+            self.globalOptionsLayout.addWidget(widget)
+            self.globalOptionsWidgets.append(widget)
+
+
+    def checkForearm(self):
+        self.forearmChecked.emit(self.forearmCheckBox.isChecked())
+
+    def setupParameterDialog(self, model):
+        try:
+            model = self.corpus[self.currentGloss()].parameters
+            if isinstance(model, anytree.node.Node):
+                raise TypeError
+                #temporary backcompat fix for ASL-Lex corpus
+                #for some reason, parameters in this corpus are anytree.Node objects, instead of ParameterTreeModels
+        except:
+            model = ParameterTreeModel(parameters.defaultParameters)
+
+        if self.parameterDialog is None:
+            self.parameterDialog = ParameterDialog(model)
+            self.parameterDialog.treeWidget.resetChecks()
+        else:
+            self.parameterDialog.close()
+            self.parameterDialog.deleteLater()
+            self.parameterDialog = ParameterDialog(model, checkStrategy='load')
+            self.parameterDialog.treeWidget.loadChecks()
+
+    def currentHandShape(self):
+        kwargs = self.generateKwargs()
+        sign = Sign(kwargs)
+        return sign
+
+    def currentGloss(self):
+        return self.gloss.glossEdit.text()
 
     def showParameterTree(self):
         self.parameterDialog.resize(self.parameterDialog.adjustedWidth, self.parameterDialog.adjustedHeight)
         self.parameterDialog.move(self.parameterDialog.adjustedPos)
         self.parameterDialog.show()
-
-    def updateParameters(self, update, parameters):
-        if not update:
-            return
-        else:
-            self.selectedParameters = parameters
-            self.askSaveChanges = True
 
     def keyPressEvent(self, e):
         key = e.key()
@@ -981,12 +512,8 @@ class MainWindow(QMainWindow):
             super().keyPressEvent(e)
 
     def copyTranscription(self):
-        transcriptions = list()
-        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
-        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
-        dialog = TranscriptionCopyDialog(transcriptions)
+        transcriptions = self.getTranscriptions()
+        dialog = TranscriptionSelectDialog(transcriptions, mode='copy')
         result = dialog.exec_()
         if result:
             self.clipboard = dialog.selectedTranscription
@@ -1007,14 +534,15 @@ class MainWindow(QMainWindow):
         dialog = TranscriptionPasteDialog(self.clipboard, transcriptions)
         result = dialog.exec_()
         if result:
+            include_flags = dialog.includeFlags.isChecked()
             if dialog.transcriptionID == 0:
-                self.configTabs.widget(0).hand1Transcription.updateFromCopy(self.clipboard)
+                self.configTabs.widget(0).hand1Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
             elif dialog.transcriptionID == 1:
-                self.configTabs.widget(0).hand2Transcription.updateFromCopy(self.clipboard)
+                self.configTabs.widget(0).hand2Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
             if dialog.transcriptionID == 2:
-                self.configTabs.widget(1).hand1Transcription.updateFromCopy(self.clipboard)
+                self.configTabs.widget(1).hand1Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
             if dialog.transcriptionID == 3:
-                self.configTabs.widget(1).hand2Transcription.updateFromCopy(self.clipboard)
+                self.configTabs.widget(1).hand2Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
 
     def userMadeChanges(self, e):
         self.askSaveChanges = True
@@ -1064,11 +592,6 @@ class MainWindow(QMainWindow):
                 pass
         self.setTabOrder(self.configTabs.widget(1).hand2Transcription[-2],
                          self.configTabs.widget(1).hand2Transcription[-1])
-        self.setTabOrder(self.configTabs.widget(1).hand2Transcription[-1],
-                         self.featuresLayout.major)
-        self.setTabOrder(self.featuresLayout.major, self.featuresLayout.minor)
-        self.setTabOrder(self.featuresLayout.minor, self.featuresLayout.oneHandMovement)
-        self.setTabOrder(self.featuresLayout.oneHandMovement, self.featuresLayout.orientation)
 
     def writeSettings(self):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
@@ -1078,73 +601,74 @@ class MainWindow(QMainWindow):
             self.settings.setValue(name, self.constraints[name])
         self.settings.endGroup()
 
-        self.settings.beginGroup('transcriptions')
-        self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
-        self.settings.endGroup()
-
         self.settings.beginGroup('parameters')
         self.settings.setValue('parameters', self.parameters)
         self.settings.endGroup()
 
-        self.settings.beginGroup('features')
-        self.settings.setValue('majorLocations', self.majorLocations)
-        self.settings.setValue('minorLocations', self.minorLocations)
-        self.settings.setValue('oneHandMovements', self.oneHandMovements)
-        self.settings.setValue('twoHandMovements', self.twoHandMovements)
-        self.settings.setValue('orientations', self.orientations)
-        self.settings.setValue('dislocations', self.dislocations)
+        self.settings.beginGroup('options')
+        self.settings.setValue('askAboutDuplicates', self.askAboutDuplicatesAct.isChecked())
+        self.settings.setValue('showSaveAlert', self.alertOnCorpusSaveAct.isChecked())
+        self.settings.setValue('parametersAlwaysOnTop', self.keepParametersOnTopAct.isChecked())
+        self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
+        self.settings.setValue('autoSave', self.autoSaveAct.isChecked())
+        self.settings.setValue('blenderPath', self.blenderPath)
         self.settings.endGroup()
 
-    def readSettings(self):
+        self.settings.beginGroup('recentSearches')
+        if not self.recentTranscriptionSearches:
+            self.recentTranscriptionSearches = list()
+        if not self.recentPhraseSearches:
+            self.recentPhraseSearches = list()
+        self.settings.setValue('recentTranscriptionSearches', list(self.recentTranscriptionSearches))
+        self.settings.setValue('recentPhraseSearches', list(self.recentPhraseSearches))
+        self.settings.setValue('recentSearchMax', self.recentSearchMax)
+        self.settings.setValue('transcriptionSearchBlankOption', self.transcriptionSearchBlankOption)
+        self.settings.setValue('transcriptionSearchWildcard', self.transcriptionSearchWildcard)
+        self.settings.endGroup()
+
+    def readSettings(self, reset=False):
         self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
+        if reset:
+            self.settings.clear()
+
         self.settings.beginGroup('constraints')
         for c in MasterConstraintList:
             name = c[0]
             self.constraints[name] = self.settings.value(name, type=bool)
         self.settings.endGroup()
 
-        self.settings.beginGroup('transcriptions')
-        self.restrictedTranscriptions = self.settings.value('restrictedTranscriptions', type=bool)
-        self.setRestrictionsAct.setChecked(self.restrictedTranscriptions)
-        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
-        self.settings.endGroup()
-
         self.settings.beginGroup('parameters')
         self.parameters = self.settings.value('parameters', defaultValue=parameters.defaultParameters)
         self.settings.endGroup()
 
-        self.settings.beginGroup('windows')
-        self.showSaveAlert = self.settings.value('showAlertOnSave', defaultValue = False)
-        self.parametersAlwaysOnTop = self.settings.value('parametersAlwaysOnTop', defaultValue = False)
+        self.settings.beginGroup('options')
+        self.showDuplicateWarning = self.settings.value('showDuplicateWarning', defaultValue=True, type=bool)
+        self.askAboutDuplicatesAct.setChecked(self.showDuplicateWarning)
+        self.showSaveAlert = self.settings.value('showSaveAlert', defaultValue=True, type=bool)
+        self.alertOnCorpusSaveAct.setChecked(self.showSaveAlert)
+        self.parametersAlwaysOnTop = self.settings.value('parametersAlwaysOnTop', defaultValue=True, type=bool)
+        self.keepParametersOnTopAct.setChecked(self.parametersAlwaysOnTop)
+        self.restrictedTranscriptions = self.settings.value('restrictedTranscriptions', type=bool)
+        self.setRestrictionsAct.setChecked(self.restrictedTranscriptions)
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
+        self.autoSave = self.settings.value('autosave', type=bool)
+        self.autoSaveAct.setChecked(self.autoSave)
+        self.blenderPath = self.settings.value('blenderPath')
         self.settings.endGroup()
 
-        self.settings.beginGroup('features')
-        self.majorLocations = self.settings.value('majorLocations', defaultValue=DEFAULT_MAJOR_LOCATIONS)
-        self.minorLocations = self.settings.value('minorLocations', defaultValue=DEFAULT_MINOR_LOCATIONS)
-        self.oneHandMovements = self.settings.value('oneHandMovements', defaultValue=DEFAULT_ONE_HAND_MOVEMENTS)
-        self.twoHandMovements = self.settings.value('twoHandMovements',defaultValue=DEFAULT_TWO_HAND_MOVEMENTS)
-        self.orientations = self.settings.value('orientations', defaultValue=DEFAULT_ORIENTATIONS)
-        self.dislocations = self.settings.value('dislocations', defaultValue=DEFAULT_DISLOCATIONS)
+        self.settings.beginGroup('recentSearches')
+        self.recentTranscriptionSearches = self.settings.value('recentTranscriptionSearches')
+                                                               #defaultValue=list(), type=list)
+        self.recentPhraseSearches = self.settings.value('recentPhraseSearches')
+                                                        #defaultValue=list(), type=list)
+        self.recentSearchMax = self.settings.value('recentSearchMax',
+                                                   defaultValue=10, type=int)
+        self.transcriptionSearchBlankOption = self.settings.value('transcriptionSearchBlankOption')
+        self.transcriptionSearchWildcard = self.settings.value('transcriptionSearchWildcard')
         self.settings.endGroup()
 
+    @decorators.checkForUnsavedChanges
     def closeEvent(self, e):
-        if self.askSaveChanges:
-            alert = QMessageBox()
-            alert.setWindowTitle('Warning')
-            alert.setText('You have unsaved changes that will be lost if you quit.\n What would you like to do?')
-            alert.addButton('Save and quit', QMessageBox.AcceptRole)
-            alert.addButton('Quit without saving' , QMessageBox.RejectRole)
-            alert.addButton('Go back', QMessageBox.NoRole)
-            alert.exec_()
-            role = alert.buttonRole(alert.clickedButton())
-            if role == QMessageBox.AcceptRole:
-                result = self.saveCorpus()
-                if result is None:
-                    return
-            elif role == QMessageBox.RejectRole:
-                pass
-            elif role == QMessageBox.NoRole:
-                return
         self.writeSettings()
         try:
             os.remove(os.path.join(os.getcwd(),'handCode.txt'))
@@ -1153,30 +677,94 @@ class MainWindow(QMainWindow):
         #super().closeEvent(QCloseEvent())
         self.close()
 
-    def checkBackwardsComptibility(self):
+    def copyCorpus(self, path):
+        newCorpus = Corpus({})
+        for word in self.corpus:
+            word.flags = Sign.sign_attributes['flags'].copy()
+            newCorpus.addWord(word)
+        newCorpus.path = path
+        save_binary(newCorpus, newCorpus.path)
+        self.corpus =  load_binary(newCorpus.path)
+
+    def checkForFlags(self):
+        for word in self.corpus:
+            newflags = {k:list() for k in word.flags.keys()}
+            for key,value in word.flags.items():
+                newflags[key] = [Flag(v, False) for v in value]
+                #SET TO UNCERTAIN
+            word.flags = newflags
+
+    def checkBackwardsComptibility(self, forceUpdate=False):
+
+        for attribute, default_value in sorted(Corpus.corpus_attributes.items()):
+            if not hasattr(self.corpus, attribute):
+                setattr(self.corpus, attribute, Corpus.copyValue(Corpus, default_value))
+
         word = self.corpus.randomWord()
-        for attribute in Sign.sign_attributes:
-            if not hasattr(word, attribute):
+
+        oldParameterTreeMethods = dir(word.parameters)
+        currentParameterTreeMethods = dir(ParameterTreeModel)
+        for method in currentParameterTreeMethods:
+            if not method in oldParameterTreeMethods:
+                updateParameters = True
                 break
         else:
+            updateParameters = False
+
+
+        for attribute, default_value in Sign.sign_attributes.items():
+            if not hasattr(word, attribute):
+                updateSigns = True
+                break
+        else:
+            updateSigns = False
+
+        if forceUpdate:
+            updateSigns = True
+            updateParameters = True
+
+        if not updateSigns and not updateParameters:
             return
 
         for word in self.corpus:
-            for attribute, default_value in Sign.sign_attributes.items():
-                if not hasattr(word, attribute):
-                    setattr(word, attribute, default_value)
+            if updateSigns:
+                for attribute, default_value in sorted(Sign.sign_attributes.items()):
+                    if not hasattr(word, attribute):
+                        setattr(word, attribute, Sign.copyValue(Sign, default_value))
+                    if attribute == 'estimated' and hasattr(word, 'partialObscurity'):
+                        word.estimated = word.partialObscurity
+                        del word.partialObscurity
+                    elif attribute == 'forearm' and hasattr(word, 'forearmInvolved'):
+                        word.forearm = word.forearmInvolved
+                        del word.forearmInvolved
+                    elif attribute == 'uncertain' and hasattr(word, 'uncertainCoding'):
+                        word.uncertain = word.uncertainCoding
+                        del word.uncertainCoding
+                    elif attribute == 'incomplete' and hasattr(word, 'incompleteCoding'):
+                        word.incomplete = word.incompleteCoding
+                        del word.incompleteCoding
+                    elif attribute == 'oneHandMovement' and hasattr(word, 'movement'):
+                        word.oneHandMovement = word.movement
+                        del word.movement
+            if updateParameters:
+                try:
+                    params = word.parameters.parameterList
+                    newTree = ParameterTreeModel(params)
+                except AttributeError:#occurs with older copora where ParameterNode and anytree.Nodes are intermixed
+                    newTree = ParameterTreeModel(parameters.defaultParameters)
+                word.parameters = newTree
 
-            if hasattr(word, 'movement'):
-                setattr(word, 'oneHandMovement', word.movement)
-                del word.movement
-
-        self.corpus.path = os.path.join(os.getcwd(), self.corpus.name)
         save_binary(self.corpus, self.corpus.path)
         self.corpus = load_binary(self.corpus.path)
 
+    def getOrCreateCorpusPath(self):
+        if os.path.exists(self.corpus.path):
+            return self.corpus.path
+        else:
+            return os.path.join(os.getcwd(), self.corpus.name)
 
     def checkTranscription(self):
-        dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs, self.featuresLayout)
+        dialog = ConstraintCheckMessageBox(self.constraints, self.configTabs)
         dialog.exec_()
 
         if not dialog.violations:
@@ -1208,40 +796,107 @@ class MainWindow(QMainWindow):
         return
 
     def launchBlender(self):
-        blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
-        if not os.path.exists(blenderPath):
-            blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
-        if not os.path.exists(blenderPath):
-            blenderPath = '~/Applications/blender.app'
-        blenderFile = os.path.join(os.getcwd(), 'handForPCT.blend')
-        blenderScript = os.path.join(os.getcwd(), 'position_hand.py')
+        transcriptions = self.getTranscriptions()
+        dialog = TranscriptionSelectDialog(transcriptions, mode='blender')
+        dialog.exec_()
+        if not dialog.selectedTranscription:
+            return
 
-        code = self.configTabs.widget(0).hand1Transcription.blenderCode()
+        nonstandard = list()
+        for slot in dialog.selectedTranscription:
+            symbol = slot.getText(empty_text='_')
+            if symbol not in STANDARD_SYMBOLS:
+                nonstandard.append(symbol)
 
-        if os.path.exists(os.path.join(os.getcwd(), 'handCode.txt')):
-            #check if the existing code matches the current transcription
-            #if so, just load the most recent image, don't render a second time
-            with open(os.path.join(os.getcwd(), 'handCode.txt'), encoding='utf-8') as file:
-                old_code = file.read()
-                old_code = old_code.strip()
-                print(code)
-                print(old_code)
-            if old_code == code:
-                self.blenderDialog = BlenderOutputWindow('hand_output.png')
-                self.blenderDialog.show()
-                self.blenderDialog.raise_()
-                return
+        if nonstandard:
+            nonstandard = '   '.join(nonstandard)
+            alert = QMessageBox()
+            alert.setWindowTitle('Nonstandard symbols')
+            alert.setText('The transcription you selected contains the following non-standard symbols:\n\n{}\n\n'
+                          'Unfortunately, SLPAnnotator cannot interpret these symbols, and therefore cannot create a '
+                          '3D image of this handshape. Sorry about that!\n\n'
+                          'The accepted "standard" symbols are those found in transcription dropdown boxes and next to '
+                          'the image of the hand. '.format(nonstandard))
+
+            alert.exec_()
+            return
+
+        if self.blenderPath is not None:
+            blenderPath = os.path.join(self.blenderPath, 'blender.exe')
+            blenderPlayerPath = os.path.join(self.blenderPath, 'blenderplayer.exe')
+            if os.path.exists(blenderPath):
+                foundPath = True
+            else:
+                foundPath = False
+        else:
+            foundPath = False
+            if os.path.exists(r'C:\Program Files\Blender Foundation\Blender\blender.exe'):
+                blenderPath = r'C:\Program Files\Blender Foundation\Blender\blender.exe'
+                blenderPlayerPath = r'C:\Program Files\Blender Foundation\Blender\blenderplayer.exe'
+                foundPath = True
+            elif os.path.exists(r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'):
+                blenderPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blender.exe'
+                blenderPlayerPath = r'C:\Program Files (x86)\Blender Foundation\Blender\blenderplayer.exe'
+                foundPath = True
+            elif os.path.exists('/Applications/Blender'):
+                blenderPath = '/Applications/Blender/blender.app/Contents/MacOS/blender'
+                blenderPlayerPath = '/Applications/Blender/blenderplayer.app/Contents/MacOS/blenderplayer'
+                foundPath = True
+            elif os.path.exists(os.path.expanduser('/Applications/Blender')):
+                blenderPath = os.path.expanduser('/Applications/Blender/blender.app/Conents/MacOS/blender')
+                blenderPlayerPath = os.path.expanduser('/Applications/Blender/blenderplayer.app/Contents/MacOS/blenderplayer')
+                foundPath = True
+
+        if not foundPath:
+            alert = QMessageBox()
+            alert.setWindowTitle('Error')
+            alert.setText('Unfortunately, SLPAnnotator could not detect an installation of Blender on your computer. Blender '
+                          'is 3rd party software that SLPAnnotator uses to generate 3D models of hand shapes. You can '
+                          'download Blender for free at www.blender.org/download \n'
+                          'If you already have Blender installed, go to the Transcriptions menu, and click on '
+                          '"Set path to Blender" to tell SLPAnnotator exactly where you have installed it.')
+            alert.exec_()
+            return
+
+        blend = 'rightHand.blend' if dialog.hand == 'R' else 'leftHand.blend'
+        blenderFile = os.path.join(os.getcwd(), blend)
+        blenderScript = os.path.join(os.getcwd(), 'applyHandCode.py')
+
+        if dialog.id in [0,1]:
+            tab = self.configTabs.widget(0)
+        else:
+            tab = self.configTabs.widget(1)
+        if dialog.hand == 'R':
+            attr = 'hand1Transcription'
+        else:
+            attr = 'hand2Transcription'
+
+        code = getattr(tab, attr).blenderCode()
 
         with open(os.path.join(os.getcwd(), 'handCode.txt'), mode='w', encoding='utf-8') as f:
             f.write(code)
 
+        colourDialog = ColourPickerDialog()
+        colourDialog.exec_()
+        handColour = colourDialog.selectedColor()
+
+        colorCodeR = str(float(handColour.red()/255))
+        colorCodeG = str(float(handColour.green()/255))
+        colorCodeB = str(float(handColour.blue()/255))
         proc = subprocess.Popen(
             [blenderPath,
-              blenderFile,
-             # '--background',
-              "--python", blenderScript])
+             blenderFile,
+            '--background',
+            '--python', blenderScript,
+             os.getcwd(), dialog.hand, colorCodeR, colorCodeG, colorCodeB])
         proc.communicate()
-        # self.blenderDialog = BlenderOutputWindow('hand_output.png', self.gloss.glossEdit.text())
+
+        proc = subprocess.Popen(
+            [blenderPlayerPath,
+             '-w',
+             os.path.join(os.getcwd(), 'handImage.blend')])
+        proc.communicate()
+        # self.blenderDialog = BlenderOutputWindow('hand_output.png',self.currentGloss())
         # self.blenderDialog.show()
         # self.blenderDialog.raise_()
 
@@ -1262,47 +917,68 @@ class MainWindow(QMainWindow):
         self.dockLayout = QVBoxLayout()
         self.dockWrapper.setLayout(self.dockLayout)
         self.corpusList = CorpusList(self) #QListWidget(self)
-        self.corpusList.currentItemChanged.connect(self.loadHandShape)
+        #self.corpusList.currentItemChanged.connect(self.loadHandShape)
+        self.corpusList.itemClicked.connect(self.loadHandShape)
         self.dockLayout.addWidget(self.corpusList)
         self.corpusDock.setWidget(self.dockWrapper)
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
-    def loadCorpus(self):
+    def loadCorpus(self, showFileDialog = True):
         file_path = QFileDialog.getOpenFileName(self,
                 'Open Corpus File', os.getcwd(), '*.corpus')
         file_path = file_path[0]
         if not file_path:
             return None
+        self.corpus = load_binary(file_path)
+        self.corpus.path = file_path
+        self.checkBackwardsComptibility()
+        self.setupNewCorpus()
+
+    def setupNewCorpus(self):
         self.askSaveChanges = False
         self.corpusList.clear()
         self.newGloss()
-        self.corpus = load_binary(file_path)
-        self.checkBackwardsComptibility()
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
+
         self.corpusList.sortItems()
+        self.corpusList.setCurrentRow(0)
+        self.corpusList.itemClicked.emit(self.corpusList.currentItem())
+        self.corpusNotes.setText(self.corpus.notes)
+        self.signNotes.setText(self.currentHandShape().notes)
+        save_binary(self.corpus, self.corpus.path)
+        self.showMaximized()
 
-        #self.showMaximized()
+    @decorators.checkForGloss
+    def saveCorpusAs(self, event=None):
+        if self.corpus is None:
+            self.saveCorpus()
+        else:
+            savename = QFileDialog.getSaveFileName(self, 'Save Corpus File As', os.getcwd(), '*.corpus')
+            path = savename[0]
+            if not path:
+                return
+            if not path.endswith('.corpus'):
+                path = path + '.corpus'
+            self.corpus.path = path
+            self.corpus.name = os.path.split(path)[1].split('.')[0]
+            save_binary(self.corpus, path)
+            self.corpus = load_binary(path)
 
-    def saveCorpus(self, event=None, checkForEmptyGloss=True, checkForDuplicates=True):
-        isDuplicate = False
-        if not self.gloss.glossEdit.text() and checkForEmptyGloss:
-            alert = QMessageBox()
-            alert.setWindowTitle('Missing gloss')
-            alert.setText('Please enter a gloss before saving')
-            alert.exec_()
-            return
-
+    @decorators.checkForGloss
+    #@decorators.checkForCorpus
+    def saveCorpus(self, event=None, checkForDuplicates=True, isDuplicate = False):
         kwargs = self.generateKwargs()
         if self.corpus is None:
             alert = QMessageBox()
             alert.setWindowTitle('No corpus loaded')
             alert.setText('You must have a corpus loaded before you can save words. What would you like to do?')
-            alert.addButton('Add this word to an existing corpus', QMessageBox.AcceptRole)
-            alert.addButton('Create a new corpus', QMessageBox.RejectRole)
+            alert.addButton('Create a new corpus', QMessageBox.AcceptRole)
+            alert.addButton('Add this word to an existing corpus', QMessageBox.NoRole)
+
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
-            if role ==  1:#create new corpus
+            if role == QMessageBox.AcceptRole:# create new corpus
                 savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.corpus')
                 path = savename[0]
                 if not path:
@@ -1314,51 +990,49 @@ class MainWindow(QMainWindow):
                 kwargs['name'] = os.path.split(path)[1].split('.')[0]
                 self.corpus = Corpus(kwargs)
 
-            elif role == 0: #load existing corpus and add to it
+            elif role == QMessageBox.NoRole: # load existing corpus and add to it
                 self.loadCorpus()
                 if self.corpus is None:
                     # corpus will be None if the user opened a file dialog, then changed their mind and cancelled
                     return
-
-        else: #corpus exists
-            kwargs['path'] = self.corpus.path
-            kwargs['file_mode'] = 'a'
-            if not checkForDuplicates:
-                isDuplicate = True
-                #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
-                #to save a gloss, under certain circumstances
-            elif kwargs['gloss'] in self.corpus.wordlist:
-                isDuplicate = True
-                alert = QMessageBox()
-                alert.setWindowTitle('Duplicate entry')
-                alert.setText('A word with the gloss {} already exists in your corpus. '
-                                'What do you want to do?'.format(kwargs['gloss']))
-                alert.addButton('Overwrite exising word', QMessageBox.AcceptRole)
-                alert.addButton('Go back and edit the gloss', QMessageBox.RejectRole)
-                alert.exec_()
-                role = alert.buttonRole(alert.clickedButton())
-                if role == QMessageBox.AcceptRole:#overwrite
-                    pass
-                elif role == QMessageBox.RejectRole:#edit
-                    return
-
+        # else: #corpus exists
+        if not checkForDuplicates:
+            isDuplicate = True
+            #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
+            #to save a gloss, under certain circumstances
+        elif kwargs['gloss'] in self.corpus.wordlist and self.showDuplicateWarning:
+            isDuplicate = True
+            alert = QMessageBox()
+            alert.setWindowTitle('Duplicate entry')
+            alert.setText('A word with the gloss {} already exists in your corpus. '
+                            'What do you want to do?'.format(kwargs['gloss']))
+            alert.addButton('Overwrite exising word', QMessageBox.AcceptRole)
+            alert.addButton('Go back and edit the gloss', QMessageBox.RejectRole)
+            alert.exec_()
+            role = alert.buttonRole(alert.clickedButton())
+            if role == QMessageBox.AcceptRole:#overwrite
+                pass
+            elif role == QMessageBox.RejectRole:#edit
+                return
         self.updateCorpus(kwargs, isDuplicate)
-        QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
+        save_binary(self.corpus, self.corpus.path)
+        self.corpus = load_binary(self.corpus.path)
+        if self.showSaveAlert:
+            QMessageBox.information(self, 'Success', 'Corpus successfully updated!')
+        self.askSaveChanges = False
         return True
 
     def updateCorpus(self, kwargs, isDuplicate=False):
         sign = Sign(kwargs)
         self.corpus.addWord(sign)
+        self.corpus.corpusNotes = kwargs['corpusNotes']
         if not isDuplicate:
             self.corpusList.addItem(kwargs['gloss'])
             self.corpusList.sortItems()
-
             for row in range(self.corpusList.count()):
                 if self.corpusList.item(row).text() == kwargs['gloss']:
                     self.corpusList.setCurrentRow(row)
                     break
-        save_binary(self.corpus, kwargs['path'])
-        self.askSaveChanges = False
 
     def newCorpus(self):
         self.corpus = None
@@ -1366,152 +1040,157 @@ class MainWindow(QMainWindow):
         self.corpusList.clear()
         self.askSaveChanges = False
 
-    def loadHandShape(self, gloss, previous_gloss=None):
-        gloss = '' if not gloss else gloss.text()
-        # gloss = gloss.text()
+    def loadHandShape(self, gloss):
+        try:
+            gloss = gloss.text()
+        except AttributeError:
+            if not gloss:
+                gloss = ''
+            #else it's just a string
         sign = self.corpus[gloss]
         self.gloss.setText(sign['gloss'])
+        self.signNotes.setText(sign['signNotes'])
         config1 = self.configTabs.widget(0)
         config2 = self.configTabs.widget(1)
         config1.clearAll()
         config2.clearAll()
 
-        handconfig = 'config1hand1'
-        config1hand1 = sign[handconfig]
-        for slot in config1.hand1Transcription.slots:
-            if slot.num == 1:
-                if config1hand1[0] == '_' or not config1hand1[0]:
-                    slot.setChecked(False)
+        for confignum,handnum in itertools.product([1,2], [1,2]):
+            name = 'config{}hand{}'.format(confignum, handnum)
+            confighand = sign[name]
+            configTab = self.configTabs.widget(confignum-1)
+            transcription = getattr(configTab, 'hand{}Transcription'.format(handnum))
+            for slot in transcription.slots:
+                if slot.num == 1:
+                    if confighand[0] == '_' or not confighand[0]:
+                        slot.setChecked(False)
+                    else:
+                        slot.setChecked(True)
                 else:
-                    slot.setChecked(True)
-            else:
-                text = config1hand1[slot.num-1]
-                slot.setText('' if text == '_' else text)
-                if sign['flags'][handconfig][slot.num-1]:
-                    slot.addFlag()
-                else:
-                    slot.removeFlag()
+                    text = confighand[slot.num - 1]
+                    slot.setText('' if text == '_' else text)
+                    slot.updateFlags(sign.flags[name][slot.num - 1])
 
-        handconfig = 'config1hand2'
-        config1hand2 = sign[handconfig]
-        for slot in config1.hand2Transcription.slots:
-            if slot.num == 1:
-                if config1hand2[0] == '_' or not config1hand2[0]:
-                    slot.setChecked(False)
-                else:
-                    slot.setChecked(True)
-            else:
-                text = config1hand2[slot.num-1]
-                slot.setText('' if text == '_' else text)
-                if sign['flags'][handconfig][slot.num-1]:
-                    slot.addFlag()
-                else:
-                    slot.removeFlag()
-
-
-        handconfig = 'config2hand1'
-        config2hand1 = sign[handconfig]
-        for slot in config2.hand1Transcription.slots:
-            if slot.num == 1:
-                if config2hand1[0] == '_' or not config2hand1[0]:
-                    slot.setChecked(False)
-                else:
-                    slot.setChecked(True)
-            else:
-                text = config2hand1[slot.num-1]
-                slot.setText('' if text == '_' else text)
-                if sign['flags'][handconfig][slot.num-1]:
-                    slot.addFlag()
-                else:
-                    slot.removeFlag()
-
-        handconfig = 'config2hand2'
-        config2hand2 = sign[handconfig]
-        for slot in config2.hand2Transcription.slots:
-            if slot.num == 1:
-                if config2hand2[0] == '_' or not config2hand2[0]:
-                    slot.setChecked(False)
-                else:
-                    slot.setChecked(True)
-            else:
-                text = config2hand2[slot.num-1]
-                slot.setText('' if text == '_' else text)
-                if sign['flags'][handconfig][slot.num-1]:
-                    slot.addFlag()
-                else:
-                    slot.removeFlag()
-
-        for name in ['major', 'minor', 'oneHandMovement', 'twoHandMovement', 'orientation', 'dislocation']:
-            widget = getattr(self.featuresLayout, name)
-            index = widget.findText(sign[name])
-            if index == -1:
-                index = 0
-            widget.setCurrentIndex(index)
+        model = sign.parameters
+        self.setupParameterDialog(model)
+        self.forearmCheckBox.setChecked(sign['forearm'])
+        self.estimatedCheckBox.setChecked(sign['estimated'])
+        self.incompleteCheckBox.setChecked(sign['incomplete'])
+        self.uncertainCheckBox.setChecked(sign['uncertain'])
+        self.reduplicatedCheckBox.setChecked(sign['reduplicated'])
         self.askSaveChanges = False
-        self.parameterDialog.updateSelectedParameters(sign['parameters'])
+        self.showMaximized()
 
     def generateKwargs(self):
         #This is called whenever the corpus is updated/saved
-        kwargs = {'path': None, 'file_mode': None,
+        kwargs = {'path': None,
                 'config1': None, 'config2': None,
-                'major': None, 'minor': None,
-                'oneHandMovement': None, 'twoHandMovement': None,
-                'orientation': None, 'dislocation': None,
-                'flags': None, 'parameters': None}
-        config1 = self.configTabs.widget(0)#.findChildren(TranscriptionLayout)
+                'flags': None, 'parameters': None,
+                'corpusNotes': None, 'signNotes': None,
+                'forearm': False, 'estimated': False,
+                'uncertain': False, 'incomplete': False, 'reduplicated': False}
+
+        config1 = self.configTabs.widget(0)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
 
-        config2 = self.configTabs.widget(1)#.findChildren(TranscriptionLayout)
+        config2 = self.configTabs.widget(1)
         kwargs['config2'] = [config2.hand1(), config2.hand2()]
 
         gloss = self.gloss.glossEdit.text().strip()
         kwargs['gloss'] = gloss
 
-        major = self.featuresLayout.major.currentText()
-        kwargs['major'] = 'None' if not major else major
-
-        minor = self.featuresLayout.minor.currentText()
-        kwargs['minor'] = 'None' if not minor else minor
-
-        oneHandMovement = self.featuresLayout.oneHandMovement.currentText()
-        kwargs['oneHandMovement'] = 'None' if not oneHandMovement else oneHandMovement
-
-        twoHandMovement = self.featuresLayout.twoHandMovement.currentText()
-        kwargs['twoHandMovement'] = 'None' if not twoHandMovement else twoHandMovement
-
-        orientation = self.featuresLayout.orientation.currentText()
-        kwargs['orientation'] = 'None' if not orientation else orientation
-
-        dislocation = self.featuresLayout.dislocation.currentText()
-        kwargs['dislocation'] = 'None' if not dislocation else dislocation
-
-        flags = {'config1hand1': self.configTabs.widget(0).hand1Transcription.flagList,
-                 'config1hand2': self.configTabs.widget(0).hand2Transcription.flagList,
-                 'config2hand1': self.configTabs.widget(1).hand1Transcription.flagList,
-                 'config2hand2': self.configTabs.widget(1).hand2Transcription.flagList}
+        flags = {'config1hand1': self.configTabs.widget(0).hand1Transcription.flags(),
+                 'config1hand2': self.configTabs.widget(0).hand2Transcription.flags(),
+                 'config2hand1': self.configTabs.widget(1).hand1Transcription.flags(),
+                 'config2hand2': self.configTabs.widget(1).hand2Transcription.flags()}
         kwargs['flags'] = flags
-        kwargs['parameters'] = self.parameterDialog.displayTree
+        kwargs['parameters'] = self.parameterDialog.treeWidget.model
+        kwargs['corpusNotes'] = self.corpusNotes.getText()
+        kwargs['signNotes'] = self.signNotes.getText()
+        if not kwargs['signNotes']:
+            kwargs['signNotes'] == 'None'
+        kwargs['forearm'] = self.forearmCheckBox.isChecked()
+        kwargs['estimated'] = self.estimatedCheckBox.isChecked()
+        kwargs['incomplete'] = self.incompleteCheckBox.isChecked()
+        kwargs['uncertain'] = self.uncertainCheckBox.isChecked()
+        kwargs['reduplicated'] = self.reduplicatedCheckBox.isChecked()
         return kwargs
 
+    def overwriteAllGlosses(self):
+        #this is a debugging function and should not normally be called
+        for word in self.corpus:
+            self.loadHandShape(word.gloss)
+            self.saveCorpus()
+
+    def funcLoad(self):
+        if not self.corpus:
+            return 
+        dialog = FunctionalLoadDialog(self.corpus)
+        dialog.exec_()
+        resultsTable = FunctionalLoadResultsTable(dialog.results)
+        resultsTable.exec_()
+
+
     def createMenus(self):
-        self.fileMenu = self.menuBar().addMenu("&Menu")
+        self.fileMenu = self.menuBar().addMenu('&File')
         self.fileMenu.addAction(self.newCorpusAct)
         self.fileMenu.addAction(self.loadCorpusAct)
+        self.fileMenu.addAction(self.mergeCorpusAct)
         self.fileMenu.addAction(self.saveCorpusAct)
+        self.fileMenu.addAction(self.saveCorpusAsAct)
         self.fileMenu.addAction(self.newGlossAct)
         self.fileMenu.addAction(self.exportCorpusAct)
+        self.fileMenu.addAction(self.importCorpusAct)
         self.fileMenu.addAction(self.quitAct)
+
+        self.editMenu = self.menuBar().addMenu('&Edit')
+        self.editMenu.addAction(self.copyAct)
+        self.editMenu.addAction(self.pasteAct)
+        self.editMenu.addAction(self.autofillAct)
 
         self.constraintsMenu = self.menuBar().addMenu('&Constraints')
         self.constraintsMenu.addAction(self.setConstraintsAct)
 
         self.settingsMenu = self.menuBar().addMenu('&Options')
-        self.settingsMenu.addAction(self.setRestrictionsAct)
+        self.settingsMenu.addAction(self.autoSaveAct)
         self.settingsMenu.addAction(self.alertOnCorpusSaveAct)
         self.settingsMenu.addAction(self.keepParametersOnTopAct)
+        self.settingsMenu.addAction(self.askAboutDuplicatesAct)
 
-        # self.featuresMenu = self.menuBar().addMenu('&Features')
-        # self.featuresMenu.addAction(self.defineFeaturesAct)
+        self.transcriptionMenu = self.menuBar().addMenu('&Transcriptions')
+        self.transcriptionMenu.addAction(self.setRestrictionsAct)
+        self.transcriptionMenu.addAction(self.changeTranscriptionFlagsAct)
+        self.transcriptionMenu.addAction(self.setBlenderPathAct)
+
+        self.notesMenu = self.menuBar().addMenu('&Notes')
+        self.notesMenu.addAction(self.addCorpusNotesAct)
+        self.notesMenu.addAction(self.addSignNotesAct)
+
+        self.searchMenu = self.menuBar().addMenu('&Search')
+        self.searchMenu.addAction(self.transcriptionSearchAct)
+        self.searchMenu.addAction(self.phraseSearchAct)
+        self.searchMenu.addAction(self.glossSearchAct)
+        self.searchMenu.addAction(self.funcloadAct)
+
+        if not hasattr(sys, 'frozen'):
+            self.debugMenu = self.menuBar().addMenu('&Debug')
+            self.debugMenu.addAction(self.resetSettingsAct)
+            self.debugMenu.addAction(self.forceCompatibilityUpdateAct)
+            self.debugMenu.addAction(self.printCorpusObjectAct)
+            self.debugMenu.addAction(self.overwriteAllGlossesAct)
+
+    def printCorpusObject(self):
+        if self.corpus is None:
+            print('No corpus loaded')
+        else:
+            print('CORPUS ATTRIBUTES')
+            for key, value in sorted(self.corpus.__dict__.items()):
+                print(key, type(value), value)
+            print('\nWORD ATTRIBUTES')
+            #word = self.corpus.randomWord()
+            word = self.corpus[self.currentGloss()]
+            for key, value in sorted(word.__dict__.items()):
+                print(key, type(value), value)
 
     def alertOnCorpusSave(self):
         if self.alertOnCorpusSaveAct.isChecked():
@@ -1525,10 +1204,246 @@ class MainWindow(QMainWindow):
             self.parameterDialog.show()
         else:
             self.parameterDialog.setWindowFlags(self.parameterDialog.windowFlags() ^ Qt.WindowStaysOnTopHint)
+            self.parameterDialog.hide()
+
+    def resetSettings(self):
+        self.readSettings(reset = True)
+
+    def askAboutDuplicates(self):
+        if self.askAboutDuplicatesAct.isChecked():
+            self.showDuplicateWarning = True
+        else:
+            self.showDuplicateWarning = False
+
+    def setAutoSave(self):
+        if self.autoSaveAct.isChecked():
+            self.autoSave = True
+        else:
+            self.autoSave = False
+
+    def changeTranscriptionFlags(self):
+        config1 = self.configTabs.widget(0)
+        config2 = self.configTabs.widget(1)
+        flags = [config1.hand1Transcription.flags(), config1.hand2Transcription.flags(),
+                 config2.hand1Transcription.flags(), config2.hand2Transcription.flags()]
+        dialog = TranscriptionFlagDialog(flags)
+        dialog.exec_()
+        if dialog.flags is not None:#dialog.flags is None if the user clicked "cancel"
+            self.configTabs.widget(0).hand1Transcription.updateFlags(dialog.flags[0])
+            self.configTabs.widget(0).hand2Transcription.updateFlags(dialog.flags[1])
+            self.configTabs.widget(1).hand1Transcription.updateFlags(dialog.flags[2])
+            self.configTabs.widget(1).hand2Transcription.updateFlags(dialog.flags[3])
+        #for row in dialog.flags:
+            #iterate through the flags and set the appropriate background/border for each transcription slot
+
+    def getTranscriptions(self):
+        transcriptions = list()
+        transcriptions.append(self.configTabs.widget(0).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(0).hand2Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand1Transcription)
+        transcriptions.append(self.configTabs.widget(1).hand2Transcription)
+        return transcriptions
+
+    def searchCorpus(self, searchType = 'transcriptions'):
+        if not self.corpus:
+            alert = QMessageBox()
+            alert.setWindowTitle('No corpus')
+            alert.setText('You have not yet loaded a corpus, so no search can be performed.')
+            alert.exec_()
+            return
+
+        if searchType == 'transcriptions':
+            dialog = TranscriptionSearchDialog(self.corpus, self.recentTranscriptionSearches,
+                                               self.transcriptionSearchBlankOption, self.transcriptionSearchWildcard)
+        elif searchType == 'phrases':
+            dialog = PhraseSearchDialog(self.corpus, self.recentPhraseSearches)
+
+        elif searchType == 'gloss':
+            dialog = GlossSearchDialog(self.corpus)
+
+        dialog.exec_()
+        if not dialog.accepted:
+            return
+
+
+        if searchType == 'transcriptions':
+            matches = self.corpus.regExSearch(dialog.regularExpressions)
+            search = RecentSearch(dialog.transcriptions, dialog.regularExpressions, matches)
+            self.recentTranscriptionSearches.appendleft(search)
+            self.transcriptionSearchBlankOption = dialog.blankValue
+            self.transcriptionSearchWildcard = dialog.wildcard
+        elif searchType == 'phrases':
+            matches = self.corpus.regExSearch(dialog.regularExpressions)
+            search = RecentSearch(dialog.phrases, dialog.regularExpressions, matches)
+            self.recentPhraseSearches.appendleft(search)
+        elif searchType == 'gloss':
+            if dialog.searchWord in self.corpus: #this is a case-insensitive search
+                self.loadHandShape(dialog.searchWord)
+                return
+            else:
+                matches = False
+
+
+        if matches:
+            remove = list()
+            attrs = GLOBAL_OPTIONS
+            for i,match in enumerate(matches):
+                if any(getattr(dialog, attr)!= getattr(match, attr)for attr in attrs):
+                    remove.append(i)
+            matches = [matches[i] for i in range(len(matches)) if not i in remove]
+
+
+            resultsDialog = SearchResultsDialog(matches)
+            resultsDialog.exec_()
+            if resultsDialog.result:
+                self.loadHandShape(resultsDialog.result)
+        else:
+            alert = QMessageBox()
+            alert.setWindowTitle('Search results')
+            alert.setText('No matches were found in your corpus.')
+            alert.exec_()
+
+    def autoFillTranscription(self):
+        dialog = AutoFillDialog()
+        dialog.exec_()
+        if not dialog.accepted:
+            return
+
+        currentTranscriptions = self.getTranscriptions()
+        if any(not t.isEmpty() for t in currentTranscriptions):
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('This autofill operation may overwrite a portion of your existing transcription.')
+            alert.setInformativeText('Do you want to continue?')
+            alert.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+            choice = alert.exec_()
+            if choice == QMessageBox.Cancel:
+                return
+
+        mapping = {'config1hand1': (0, 'hand1Transcription'),
+                   'config1hand2': (0, 'hand2Transcription'),
+                   'config2hand1': (1, 'hand1Transcription'),
+                   'config2hand2': (1, 'hand2Transcription')}
+        for confighand in mapping:
+            widgetnum, attribute_name = mapping[confighand]
+            if any(x is not None for x in dialog.transcriptions[confighand]):
+                current = currentTranscriptions[0]
+                for slot, symbol in enumerate(dialog.transcriptions[confighand]):
+                    if symbol is not None:
+                        getattr(self.configTabs.widget(widgetnum), attribute_name)[slot].setText(symbol)
+
+    def mergeCorpus(self):
+        if self.corpus is None:
+            alert = QMessageBox()
+            alert.setWindowTitle('No corpus loaded')
+            alert.setText('You must have a corpus already loaded in order to merge.')
+            alert.exec_()
+            return
+
+        dialog = MergeCorpusDialog()
+        dialog.exec_()
+
+        if dialog.filename:
+            corpus2 = load_binary(dialog.filename)
+            for sign in corpus2:
+                if sign.gloss in self.corpus:
+                    alert = MergeCorpusMessageBox()
+                    alert.setText(alert.baseText.format(sign.gloss))
+                    alert.exec_()
+                else:
+                    self.corpus.addWord(sign)
+            save_binary(self.corpus, self.corpus.path)
+            currentGloss = self.currentGloss()
+            self.setupNewCorpus()
+
+            for n in range(self.corpusList.count()):
+                item = self.corpusList.item(n)
+                if item.text() == currentGloss:
+                    self.corpusList.setCurrentRow(n)
+                    break
+            else:
+                self.corpusList.setCurrentRow(0)
 
     def createActions(self):
 
-        self.alertOnCorpusSaveAct = QAction('&Alert after saving',
+        self.mergeCorpusAct = QAction('&Merge corpus...',
+                                self,
+                                triggered = self.mergeCorpus)
+
+        self.funcloadAct = QAction('Calculate functional load...',
+                                   self,
+                                   triggered = self.funcLoad)
+
+        self.copyAct = QAction('&Copy a transcription...',
+                              self,
+                              triggered = self.copyTranscription)
+
+        self.pasteAct = QAction('&Paste a transcription...',
+                                self,
+                                triggered = self.pasteTranscription)
+
+        self.autofillAct = QAction('&Autofill transcription slots...',
+                               self,
+                               triggered = self.autoFillTranscription)
+
+        self.glossSearchAct = QAction('Search by &gloss...',
+                                      self,
+                                      triggered = lambda x: self.searchCorpus(searchType = 'gloss'))
+
+        self.transcriptionSearchAct = QAction('Search by &transcription...',
+                                              self,
+                                              triggered = lambda x: self.searchCorpus(searchType = 'transcriptions'))
+
+        self.phraseSearchAct = QAction('Search by descriptive &phrase...',
+                                       self,
+                                       triggered = lambda x: self.searchCorpus(searchType = 'phrases'))
+
+        self.overwriteAllGlossesAct = QAction('Resave all glosses in new style',
+                                              self,
+                                              triggered = self.overwriteAllGlosses)
+
+        self.printCorpusObjectAct = QAction('Print corpus.__dict__',
+                                         self,
+                                         triggered = self.printCorpusObject)
+
+        self.importCorpusAct = QAction('&Import corpus from csv...',
+                                       self,
+                                       statusTip = 'Import from csv file',
+                                       triggered = self.importCorpus)
+
+        self.setBlenderPathAct = QAction('Set path to Blender...',
+                                         self,
+                                         statusTip = 'Set path to Blender',
+                                         triggered = self.setBlenderPath)
+
+        self.changeTranscriptionFlagsAct = QAction('Set transcription &flags...',
+                                                 self,
+                                                 statusTip = 'Change multiple flags at once',
+                                                 triggered = self.changeTranscriptionFlags)
+
+        self.autoSaveAct = QAction('&Autosave',
+                                   self,
+                                   statusTip = 'Always save when moving between words in a corpus',
+                                   checkable = True,
+                                   triggered = self.setAutoSave)
+
+        self.forceCompatibilityUpdateAct = QAction('Force compatibility update',
+                                               self,
+                                               triggered = self.forceComptibilityUpdate)
+
+        self.askAboutDuplicatesAct = QAction('Warn about duplicate glosses',
+                                             self,
+                                             statusTip = 'Ask before overwriting duplicate glosses',
+                                             checkable = True,
+                                             triggered = self.askAboutDuplicates)
+
+        self.resetSettingsAct = QAction('&Reset all settings',
+                                        self,
+                                        statusTip = 'Reset all options and settings to defaults',
+                                        triggered = self.resetSettings)
+
+
+        self.alertOnCorpusSaveAct = QAction('Show save &alert',
                                             self,
                                             statusTip='Show a pop-up window whenever a corpus entry is saved',
                                             checkable = True,
@@ -1547,11 +1462,18 @@ class MainWindow(QMainWindow):
 
         self.loadCorpusAct = QAction( "&Load corpus...",
                 self,
-                statusTip="Load a corpus", triggered=self.loadCorpus)
+                statusTip="Load a corpus",
+                triggered=self.loadCorpus)
 
-        self.saveCorpusAct = QAction( "&Save corpus...",
+        self.saveCorpusAct = QAction( "&Save current word",
                 self,
-                statusTip="Save current corpus", triggered=self.saveCorpus)
+                statusTip="Save current word and update corpus",
+                triggered=self.saveCorpus)
+
+        self.saveCorpusAsAct = QAction("Save corpus &as...",
+                                       self,
+                                       statusTip = "Save current corpus under a new name",
+                                       triggered=self.saveCorpusAs)
 
         self.newGlossAct = QAction('&New gloss',
                 self,
@@ -1562,7 +1484,7 @@ class MainWindow(QMainWindow):
                 self,
                 statusTip="Quit", triggered=self.closeEvent)
 
-        self.exportCorpusAct = QAction('&Export corpus as csv',
+        self.exportCorpusAct = QAction('&Export corpus as csv...',
                                     self,
                                     statusTip='Save corpus as csv for opening as a spreadsheet',
                                     triggered=self.exportCorpus)
@@ -1576,97 +1498,61 @@ class MainWindow(QMainWindow):
                                     self,
                                     statusTip = 'Select (violable) constraints on transcriptions',
                                     triggered = self.setConstraints)
-        # self.defineFeaturesAct = QAction('Edit parameter values...',
-        #                                 self,
-        #                                 statusTip = 'Edit the set of possible handshape parameters',
-        #                                 triggered = self.defineFeatures)
+        self.addCorpusNotesAct = QAction('Edit &corpus notes...',
+                                         self,
+                                         statusTip = 'Open a notepad for information about the corpus',
+                                         triggered = self.addCorpusNotes)
+        self.addSignNotesAct = QAction('Edit &sign notes...',
+                                        self,
+                                       statusTip = 'Open a notepad for information about the current sign',
+                                       triggered = self.addSignNotes)
 
-    def defineFeatures(self):
-        currentMajor = self.featuresLayout.major.currentText()
-        currentMinor = self.featuresLayout.minor.currentText()
-        currentOneHandMovement = self.featuresLayout.oneHandMovement.currentText()
-        currentTwoHandMovement = self.featuresLayout.twoHandMovement.currentText()
-        currentOrientation = self.featuresLayout.orientation.currentText()
-        currentDislocation = self.featuresLayout.dislocation.currentText()
+    def forceComptibilityUpdate(self):
+        file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', os.getcwd(), '*.corpus')
+        file_path = file_path[0]
+        if not file_path:
+            return
+        self.corpus = load_binary(file_path)
+        self.corpus.path = file_path
+        self.checkBackwardsComptibility(forceUpdate=True)
+        save_binary(self.corpus, self.corpus.path)
+        alert = QMessageBox()
+        alert.setText('Corpus updated!')
+        alert.exec_()
 
-        dialog = FeaturesDialog([self.majorLocations, self.minorLocations,
-                                 self.oneHandMovements, self.twoHandMovements,
-                                 self.orientations, self.dislocations])
-        results = dialog.exec_()
-        if results:
 
-            self.featuresLayout.minor.clear()
-            self.minorLocations = dialog.minorLocations
+    def initCorpusNotes(self):
+        self.corpusNotes = NotesDialog()
+        if self.corpus is None:
+            title = 'Notes for unnamed corpus'
+        else:
+            title = 'Notes for {} corpus'.format(self.corpus.name)
+        self.corpusNotes.setWindowTitle(title)
 
-            #Empty strings are added here to allow the user to have no feature selected (as opposed to, say, no movement
-            #which is different). These empty strings are used in the "define features" dialog.
-            self.featuresLayout.major.clear()
-            self.majorLocations = list()
-            self.majorLocations.append('')
-            self.featuresLayout.major.addItem('')
-            for index in range(dialog.majorLocationList.count()):
-                item = dialog.majorLocationList.item(index)
-                self.majorLocations.append(item.text())
-                self.featuresLayout.major.addItem(item.text())
+    def initSignNotes(self):
+        self.signNotes = NotesDialog()
+        if self.gloss.text():
+            self.signNotes.setWindowTitle('Notes for the sign {}'.format(self.gloss.text()))
+        else:
+            self.signNotes.setWindowTitle('Notes for an unglossed sign')
 
-            if currentMajor in self.majorLocations:
-                self.featuresLayout.major.setCurrentText(currentMajor)
-                self.featuresLayout.minor.setCurrentText(currentMinor)
-            else:
-                self.featuresLayout.major.setCurrentIndex(0)
-                self.featuresLayout.minor.setCurrentIndex(0)
+    def addCorpusNotes(self):
+        if self.corpus is None:
+            self.corpusNotes.setWindowTitle('Notes for unnamed corpus')
+        else:
+            self.corpusNotes.setWindowTitle('Notes for {} corpus'.format(self.corpus.name))
+        self.corpusNotes.show()
+        self.corpusNotes.raise_()
+        self.askSaveChanges = True
 
-            self.featuresLayout.oneHandMovement.clear()
-            self.oneHandMovements = list()
-            self.oneHandMovements.append('')
-            self.featuresLayout.oneHandMovement.addItem('')
-            for index in range(dialog.oneHandMovementList.count()):
-                item = dialog.oneHandMovementList.item(index)
-                self.oneHandMovements.append(item.text())
-                self.featuresLayout.oneHandMovement.addItem(item.text())
-            if currentOneHandMovement in self.oneHandMovements:
-                self.featuresLayout.oneHandMovement.setCurrentText(currentOneHandMovement)
-            else:
-                self.featuresLayout.oneHandMovement.setCurrentIndex(0)
-
-            self.featuresLayout.twoHandMovement.clear()
-            self.twoHandMovements = list()
-            self.twoHandMovements.append('')
-            self.featuresLayout.twoHandMovement.addItem('')
-            for index in range(dialog.twoHandMovementList.count()):
-                item = dialog.twoHandMovementList.item(index)
-                self.twoHandMovements.append(item.text())
-                self.featuresLayout.twoHandMovement.addItem(item.text())
-            if currentTwoHandMovement in self.twoHandMovements:
-                self.featuresLayout.twoHandMovement.setCurrentText(currentTwoHandMovement)
-            else:
-                self.featuresLayout.twoHandMovement.setCurrentIndex(0)
-
-            self.featuresLayout.orientation.clear()
-            self.orientations = list()
-            self.orientations.append('')
-            self.featuresLayout.orientation.addItem('')
-            for index in range(dialog.orientationList.count()):
-                item = dialog.orientationList.item(index)
-                self.orientations.append(item.text())
-                self.featuresLayout.orientation.addItem(item.text())
-            if currentOrientation in self.orientations:
-                self.featuresLayout.orientation.setCurrentText(currentOrientation)
-            else:
-                self.featuresLayout.orientation.setCurrentIndex(0)
-
-            self.featuresLayout.dislocation.clear()
-            self.dislocations = list()
-            self.dislocations.append('')
-            self.featuresLayout.dislocation.addItem('')
-            for index in range(dialog.dislocationList.count()):
-                item = dialog.dislocationList.item(index)
-                self.dislocations.append(item.text())
-                self.featuresLayout.dislocation.addItem(item.text())
-            if currentDislocation in self.dislocations:
-                self.featuresLayout.dislocation.setCurrentText(currentDislocation)
-            else:
-                self.featuresLayout.dislocation.setCurrentIndex(0)
+    def addSignNotes(self):
+        if self.gloss.text():
+            self.signNotes.setWindowTitle('Notes for the sign {}'.format(self.gloss.text()))
+        else:
+            self.signNotes.setWindowTitle('Notes for an unglossed sign')
+        self.signNotes.show()
+        self.signNotes.raise_()
+        self.askSaveChanges = True
 
     def setConstraints(self):
         dialog = ConstraintsDialog(self.constraints)
@@ -1682,36 +1568,210 @@ class MainWindow(QMainWindow):
 
     def exportCorpus(self):
 
+        if not self.corpus:
+            alert = QMessageBox()
+            alert.setWindowTitle('No corpus')
+            alert.setText('You must save the current word to a corpus before you can export it.')
+            alert.exec_()
+            return
+
         dialog = ExportCorpusDialog()
         results = dialog.exec_()
 
         if results:
             path = dialog.fileNameEdit.text()
             include_fields = dialog.includeFields.isChecked()
-            blank_space = dialog.blankSpaceEdit.text()
+            blank_space = dialog.blankSpaceText
             x_in_box = dialog.xinboxEdit.text()
             null = dialog.nullEdit.text()
             if not blank_space:
                 blank_space = ''
-            kwargs = {'include_fields': include_fields, 'blank_space': blank_space}
+            kwargs = {'include_fields': include_fields,
+                      'blank_space': blank_space,
+                      'parameter_format': dialog.parameterFormat}
             if x_in_box:
                 kwargs['x_in_box'] = x_in_box
             if null:
                 kwargs['null'] = null
-            output = [word.export(**kwargs) for word in self.corpus]
+            #output = [word.export(**kwargs) for word in self.corpus]
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
                     print(Sign.headers, file=f)
-                    for word in output:
-                        print(word, file=f)
-                QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
+                    for sign in self.corpus:
+                        kwargs['sign'] = sign
+                        print(self.getSignDataForExport(**kwargs), file=f)
+                if self.showSaveAlert:
+                    QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
             except PermissionError:
                 filename = os.path.split(path)[-1]
                 alert = QMessageBox()
                 alert.setWindowTitle('Error encountered')
                 alert.setText('The file {} is already open in a program on your computer. Please close the file before '
-                              'saving, or choose a different file name.'.format(filename))
+                              'saving, or else choose a different file name.'.format(filename))
                 alert.exec_()
+
+    def getSignDataForExport(self, sign=None, include_fields=True, blank_space='_',
+                             x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
+        def add_fields(self, transcription):
+            transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
+                                                                         ''.join(transcription[1:5]),
+                                                                         ''.join(transcription[5:15]),
+                                                                         ''.join(transcription[15:19]),
+                                                                         ''.join(transcription[19:24]),
+                                                                         ''.join(transcription[24:29]),
+                                                                         ''.join(transcription[29:34]))
+            return transcription
+
+        output = list()
+        output.append(sign.gloss)
+        for config_num in [1, 2]:
+            for hand_num in [1, 2]:
+                hand = getattr(sign, 'config{}hand{}'.format(config_num, hand_num))
+                if hand[0] == '_' or not hand[0]:
+                    hand[0] = blank_space
+                else:
+                    hand[0] = 'V'
+                transcription = [x if x else blank_space for x in hand]
+                transcription[7] = null
+                if transcription[19] == X_IN_BOX:
+                    transcription[19] = x_in_box
+                if transcription[24] == X_IN_BOX:
+                    transcription[24] = x_in_box
+                if transcription[29] == X_IN_BOX:
+                    transcription[29] = x_in_box
+                if include_fields:
+                    transcription = add_fields(transcription)
+                output.append(''.join(transcription))
+
+        for config_num in [1, 2]:
+            for hand_num in [1, 2]:
+                slot_list = getattr(sign, 'config{}hand{}'.format(config_num, hand_num))
+                for slot_num in range(34):
+                    symbol = slot_list[slot_num]
+                    if symbol == X_IN_BOX:
+                        symbol = x_in_box
+                    if symbol == NULL:
+                        symbol = null
+                    output.append(symbol)
+
+                uncertain, estimates = list(), list()
+                key_name = 'config{}hand{}'.format(config_num, hand_num)
+                for i, flag in enumerate(sign.flags[key_name]):
+                    if flag.isUncertain:
+                        uncertain.append(str(i + 1))
+                    if flag.isEstimate:
+                        estimates.append(str(i + 1))
+                uncertain = 'None' if not uncertain else '-'.join(uncertain)
+                estimates = 'None' if not estimates else '-'.join(estimates)
+                output.append(uncertain)
+                output.append(estimates)
+
+        output.append('True' if sign.forearm else 'False')
+        output.append('True' if sign.estimated else 'False')
+        output.append('True' if sign.uncertain else 'False')
+        output.append('True' if sign.incomplete else 'False')
+        output.append('True' if sign.reduplicated else 'False')
+        notes = ''.join([n.replace('\n', '  ') for n in sign.notes])
+        output.append(notes)
+        if parameter_format == 'xml':
+            parameters = sign.parameters.exportXML()
+        elif parameter_format == 'txt':
+            parameters = sign.parameters.exportTree()
+        output.append(parameters)
+
+        output = ','.join(output)
+
+        return output
+
+    def importCorpus(self):
+        if self.corpus is not None:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText(('You currently have an open corpus, and you will lose any unsaved changes. '
+                            'What would you like to do?'))
+            alert.addButton('Return to corpus', QMessageBox.NoRole)
+            alert.addButton('Continue', QMessageBox.YesRole)
+            alert.exec_()
+            if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
+                return
+        filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from CSV', os.getcwd(), '*.csv')
+        filepath = filepath[0]
+        if not filepath:
+            return
+        filepath, filename = os.path.split(filepath)
+        filename = filename.split('.')[0]
+
+        corpora = [f for f in os.listdir(filepath) if f.endswith('.corpus')]
+        for c in corpora:
+            if c.split('.')[0] == filename:
+                showAlert = True
+                break
+        else:
+            showAlert = False
+
+        if showAlert:
+            alert = QMessageBox()
+            alert.setWindowTitle('Warning')
+            alert.setText('The current folder already contains a corpus called \"{}\". To avoid overwriting this file, '
+                          'your imported corpus will be called \"{}-import\". You can rename your corpus in '
+                          'SLPAnnotator by selecting File > Save as...\n\n'
+                          'What do you want to do?'.format(filename, filename))
+
+            alert.addButton('Import CSV file', QMessageBox.AcceptRole)
+            alert.addButton('Cancel', QMessageBox.RejectRole)
+            alert.exec_()
+            if alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
+                return
+
+        if showAlert:
+            corpus = Corpus({'name':filename+'-import', 'path': os.path.join(filepath, filename+'-1.corpus')})
+        else:
+            corpus = Corpus({'name': filename, 'path':os.path.join(filepath, filename+'.corpus')})
+
+        with open(os.path.join(filepath, filename+'.csv'), mode='r', encoding='utf-8') as f:
+            headers = f.readline().strip()
+            headers = headers.split(',')
+            for line in f:
+                line = line.strip()
+                line = line.split(',')
+                data = {h:l for (h,l) in zip(headers, line)}
+                kwargs = dict()
+                flags = dict()
+                transcriptions = [ [[None for n in range(34)], [None for n in range(34)]],
+                                   [[None for n in range(34)], [None for n in range(34)]] ]
+                for config in [1,2]:
+                    for hand in [1,2]:
+                        for n in range(1,35):
+                            name = 'config{}hand{}slot{}'.format(config, hand, n)
+                            transcriptions[config-1][hand-1][n-1] = data[name]
+                        uncertain = data['config{}hand{}uncertain'.format(config, hand)]
+                        if uncertain == 'None':
+                            uncertain = list()
+                        else:
+                            uncertain = [int(n) for n in uncertain.split('-')]
+                        estimated = data['config{}hand{}estimated'.format(config, hand)]
+                        if estimated == 'None':
+                            estimated = list()
+                        else:
+                            estimated = [int(n) for n in estimated.split('-')]
+                        confighand = 'config{}hand{}'.format(config, hand)
+                        flags[confighand] = [Flag(True if n in uncertain else False, True if n in estimated else False)
+                                             for n in range(34)]
+                kwargs['config1'] = transcriptions[0]
+                kwargs['config2'] = transcriptions[1]
+                kwargs['flags'] = flags
+                kwargs['gloss'] = data['gloss']
+                kwargs['forearm'] = True if data['forearm'] == 'True' else False
+                kwargs['estimated'] = True if data['estimated'] == 'True' else False
+                kwargs['uncertain'] = True if data['uncertain'] == 'True' else False
+                kwargs['incomplete'] = True if data['incomplete'] == 'True' else False
+                kwargs['reduplicated'] = True if data['reduplicated'] == 'True' else False
+                kwargs['parameters'] = ParameterTreeModel(data['parameters'], fromXML=True)
+                kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
+                sign = Sign(kwargs)
+                corpus.addWord(sign)
+        self.corpus = corpus
+        self.setupNewCorpus()
 
     def sizeHint(self):
         sz = QMainWindow.sizeHint(self)
@@ -1732,28 +1792,80 @@ class MainWindow(QMainWindow):
             item = self.__dict__[i]
             clean(item)
 
-    def newGloss(self, clearFlags=False):
-        if self.askSaveChanges:
-            alert = QMessageBox()
-            alert.setWindowTitle('Warning')
-            alert.setText('This will erase the information for the current word, '
-                          'and you will lose any unsaved changes.\n What would you like to do?')
-            alert.addButton('Continue without saving', QMessageBox.AcceptRole)
-            alert.addButton('Go back', QMessageBox.RejectRole)
-            alert.exec_()
-            role = alert.buttonRole(alert.clickedButton())
-            if role == 0:#AcceptRole:
-                pass
-            elif role == 1:#RejectRole
-                return
+    @decorators.checkForUnsavedChanges
+    def newGloss(self, clearFlags=True):
         self.gloss.glossEdit.setText('')
         self.configTabs.widget(0).clearAll(clearFlags=clearFlags)
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
+        self.configTabs.setCurrentIndex(0)
+        self.transcriptionRestrictionsChanged.emit(self.restrictedTranscriptions)
 
-        self.featuresLayout.reset()
         self.parameterDialog.accept()
-        self.initParameterTree()
+        self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
+        self.initSignNotes()
+        for widget in self.globalOptionsWidgets:
+            widget.setChecked(False)
         self.askSaveChanges = False
+        self.showMaximized()
+
+class GlobalOptionCheckBox(QCheckBox):
+
+    def __init__(self, text, slot):
+        super().__init__()
+        self.setText(text)
+        self.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.clicked.connect(slot)
+
+class MergeCorpusDialog(QDialog):
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Merge corpus')
+        layout = QVBoxLayout()
+
+        explanation = QLabel('Select a corpus file to merge into the corpus that you currently have open.\n')
+        layout.addWidget(explanation)
+
+        findLayout = QHBoxLayout()
+        findButton = QPushButton('Select corpus file...')
+        findButton.clicked.connect(self.getFileName)
+        self.fileNameEdit = QLineEdit()
+        findLayout.addWidget(findButton)
+        findLayout.addWidget(self.fileNameEdit)
+        layout.addLayout(findLayout)
+
+        buttonLayout = QHBoxLayout()
+        ok = QPushButton('OK')
+        ok.clicked.connect(self.accept)
+        cancel = QPushButton('Cancel')
+        cancel.clicked.connect(self.reject)
+        buttonLayout.addWidget(ok)
+        buttonLayout.addWidget(cancel)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+    def getFileName(self):
+        filename = QFileDialog.getOpenFileName(self, 'Merge Corpus Files', os.getcwd(), '*.corpus')
+        path = filename[0]
+        if not path:
+            return
+        if not path.endswith('.corpus'):
+            path = path + '.corpus'
+        self.fileNameEdit.setText(path)
+
+    def accept(self):
+        self.filename = self.fileNameEdit.text()
+        if not self.filename:
+            alert = QMessageBox()
+            alert.setWindowTitle('Error')
+            alert.setText('You must select a valid corpus file')
+            alert.exec_()
+            return
+        super().accept()
+
+    def reject(self):
+        self.filename = None
+        super().reject()
 
 class ExportCorpusDialog(QDialog):
 
@@ -1774,22 +1886,60 @@ class ExportCorpusDialog(QDialog):
         layout.addLayout(fileNameLayout)
 
         outputOptionsLayout = QVBoxLayout()
-        blankSpaceLabel = QLabel('\n\nWhich character should be used to represent empty transcription slots?\n'
-                                 'Mouse over the text box for details.')
-        blankSpaceLabel.setWordWrap(True)
-        self.blankSpaceEdit = QLineEdit('')
-        self.blankSpaceEdit.setMaximumWidth(100)
-        self.blankSpaceEdit.setToolTip('If you want empty slots to appear as blank spaces, then type one space.'
-                                  '\nIf you do not want empty slots represented at all in the output, type nothing.')
+
+        blankSpaceLayout = QVBoxLayout()
+        blankSpaceLabel = QLabel('How should empty transcription slots be represented in your output?')
+        # blankSpaceLabel.setWordWrap(True)
+        blankSpaceLayout.addWidget(blankSpaceLabel)
+
+        blankRadioButtonLayout = QHBoxLayout()
+        noBlanksOption = QRadioButton('Do not show empty slots in the output')
+        blankRadioButtonLayout.addWidget(noBlanksOption)
+        blankSpaceOption = QRadioButton('Print a blank space')
+        blankRadioButtonLayout.addWidget(blankSpaceOption)
+        otherBlankOption = QRadioButton('Print this character: ')
+        blankRadioButtonLayout.addWidget(otherBlankOption)
+        otherBlankOption.setChecked(True)
+        self.blankOptionEdit = QLineEdit()
+        self.blankOptionEdit.setMaxLength(1)
+        self.blankOptionEdit.setMaximumWidth(30)
+        self.blankOptionEdit.setText('_')
+        blankRadioButtonLayout.addWidget(self.blankOptionEdit)
+        self.blankOptionButtons = QButtonGroup()
+        self.blankOptionButtons.addButton(noBlanksOption)
+        self.blankOptionButtons.addButton(blankSpaceOption)
+        self.blankOptionButtons.addButton(otherBlankOption)
+        self.blankOptionButtons.setId(noBlanksOption, 0)
+        self.blankOptionButtons.setId(blankSpaceOption, 1)
+        self.blankOptionButtons.setId(otherBlankOption, 2)
+        otherBlankOption.setChecked(True)
+        blankSpaceLayout.addLayout(blankRadioButtonLayout)
 
         self.includeFields = QCheckBox('Include fields in transcription?')
         self.includeFields.setToolTip('If checked, transcriptions will be delimited by square brackets '
                                   'and numbers representing fields.\n'
                                   'If not checked, transcriptions will be one long string.')
 
+        parametersLayout = QVBoxLayout()
+        exportParamsLabel = QLabel('What format should be used for parameters?')
+        parametersLayout.addWidget(exportParamsLabel)
+        parameterOptionsLayout = QHBoxLayout()
+        self.parameterOptions = QButtonGroup()
+        plainTextOption = QRadioButton('plain text')
+        xmlOption = QRadioButton('xml')
+        parameterOptionsLayout.addWidget(plainTextOption)
+        parameterOptionsLayout.addWidget(xmlOption)
+        parameterOptionsLayout.insertSpacing(-1, 100)
+        parametersLayout.addLayout(parameterOptionsLayout)
+        self.parameterOptions.addButton(plainTextOption)
+        self.parameterOptions.addButton(xmlOption)
+        self.parameterOptions.setId(plainTextOption, 0)
+        self.parameterOptions.setId(xmlOption, 1)
+        xmlOption.setChecked(True)
+
         altSymbolsLabel = QLabel('Some programs have trouble displaying the "ultracrossed" symbol (x-in-a-box) and the '
-                            'empty set symbol. If you would like to use alternatives in the output file, you can '
-                            'enter them below.')
+                                 'empty set symbol. If you would like to use alternatives in the output file, you can '
+                                 'enter them below.')
         altSymbolsLabel.setWordWrap(True)
         self.xinboxEdit = QLineEdit('')
         self.xinboxEdit.setMaximumWidth(170)
@@ -1800,12 +1950,18 @@ class ExportCorpusDialog(QDialog):
         self.nullEdit.setPlaceholderText('Alternative empty set symbol')
 
         outputOptionsLayout.addWidget(self.includeFields)
-        outputOptionsLayout.addWidget(blankSpaceLabel)
-        outputOptionsLayout.addWidget(self.blankSpaceEdit)
-
+        outputOptionsLayout.addLayout(blankSpaceLayout)
+        outputOptionsLayout.addLayout(parametersLayout)
         outputOptionsLayout.addWidget(altSymbolsLabel)
         outputOptionsLayout.addWidget(self.xinboxEdit)
         outputOptionsLayout.addWidget(self.nullEdit)
+
+        noteLabel = QLabel('NOTE: If you are exporting a corpus that you want to re-import into SLP-Annotator, you '
+                           'must use the default options (no fields, underscore for blanks, xml parameters, no '
+                           'alternative symbols).')
+        noteLabel.setWordWrap(True)
+        outputOptionsLayout.addWidget(noteLabel)
+
         layout.addLayout(outputOptionsLayout)
 
         buttonLayout = QHBoxLayout()
@@ -1828,6 +1984,31 @@ class ExportCorpusDialog(QDialog):
         self.fileNameEdit.setText(path)
 
     def accept(self):
+        selectedButton = self.blankOptionButtons.checkedButton()
+        id = self.blankOptionButtons.id(selectedButton)
+        if id == 0:
+            self.blankSpaceText = ''
+        elif id == 1:
+            self.blankSpaceText = ' '
+        elif id == 2:
+            if not self.blankOptionEdit.text():
+                alert = QMessageBox()
+                alert.setWindowTitle('Missing information')
+                alert.setText('You selected to replace empty transcription slots with a symbol of your choosing, but no'
+                              ' symbol was typed into the text box. Please enter a symbol, or choose a different'
+                              ' option.')
+                alert.exec_()
+                return
+            else:
+                self.blankSpaceText = self.blankOptionEdit.text()
+
+        selectedButton = self.parameterOptions.checkedButton()
+        id = self.parameterOptions.id(selectedButton)
+        if id == 0:
+            self.parameterFormat = 'txt'
+        else:
+            self.parameterFormat = 'xml'
+
         if os.path.exists(os.path.split(self.fileNameEdit.text())[0]):
             super().accept()
         else:
@@ -1840,6 +2021,63 @@ class ExportCorpusDialog(QDialog):
             alert.setWindowTitle('File name error')
             alert.setText(text)
             alert.exec_()
+
+class BlenderPathDialog(QDialog):
+
+    def __init__(self, current_path=None):
+        super().__init__()
+        self.setWindowTitle('Set path to Blender')
+        label = QLabel('Path to Blender executable: ')
+        self.pathEdit = QLineEdit()
+        if current_path is not None:
+            self.pathEdit.setText(os.path.join(current_path, 'blender.exe'))
+            self.file_path = current_path
+        else:
+            self.file_path = None
+        explore = QPushButton('Find')
+        explore.clicked.connect(self.findPath)
+        explanation = QLabel('Blender is 3rd party software that the Sign Language Phonetic Annotator uses to generate '
+                             '3D models of hand shapes. You can download Blender for free from '
+                             'https://www.blender.org/download/. '
+                             '\n\nYou must download and install Blender in order for '
+                             'the "Visualize Handshape" button to work. This is completely optional, however, and '
+                             'it is not required for the general use of SLPA.\n\n'
+                             'If you have already installed Blender, click the "Find" button above to locate it on '
+                             'your computer. Look for a file called "blender.exe" (Windows) or "blender.app" (Mac). '
+                             'It is typically located in C:\\Program Files\\Blender Foundation\\Blender on Windows, or '
+                             'in /Applications/Blender on Mac.')
+        explanation.setWordWrap(True)
+        font = QFont(FONT_NAME, FONT_SIZE)
+        explanation.setFont(font)
+        topLayout = QHBoxLayout()
+        topLayout.addWidget(label)
+        topLayout.addWidget(self.pathEdit)
+        topLayout.addWidget(explore)
+        midLayout = QHBoxLayout()
+        ok = QPushButton('OK')
+        cancel = QPushButton('Cancel')
+        ok.clicked.connect(self.accept)
+        cancel.clicked.connect(self.reject)
+        midLayout.addWidget(ok)
+        midLayout.addWidget(cancel)
+
+        mainLayout = QVBoxLayout()
+        mainLayout.addLayout(topLayout)
+        mainLayout.addLayout(midLayout)
+        mainLayout.addWidget(explanation)
+        self.setLayout(mainLayout)
+
+    def findPath(self):
+        file_path = QFileDialog.getOpenFileName(self,
+                                                'Find Blender', os.getcwd(), 'blender.exe')
+        file_path = file_path[0]
+        if not file_path:
+            self.file_path = None
+            self.pathEdit.setText('')
+        else:
+            path = os.path.abspath(file_path)
+            self.file_path = path
+            self.pathEdit.setText(path)
 
 def clean(item):
     """Clean up the memory by closing and deleting the item if possible."""
@@ -1858,39 +2096,3 @@ def clean(item):
             item.deleteLater()
         except (RuntimeError, AttributeError): # deleted or no deleteLater method
             pass
-
-def sortData(data):
-    if data == 'gloss':
-        return 0
-    elif data == 'config1':
-        return 1
-    elif data == 'config2':
-        return 2
-    elif data == 'major':
-        return 3
-    elif data == 'minor':
-        return 4
-    elif data == 'oneHandMovement':
-        return 5
-    elif data == 'twoHandMovement':
-        return 6
-    elif data == 'orientation':
-        return 7
-
-def loadcsvCorpus(path):
-    with open(path, mode='r', encoding='utf-8') as file:
-        headers = file.readline().strip().split(',')
-        for line in file:
-            line = line.split(',')
-            data = {headers[n]: line[n] for n in range(len(headers))}
-            button = DataButton(data)
-            button.sendData.connect(self.loadHandShape)
-            self.corpusDock.widget().layout().addWidget(button)
-
-def getMediaFilePath(filename):
-    if hasattr(sys, 'frozen'):
-        dir = os.path.dirname(sys.executable)
-        path = os.path.join(dir, 'media', filename)
-    else:
-        path = os.path.join(os.getcwd(), 'media', filename)
-    return path
