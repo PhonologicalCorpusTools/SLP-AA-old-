@@ -20,6 +20,7 @@ class ParameterTreeWidget(QTreeWidget):
         self.currentItemChanged.connect(self.handleItemChanged)
         self.currentItemChanged.connect(self.parent.updateDisplayTree)
 
+
         for parameter in self.model.tree.children:
             displayNode = anytree.Node(parameter.name, parent=self.parent.displayTree)
             parentWidgetItem = ParameterTreeWidgetItem(self, parameter=parameter)
@@ -32,12 +33,16 @@ class ParameterTreeWidget(QTreeWidget):
     def addChildren(self, parentWidgetItem, parentParameter, displayNode, checkStrategy='defaults'):
         buttonGroup = list()
         appendGroup = False
-
         for c in parentParameter.children:
-            child = ParameterTreeWidgetItem(parentWidgetItem, parameter=c)
+            try:
+                if c.parameter.is_editable:
+                    child = EditableParameterTreeWidgetItem(parentWidgetItem, parameter=c)
+                else:
+                    child = ParameterTreeWidgetItem(parentWidgetItem, parameter=c)
+            except AttributeError:
+                child = ParameterTreeWidgetItem(parentWidgetItem, parameter=c)
             if c.is_leaf:
                 child.setText(0, c.name)
-                child.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 if checkStrategy == 'defaults' and c.parameter.is_default:
                     child.setCheckState(0, Qt.Checked)
                     c.is_checked = True
@@ -126,7 +131,7 @@ class ParameterTreeWidget(QTreeWidget):
         treeResolver = anytree.Resolver('name')
         path = self.makeTreePath(item)
         parameterNode = treeResolver.get(self.model.tree, path)
-        for childNode in parameterNode.children:
+        for i, childNode in enumerate(parameterNode.children):
             if childNode.name == item.text(0):
                 childNode.is_checked = True
             else:
@@ -331,6 +336,7 @@ class ParameterTreeWidgetItem(QTreeWidgetItem):
 
     def __init__(self, parent, parameter=None):
         super().__init__(parent)
+        self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
         self.parameter = parameter
 
     def setData(self, column, role, value):
@@ -341,6 +347,20 @@ class ParameterTreeWidgetItem(QTreeWidgetItem):
             treewidget = self.treeWidget()
             if treewidget is not None:
                 treewidget.itemChecked.emit(self, column)
+
+class EditableParameterTreeWidgetItem(ParameterTreeWidgetItem):
+
+    def __init__(self, parent, parameter=None):
+        super().__init__(parent, parameter)
+        self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsEditable)
+
+        #self.doubleClicked.connect(self.changeName)
+
+    # def changeName(self):
+    #     print(self.text())
+
+
+
 
 class ParameterTreeModel:
 
@@ -422,7 +442,8 @@ class ParameterTreeModel:
             for c in parameter.children:
                 self.addNode(c, newNode)
         else:
-            newNode = ParameterNode(parameters.TerminalParameter(parameter.name, parentNode), parent=parentNode) #anytree.Node(parameter, parent=parentNode)
+            newNode = ParameterNode(parameters.TerminalParameter(parameter.name, parentNode, parameter.is_editable),
+                                    parent=parentNode)
 
     def addNodeFromXML(self, element, parentNode):
         parameter = parameters.getParameterFromXML(element)
@@ -436,7 +457,8 @@ class ParameterTreeModel:
             for subelement in element:
                 self.addNodeFromXML(subelement, newNode)
         else:
-            newNode = ParameterNode(parameters.TerminalParameter(parameter.name, parentNode), parent=parentNode)
+            newNode = ParameterNode(parameters.TerminalParameter(parameter.name, parentNode, parameter.is_editable),
+                                    parent=parentNode)
             if element.attrib['is_default'] == 'True':
                 newNode.is_default = True
             if element.attrib['is_checked'] == 'True':
