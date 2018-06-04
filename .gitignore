@@ -30,6 +30,7 @@
 *.obj
 *.mtl
 *.3ds
+*.zip
 
 # C extensions
 *.so

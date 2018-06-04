@@ -138,11 +138,11 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot5 = TranscriptionSlot(5, 2, '[EeFfHi\\?]', list('HEeiFf?'))
 
         #FIELD 3 (Thumb/Finger Contact)
-        self.slot6 = TranscriptionSlot(6, 3, '[-tfbru\\?]', list('-tfbru?'))
+        self.slot6 = TranscriptionSlot(6, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'])
         self.slot7 = TranscriptionSlot(7, 3, '[-dpM\\?]', list('-dpM?'))
         self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL])
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
-        self.slot10 = TranscriptionSlot(10, 3, '[-tfbru\\?]', list('-tfbru?'))
+        self.slot10 = TranscriptionSlot(10, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'])
         self.slot11 = TranscriptionSlot(11, 3, '[-dmpM\\?]', list('-dmpM?'))
         self.slot12 = TranscriptionSlot(12, 3, '[-1\s\\?]', ['-','1','?'])
         self.slot13 = TranscriptionSlot(13, 3, '[-2\s\\?]', ['-','2','?'])
@@ -285,9 +285,11 @@ class TranscriptionSlot(QLineEdit):
         qregexp = QRegExp(regex)
         qregexp.setCaseSensitivity(Qt.CaseInsensitive)
         self.setValidator(QRegExpValidator(qregexp))
-        if self.num in [20,25,30]:
+        if self.num in [6,10,20,25,30]:
             self.setMaxLength(2)
-            #these slots are the only ones that can contain digraphs, namely 'x+' and 'x-'
+            #these slots are the only ones that can contain digraphs
+            #slots 6 and 10 can contain the digraph 'fr'
+            #slots 20, 25, an 30 can contain the digraphs 'x+' and 'x-'
         else:
             self.setMaxLength(1)
 
@@ -468,7 +470,10 @@ class TranscriptionSlot(QLineEdit):
 
         #everything in slot 6 and slot 10 is lowercase
         elif self.num == 6 or self.num == 10:
-            self.setText(e.text().lower())
+            if key == 70: #Qt.Key_F
+                self.setText('fr')
+            else:
+                self.setText(e.text().lower())
 
         #everything in slot 11 is lowercase, except m/M which can be either upper or lower
         elif self.num == 11:
@@ -649,11 +654,11 @@ class TranscriptionInfo(QGridLayout):
                             3: self.generateSlotDescription(['{', '<', '=', '?']),
                             4: self.generateSlotDescription(FINGER_SYMBOLS),
                             5: self.generateSlotDescription(FINGER_SYMBOLS),
-                            6: self.generateSlotDescription(['-', 't', 'f', 'b', 'r', 'u', '?']),
+                            6: self.generateSlotDescription(['-', 't', 'fr', 'b', 'r', 'u', '?']),
                             7: self.generateSlotDescription(['-', 'd', 'p', 'M', '?']),
                             #8 always null,
                             #9 always forward slash,
-                            10: self.generateSlotDescription(['-', 't', 'f', 'b', 'r']),
+                            10: self.generateSlotDescription(['-', 't', 'fr', 'b', 'r']),
                             11: self.generateSlotDescription(['-', 'd', 'm', 'p', 'M', '?']),
                             12: self.generateSlotDescription(['-', '1', '?']),
                             13: self.generateSlotDescription(['-', '2', '?']),

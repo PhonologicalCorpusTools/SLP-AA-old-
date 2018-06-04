@@ -694,7 +694,7 @@ class MainWindow(QMainWindow):
                 #SET TO UNCERTAIN
             word.flags = newflags
 
-    def checkBackwardsComptibility(self):
+    def checkBackwardsComptibility(self, forceUpdate=False):
 
         for attribute, default_value in sorted(Corpus.corpus_attributes.items()):
             if not hasattr(self.corpus, attribute):
@@ -719,7 +719,9 @@ class MainWindow(QMainWindow):
         else:
             updateSigns = False
 
-        #updateParameters = True
+        if forceUpdate:
+            updateSigns = True
+            updateParameters = True
 
         if not updateSigns and not updateParameters:
             return
@@ -1173,7 +1175,7 @@ class MainWindow(QMainWindow):
         if not hasattr(sys, 'frozen'):
             self.debugMenu = self.menuBar().addMenu('&Debug')
             self.debugMenu.addAction(self.resetSettingsAct)
-            self.debugMenu.addAction(self.forceBackCompatCheckAct)
+            self.debugMenu.addAction(self.forceCompatibilityUpdateAct)
             self.debugMenu.addAction(self.printCorpusObjectAct)
             self.debugMenu.addAction(self.overwriteAllGlossesAct)
 
@@ -1425,10 +1427,9 @@ class MainWindow(QMainWindow):
                                    checkable = True,
                                    triggered = self.setAutoSave)
 
-        self.forceBackCompatCheckAct = QAction('Force &backward compatibility check',
+        self.forceCompatibilityUpdateAct = QAction('Force compatibility update',
                                                self,
-                                               statusTip = 'Check compatibility of current corpus',
-                                               triggered = self.checkBackwardsComptibility)
+                                               triggered = self.forceComptibilityUpdate)
 
         self.askAboutDuplicatesAct = QAction('Warn about duplicate glosses',
                                              self,
@@ -1505,6 +1506,20 @@ class MainWindow(QMainWindow):
                                         self,
                                        statusTip = 'Open a notepad for information about the current sign',
                                        triggered = self.addSignNotes)
+
+    def forceComptibilityUpdate(self):
+        file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', os.getcwd(), '*.corpus')
+        file_path = file_path[0]
+        if not file_path:
+            return
+        self.corpus = load_binary(file_path)
+        self.corpus.path = file_path
+        self.checkBackwardsComptibility(forceUpdate=True)
+        save_binary(self.corpus, self.corpus.path)
+        alert = QMessageBox()
+        alert.setText('Corpus updated!')
+        alert.exec_()
+
 
     def initCorpusNotes(self):
         self.corpusNotes = NotesDialog()
