@@ -26,8 +26,41 @@ def split_arr_fourths(arr):
     
     return [config1hand1,config1hand2,config2hand1,config2hand2]
 
+def initializeRead():
+##    for item in os.listdir("Sample"):
+##        if not item.startswith('.') and os.path.isfile(os.path.join("Sample", item)):
+##            print(item)
+
+    list_of_files = os.listdir("Sample")
+    print(list_of_files)
+    file_counter = 0
+    concat_list = ""
+    for file in list_of_files:
+##        if file.startswith('.'):
+##            print(file)
+##            list_of_files.remove(file)
+##            
+##        elif not file.startswith('.'):
+
+        file_counter += 1
+        concat_list += str(file_counter) + '.' + file + "\n"
+    print(concat_list)
+
+    fileindex1 = input("Choose a number for your first file: ")
+    fileindex2 = input("Choose a number for your second file: ")
+
+    fileindex1 = int(fileindex1)-1
+    fileindex2 = int(fileindex2)-1
+
+    filepath1 = "Sample/" + list_of_files[fileindex1]
+    filepath2 = "Sample/" + list_of_files[fileindex2]
+
+    return filepath1, filepath2
+            
+
 #returns a dictionary with word and a list of 4 elements with all configs and hands
 def readMyFile(filename):
+    
     word_dict = dict()
     with open(filename,encoding='utf-8') as csvDataFile:
         csvReader = csv.reader(csvDataFile, skipinitialspace=True,delimiter=',', quoting=csv.QUOTE_NONE)
@@ -208,15 +241,12 @@ def reliability_analysis(dict1,dict2):
         reliability_analysis(dict1,dict2)
     elif do_exit == 2:
         exit(0)
-    
 
 
 
-
-
-
-first_dict = readMyFile('Sample/export_ASL.csv')
-second_dict = readMyFile('Sample/export_ASL copy.csv')
+filepath1,filepath2 = initializeRead()
+first_dict = readMyFile(filepath1)
+second_dict = readMyFile(filepath2)
 reliability_analysis(first_dict,second_dict)
 
 
