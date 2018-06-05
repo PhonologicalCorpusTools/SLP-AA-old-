@@ -27,23 +27,22 @@ def split_arr_fourths(arr):
     return [config1hand1,config1hand2,config2hand1,config2hand2]
 
 def initializeRead():
-##    for item in os.listdir("Sample"):
-##        if not item.startswith('.') and os.path.isfile(os.path.join("Sample", item)):
-##            print(item)
+
 
     list_of_files = os.listdir("Sample")
+    list_of_files=list(filter(lambda a: a[0] != '.', list_of_files))
+
     print(list_of_files)
+
+    
     file_counter = 0
     concat_list = ""
     for file in list_of_files:
-##        if file.startswith('.'):
-##            print(file)
-##            list_of_files.remove(file)
-##            
-##        elif not file.startswith('.'):
-
         file_counter += 1
         concat_list += str(file_counter) + '.' + file + "\n"
+
+
+
     print(concat_list)
 
     fileindex1 = input("Choose a number for your first file: ")
@@ -245,6 +244,8 @@ def reliability_analysis(dict1,dict2):
 
 
 filepath1,filepath2 = initializeRead()
+print(filepath1)
+print(filepath2)
 first_dict = readMyFile(filepath1)
 second_dict = readMyFile(filepath2)
 reliability_analysis(first_dict,second_dict)
