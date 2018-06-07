@@ -1,8 +1,9 @@
-from imports import *
+from imports import (QTreeWidget, QTreeWidgetItem, Slot, Signal, Qt, QHBoxLayout, QVBoxLayout, QLabel, QDialog,
+                     QTextEdit,QGridLayout, QPushButton, QMessageBox, QAbstractItemModel, QTreeView, QStandardItemModel,
+                     QStandardItem)
 from collections import defaultdict
 from xml.etree.ElementTree import Element as xmlElement, SubElement as xmlSubElement
 from xml.etree import ElementTree as xmlElementTree
-from xml.dom import minidom
 import parameters
 import anytree
 
@@ -30,17 +31,28 @@ class ParameterTreeWidget(QTreeWidget):
 
         self.buttonGroups['Major Location'].extend(self.specialButtons)
 
+    @Slot(str)
+    def updateEditableNames(self, e):
+        print(e)
+
     def addChildren(self, parentWidgetItem, parentParameter, displayNode, checkStrategy='defaults'):
         buttonGroup = list()
         appendGroup = False
+        #first make a TreeWidgetItem
+        #if the associated parameter is a terminal one, make this a checkable item
+        #also, add it to a buttongroup so only one parameter can be checked at time
         for c in parentParameter.children:
             try:
                 if c.parameter.is_editable:
                     child = EditableParameterTreeWidgetItem(parentWidgetItem, parameter=c)
+                    child.nameChanged.connect(self.updateEditableNames)
+                    #self.updateEditableNames.connect(child.nameChanged)
                 else:
                     child = ParameterTreeWidgetItem(parentWidgetItem, parameter=c)
-            except AttributeError:
+            except AttributeError as e:
+                print(e)
                 child = ParameterTreeWidgetItem(parentWidgetItem, parameter=c)
+
             if c.is_leaf:
                 child.setText(0, c.name)
                 if checkStrategy == 'defaults' and c.parameter.is_default:
@@ -336,8 +348,9 @@ class ParameterTreeWidgetItem(QTreeWidgetItem):
 
     def __init__(self, parent, parameter=None):
         super().__init__(parent)
-        self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
         self.parameter = parameter
+        self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+
 
     def setData(self, column, role, value):
         state = self.checkState(column)
@@ -348,18 +361,28 @@ class ParameterTreeWidgetItem(QTreeWidgetItem):
             if treewidget is not None:
                 treewidget.itemChecked.emit(self, column)
 
-class EditableParameterTreeWidgetItem(ParameterTreeWidgetItem):
+class EditableParameterTreeWidgetItem(QTreeWidgetItem):
+
 
     def __init__(self, parent, parameter=None):
-        super().__init__(parent, parameter)
+        super().__init__(parent)
+        self.parameter = parameter
         self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsEditable)
+        self.nameChanged = Signal(str)
 
-        #self.doubleClicked.connect(self.changeName)
+    def setData(self, column, role, value):
+        state = self.checkState(column)
+        super().setData(column, role, value)
+        if (role == Qt.CheckStateRole and
+            state != self.checkState(column)):
+            treewidget = self.treeWidget()
+            if treewidget is not None:
+                treewidget.itemChecked.emit(self, column)
 
-    # def changeName(self):
-    #     print(self.text())
-
-
+    def keyPressEvent(self, key):
+        if key == Qt.Key_Enter or key == Qt.Key_Return:
+            print('enter key pressed')
+            self.nameChanged.emit(self.text(0))
 
 
 class ParameterTreeModel:
