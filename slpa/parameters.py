@@ -7,6 +7,7 @@ class Parameter:
         self.parent = parent
         self.default = default
         self.is_default = is_default
+        self.is_checked = False
         self.children = list()
         self.defaultChild = None
         self.editableChildren = list() if editableChildren is None else editableChildren
@@ -66,6 +67,7 @@ class TerminalParameter:
         self.is_default = True if self.name == parent.default else False
         self.children = tuple()
         self.is_editable = is_editable
+        self.is_checked = True if self.is_default else False
 
     def __str__(self):
         return self.name
@@ -249,3 +251,14 @@ def getParameterFromXML(element):
                 return p
     else:
         raise AttributeError('XML Error: Cannot find parameter {} with parent {}'.format(element.attrib['name']))
+
+# def printChildren(p):
+#     for c in p.children:
+#         print(c, type(c))
+#         if c.children:
+#             printChildren(c)
+
+# for d in defaultParameters:
+#     print(d, type(d))
+#     for c in d.children:
+#         printChildren(c)
