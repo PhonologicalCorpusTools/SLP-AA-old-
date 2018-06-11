@@ -1,6 +1,7 @@
 import csv
 import os
 import numpy as np
+import xlwt
 
 parts_list = ["All","Forearm","Thumb","Thumb / Finger Contact","Index Finger","Middle Finger","Ring Finger","Pinky Finger","Thumb / Finger Surfaces","Finger Contact","Extensions","Finger 1 Extensions","Finger 2 Extensions","Finger 3 Extensions","Finger 4 Extensions","Finger / Finger Contact","Proximal Joints","Medial Joints","Distal Joints","ALL summary of 1-19"]
 conf_list = ["Config-1 Hand-1","Config-1 Hand-2","Config-2 Hand-1","Config-2 Hand-2"]
@@ -26,7 +27,7 @@ def split_arr_fourths(arr):
     
     return [config1hand1,config1hand2,config2hand1,config2hand2]
 
-def initializeRead():
+def initializeReadTwoFiles():
 
 
     list_of_files = os.listdir("Sample")
@@ -55,7 +56,29 @@ def initializeRead():
     filepath2 = "Sample/" + list_of_files[fileindex2]
 
     return filepath1, filepath2
-            
+
+def initializeReadMultiple():
+    list_of_files = os.listdir("Sample")
+    list_of_files=list(filter(lambda a: a[0] != '.', list_of_files))
+
+    file_counter = 0
+    concat_list = ""
+    for file in list_of_files:
+        file_counter += 1
+        concat_list += str(file_counter) + '.' + file + "\n"
+
+
+    print(concat_list)
+    filebaseindex = input("Please choose a base file to compare to: ")
+    filebaseindex = int(filebaseindex)-1
+
+    filebasepath = "Sample/" + list_of_files[filebaseindex]
+    list_of_files.remove(list_of_files[filebaseindex])
+    list_of_files = ["Sample/"+path for path in list_of_files]
+
+    return filebasepath, list_of_files
+    
+
 
 #returns a dictionary with word and a list of 4 elements with all configs and hands
 def readMyFile(filename):
@@ -102,6 +125,7 @@ def weird_function(rangestr):
             print("That wasn't a valid input")
 
     return proto_val
+
 
 def print_options_get_val(dict1,dict2):
 
@@ -243,13 +267,37 @@ def reliability_analysis(dict1,dict2):
 
 
 
-filepath1,filepath2 = initializeRead()
-print(filepath1)
-print(filepath2)
-first_dict = readMyFile(filepath1)
-second_dict = readMyFile(filepath2)
-reliability_analysis(first_dict,second_dict)
+def reliability_analysis_all(dict1, dict2):
+    for word in dict1.keys():
+        for conf in conf_list:
+            ws = wb.add_sheet(word + conf)
+            
+            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+    
+
+
+print("Would you like to: \n1. Compare two values (Print and show in command line) \n2. Compare all files in folder to a base file (Save and show in excel sheet)")
+get_choice = weird_function("1-2")
+
+if get_choice == 1:
+    filepath1,filepath2 = initializeReadTwoFiles()
+    first_dict = readMyFile(filepath1)
+    second_dict = readMyFile(filepath2)
+    reliability_analysis(first_dict,second_dict)
+elif get_choice == 2:
+    wb = xlwt.Workbook()
+
+    filepath, filearray = initializeReadMultiple();
+    base_dict = readMyFile(filepath)
+    for path in filearray:
+        compared_dict = readMyFile(path)
+        reliability_analysis_all(base_dict,compared_dict)
+
+    save_filename = input("What would you like to call this file?: ")
+    wb.save(save_filename + '.xls')
 
 
 
-
+        
+        
