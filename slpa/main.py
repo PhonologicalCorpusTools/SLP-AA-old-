@@ -470,23 +470,19 @@ class MainWindow(QMainWindow):
         self.forearmChecked.emit(self.forearmCheckBox.isChecked())
 
     def setupParameterDialog(self, model):
-        try:
-            model = self.corpus[self.currentGloss()].parameters
-            if isinstance(model, anytree.node.Node):
-                raise TypeError
-                #temporary backcompat fix for ASL-Lex corpus
-                #for some reason, parameters in this corpus are anytree.Node objects, instead of ParameterTreeModels
-        except:
+        currentGloss = self.currentGloss()
+        if self.corpus is not None and currentGloss:
+            model = ParameterTreeModel(self.corpus[currentGloss].parameters)
+        else:
             model = ParameterTreeModel(parameters.defaultParameters)
 
         if self.parameterDialog is None:
             self.parameterDialog = ParameterDialog(model)
-            self.parameterDialog.treeWidget.resetChecks()
+            #self.parameterDialog.reset()
         else:
             self.parameterDialog.close()
             self.parameterDialog.deleteLater()
             self.parameterDialog = ParameterDialog(model, checkStrategy='load')
-            self.parameterDialog.treeWidget.loadChecks()
 
     def currentHandShape(self):
         kwargs = self.generateKwargs()
@@ -931,7 +927,7 @@ class MainWindow(QMainWindow):
             return None
         self.corpus = load_binary(file_path)
         self.corpus.path = file_path
-        self.checkBackwardsComptibility()
+        #self.checkBackwardsComptibility()
         self.setupNewCorpus()
 
     def setupNewCorpus(self):
@@ -1073,11 +1069,15 @@ class MainWindow(QMainWindow):
 
         model = sign.parameters
         self.setupParameterDialog(model)
-        self.forearmCheckBox.setChecked(sign['forearm'])
-        self.estimatedCheckBox.setChecked(sign['estimated'])
-        self.incompleteCheckBox.setChecked(sign['incomplete'])
-        self.uncertainCheckBox.setChecked(sign['uncertain'])
-        self.reduplicatedCheckBox.setChecked(sign['reduplicated'])
+        for option in GLOBAL_OPTIONS:
+            name = option+'CheckBox'
+            widget = getattr(self, name)
+            widget.setChecked(sign[option])
+        # self.forearmCheckBox.setChecked(sign['forearm'])
+        # self.estimatedCheckBox.setChecked(sign['estimated'])
+        # self.incompleteCheckBox.setChecked(sign['incomplete'])
+        # self.uncertainCheckBox.setChecked(sign['uncertain'])
+        # self.reduplicatedCheckBox.setChecked(sign['reduplicated'])
         self.askSaveChanges = False
         self.showMaximized()
 
@@ -1104,16 +1104,18 @@ class MainWindow(QMainWindow):
                  'config2hand1': self.configTabs.widget(1).hand1Transcription.flags(),
                  'config2hand2': self.configTabs.widget(1).hand2Transcription.flags()}
         kwargs['flags'] = flags
-        kwargs['parameters'] = self.parameterDialog.treeWidget.model
+        kwargs['parameters'] = self.parameterDialog.saveParameters()
         kwargs['corpusNotes'] = self.corpusNotes.getText()
         kwargs['signNotes'] = self.signNotes.getText()
         if not kwargs['signNotes']:
             kwargs['signNotes'] == 'None'
-        kwargs['forearm'] = self.forearmCheckBox.isChecked()
-        kwargs['estimated'] = self.estimatedCheckBox.isChecked()
-        kwargs['incomplete'] = self.incompleteCheckBox.isChecked()
-        kwargs['uncertain'] = self.uncertainCheckBox.isChecked()
-        kwargs['reduplicated'] = self.reduplicatedCheckBox.isChecked()
+        for option in GLOBAL_OPTIONS:
+            kwargs[option] = getattr(self, option+'CheckBox').isChecked()
+        # kwargs['forearm'] = self.forearmCheckBox.isChecked()
+        # kwargs['estimated'] = self.estimatedCheckBox.isChecked()
+        # kwargs['incomplete'] = self.incompleteCheckBox.isChecked()
+        # kwargs['uncertain'] = self.uncertainCheckBox.isChecked()
+        # kwargs['reduplicated'] = self.reduplicatedCheckBox.isChecked()
         return kwargs
 
     def overwriteAllGlosses(self):

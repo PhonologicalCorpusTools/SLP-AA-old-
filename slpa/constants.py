@@ -1,4 +1,4 @@
-GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete', 'reduplicated']
+GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete']#, 'reduplicated']
 
 X_IN_BOX = '\u2327'
 

@@ -2,7 +2,7 @@
 import os, re
 from collections import OrderedDict
 from random import choice
-from parameters import defaultParameterTree, defaultParameters
+from parameters import defaultParameters
 from parameterwidgets import ParameterTreeModel
 from transcriptions import Flag
 from constants import GLOBAL_OPTIONS
@@ -98,7 +98,7 @@ class Corpus():
 class Sign():
 
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
-                       'parameters': ParameterTreeModel(defaultParameters),
+                       'parameters': defaultParameters,
                        'flags': {'config1hand1':[Flag(False,False) for n in range(34)],
                                  'config1hand2':[Flag(False,False) for n in range(34)],
                                  'config2hand1':[Flag(False,False) for n in range(34)],

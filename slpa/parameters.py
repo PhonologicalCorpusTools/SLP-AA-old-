@@ -7,7 +7,7 @@ class Parameter:
         self.parent = parent
         self.default = default
         self.is_default = is_default
-        self.is_checked = False
+        self.is_checked = True if is_default else False
         self.children = list()
         self.defaultChild = None
         self.editableChildren = list() if editableChildren is None else editableChildren
@@ -215,12 +215,20 @@ allParameters.extend([HandPart, SigningSpaceZone])
 allParameters.extend(HandPart.children)
 allParameters.extend(SigningSpaceZone.children)
 
+#REDUPLICATION PARAMETERS
+Reduplication = Parameter(name ='Reduplication',
+                          children = ['None', 'Once', 'Twice', 'Multiple', '(Specify)'],
+                          default = 'None',
+                          editableChildren=['(Specify)'])
+allParameters.append(Reduplication)
+allParameters.extend(Reduplication.children)
+
 def getAllParameters():
     return allParameters[:]
 
 MajorLocation.addChildren([SignSpaceLocation, BodyLocation, WeakHandLocation])
 
-defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation]
+defaultParameters = [Quality, MajorMovement, LocalMovement, MajorLocation, Reduplication]
 
 def encodeXMLName(name):
     if name == 0 or name == '0':
@@ -251,14 +259,3 @@ def getParameterFromXML(element):
                 return p
     else:
         raise AttributeError('XML Error: Cannot find parameter {} with parent {}'.format(element.attrib['name']))
-
-# def printChildren(p):
-#     for c in p.children:
-#         print(c, type(c))
-#         if c.children:
-#             printChildren(c)
-
-# for d in defaultParameters:
-#     print(d, type(d))
-#     for c in d.children:
-#         printChildren(c)
