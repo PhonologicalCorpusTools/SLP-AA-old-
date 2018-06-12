@@ -1610,17 +1610,19 @@ class MainWindow(QMainWindow):
                               'saving, or else choose a different file name.'.format(filename))
                 alert.exec_()
 
+    def add_fields(self, transcription):
+        transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
+                                                                     ''.join(transcription[1:5]),
+                                                                     ''.join(transcription[5:15]),
+                                                                     ''.join(transcription[15:19]),
+                                                                     ''.join(transcription[19:24]),
+                                                                     ''.join(transcription[24:29]),
+                                                                     ''.join(transcription[29:34]))
+        return transcription
+
     def getSignDataForExport(self, sign=None, include_fields=True, blank_space='_',
                              x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
-        def add_fields(self, transcription):
-            transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
-                                                                         ''.join(transcription[1:5]),
-                                                                         ''.join(transcription[5:15]),
-                                                                         ''.join(transcription[15:19]),
-                                                                         ''.join(transcription[19:24]),
-                                                                         ''.join(transcription[24:29]),
-                                                                         ''.join(transcription[29:34]))
-            return transcription
+
 
         output = list()
         output.append(sign.gloss)
@@ -1640,7 +1642,7 @@ class MainWindow(QMainWindow):
                 if transcription[29] == X_IN_BOX:
                     transcription[29] = x_in_box
                 if include_fields:
-                    transcription = add_fields(transcription)
+                    transcription = self.add_fields(transcription)
                 output.append(''.join(transcription))
 
         for config_num in [1, 2]:
