@@ -198,15 +198,14 @@ def get_range(numb):
 # word is word
 # config index = [0 for config1hand1] [1 for config1hand2] [2 for config2hand1] [3 for config2hand2]
 def reliability_analysis(dict1,dict2):
-    word_ch, config_ch, part_ch = print_options_get_val(dict1,dict2)
 
+    word_ch, config_ch, part_ch = print_options_get_val(dict1,dict2)
     print("Word: ",word_ch)
     print("Configuration: ",conf_list[config_ch])
     print("\n")
     
     mutated_arr1 = ["*"] + mutate_constants(dict1[word_ch][config_ch])
     mutated_arr2 = ["*"] + mutate_constants(dict2[word_ch][config_ch])
-
     if part_ch >=1 and part_ch <= 19:
         range_list = get_range(part_ch)
         single_number_list = []
@@ -267,14 +266,33 @@ def reliability_analysis(dict1,dict2):
 
 
 
-def reliability_analysis_all(dict1, dict2):
-    for word in dict1.keys():
-        for conf in conf_list:
-            ws = wb.add_sheet(word + conf)
-            
-            
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
-    
+def reliability_analysis_diff(basedict, compareddict,word,column,pathname):
+    ex_row1 = 0
+    for config in range(0,len(conf_list)):
+        ws.write(ex_row1,column,pathname)
+        mutated_arr1 = ["*"] + mutate_constants(basedict[word][config])
+        mutated_arr2 = ["*"] + mutate_constants(compareddict[word][config])
+        for part in range(1,len(parts_list)):
+            range_list = get_range(part)
+            single_number_list = []
+
+            if (len(range_list) == 3) and ("-" in range_list):
+                single_number_list = list(range(range_list[0],range_list[2]+1))
+            elif len(range_list) != 0:
+                single_number_list = range_list
+
+            dict1_compare_list = []
+            dict2_compare_list = []
+            for ind in single_number_list:
+                dict1_compare_list.append(mutated_arr1[ind])
+                dict2_compare_list.append(mutated_arr2[ind])
+
+            if '*' in dict1_compare_list and dict2_compare_list:
+                dict1_compare_list=list(filter(lambda a: a != "*", dict1_compare_list))
+                dict2_compare_list=list(filter(lambda a: a != "*", dict2_compare_list))
+            ex_row1 += 1
+            ws.write(ex_row1,column,str((1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100))
+        ex_row1 += 2
 
 
 print("Would you like to: \n1. Compare two values (Print and show in command line) \n2. Compare all files in folder to a base file (Save and show in excel sheet)")
@@ -287,12 +305,33 @@ if get_choice == 1:
     reliability_analysis(first_dict,second_dict)
 elif get_choice == 2:
     wb = xlwt.Workbook()
-
     filepath, filearray = initializeReadMultiple();
     base_dict = readMyFile(filepath)
-    for path in filearray:
-        compared_dict = readMyFile(path)
-        reliability_analysis_all(base_dict,compared_dict)
+
+    for word in base_dict.keys():
+        ex_col = 0
+        ex_row = 0
+
+        ws = wb.add_sheet(word)
+        
+        for config in conf_list:
+            ws.write(ex_row,ex_col,config)
+            for part in parts_list:
+                if part != "ALL summary of 1-19":
+                    ex_row += 1
+                    ws.write(ex_row,ex_col,part)
+            ex_row += 2
+        ex_col += 1
+        ex_row = 0
+        
+        for path in filearray:
+            compared_dict = readMyFile(path)
+            alt_path = path
+            alt_path = alt_path.split('/')
+            alt_path = alt_path[1].split('.')
+            alt_path = alt_path[0]
+            reliability_analysis_diff(base_dict, compared_dict,word,ex_col,alt_path)
+            ex_col +=1
 
     save_filename = input("What would you like to call this file?: ")
     wb.save(save_filename + '.xls')
