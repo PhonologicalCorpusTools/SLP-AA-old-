@@ -133,7 +133,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #FIELD 2 (Thumb)
         self.slot2 = TranscriptionSlot(2, 2, '[LUO\\?]', list('LUO?'))
-        self.slot3 = TranscriptionSlot(3, 2, '[{<=x\\?]', list('{<=x?'))
+        self.slot3 = TranscriptionSlot(3, 2, '[{<=\\?]', list('{<=?'))
         self.slot4 = TranscriptionSlot(4, 2, '[EeFfHi\\?]', list('HEeiFf?'))
         self.slot5 = TranscriptionSlot(5, 2, '[EeFfHi\\?]', list('HEeiFf?'))
 
@@ -609,7 +609,7 @@ class TranscriptionInfo(QGridLayout):
         tuples = [(self.fieldNumberTitle, self.fieldNumberInfo), (self.fieldTypeTitle, self.fieldTypeInfo),
                   (self.slotNumberTitle, self.slotNumberInfo), (self.slotTypeTitle, self.slotTypeInfo),
                   (self.slotOptionsTitle, self.slotOptionsInfo)]
-        for row in range(5):
+        for row in range(len(tuples)):
             title,info = tuples.pop(0)
             self.addWidget(title, row, 0)
             self.addWidget(info, row, 1)
@@ -650,15 +650,15 @@ class TranscriptionInfo(QGridLayout):
                             34: 'Pinky DIP flexion'}
 
         self.optionsDict = {1: 'Either on or off (checkbox)',
-                            2: self.generateSlotDescription(['L', 'U', 'x', '?']),
+                            2: self.generateSlotDescription(['L', 'U', 'O', '?']),
                             3: self.generateSlotDescription(['{', '<', '=', '?']),
                             4: self.generateSlotDescription(FINGER_SYMBOLS),
                             5: self.generateSlotDescription(FINGER_SYMBOLS),
-                            6: self.generateSlotDescription(['-', 't', 'fr', 'b', 'r', 'u', '?']),
+                            6: self.generateSlotDescription(['-', 't', 'fr', 'b', 'r', 'u', '?', ]),
                             7: self.generateSlotDescription(['-', 'd', 'p', 'M', '?']),
                             #8 always null,
                             #9 always forward slash,
-                            10: self.generateSlotDescription(['-', 't', 'fr', 'b', 'r']),
+                            10: self.generateSlotDescription(['-', 't', 'fr', 'b', 'r', 'u', '?']),
                             11: self.generateSlotDescription(['-', 'd', 'm', 'p', 'M', '?']),
                             12: self.generateSlotDescription(['-', '1', '?']),
                             13: self.generateSlotDescription(['-', '2', '?']),
