@@ -84,7 +84,7 @@ def initializeReadMultiple():
 def readMyFile(filename):
     
     word_dict = dict()
-    with open(filename,encoding='utf-8') as csvDataFile:
+    with open(filename,encoding='ISO-8859-1') as csvDataFile:
         csvReader = csv.reader(csvDataFile, skipinitialspace=True,delimiter=',', quoting=csv.QUOTE_NONE)
         next(csvReader)
         for row in csvReader:
@@ -93,17 +93,17 @@ def readMyFile(filename):
             if len(both_removed) == 151:
                 both_removed = both_removed[:len(front_removed)-7]
                 both_removed = split_arr_fourths(both_removed)
-                word_dict[row[0]]=both_removed
+                word_dict[row[0].upper()]=both_removed
             if len(both_removed) == 150:
                 both_removed.append("*")
                 both_removed = both_removed[:len(front_removed)-7]
                 both_removed = split_arr_fourths(both_removed)
-                word_dict[row[0]]=both_removed
+                word_dict[row[0].upper()]=both_removed
             if len(both_removed) > 151:
                 both_removed = both_removed[:151]
                 both_removed = both_removed[:len(front_removed)-7]
                 both_removed = split_arr_fourths(both_removed)
-                word_dict[row[0]]=both_removed
+                word_dict[row[0].upper()]=both_removed
             else:
                 continue
     return word_dict
