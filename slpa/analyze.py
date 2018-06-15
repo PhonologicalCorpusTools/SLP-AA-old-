@@ -291,7 +291,7 @@ def reliability_analysis_diff(basedict, compareddict,word,column,pathname):
                 dict1_compare_list=list(filter(lambda a: a != "*", dict1_compare_list))
                 dict2_compare_list=list(filter(lambda a: a != "*", dict2_compare_list))
             ex_row1 += 1
-            ws.write(ex_row1,column,str((1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100))
+            ws.write(ex_row1,column,float((1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100))
         ex_row1 += 2
 
 
