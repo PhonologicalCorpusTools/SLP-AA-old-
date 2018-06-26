@@ -58,8 +58,23 @@ def initializeReadTwoFiles():
     return filepath1, filepath2
 
 def initializeReadMultiple():
-    list_of_files = os.listdir("Sample")
+    ws1 = wb.add_sheet("METADATA")
+
+    list_of_folders = (next(os.walk('Sample'))[1])
+    folder_counter = 0
+    concat_list1 = ""
+    for folder in list_of_folders:
+        folder_counter += 1
+        concat_list1 += str(folder_counter) + '.' + folder + "\n"
+    print(concat_list1)
+    folderbaseindex = input("Please choose a folder of excel files you'd like to compare: ")
+    folderbaseindex = int(folderbaseindex)-1
+    folder_name = list_of_folders[folderbaseindex]
+
+    
+    list_of_files = os.listdir("Sample/"+folder_name)
     list_of_files=list(filter(lambda a: a[0] != '.', list_of_files))
+    list_of_files=list(filter(lambda a: a[-4:] != '.xls', list_of_files))
 
     file_counter = 0
     concat_list = ""
@@ -72,11 +87,30 @@ def initializeReadMultiple():
     filebaseindex = input("Please choose a base file to compare to: ")
     filebaseindex = int(filebaseindex)-1
 
-    filebasepath = "Sample/" + list_of_files[filebaseindex]
-    list_of_files.remove(list_of_files[filebaseindex])
-    list_of_files = ["Sample/"+path for path in list_of_files]
+    filebasepath = "Sample/"+folder_name+"/"+list_of_files[filebaseindex]
+    
+    ws1.write(0,0,"Current Folder Selected:")
+    ws1.write(1,0,"Base Dictionary File Compared to:")
+    ws1.write(3,0,"All Other Files Compared:")
 
-    return filebasepath, list_of_files
+    ws1.write(0,1,folder_name)
+    ws1.write(1,1,list_of_files[filebaseindex])
+    
+    list_of_files.remove(list_of_files[filebaseindex])
+
+    ex_row=2
+    for file in list_of_files:
+        ex_row +=1
+        ws1.write(ex_row,1,file)
+        
+    
+    list_of_files = ["Sample/"+folder_name+"/"+path for path in list_of_files]
+
+    folderpath = "Sample/"+folder_name+"/"
+
+    
+
+    return folderpath, filebasepath, list_of_files
     
 
 
@@ -305,7 +339,7 @@ if get_choice == 1:
     reliability_analysis(first_dict,second_dict)
 elif get_choice == 2:
     wb = xlwt.Workbook()
-    filepath, filearray = initializeReadMultiple();
+    folderpath, filepath, filearray = initializeReadMultiple();
     base_dict = readMyFile(filepath)
 
     for word in base_dict.keys():
@@ -328,13 +362,13 @@ elif get_choice == 2:
             compared_dict = readMyFile(path)
             alt_path = path
             alt_path = alt_path.split('/')
-            alt_path = alt_path[1].split('.')
+            alt_path = alt_path[2].split('.')
             alt_path = alt_path[0]
             reliability_analysis_diff(base_dict, compared_dict,word,ex_col,alt_path)
             ex_col +=1
 
     save_filename = input("What would you like to call this file?: ")
-    wb.save(save_filename + '.xls')
+    wb.save(folderpath+save_filename + '.xls')
 
 
 
