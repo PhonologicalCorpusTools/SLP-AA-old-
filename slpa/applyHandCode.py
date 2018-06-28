@@ -79,13 +79,13 @@ def rotation_from_matrix(matrix):
 def translate_finger_code_to_degrees(finger, hand, Fshape, handShapeParams):
     # flexionDictionary parameters: [proximal, medial, distal] joints
     if hand == 'L':
-        flexionDict = {'H':[30, 15, 10], 'E':[10, 5, 5], 'e': [5, 0, 0], 'i':[-35, -40, -50], 'F':[-80, -90, -75], '_':[0, 0, 0]}
-        abductDict = {'middle': {'=':0, '<':10, '_':0}, 'ring': {'=':0, '<':10, '_':0}, 'pinky': {'=':0, '<':20, '_':0}}
-        rotDict = {'middle': {'=':0, '<':5, '_':0}, 'ring': {'=':0, '<':-5, '_':0}, 'pinky': {'=':0, '<':-10, '_':0}}
+        flexionDict = {'H':[30, 15, 10], 'E':[10, 5, 5], 'e': [5, 0, 0], 'i':[-30, -35, -40], 'F':[-80, -90, -75], '_':[0, 0, 0]}
+        abductDict = {'middle': {'x': -30, '=':0, '<':10, '{':20, '_':0}, 'ring': {'x': -25, '=':0, '<':10, '{':20, '_':0}, 'pinky': {'x': -25, '=':0, '<':20, '{':30, '_':0}}
+        rotDict = {'middle': {'x': -10, '=':0, '<':5, '{':7, '_':0}, 'ring': {'x': -10, '=':0, '<':-5, '{':-7, '_':0}, 'pinky': {'x': -10, '=':0, '<':-10, '{':-12, '_':0}}
     else:
-        flexionDict = {'H':[-30, -15, -10], 'E':[-10, -5, -5], 'e': [-5, 0, 0], 'i':[35, 40, 50], 'F':[80, 90, 75], '_':[0, 0, 0]}
-        abductDict = {'middle': {'=':0, '<':-10, '_':0}, 'ring': {'=':0, '<':-10, '_':0}, 'pinky': {'=':0, '<':-20, '_':0}}
-        rotDict = {'middle': {'=':0, '<':5, '_':0}, 	'ring': {'=':0, '<':-5, '_':0}, 'pinky': {'=':0, '<':-10, '_':0}}
+        flexionDict = {'H':[-30, -15, -10], 'E':[-10, -5, -5], 'e': [-5, 0, 0], 'i':[30, 35, 40], 'F':[80, 90, 75], '_':[0, 0, 0]}
+        abductDict = {'middle': {'x': 30, '=':0, '<':-10, '{':-20, '_':0}, 'ring': {'x': 25,'=':0, '<':-10, '{':-20, '_':0}, 'pinky': {'x':25, '=':0, '<':-20, '{':-30, '_':0}}
+        rotDict = {'middle': {'x': 10, '=':0, '<':5, '{':7, '_':0}, 'ring': {'x': 10, '=':0, '<':-5, '{':-7, '_':0}, 'pinky': {'x': 10, '=':0, '<':-10, '{':-12, '_':0}}
 
     if finger == 'index':
         handShapeParams['finger_index.01.' + hand] = [0, 0, flexionDict[Fshape[1]][0]]
@@ -157,6 +157,10 @@ if __name__ == '__main__':
     argv = sys.argv
     codepath = argv[-5]
     hand = argv[-4]
+    #print('DINOSAUR RAWR!')
+    #print('-------------------------')
+    #print(codepath)
+    #print(hand)
     colorCode = (float(argv[-3]), float(argv[-2]), float(argv[-1]))
     
     # Read handshape coding and parse into thumb/fingers
@@ -165,6 +169,10 @@ if __name__ == '__main__':
         parseCode = re.split('\]\d\[+', code[1:])
         [armShape, thumbShape, thumbFingerContact, indexShape, middleShape, ringShape, pinkyShape] = parseCode[:]
 
+    #print(thumbShape)
+    #print(thumbFingerContact)
+    #print(indexShape)
+    #print(middleShape)
     # Set hand & generate degrees of rotation, adduction & flexion
     # with open(os.path.join(os.getcwd(),'debug.txt'), 'w') as outf:
     if True:
