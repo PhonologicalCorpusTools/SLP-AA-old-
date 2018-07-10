@@ -1589,6 +1589,7 @@ class MainWindow(QMainWindow):
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
                     print(Sign.headers, file=f)
+                    print(Sign.headers)
                     for sign in self.corpus:
                         kwargs['sign'] = sign
                         print(self.getSignDataForExport(**kwargs), file=f)
@@ -1603,7 +1604,7 @@ class MainWindow(QMainWindow):
                 alert.exec_()
 
     @classmethod
-    def getSignDataForExport(self, sign=None, include_fields=True, blank_space='_',
+    def getSignDataForExport(self, sign=None, include_fields=False, blank_space='_',
                              x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
         def add_fields(transcription):
             transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
@@ -1658,12 +1659,8 @@ class MainWindow(QMainWindow):
                 estimates = 'None' if not estimates else '-'.join(estimates)
                 output.append(uncertain)
                 output.append(estimates)
-
-        output.append('True' if sign.forearm else 'False')
-        output.append('True' if sign.estimated else 'False')
-        output.append('True' if sign.uncertain else 'False')
-        output.append('True' if sign.incomplete else 'False')
-        output.append('True' if sign.reduplicated else 'False')
+        for option in GLOBAL_OPTIONS:
+            output.append('True' if getattr(sign, option) else 'False')
         notes = ''.join([n.replace('\n', '  ') for n in sign.notes])
         output.append(notes)
         if parameter_format == 'xml':
@@ -1671,7 +1668,6 @@ class MainWindow(QMainWindow):
         elif parameter_format == 'txt':
             outputParameters = parameters.exportTree(sign.parameters)
         output.append(outputParameters)
-
         output = ','.join(output)
 
         return output
