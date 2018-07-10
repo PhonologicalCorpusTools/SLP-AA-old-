@@ -3,6 +3,7 @@ import sys
 import anytree
 import binary
 from collections import defaultdict
+from xml.etree import ElementTree as xmlElementTree
 from imports import (QApplication, Qt, QDialog, QTreeView, QStandardItemModel, QStandardItem, QVBoxLayout, QHBoxLayout,
                      QTextEdit, QPushButton, QGridLayout, QMessageBox)
 
@@ -177,8 +178,11 @@ class ParameterDialog(QDialog):
         self.terminalNodesLabel.setText(text)
 
 class ParameterTreeModel(QStandardItemModel):
-    def __init__(self, parameterList):
+    def __init__(self, parameterList, fromXML=False):
         super().__init__()
+        if fromXML:
+            parameterList = self.parseXML(parameterList)
+
         self.buttonGroups = defaultdict(list)
         self.specialButtons = list()
         topItem = self.invisibleRootItem()
@@ -187,6 +191,38 @@ class ParameterTreeModel(QStandardItemModel):
             self.addItem(p, topItem)
 
         self.buttonGroups['Major Location'].extend(self.specialButtons)
+
+    def parseXML(self, xmlstring):
+        topElement = xmlElementTree.fromstring(xmlstring)
+        self.params = list()
+
+        for topChild in topElement:
+            p = parameters.getParameterFromXML(topChild)
+            self.params.append(p)
+            # parentNode = ParameterNode(p, parent = self.tree)
+            if topChild.attrib['is_default'] == 'True':
+                p.is_default = True
+            if topChild.attrib['is_checked'] == 'True':
+                p.is_checked = True
+            # setattr(self, p.name, parentNode)
+            for child in topChild:
+                self.addNodeFromXML(child)
+
+    def addNodeFromXML(self, element):
+        parameter = parameters.getParameterFromXML(element)
+        self.params.append(parameter)
+        for child in element:
+            if element.attrib['is_default'] == 'True':
+                child.is_default = True
+            if element.attrib['is_checked'] == 'True':
+                child.is_checked = True
+            for subelement in element:
+                self.addNodeFromXML(subelement)
+
+        if element.attrib['is_default'] == 'True':
+            child.is_default = True
+        if element.attrib['is_checked'] == 'True':
+            child.is_checked = True
 
     def handleItemChanged(self, item):
         if item.parent is None or not hasattr(item.parent, 'name'):
@@ -210,8 +246,6 @@ class ParameterTreeModel(QStandardItemModel):
                 for b in self.specialButtons:
                     b.setCheckState(False)
                 checkSpecial.setCheckState(True)
-
-
 
     def addItem(self, parameter, parent):
         newItem = ParameterTreeItem(parameter, parent=parent)
@@ -242,7 +276,6 @@ class ParameterTreeView(QTreeView):
         item = self.model().itemFromIndex(index)
         self.model().handleItemChanged(item)
 
-
 class ParameterTreeItem(QStandardItem):
     def __init__(self, parameter, parent=None):
         super().__init__()
@@ -260,6 +293,14 @@ class ParameterTreeItem(QStandardItem):
 
     def __repr__(self):
         return self.__str__()
+
+#The following classes are here for backcompat reasons. They trick the unpickler into working so we can replace the
+#old style parameters (anytree/QTreeWidget) with the new style parameters (QStandardItemModel/QTreeView)
+class ParameterNode(anytree.Node):
+    pass
+
+class OldParameterTreeModel:
+    pass
 
 
 if __name__ == '__main__':

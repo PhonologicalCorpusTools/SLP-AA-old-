@@ -1,4 +1,6 @@
 import anytree
+from xml.etree.ElementTree import Element as xmlElement, SubElement as xmlSubElement
+from xml.etree import ElementTree as xmlElementTree
 
 class Parameter:
 
@@ -42,6 +44,15 @@ class Parameter:
         for c in children:
             self.children.append(c)
         self.children.sort()
+
+    def getTree(self, output=None):
+        if output is None:
+            output = list()
+        for c in self.children:
+            output.append(c)
+            if c.children:
+                c.getTree(output)
+        return output
 
     def __str__(self):
         return self.name
@@ -245,12 +256,6 @@ def addChild(parentNode, childParameter):
     for child in childParameter.children:
         addChild(node, child)
 
-defaultParameterTree = anytree.Node('Parameters', parent = None)
-for parameter in defaultParameters:
-    parentNode = anytree.Node(parameter.name, parent = defaultParameterTree)
-    for childParameter in parameter.children:
-        addChild(parentNode, childParameter)
-
 def getParameterFromXML(element):
     for p in getAllParameters():
         if element.attrib['name'] == p.name:
@@ -259,3 +264,59 @@ def getParameterFromXML(element):
                 return p
     else:
         raise AttributeError('XML Error: Cannot find parameter {} with parent {}'.format(element.attrib['name']))
+
+def getXMLElements(param, elements):
+    paramName = encodeXMLName(param.name)
+    for e in elements:
+        if ((param.parent is None and e.attrib['name'] == 'Parameters')  # top-level parameter
+            or (e.attrib['name'] == param.parent.name)):  # sub-level parameter
+            se = xmlSubElement(e, paramName)
+            se.attrib['name'] = param.name
+            se.attrib['is_checked'] = 'True' if param.is_checked else 'False'
+            se.attrib['is_default'] = 'True' if param.is_default else 'False'
+            se.attrib['parent'] = e.attrib['name']
+            elements.append(se)
+            break
+    return elements
+
+def getChildXMLElements(parameter, elements):
+    for child in parameter.children:
+        elements = getXMLElements(child, elements)
+        elements = getChildXMLElements(child, elements)
+    return elements
+
+
+def exportTree(parameterList):
+    export = list()
+    params = list()
+    for parameter in parameterList:
+        params.extend(parameter.getTree())
+    for parameter in params:
+        if parameter.is_checked:
+            export.append("{}:{}".format(parameter.parent.name, parameter.name))
+    export = ','.join(export)
+    return export
+
+def exportXML(parameterList):
+
+    elements = list()
+    top = xmlElement('Parameters')
+    top.attrib['name'] = 'Parameters'
+    top.attrib['is_checked'] = 'False'
+    top.attrib['is_default'] = 'False'
+    elements.append(top)
+
+    for param in parameterList:
+        elements = getXMLElements(param, elements)
+        elements = getChildXMLElements(param, elements)
+
+    string = xmlElementTree.tostring(top, encoding='unicode', method='xml')
+    return string
+
+
+
+defaultParameterTree = anytree.Node('Parameters', parent = None)
+for parameter in defaultParameters:
+    parentNode = anytree.Node(parameter.name, parent = defaultParameterTree)
+    for childParameter in parameter.children:
+        addChild(parentNode, childParameter)

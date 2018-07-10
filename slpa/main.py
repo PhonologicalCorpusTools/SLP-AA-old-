@@ -1073,11 +1073,6 @@ class MainWindow(QMainWindow):
             name = option+'CheckBox'
             widget = getattr(self, name)
             widget.setChecked(sign[option])
-        # self.forearmCheckBox.setChecked(sign['forearm'])
-        # self.estimatedCheckBox.setChecked(sign['estimated'])
-        # self.incompleteCheckBox.setChecked(sign['incomplete'])
-        # self.uncertainCheckBox.setChecked(sign['uncertain'])
-        # self.reduplicatedCheckBox.setChecked(sign['reduplicated'])
         self.askSaveChanges = False
         self.showMaximized()
 
@@ -1111,11 +1106,6 @@ class MainWindow(QMainWindow):
             kwargs['signNotes'] == 'None'
         for option in GLOBAL_OPTIONS:
             kwargs[option] = getattr(self, option+'CheckBox').isChecked()
-        # kwargs['forearm'] = self.forearmCheckBox.isChecked()
-        # kwargs['estimated'] = self.estimatedCheckBox.isChecked()
-        # kwargs['incomplete'] = self.incompleteCheckBox.isChecked()
-        # kwargs['uncertain'] = self.uncertainCheckBox.isChecked()
-        # kwargs['reduplicated'] = self.reduplicatedCheckBox.isChecked()
         return kwargs
 
     def overwriteAllGlosses(self):
@@ -1612,9 +1602,10 @@ class MainWindow(QMainWindow):
                               'saving, or else choose a different file name.'.format(filename))
                 alert.exec_()
 
+    @classmethod
     def getSignDataForExport(self, sign=None, include_fields=True, blank_space='_',
                              x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
-        def add_fields(self, transcription):
+        def add_fields(transcription):
             transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
                                                                          ''.join(transcription[1:5]),
                                                                          ''.join(transcription[5:15]),
@@ -1676,10 +1667,10 @@ class MainWindow(QMainWindow):
         notes = ''.join([n.replace('\n', '  ') for n in sign.notes])
         output.append(notes)
         if parameter_format == 'xml':
-            parameters = sign.parameters.exportXML()
+            outputParameters = parameters.exportXML(sign.parameters)
         elif parameter_format == 'txt':
-            parameters = sign.parameters.exportTree()
-        output.append(parameters)
+            outputParameters = parameters.exportTree(sign.parameters)
+        output.append(outputParameters)
 
         output = ','.join(output)
 
@@ -1763,11 +1754,8 @@ class MainWindow(QMainWindow):
                 kwargs['config2'] = transcriptions[1]
                 kwargs['flags'] = flags
                 kwargs['gloss'] = data['gloss']
-                kwargs['forearm'] = True if data['forearm'] == 'True' else False
-                kwargs['estimated'] = True if data['estimated'] == 'True' else False
-                kwargs['uncertain'] = True if data['uncertain'] == 'True' else False
-                kwargs['incomplete'] = True if data['incomplete'] == 'True' else False
-                kwargs['reduplicated'] = True if data['reduplicated'] == 'True' else False
+                for option in GLOBAL_OPTIONS:
+                    kwargs[option] = True if data[option] == 'True' else False
                 kwargs['parameters'] = ParameterTreeModel(data['parameters'], fromXML=True)
                 kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
                 sign = Sign(kwargs)

@@ -1,4 +1,5 @@
 import pickle
+import parameterwidgets
 import anytree
 
 class SLPAUnpickler(pickle._Unpickler):
@@ -9,8 +10,9 @@ class SLPAUnpickler(pickle._Unpickler):
     def find_class(self, module, name):
         if 'anytree' in module:
             return getattr(anytree, name)
-        else:
-            return super().find_class(module, name)
+        if name == 'ParameterTreeModel':
+            return getattr(parameterwidgets, 'OldParameterTreeModel')
+        return super().find_class(module, name)
 
 def load_binary(path):
     with open(path, 'rb') as f:
