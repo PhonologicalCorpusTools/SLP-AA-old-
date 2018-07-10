@@ -1,11 +1,11 @@
-GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete', 'reduplicated']
+GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete']#, 'reduplicated']
 
 X_IN_BOX = '\u2327'
 
 NULL = '\u2205'
 
 STANDARD_SYMBOLS = ['_', '+', '-', '/', '1', '2', '3', '4', '<', '=', '?', 'E', 'F', 'H', 'L', 'M', 'O', 'U', 'V',
-                    'b', 'd', 'e', 'f', 'i', 'm', 'p', 'r', 't', 'u', 'x', 'x+', 'x-', '{', NULL, X_IN_BOX]
+                    'b', 'd', 'e', 'f', 'fr', 'i', 'm', 'p', 'r', 't', 'u', 'x', 'x+', 'x-', '{', NULL, X_IN_BOX]
 
 FINGER_SYMBOLS = ['H', 'E', 'e', 'i', 'F', 'f', '?']
 
