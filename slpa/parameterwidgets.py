@@ -80,7 +80,6 @@ class ParameterDialog(QDialog):
             traverse(item)
             output.append(self.model.item(j).parameter)
 
-        binary.save_binary(output, r'C:\Users\Scott\Documents\GitHub\SLP-Annotator\slpa\test_parameter_output.params')
         return output
 
 
