@@ -470,23 +470,19 @@ class MainWindow(QMainWindow):
         self.forearmChecked.emit(self.forearmCheckBox.isChecked())
 
     def setupParameterDialog(self, model):
-        try:
-            model = self.corpus[self.currentGloss()].parameters
-            if isinstance(model, anytree.node.Node):
-                raise TypeError
-                #temporary backcompat fix for ASL-Lex corpus
-                #for some reason, parameters in this corpus are anytree.Node objects, instead of ParameterTreeModels
-        except:
+        currentGloss = self.currentGloss()
+        if self.corpus is not None and currentGloss:
+            model = ParameterTreeModel(self.corpus[currentGloss].parameters)
+        else:
             model = ParameterTreeModel(parameters.defaultParameters)
 
         if self.parameterDialog is None:
             self.parameterDialog = ParameterDialog(model)
-            self.parameterDialog.treeWidget.resetChecks()
+            #self.parameterDialog.reset()
         else:
             self.parameterDialog.close()
             self.parameterDialog.deleteLater()
             self.parameterDialog = ParameterDialog(model, checkStrategy='load')
-            self.parameterDialog.treeWidget.loadChecks()
 
     def currentHandShape(self):
         kwargs = self.generateKwargs()
@@ -931,7 +927,7 @@ class MainWindow(QMainWindow):
             return None
         self.corpus = load_binary(file_path)
         self.corpus.path = file_path
-        self.checkBackwardsComptibility()
+        #self.checkBackwardsComptibility()
         self.setupNewCorpus()
 
     def setupNewCorpus(self):
@@ -1073,11 +1069,10 @@ class MainWindow(QMainWindow):
 
         model = sign.parameters
         self.setupParameterDialog(model)
-        self.forearmCheckBox.setChecked(sign['forearm'])
-        self.estimatedCheckBox.setChecked(sign['estimated'])
-        self.incompleteCheckBox.setChecked(sign['incomplete'])
-        self.uncertainCheckBox.setChecked(sign['uncertain'])
-        self.reduplicatedCheckBox.setChecked(sign['reduplicated'])
+        for option in GLOBAL_OPTIONS:
+            name = option+'CheckBox'
+            widget = getattr(self, name)
+            widget.setChecked(sign[option])
         self.askSaveChanges = False
         self.showMaximized()
 
@@ -1104,16 +1099,13 @@ class MainWindow(QMainWindow):
                  'config2hand1': self.configTabs.widget(1).hand1Transcription.flags(),
                  'config2hand2': self.configTabs.widget(1).hand2Transcription.flags()}
         kwargs['flags'] = flags
-        kwargs['parameters'] = self.parameterDialog.treeWidget.model
+        kwargs['parameters'] = self.parameterDialog.saveParameters()
         kwargs['corpusNotes'] = self.corpusNotes.getText()
         kwargs['signNotes'] = self.signNotes.getText()
         if not kwargs['signNotes']:
             kwargs['signNotes'] == 'None'
-        kwargs['forearm'] = self.forearmCheckBox.isChecked()
-        kwargs['estimated'] = self.estimatedCheckBox.isChecked()
-        kwargs['incomplete'] = self.incompleteCheckBox.isChecked()
-        kwargs['uncertain'] = self.uncertainCheckBox.isChecked()
-        kwargs['reduplicated'] = self.reduplicatedCheckBox.isChecked()
+        for option in GLOBAL_OPTIONS:
+            kwargs[option] = getattr(self, option+'CheckBox').isChecked()
         return kwargs
 
     def overwriteAllGlosses(self):
@@ -1597,6 +1589,7 @@ class MainWindow(QMainWindow):
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
                     print(Sign.headers, file=f)
+                    print(Sign.headers)
                     for sign in self.corpus:
                         kwargs['sign'] = sign
                         print(self.getSignDataForExport(**kwargs), file=f)
@@ -1610,19 +1603,18 @@ class MainWindow(QMainWindow):
                               'saving, or else choose a different file name.'.format(filename))
                 alert.exec_()
 
-    def add_fields(self, transcription):
-        transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
-                                                                     ''.join(transcription[1:5]),
-                                                                     ''.join(transcription[5:15]),
-                                                                     ''.join(transcription[15:19]),
-                                                                     ''.join(transcription[19:24]),
-                                                                     ''.join(transcription[24:29]),
-                                                                     ''.join(transcription[29:34]))
-        return transcription
-
-    def getSignDataForExport(self, sign=None, include_fields=True, blank_space='_',
+    @classmethod
+    def getSignDataForExport(self, sign=None, include_fields=False, blank_space='_',
                              x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
-
+        def add_fields(transcription):
+            transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
+                                                                         ''.join(transcription[1:5]),
+                                                                         ''.join(transcription[5:15]),
+                                                                         ''.join(transcription[15:19]),
+                                                                         ''.join(transcription[19:24]),
+                                                                         ''.join(transcription[24:29]),
+                                                                         ''.join(transcription[29:34]))
+            return transcription
 
         output = list()
         output.append(sign.gloss)
@@ -1642,7 +1634,7 @@ class MainWindow(QMainWindow):
                 if transcription[29] == X_IN_BOX:
                     transcription[29] = x_in_box
                 if include_fields:
-                    transcription = self.add_fields(transcription)
+                    transcription = add_fields(transcription)
                 output.append(''.join(transcription))
 
         for config_num in [1, 2]:
@@ -1667,20 +1659,15 @@ class MainWindow(QMainWindow):
                 estimates = 'None' if not estimates else '-'.join(estimates)
                 output.append(uncertain)
                 output.append(estimates)
-
-        output.append('True' if sign.forearm else 'False')
-        output.append('True' if sign.estimated else 'False')
-        output.append('True' if sign.uncertain else 'False')
-        output.append('True' if sign.incomplete else 'False')
-        output.append('True' if sign.reduplicated else 'False')
+        for option in GLOBAL_OPTIONS:
+            output.append('True' if getattr(sign, option) else 'False')
         notes = ''.join([n.replace('\n', '  ') for n in sign.notes])
         output.append(notes)
         if parameter_format == 'xml':
-            parameters = sign.parameters.exportXML()
+            outputParameters = parameters.exportXML(sign.parameters)
         elif parameter_format == 'txt':
-            parameters = sign.parameters.exportTree()
-        output.append(parameters)
-
+            outputParameters = parameters.exportTree(sign.parameters)
+        output.append(outputParameters)
         output = ','.join(output)
 
         return output
@@ -1763,11 +1750,8 @@ class MainWindow(QMainWindow):
                 kwargs['config2'] = transcriptions[1]
                 kwargs['flags'] = flags
                 kwargs['gloss'] = data['gloss']
-                kwargs['forearm'] = True if data['forearm'] == 'True' else False
-                kwargs['estimated'] = True if data['estimated'] == 'True' else False
-                kwargs['uncertain'] = True if data['uncertain'] == 'True' else False
-                kwargs['incomplete'] = True if data['incomplete'] == 'True' else False
-                kwargs['reduplicated'] = True if data['reduplicated'] == 'True' else False
+                for option in GLOBAL_OPTIONS:
+                    kwargs[option] = True if data[option] == 'True' else False
                 kwargs['parameters'] = ParameterTreeModel(data['parameters'], fromXML=True)
                 kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
                 sign = Sign(kwargs)
