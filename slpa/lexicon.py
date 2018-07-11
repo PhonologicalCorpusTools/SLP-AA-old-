@@ -122,7 +122,7 @@ class Sign():
     headers.extend(GLOBAL_OPTIONS)
     headers.append('notes')
     headers.append('parameters')
-    headers = ','.join(headers)
+    headers = '\t'.join(headers)
 
     def __init__(self, kwargs):
         for attribute, default_value in Sign.sign_attributes.items():

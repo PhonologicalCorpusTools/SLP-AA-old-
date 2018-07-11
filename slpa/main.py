@@ -1589,10 +1589,10 @@ class MainWindow(QMainWindow):
             try:
                 with open(path, encoding='utf-8', mode='w') as f:
                     print(Sign.headers, file=f)
-                    print(Sign.headers)
                     for sign in self.corpus:
                         kwargs['sign'] = sign
-                        print(self.getSignDataForExport(**kwargs), file=f)
+                        output = self.getSignDataForExport(**kwargs)
+                        print(output, file=f)
                 if self.showSaveAlert:
                     QMessageBox.information(self, 'Success', 'Corpus successfully exported!')
             except PermissionError:
@@ -1668,7 +1668,7 @@ class MainWindow(QMainWindow):
         elif parameter_format == 'txt':
             outputParameters = parameters.exportTree(sign.parameters)
         output.append(outputParameters)
-        output = ','.join(output)
+        output = '\t'.join(output)
 
         return output
 
