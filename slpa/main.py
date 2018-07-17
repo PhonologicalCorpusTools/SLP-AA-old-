@@ -1668,6 +1668,8 @@ class MainWindow(QMainWindow):
             outputParameters = parameters.exportXML(sign.parameters)
         elif parameter_format == 'txt':
             outputParameters = parameters.exportTree(sign.parameters)
+        elif parameter_format == 'none':
+            outputParameters = ' '
         output.append(outputParameters)
         output = '\t'.join(output)
 
@@ -1723,7 +1725,7 @@ class MainWindow(QMainWindow):
             headers = headers.split('\t')
             start = f.tell()
             firstline = f.readline()
-            params = firstline.split('\t')[-1]
+            params = firstline.split('\t')[-1].strip()
             verfied, useDefaultParameters = self.verifyParametersForImport(params)
             if not verfied:
                 return
@@ -1786,9 +1788,10 @@ class MainWindow(QMainWindow):
 
         if message is not None:
             alert = QMessageBox()
+            alert.setWindowTitle('Loading from csv')
             alert.setText(('There is a problem loading the parameters from your corpus.\n'
                            '{}\n'
-                           'If you continue, SLPA will load your corpus will default parameters. {}\n'
+                           'If you continue, SLPA will load your corpus with default parameters. {}\n'
                            'What would you like to do?').format(message[0], message[1]))
             load = QPushButton('Load with defaults')
             cancel = QPushButton('Cancel')
@@ -1956,14 +1959,18 @@ class ExportCorpusDialog(QDialog):
         self.parameterOptions = QButtonGroup()
         plainTextOption = QRadioButton('plain text')
         xmlOption = QRadioButton('xml')
+        noParametersOption = QRadioButton('don\'t export parameters')
         parameterOptionsLayout.addWidget(plainTextOption)
         parameterOptionsLayout.addWidget(xmlOption)
+        parameterOptionsLayout.addWidget(noParametersOption)
         parameterOptionsLayout.insertSpacing(-1, 100)
         parametersLayout.addLayout(parameterOptionsLayout)
         self.parameterOptions.addButton(plainTextOption)
         self.parameterOptions.addButton(xmlOption)
+        self.parameterOptions.addButton(noParametersOption)
         self.parameterOptions.setId(plainTextOption, 0)
         self.parameterOptions.setId(xmlOption, 1)
+        self.parameterOptions.setId(noParametersOption, 2)
         xmlOption.setChecked(True)
 
         altSymbolsLabel = QLabel('Some programs have trouble displaying the "ultracrossed" symbol (x-in-a-box) and the '
@@ -1988,6 +1995,7 @@ class ExportCorpusDialog(QDialog):
         noteLabel = QLabel('NOTE: If you are exporting a corpus that you want to re-import into SLP-Annotator, you '
                            'must use the default options (no fields, underscore for blanks, xml parameters, no '
                            'alternative symbols).')
+        noteLabel.setFont(QFont('Arial', 14))
         noteLabel.setWordWrap(True)
         outputOptionsLayout.addWidget(noteLabel)
 
@@ -2035,8 +2043,10 @@ class ExportCorpusDialog(QDialog):
         id = self.parameterOptions.id(selectedButton)
         if id == 0:
             self.parameterFormat = 'txt'
-        else:
+        elif id == 1:
             self.parameterFormat = 'xml'
+        else:
+            self.parameterFormat = 'none'
 
         if os.path.exists(os.path.split(self.fileNameEdit.text())[0]):
             super().accept()
