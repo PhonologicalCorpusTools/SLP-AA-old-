@@ -130,12 +130,12 @@ ContourPlane = Parameter(name='Contour planes',
                          parent=MajorMovement)
 ContourPlane.sortChildren()
 MajorRepetition = Parameter(name='Major Movement Repetition',
-                       children=['None', 'Once', 'Twice', 'Multiple', 'Other'],
-                        #the "other" option *must* come last in this list
+                       children=['None', 'Once', 'Twice', 'Multiple', 'Specify'],
+                        #the "Specify" option *must* come last in this list
                         #there is code that depends on this in parameterwidgets.ParameterTreeWidget.addChildren()
                        default='None',
                        parent=MajorMovement,
-                       editableChildren=['Other'])
+                       editableChildren=['Specify'])
 Direction = Parameter(name = 'Direction',
                       children = ['None', 'Forward', 'Backward'],
                       default='None',
@@ -160,12 +160,12 @@ LocalContourMovement = Parameter(name='Contour of movement',
                                  parent = LocalMovement)
 LocalContourMovement.sortChildren()
 LocalRepetition = Parameter(name = 'Local Repetition',
-                            children = ['None', 'Once', 'Twice', 'Multiple', 'Other'],
-                            #the "other" option *must* come last in this list
+                            children = ['None', 'Once', 'Twice', 'Multiple', 'Specify'],
+                            #the "specify" option *must* come last in this list
                             #there is code that depends on this in parameterwidgets.ParameterTreeItem.addChildren()
                             default = 'None',
                             parent = LocalMovement,
-                            editableChildren=['Other'])
+                            editableChildren=['Specify'])
 LocalMovement.addChildren([LocalContourMovement, LocalRepetition])
 allParameters.append(LocalMovement)
 allParameters.append(LocalContourMovement)
@@ -231,9 +231,9 @@ allParameters.extend(SigningSpaceZone.children)
 
 #REDUPLICATION PARAMETERS
 Reduplication = Parameter(name ='Reduplication',
-                          children = ['None', 'Once', 'Twice', 'Multiple', 'Other'],
+                          children = ['None', 'Once', 'Twice', 'Multiple', 'Specify'],
                           default = 'None',
-                          editableChildren=['Other'])
+                          editableChildren=['Specify'])
 allParameters.append(Reduplication)
 allParameters.extend(Reduplication.children)
 
