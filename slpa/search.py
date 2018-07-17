@@ -722,11 +722,13 @@ class TranscriptionSearchDialog(SearchDialog):
         self.transcriptions.append(self.configTabs.widget(1).hand2Transcription)
 
     def generateGlobalOptions(self):
-        self.forearm = self.forearmCheckBox.isChecked()
-        self.estimated = self.estimatedCheckBox.isChecked()
-        self.uncertain = self.uncertainCheckBox.isChecked()
-        self.incomplete = self.incompleteCheckBox.isChecked()
-        self.reduplicated = self.reduplicatedCheckBox.isChecked()
+        for option in GLOBAL_OPTIONS:
+            setattr(self, option, getattr(self, option+'CheckBox').isChecked())
+        # self.forearm = self.forearmCheckBox.isChecked()
+        # self.estimated = self.estimatedCheckBox.isChecked()
+        # self.uncertain = self.uncertainCheckBox.isChecked()
+        # self.incomplete = self.incompleteCheckBox.isChecked()
+        # self.reduplicated = self.reduplicatedCheckBox.isChecked()
 
 class RecentSearch:
 
