@@ -72,10 +72,13 @@ class Parameter:
 
 class TerminalParameter:
 
-    def __init__(self, name, parent, is_editable=False):
+    def __init__(self, name, parent, is_editable=False, is_default=None):
         self.name = name
         self.parent = parent
-        self.is_default = True if self.name == parent.default else False
+        if is_default is None:
+            self.is_default = True if self.name == parent.default else False
+        else:
+            self.is_default = is_default
         self.children = tuple()
         self.is_editable = is_editable
         self.is_checked = True if self.is_default else False
@@ -127,12 +130,12 @@ ContourPlane = Parameter(name='Contour planes',
                          parent=MajorMovement)
 ContourPlane.sortChildren()
 MajorRepetition = Parameter(name='Major Movement Repetition',
-                       children=['None', 'Once', 'Twice', 'Multiple', '(Specify)'],
-                        #the (specify) option *must* come last in this list
+                       children=['None', 'Once', 'Twice', 'Multiple', 'Other'],
+                        #the "other" option *must* come last in this list
                         #there is code that depends on this in parameterwidgets.ParameterTreeWidget.addChildren()
                        default='None',
                        parent=MajorMovement,
-                       editableChildren=['(Specify)'])
+                       editableChildren=['Other'])
 Direction = Parameter(name = 'Direction',
                       children = ['None', 'Forward', 'Backward'],
                       default='None',
@@ -157,12 +160,12 @@ LocalContourMovement = Parameter(name='Contour of movement',
                                  parent = LocalMovement)
 LocalContourMovement.sortChildren()
 LocalRepetition = Parameter(name = 'Local Repetition',
-                            children = ['None', 'Once', 'Twice', 'Multiple', '(Specify)'],
-                            #the (specify) option *must* come last in this list
+                            children = ['None', 'Once', 'Twice', 'Multiple', 'Other'],
+                            #the "other" option *must* come last in this list
                             #there is code that depends on this in parameterwidgets.ParameterTreeItem.addChildren()
                             default = 'None',
                             parent = LocalMovement,
-                            editableChildren=['(Specify)'])
+                            editableChildren=['Other'])
 LocalMovement.addChildren([LocalContourMovement, LocalRepetition])
 allParameters.append(LocalMovement)
 allParameters.append(LocalContourMovement)
@@ -228,9 +231,9 @@ allParameters.extend(SigningSpaceZone.children)
 
 #REDUPLICATION PARAMETERS
 Reduplication = Parameter(name ='Reduplication',
-                          children = ['None', 'Once', 'Twice', 'Multiple', '(Specify)'],
+                          children = ['None', 'Once', 'Twice', 'Multiple', 'Other'],
                           default = 'None',
-                          editableChildren=['(Specify)'])
+                          editableChildren=['Other'])
 allParameters.append(Reduplication)
 allParameters.extend(Reduplication.children)
 
@@ -251,19 +254,29 @@ def decodeXMLName(name):
         name = '0'
     return name.replace('_', ' ')
 
+def textToBoolean(text):
+    return True if text == 'True' else False
+
+def booleanToText(boolean):
+    return 'True' if boolean else 'False'
+
 def addChild(parentNode, childParameter):
     node = anytree.Node(childParameter.name, parent=parentNode)
     for child in childParameter.children:
         addChild(node, child)
 
-def getParameterFromXML(element):
-    for p in getAllParameters():
-        if element.attrib['name'] == p.name:
-            parentName = 'Parameters' if p.parent is None else p.parent.name
-            if element.attrib['parent'] == parentName:
-                return p
+def getParameterFromXML(element, terminal=False):
+    if not terminal:
+        p = Parameter(element.attrib['name'],
+                  parent = element.attrib['parent'],
+                  is_default= textToBoolean(element.attrib['is_default']))
+
     else:
-        raise AttributeError('XML Error: Cannot find parameter {} with parent {}'.format(element.attrib['name']))
+        p = TerminalParameter(element.attrib['name'],
+                              element.attrib['parent'],
+                              is_editable= textToBoolean(element.attrib['is_editable']),
+                              is_default= textToBoolean(element.attrib['is_default']))
+    return p
 
 def getXMLElements(param, elements):
     paramName = encodeXMLName(param.name)
@@ -272,8 +285,9 @@ def getXMLElements(param, elements):
             or (e.attrib['name'] == param.parent.name)):  # sub-level parameter
             se = xmlSubElement(e, paramName)
             se.attrib['name'] = param.name
-            se.attrib['is_checked'] = 'True' if param.is_checked else 'False'
-            se.attrib['is_default'] = 'True' if param.is_default else 'False'
+            se.attrib['is_checked'] = booleanToText(param.is_checked)
+            se.attrib['is_default'] = booleanToText(param.is_default)
+            se.attrib['is_editable'] = booleanToText(hasattr(param, 'is_editable') and param.is_editable)
             se.attrib['parent'] = e.attrib['name']
             elements.append(se)
             break
@@ -304,6 +318,7 @@ def exportXML(parameterList):
     top.attrib['name'] = 'Parameters'
     top.attrib['is_checked'] = 'False'
     top.attrib['is_default'] = 'False'
+    top.attrib['is_editable'] = 'False'
     elements.append(top)
 
     for param in parameterList:

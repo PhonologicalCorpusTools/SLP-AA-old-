@@ -471,10 +471,10 @@ class MainWindow(QMainWindow):
 
     def setupParameterDialog(self, model):
         currentGloss = self.currentGloss()
-        if self.corpus is not None and currentGloss:
-            model = ParameterTreeModel(self.corpus[currentGloss].parameters)
-        else:
-            model = ParameterTreeModel(parameters.defaultParameters)
+        # if self.corpus is not None and currentGloss:
+        #     model = self.corpus[currentGloss].parameters
+        # else:
+        #     model = ParameterTreeModel(parameters.defaultParameters)
 
         if self.parameterDialog is None:
             self.parameterDialog = ParameterDialog(model)
@@ -1067,7 +1067,7 @@ class MainWindow(QMainWindow):
                     slot.setText('' if text == '_' else text)
                     slot.updateFlags(sign.flags[name][slot.num - 1])
 
-        model = sign.parameters
+        model = ParameterTreeModel(sign.parameters)
         self.setupParameterDialog(model)
         for option in GLOBAL_OPTIONS:
             name = option+'CheckBox'
@@ -1661,7 +1661,7 @@ class MainWindow(QMainWindow):
                 output.append(estimates)
         for option in GLOBAL_OPTIONS:
             output.append('True' if getattr(sign, option) else 'False')
-        notes = ''.join([n.replace('\n', '  ') for n in sign.notes])
+        notes = ''.join([n.replace('\n', '  ').replace('\t', '    ') for n in sign.notes])
         output.append(notes)
         if parameter_format == 'xml':
             outputParameters = parameters.exportXML(sign.parameters)
@@ -1719,10 +1719,10 @@ class MainWindow(QMainWindow):
 
         with open(os.path.join(filepath, filename+'.csv'), mode='r', encoding='utf-8') as f:
             headers = f.readline().strip()
-            headers = headers.split(',')
+            headers = headers.split('\t')
             for line in f:
                 line = line.strip()
-                line = line.split(',')
+                line = line.split('\t')
                 data = {h:l for (h,l) in zip(headers, line)}
                 kwargs = dict()
                 flags = dict()
@@ -1752,7 +1752,8 @@ class MainWindow(QMainWindow):
                 kwargs['gloss'] = data['gloss']
                 for option in GLOBAL_OPTIONS:
                     kwargs[option] = True if data[option] == 'True' else False
-                kwargs['parameters'] = ParameterTreeModel(data['parameters'], fromXML=True)
+                model = ParameterTreeModel(data['parameters'], fromXML=True)
+                kwargs['parameters'] = model.params
                 kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
                 sign = Sign(kwargs)
                 corpus.addWord(sign)

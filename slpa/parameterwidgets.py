@@ -179,49 +179,52 @@ class ParameterDialog(QDialog):
 class ParameterTreeModel(QStandardItemModel):
     def __init__(self, parameterList, fromXML=False):
         super().__init__()
+        self.params = list()
         if fromXML:
-            parameterList = self.parseXML(parameterList)
+            self.parseXML(parameterList)#populates self.params
+        else:
+            self.params = parameterList
 
         self.buttonGroups = defaultdict(list)
         self.specialButtons = list()
         topItem = self.invisibleRootItem()
 
-        for p in parameterList:
+        for p in self.params:
             self.addItem(p, topItem)
 
         self.buttonGroups['Major Location'].extend(self.specialButtons)
 
     def parseXML(self, xmlstring):
         topElement = xmlElementTree.fromstring(xmlstring)
-        self.params = list()
 
         for topChild in topElement:
             p = parameters.getParameterFromXML(topChild)
+            p.parent = None
             self.params.append(p)
-            # parentNode = ParameterNode(p, parent = self.tree)
-            if topChild.attrib['is_default'] == 'True':
-                p.is_default = True
             if topChild.attrib['is_checked'] == 'True':
                 p.is_checked = True
-            # setattr(self, p.name, parentNode)
             for child in topChild:
-                self.addNodeFromXML(child)
+                self.addNodeFromXML(child, p)
 
-    def addNodeFromXML(self, element):
-        parameter = parameters.getParameterFromXML(element)
-        self.params.append(parameter)
-        for child in element:
-            if element.attrib['is_default'] == 'True':
-                child.is_default = True
-            if element.attrib['is_checked'] == 'True':
-                child.is_checked = True
+
+    def addNodeFromXML(self, element, parentParameter):
+        if list(element):
+            #this is an awkward way of checking if the element has children
+            #the .getchildren() method has been deprecated for a long time now
+            #and trying to access element._children results in an unexplainable AttributeError
+            parameter = parameters.getParameterFromXML(element)
+            self.params.append(parameter)
+            parentParameter.addChildren([parameter])
+            parameter.parent = parentParameter
             for subelement in element:
-                self.addNodeFromXML(subelement)
+                self.addNodeFromXML(subelement, parameter)
 
-        if element.attrib['is_default'] == 'True':
-            child.is_default = True
-        if element.attrib['is_checked'] == 'True':
-            child.is_checked = True
+        else:
+            parameter = parameters.getParameterFromXML(element, terminal=True)
+            self.params.append(parameter)
+            parentParameter.addChildren([parameter])
+            parameter.parent = parentParameter
+
 
     def handleItemChanged(self, item):
         if item.parent is None or not hasattr(item.parent, 'name'):
