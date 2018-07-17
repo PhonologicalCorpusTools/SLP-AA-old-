@@ -8,6 +8,7 @@ import parameters
 import decorators
 import anytree
 import random
+from xml.etree import ElementTree as xmlElementTree
 from imports import *
 from handshapes import *
 from lexicon import *
@@ -1720,6 +1721,14 @@ class MainWindow(QMainWindow):
         with open(os.path.join(filepath, filename+'.csv'), mode='r', encoding='utf-8') as f:
             headers = f.readline().strip()
             headers = headers.split('\t')
+            start = f.tell()
+            firstline = f.readline()
+            params = firstline.split('\t')[-1]
+            verfied, useDefaultParameters = self.verifyParametersForImport(params)
+            if not verfied:
+                return
+            f.seek(start)
+
             for line in f:
                 line = line.strip()
                 line = line.split('\t')
@@ -1752,13 +1761,46 @@ class MainWindow(QMainWindow):
                 kwargs['gloss'] = data['gloss']
                 for option in GLOBAL_OPTIONS:
                     kwargs[option] = True if data[option] == 'True' else False
-                model = ParameterTreeModel(data['parameters'], fromXML=True)
+                if useDefaultParameters:
+                    model = ParameterTreeModel(parameters.defaultParameters)
+                else:
+                    model = ParameterTreeModel(data['parameters'], fromXML=True)
                 kwargs['parameters'] = model.params
                 kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
                 sign = Sign(kwargs)
                 corpus.addWord(sign)
         self.corpus = corpus
         self.setupNewCorpus()
+
+    def verifyParametersForImport(self, parameters):
+        message = None
+        useDefaults = False
+        if not parameters:
+            message = ('Your corpus was exported without any parameter information.', '')
+        else:
+            try:
+                xmlElementTree.fromstring(parameters)
+            except xmlElementTree.ParseError:
+                message = ('Your corpus was exported in a format that cannot be re-imported.',
+                           'You will lose any existing parameter information.')
+
+        if message is not None:
+            alert = QMessageBox()
+            alert.setText(('There is a problem loading the parameters from your corpus.\n'
+                           '{}\n'
+                           'If you continue, SLPA will load your corpus will default parameters. {}\n'
+                           'What would you like to do?').format(message[0], message[1]))
+            load = QPushButton('Load with defaults')
+            cancel = QPushButton('Cancel')
+            alert.addButton(load, QMessageBox.AcceptRole)
+            alert.addButton(cancel, QMessageBox.RejectRole)
+            alert.exec_()
+            if alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
+                return False, False
+            else:
+                useDefaults = True
+
+        return True, useDefaults
 
     def sizeHint(self):
         sz = QMainWindow.sizeHint(self)
