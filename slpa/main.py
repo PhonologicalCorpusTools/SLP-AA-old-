@@ -1995,7 +1995,6 @@ class ExportCorpusDialog(QDialog):
         noteLabel = QLabel('NOTE: If you are exporting a corpus that you want to re-import into SLP-Annotator, you '
                            'must use the default options (no fields, underscore for blanks, xml parameters, no '
                            'alternative symbols).')
-        noteLabel.setFont(QFont('Arial', 14))
         noteLabel.setWordWrap(True)
         outputOptionsLayout.addWidget(noteLabel)
 

@@ -187,6 +187,9 @@ class ParameterTreeModel(QStandardItemModel):
         else:
             self.params = parameterList
 
+        for p in self.params:
+            print(p.name, p.parent.name if p.parent is not None else 'Parameters', ', '.join([child.name for child in p.children]))
+
         self.buttonGroups = defaultdict(list)
         self.specialButtons = list()
         topItem = self.invisibleRootItem()
@@ -211,11 +214,10 @@ class ParameterTreeModel(QStandardItemModel):
 
     def addNodeFromXML(self, element, parentParameter):
         if list(element):
-            #this is an awkward way of checking if the element has children
+            #this seems to be the best way to check if the element has children
             #the .getchildren() method has been deprecated for a long time now
-            #and trying to access element._children results in an unexplainable AttributeError
+            #and trying to access element._children attribute results in an unexplainable AttributeError
             parameter = parameters.getParameterFromXML(element)
-            self.params.append(parameter)
             parentParameter.addChildren([parameter])
             parameter.parent = parentParameter
             for subelement in element:
@@ -223,7 +225,6 @@ class ParameterTreeModel(QStandardItemModel):
 
         else:
             parameter = parameters.getParameterFromXML(element, terminal=True)
-            self.params.append(parameter)
             parentParameter.addChildren([parameter])
             parameter.parent = parentParameter
 
