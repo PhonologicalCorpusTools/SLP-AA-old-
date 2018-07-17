@@ -186,10 +186,6 @@ class ParameterTreeModel(QStandardItemModel):
             self.parseXML(parameterList)#populates self.params
         else:
             self.params = parameterList
-
-        for p in self.params:
-            print(p.name, p.parent.name if p.parent is not None else 'Parameters', ', '.join([child.name for child in p.children]))
-
         self.buttonGroups = defaultdict(list)
         self.specialButtons = list()
         topItem = self.invisibleRootItem()
