@@ -329,8 +329,8 @@ def reliability_analysis_diff(basedict, compareddict,word,column,pathname):
         ex_row1 += 2
 
 
-print("Would you like to: \n1. Compare two values (Print and show in command line) \n2. Compare all files in folder to a base file (Save and show in excel sheet)")
-get_choice = weird_function("1-2")
+print("Would you like to: \n1. Compare two values (Print and show in command line) \n2. Compare all files in folder to a base file (Save and show in excel sheet) \n3. Combine all files to base file to be able to plug into R")
+get_choice = weird_function("1-3")
 
 if get_choice == 1:
     filepath1,filepath2 = initializeReadTwoFiles()
@@ -338,6 +338,7 @@ if get_choice == 1:
     second_dict = readMyFile(filepath2)
     reliability_analysis(first_dict,second_dict)
 elif get_choice == 2:
+
     wb = xlwt.Workbook()
     folderpath, filepath, filearray = initializeReadMultiple();
     base_dict = readMyFile(filepath)
@@ -370,6 +371,24 @@ elif get_choice == 2:
     save_filename = input("What would you like to call this file?: ")
     wb.save(folderpath+save_filename + '.xls')
 
+elif get_choice == 3:
+
+    wb = xlwt.Workbook()
+    folderpath, filepath, filearray = initializeReadMultiple();
+    base_dict = readMyFile(filepath)
+
+    for word in base_dict.keys():
+        ex_col = 0
+        ex_row = 0
+
+        ws.write(ex_row,ex_col,word)
+        ex_row +=1
+
+        for config in conf_list:
+            ws.write(ex_row,ex_col,part)
+                if part != "ALL summary of 1-19":
+                    ex_row += 1
+                    ws.write(ex_row,ex_col,part)
 
 
         
