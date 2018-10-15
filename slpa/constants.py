@@ -9,7 +9,7 @@ STANDARD_SYMBOLS = ['_', '+', '-', '/', '1', '2', '3', '4', '<', '=', '?', 'E', 
 
 FINGER_SYMBOLS = ['H', 'E', 'e', 'i', 'F', 'f', '?']
 
-CONTACT_SYMBOLS = ['{', '=', 'x-', 'x', 'x+', X_IN_BOX, '?']
+CONTACT_SYMBOLS = ['{', '<', '=', 'x-', 'x', 'x+', X_IN_BOX, '?']
 
 SYMBOL_DESCRIPTIONS = {
     'L': 'lateral',
@@ -25,7 +25,7 @@ SYMBOL_DESCRIPTIONS = {
     '=': 'adducted',
     '-': 'no contact',
     't': 'tip',
-    'f': 'friction surface',
+    'fr': 'friction surface',
     'b': 'back surface',
     'r': 'radial surface',
     'u': 'ulnar surface',

@@ -329,6 +329,36 @@ def reliability_analysis_diff(basedict, compareddict,word,column,pathname):
         ex_row1 += 2
 
 
+def reliability_analysis_diff1(basedict, compareddict,word,row,pathname):
+    for config in range(0,len(conf_list)):
+        mutated_arr1 = ["*"] + mutate_constants(basedict[word][config])
+        mutated_arr2 = ["*"] + mutate_constants(compareddict[word][config])
+        for part in range(1,len(parts_list)):
+            range_list = get_range(part)
+            single_number_list = []
+
+            if (len(range_list) == 3) and ("-" in range_list):
+                single_number_list = list(range(range_list[0],range_list[2]+1))
+            elif len(range_list) != 0:
+                single_number_list = range_list
+
+            dict1_compare_list = []
+            dict2_compare_list = []
+            for ind in single_number_list:
+                dict1_compare_list.append(mutated_arr1[ind])
+                dict2_compare_list.append(mutated_arr2[ind])
+
+            if '*' in dict1_compare_list and dict2_compare_list:
+                dict1_compare_list=list(filter(lambda a: a != "*", dict1_compare_list))
+                dict2_compare_list=list(filter(lambda a: a != "*", dict2_compare_list))
+            
+            ws.write(row,6,float((1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100))
+            row += 1
+        row += 0
+    return row
+        
+
+
 print("Would you like to: \n1. Compare two values (Print and show in command line) \n2. Compare all files in folder to a base file (Save and show in excel sheet) \n3. Combine all files to base file to be able to plug into R")
 get_choice = weird_function("1-3")
 
@@ -377,18 +407,45 @@ elif get_choice == 3:
     folderpath, filepath, filearray = initializeReadMultiple();
     base_dict = readMyFile(filepath)
 
+    ws = wb.add_sheet("ALL DATA")
+    
+    ex_row = 0
     for word in base_dict.keys():
-        ex_col = 0
-        ex_row = 0
+        for path in filearray:
+            for config in conf_list:
+                for part in parts_list:
+                    ex_col = 0
+                    if part != "ALL summary of 1-19":
+                        ws.write(ex_row,ex_col,folderpath)
+                        ex_col += 1
+                        ws.write(ex_row,ex_col,word)
+                        ex_col += 1
+                        ws.write(ex_row,ex_col,config)
+                        ex_col += 1
+                        ws.write(ex_row,ex_col,part)
+                        ex_col += 1
+                        ws.write(ex_row,ex_col,filepath)
+                        ex_col += 1
+                        ws.write(ex_row,ex_col,path)
+                        ex_row += 1
+        ex_row += 0
 
-        ws.write(ex_row,ex_col,word)
-        ex_row +=1
+    rower = 0
+    for word in base_dict.keys():
+        for path in filearray:
+            compared_dict = readMyFile(path)
+            alt_path = path
+            alt_path = alt_path.split('/')
+            alt_path = alt_path[2].split('.')
+            alt_path = alt_path[0]
+            rower = reliability_analysis_diff1(base_dict, compared_dict,word,rower,alt_path)
+            
 
-        for config in conf_list:
-            ws.write(ex_row,ex_col,part)
-                if part != "ALL summary of 1-19":
-                    ex_row += 1
-                    ws.write(ex_row,ex_col,part)
+            
+
+        
+    save_filename = input("What would you like to call this file?: ")
+    wb.save(folderpath+save_filename + '.xls')
 
 
         
