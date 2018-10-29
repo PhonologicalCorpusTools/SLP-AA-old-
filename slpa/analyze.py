@@ -408,8 +408,14 @@ elif get_choice == 3:
     base_dict = readMyFile(filepath)
 
     ws = wb.add_sheet("ALL DATA")
-    
-    ex_row = 0
+
+    header_list = ["Folder","Word","Configuration","Part","Base File","Compared Files","Result"]
+    header_col=0
+    for word in header_list:
+        ws.write(0,header_col, word)
+        header_col += 1
+
+    ex_row = 1
     for word in base_dict.keys():
         for path in filearray:
             for config in conf_list:
@@ -428,9 +434,11 @@ elif get_choice == 3:
                         ex_col += 1
                         ws.write(ex_row,ex_col,path)
                         ex_row += 1
-        ex_row += 0
+                        
 
-    rower = 0
+        
+    
+    rower = 1
     for word in base_dict.keys():
         for path in filearray:
             compared_dict = readMyFile(path)
