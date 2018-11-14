@@ -329,7 +329,7 @@ def reliability_analysis_diff(basedict, compareddict,word,column,pathname):
         ex_row1 += 2
 
 
-def reliability_analysis_diff1(basedict, compareddict,word,row,pathname):
+def reliability_analysis_diff1(basedict, compareddict,word,row,pathname,colist):
     for config in range(0,len(conf_list)):
         mutated_arr1 = ["*"] + mutate_constants(basedict[word][config])
         mutated_arr2 = ["*"] + mutate_constants(compareddict[word][config])
@@ -347,6 +347,14 @@ def reliability_analysis_diff1(basedict, compareddict,word,row,pathname):
             for ind in single_number_list:
                 dict1_compare_list.append(mutated_arr1[ind])
                 dict2_compare_list.append(mutated_arr2[ind])
+
+            for index in range(len(dict1_compare_list)):
+                for pair in colist:
+                    if ((dict1_compare_list[index] == pair[0]) & (dict2_compare_list[index] == pair[1])) or ((dict1_compare_list[index] == pair[1]) & (dict2_compare_list[index] == pair[0])):
+                        dict1_compare_list[index] == "*"
+                        dict2_compare_list[index] == "*"
+                        
+                
 
             if '*' in dict1_compare_list and dict2_compare_list:
                 dict1_compare_list=list(filter(lambda a: a != "*", dict1_compare_list))
@@ -435,8 +443,17 @@ elif get_choice == 3:
                         ws.write(ex_row,ex_col,path)
                         ex_row += 1
                         
+    collapse_list = []
+    collapse_val =""
+    while collapse_val != "quit":
+        collapse_val = input("Please enter the values you would like to collapse. \nSeparate the values you want to collpase with a / \nAn example would be \"e/E\" \nEnter here(or type \'quit\'):")
+        if (len(collapse_val)==3) & (collapse_val[1]=="/"):
+            collapse_list.append(collapse_val.split("/"))
+            print("\n")
+        else:
+            print("Input is in incorrect format, please try again.\n")
 
-        
+
     
     rower = 1
     for word in base_dict.keys():
@@ -446,7 +463,10 @@ elif get_choice == 3:
             alt_path = alt_path.split('/')
             alt_path = alt_path[2].split('.')
             alt_path = alt_path[0]
-            rower = reliability_analysis_diff1(base_dict, compared_dict,word,rower,alt_path)
+
+
+            
+            rower = reliability_analysis_diff1(base_dict, compared_dict,word,rower,alt_path,collapse_list)
             
 
             
