@@ -7,7 +7,68 @@ parts_list = ["All","Forearm","Thumb","Thumb / Finger Contact","Index Finger","M
 conf_list = ["Config-1 Hand-1","Config-1 Hand-2","Config-2 Hand-1","Config-2 Hand-2"]
 
 
-elif get_choice == 2:
+
+def reliability_analysis_diff(basedict, compareddict,word,column,pathname):
+    ex_row1 = 0
+    for config in range(0,len(conf_list)):
+        ws.write(ex_row1,column,pathname)
+        mutated_arr1 = ["*"] + mutate_constants(basedict[word][config])
+        mutated_arr2 = ["*"] + mutate_constants(compareddict[word][config])
+        for part in range(1,len(parts_list)):
+            range_list = get_range(part)
+            single_number_list = []
+
+            if (len(range_list) == 3) and ("-" in range_list):
+                single_number_list = list(range(range_list[0],range_list[2]+1))
+            elif len(range_list) != 0:
+                single_number_list = range_list
+
+            dict1_compare_list = []
+            dict2_compare_list = []
+            for ind in single_number_list:
+                dict1_compare_list.append(mutated_arr1[ind])
+                dict2_compare_list.append(mutated_arr2[ind])
+
+            if '*' in dict1_compare_list and dict2_compare_list:
+                dict1_compare_list=list(filter(lambda a: a != "*", dict1_compare_list))
+                dict2_compare_list=list(filter(lambda a: a != "*", dict2_compare_list))
+            ex_row1 += 1
+            ws.write(ex_row1,column,float((1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100))
+        ex_row1 += 2
+
+
+def reliability_analysis_diff1(basedict, compareddict,word,row,pathname):
+    for config in range(0,len(conf_list)):
+        mutated_arr1 = ["*"] + mutate_constants(basedict[word][config])
+        mutated_arr2 = ["*"] + mutate_constants(compareddict[word][config])
+        for part in range(1,len(parts_list)):
+            range_list = get_range(part)
+            single_number_list = []
+
+            if (len(range_list) == 3) and ("-" in range_list):
+                single_number_list = list(range(range_list[0],range_list[2]+1))
+            elif len(range_list) != 0:
+                single_number_list = range_list
+
+            dict1_compare_list = []
+            dict2_compare_list = []
+            for ind in single_number_list:
+                dict1_compare_list.append(mutated_arr1[ind])
+                dict2_compare_list.append(mutated_arr2[ind])
+
+            if '*' in dict1_compare_list and dict2_compare_list:
+                dict1_compare_list=list(filter(lambda a: a != "*", dict1_compare_list))
+                dict2_compare_list=list(filter(lambda a: a != "*", dict2_compare_list))
+            
+            ws.write(row,6,float((1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100))
+            row += 1
+        row += 0
+    return row
+
+
+
+
+elif get_choice == 1:
 
     wb = xlwt.Workbook()
     folderpath, filepath, filearray = initializeReadMultiple();
@@ -38,10 +99,8 @@ elif get_choice == 2:
             reliability_analysis_diff(base_dict, compared_dict,word,ex_col,alt_path)
             ex_col +=1
 
-    save_filename = input("What would you like to call this file?: ")
-    wb.save(folderpath+save_filename + '.xls')
 
-elif get_choice == 3:
+elif get_choice == 2:
 
     wb = xlwt.Workbook()
     folderpath, filepath, filearray = initializeReadMultiple();
@@ -84,5 +143,5 @@ elif get_choice == 3:
             
 
         
-    save_filename = input("What would you like to call this file?: ")
-    wb.save(folderpath+save_filename + '.xls')
+save_filename = input("What would you like to call this file?: ")
+wb.save(folderpath+save_filename + '.xls')
