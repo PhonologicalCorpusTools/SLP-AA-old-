@@ -146,7 +146,7 @@ def mutate_constants(arr):
     presetlist = [8,9,16,21,26,31]
     presetlist[:] = [x - 1 for x in presetlist]
     for indexn in presetlist:
-        arr[indexn] = "*"
+        arr[indexn] = "@"
     return arr
 
 def weird_function(rangestr):
@@ -331,8 +331,8 @@ def reliability_analysis_diff(basedict, compareddict,word,column,pathname):
 
 def reliability_analysis_diff1(basedict, compareddict,word,row,pathname,colist):
     for config in range(0,len(conf_list)):
-        mutated_arr1 = ["*"] + mutate_constants(basedict[word][config])
-        mutated_arr2 = ["*"] + mutate_constants(compareddict[word][config])
+        mutated_arr1 = ["@"] + mutate_constants(basedict[word][config])
+        mutated_arr2 = ["@"] + mutate_constants(compareddict[word][config])
         for part in range(1,len(parts_list)):
             range_list = get_range(part)
             single_number_list = []
@@ -347,18 +347,19 @@ def reliability_analysis_diff1(basedict, compareddict,word,row,pathname,colist):
             for ind in single_number_list:
                 dict1_compare_list.append(mutated_arr1[ind])
                 dict2_compare_list.append(mutated_arr2[ind])
-
+            
             for index in range(len(dict1_compare_list)):
                 for pair in colist:
                     if ((dict1_compare_list[index] == pair[0]) & (dict2_compare_list[index] == pair[1])) or ((dict1_compare_list[index] == pair[1]) & (dict2_compare_list[index] == pair[0])):
-                        dict1_compare_list[index] == "*"
-                        dict2_compare_list[index] == "*"
-                        
+                        dict1_compare_list[index] = "*"
+                        dict2_compare_list[index] = "*"
+
+                               
                 
 
             if '*' in dict1_compare_list and dict2_compare_list:
-                dict1_compare_list=list(filter(lambda a: a != "*", dict1_compare_list))
-                dict2_compare_list=list(filter(lambda a: a != "*", dict2_compare_list))
+                dict1_compare_list=list(filter(lambda a: a != "@", dict1_compare_list))
+                dict2_compare_list=list(filter(lambda a: a != "@", dict2_compare_list))
             
             ws.write(row,6,float((1-np.mean(np.array(dict1_compare_list) != np.array(dict2_compare_list)))*100))
             row += 1
@@ -445,8 +446,8 @@ elif get_choice == 3:
                         
     collapse_list = []
     collapse_val =""
-    while collapse_val != "quit":
-        collapse_val = input("Please enter the values you would like to collapse. \nSeparate the values you want to collpase with a / \nAn example would be \"e/E\" \nEnter here(or type \'quit\'):")
+    while collapse_val != "done":
+        collapse_val = input("Please enter the values you would like to collapse. \nSeparate the values you want to collpase with a / \nAn example would be \"e/E\" \nEnter here(or type \'done\'):")
         if (len(collapse_val)==3) & (collapse_val[1]=="/"):
             collapse_list.append(collapse_val.split("/"))
             print("\n")
