@@ -12,7 +12,17 @@ class SLPAUnpickler(pickle._Unpickler):
             return getattr(anytree, name)
         if name == 'ParameterTreeModel':
             return getattr(parameterwidgets, 'OldParameterTreeModel')
-        return super().find_class(module, name)
+
+        try:
+            return super().find_class(module, name)
+        except ModuleNotFoundError:
+            module = module[4:]
+            return super().find_class(module, name)
+        #if module == 'transcriptions':
+        #    module = 'gui.transcriptions'
+        #if module == 'parameterwidgets':
+        #    module = 'gui.parameterwidgets'
+        #return super().find_class(module, name)
 
 def load_binary(path):
     with open(path, 'rb') as f:
