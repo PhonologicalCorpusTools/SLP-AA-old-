@@ -2,17 +2,16 @@ import os
 import sys
 base = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0,base)
-import slpa.main as Main
 
 if __name__ == '__main__':
-    app = Main.QApplicationMessaging(sys.argv)
+    app = main.QApplicationMessaging(sys.argv)
     if app.isRunning():
         if len(sys.argv) > 1:
             app.sendMessage(sys.argv[1])
         else:
             app.sendMessage('ARISE')
     else:
-        main = Main.MainWindow(app)
+        main = main.MainWindow(app)
 
         app.aboutToQuit.connect(main.cleanUp)
         app.setActiveWindow(main)

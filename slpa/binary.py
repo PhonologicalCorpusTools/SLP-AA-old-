@@ -1,5 +1,5 @@
 import pickle
-import parameterwidgets
+from gui import parameterwidgets
 import anytree
 
 class SLPAUnpickler(pickle._Unpickler):
@@ -31,6 +31,6 @@ def load_binary(path):
     return obj
 
 def save_binary(obj, path):
-    with open(path,'wb') as f:
+    with open(path, 'wb') as f:
         pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
 

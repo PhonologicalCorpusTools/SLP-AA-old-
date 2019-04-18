@@ -47,7 +47,7 @@ class TranscriptionLayout(QVBoxLayout):
 
         #FIELD 2 (Thumb)
         self.field2 = TranscriptionField(number=2)
-        for j in range(2,6):
+        for j in range(2, 6):
             slot = getattr(self, 'slot{}'.format(j))
             self.field2.addSlot(slot)
             self.slots.append(slot)

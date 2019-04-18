@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-from main import MainWindow, QApplicationMessaging
+from gui.main import MainWindow, QApplicationMessaging
 
 if sys.platform.startswith('win'):
     if getattr(sys, 'frozen', False):

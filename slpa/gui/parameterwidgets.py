@@ -6,6 +6,7 @@ from collections import defaultdict
 from xml.etree import ElementTree as xmlElementTree
 from imports import (QApplication, Qt, QDialog, QTreeView, QStandardItemModel, QStandardItem, QVBoxLayout, QHBoxLayout,
                      QTextEdit, QPushButton, QGridLayout, QMessageBox)
+from pprint import pprint
 
 
 class ParameterDialog(QDialog):
@@ -185,7 +186,8 @@ class ParameterTreeModel(QStandardItemModel):
         if fromXML:
             self.parseXML(parameterList)#populates self.params
         else:
-            self.params = parameterList
+            if type(parameterList) != OldParameterTreeModel:
+                self.params = parameterList
         self.buttonGroups = defaultdict(list)
         self.specialButtons = list()
         topItem = self.invisibleRootItem()
