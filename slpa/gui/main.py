@@ -1,29 +1,23 @@
-import traceback
 import itertools
-import os
-import sys
 import subprocess
 import collections
 import parameters
 import decorators
-import anytree
-import random
 from xml.etree import ElementTree as xmlElementTree
-from imports import *
-from handshapes import *
 from lexicon import *
 from binary import *
-from transcriptions import *
-from constraints import *
-from constraintwidgets import *
-from notes import *
-from search import *
+from gui.transcriptions import *
+from gui.constraintwidgets import *
+from gui.notes import *
+from gui.search import *
 from image import *
-from functional_load import *
-from colour import *
+from gui.functional_load import *
+from gui.colour import *
 from constants import GLOBAL_OPTIONS
-from parameterwidgets import ParameterDialog, ParameterTreeModel
+from gui.parameterwidgets import ParameterDialog, ParameterTreeModel
+from gui.phonological_search import PhonologicalSearchDialog, ExtendedFingerSearchDialog
 #from slpa import __version__ as currentSLPAversion
+from pprint import pprint
 
 __currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
@@ -273,8 +267,9 @@ class MainWindow(QMainWindow):
     transcriptionRestrictionsChanged = Signal(bool)
     forearmChecked = Signal(bool)
 
-    def __init__(self,app):
-        app.messageFromOtherInstance.connect(self.handleMessage)
+    def __init__(self, app=None):
+        if app is not None:
+            app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
@@ -1135,6 +1130,7 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.exportCorpusAct)
         self.fileMenu.addAction(self.importCorpusAct)
         self.fileMenu.addAction(self.quitAct)
+        self.fileMenu.addAction(self.switchAct)
 
         self.editMenu = self.menuBar().addMenu('&Edit')
         self.editMenu.addAction(self.copyAct)
@@ -1367,6 +1363,7 @@ class MainWindow(QMainWindow):
                                    self,
                                    triggered = self.funcLoad)
 
+
         self.copyAct = QAction('&Copy a transcription...',
                               self,
                               triggered = self.copyTranscription)
@@ -1499,6 +1496,18 @@ class MainWindow(QMainWindow):
                                         self,
                                        statusTip = 'Open a notepad for information about the current sign',
                                        triggered = self.addSignNotes)
+
+        self.switchAct = QAction('Switch to analyzer mode',
+                                 self,
+                                 statusTip='Switch to analyzer mode',
+                                 triggered=self.switchMode)
+
+    def switchMode(self):
+        self.writeSettings()
+        self.close()
+        self.analyzer = AnalyzerMainWindow(self.corpus)
+        self.analyzer.show()
+
 
     def forceComptibilityUpdate(self):
         file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', os.getcwd(), '*.corpus')
@@ -1723,8 +1732,11 @@ class MainWindow(QMainWindow):
         with open(os.path.join(filepath, filename+'.csv'), mode='r', encoding='utf-8') as f:
             headers = f.readline().strip()
             headers = headers.split('\t')
+            #print('headers', headers)
             start = f.tell()
+            #print('start', start)
             firstline = f.readline()
+            #print('firstline', firstline)
             params = firstline.split('\t')[-1].strip()
             verfied, useDefaultParameters = self.verifyParametersForImport(params)
             if not verfied:
@@ -1739,21 +1751,24 @@ class MainWindow(QMainWindow):
                 flags = dict()
                 transcriptions = [ [[None for n in range(34)], [None for n in range(34)]],
                                    [[None for n in range(34)], [None for n in range(34)]] ]
-                for config in [1,2]:
-                    for hand in [1,2]:
+                for config in [1, 2]:
+                    for hand in [1, 2]:
                         for n in range(1,35):
                             name = 'config{}hand{}slot{}'.format(config, hand, n)
                             transcriptions[config-1][hand-1][n-1] = data[name]
+
                         uncertain = data['config{}hand{}uncertain'.format(config, hand)]
                         if uncertain == 'None':
                             uncertain = list()
                         else:
                             uncertain = [int(n) for n in uncertain.split('-')]
+
                         estimated = data['config{}hand{}estimated'.format(config, hand)]
                         if estimated == 'None':
                             estimated = list()
                         else:
                             estimated = [int(n) for n in estimated.split('-')]
+
                         confighand = 'config{}hand{}'.format(config, hand)
                         flags[confighand] = [Flag(True if n in uncertain else False, True if n in estimated else False)
                                              for n in range(34)]
@@ -1761,7 +1776,7 @@ class MainWindow(QMainWindow):
                 kwargs['config2'] = transcriptions[1]
                 kwargs['flags'] = flags
                 kwargs['gloss'] = data['gloss']
-                for option in GLOBAL_OPTIONS:
+                for option in GLOBAL_OPTIONS:  #GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete']
                     kwargs[option] = True if data[option] == 'True' else False
                 if useDefaultParameters:
                     model = ParameterTreeModel(parameters.defaultParameters)
@@ -2134,3 +2149,206 @@ def clean(item):
             item.deleteLater()
         except (RuntimeError, AttributeError): # deleted or no deleteLater method
             pass
+
+#TODO: add settings arguments
+class AnalyzerMainWindow(QMainWindow):
+    def __init__(self, corpus):
+        super().__init__()
+
+        self.corpus = corpus
+
+
+        #=====
+        #pprint(self.corpus.wordlist)
+        #=====
+
+        self.setWindowTitle('SLP-Analyzer')
+
+        centralWidget = QWidget()
+        self.setCentralWidget(centralWidget)
+        mainLayout = QVBoxLayout()
+        centralWidget.setLayout(mainLayout)
+
+        wordFrame = QGroupBox('Word')
+        wordLayout = QVBoxLayout()
+        wordFrame.setLayout(wordLayout)
+        # mainLayout.addWidget(wordFrame)
+
+        searchField = QLineEdit()
+        searchField.setPlaceholderText('Search...')
+        wordLayout.addWidget(searchField, alignment=Qt.AlignRight)
+
+        wordList = WordListView()
+        wordList.itemClicked.connect(self.loadData)
+        wordLayout.addWidget(wordList)
+        # wordList.setWindowTitle('Word')
+
+        #model = QStandardItemModel()
+
+        rightFrame = QFrame()
+        rightLayout = QVBoxLayout()
+        rightFrame.setLayout(rightLayout)
+        # mainLayout.addWidget(rightFrame)
+
+        globalFrame = QGroupBox('Global options')
+        globalLayout = QHBoxLayout()
+        globalFrame.setLayout(globalLayout)
+        rightLayout.addWidget(globalFrame)
+        self.forearmButton = QCheckBox('Forearm')
+        globalLayout.addWidget(self.forearmButton)
+        self.estimatedButton = QCheckBox('Estimated')
+        globalLayout.addWidget(self.estimatedButton)
+        self.uncertainButton = QCheckBox('Uncertain')
+        globalLayout.addWidget(self.uncertainButton)
+        self.incompleteButton = QCheckBox('Incomplete')
+        globalLayout.addWidget(self.incompleteButton)
+
+        config1Frame = QGroupBox('Config 1')
+        config1Layout = QVBoxLayout()
+        config1Frame.setLayout(config1Layout)
+        rightLayout.addWidget(config1Frame)
+
+        self.config1 = TranscriptionConfigTab(1)
+        config1Layout.addWidget(self.config1)
+
+        config2Frame = QGroupBox('Config 2')
+        config2Layout = QVBoxLayout()
+        config2Frame.setLayout(config2Layout)
+        rightLayout.addWidget(config2Frame)
+
+        self.config2 = TranscriptionConfigTab(2)
+        config2Layout.addWidget(self.config2)
+
+        parameterFrame = QGroupBox('Parameter')
+        paramLayout = QHBoxLayout()
+        parameterFrame.setLayout(paramLayout)
+        rightLayout.addWidget(parameterFrame)
+
+        qualityFrame = QGroupBox('Quality')
+        paramLayout.addWidget(qualityFrame)
+        majorMovementFrame = QGroupBox('Major movement')
+        paramLayout.addWidget(majorMovementFrame)
+        localMovementFrame = QGroupBox('Local movement')
+        paramLayout.addWidget(localMovementFrame)
+        majorLocationFrame = QGroupBox('Major location')
+        paramLayout.addWidget(majorLocationFrame)
+        reduplicationFrame = QGroupBox('Reduplication')
+        paramLayout.addWidget(reduplicationFrame)
+
+        splitter = QSplitter()
+        splitter.addWidget(wordFrame)
+        splitter.addWidget(rightFrame)
+        mainLayout.addWidget(splitter)
+
+        # =====
+        for word in self.corpus:
+            wordList.addItem(word.gloss)
+
+        wordList.sortItems()
+        wordList.setCurrentRow(0)
+        wordList.itemClicked.emit(wordList.currentItem())
+        # create an item with a caption
+        # item = QStandardItem(word.gloss)
+
+        # add a checkbox to it
+        # item.setCheckable(True)
+
+        # Add the item to the model
+        # model.appendRow(item)
+        # =====
+
+        # Apply the model to the list view
+        # wordList.setModel(model)
+
+        self.createActions()
+        self.createMenu()
+
+    def createMenu(self):
+        self.fileMenu = self.menuBar().addMenu('&File')
+        self.fileMenu.addAction(self.loadCorporaAction)
+        self.fileMenu.addAction(self.switchAct)
+
+        self.searchMenu = self.menuBar().addMenu('&Search')
+        self.searchMenu.addAction(self.searchByTranscriptionAct)
+        self.searchMenu.addAction(self.searchByExtendedFingersAct)
+
+    def createActions(self):
+        self.loadCorporaAction = QAction('&Load corpora...', self, statusTip='Load a corpus',
+                                                   triggered=self.loadCorpora)
+        self.switchAct = QAction('Switch to annotator mode',
+                                 self,
+                                 statusTip='Switch to annotator mode',
+                                 triggered=self.switchMode)
+
+        self.searchByTranscriptionAct = QAction('Search by transcription...', self, triggered=self.searchByTranscription)
+        self.searchByExtendedFingersAct = QAction('Search by extended fingers...', self, triggered=self.searchByExtendedFingers)
+
+    def searchByTranscription(self):
+        searchDialog = PhonologicalSearchDialog(self, self.corpus)
+        searchDialog.exec_()
+
+    def searchByExtendedFingers(self):
+        searchDialog = ExtendedFingerSearchDialog(self.corpus, self, None, None)
+        searchDialog.exec_()
+
+    def switchMode(self):
+        #pass
+        self.close()
+        self.annotator = MainWindow()
+        self.annotator.corpus = self.corpus
+        self.annotator.setupNewCorpus()
+        self.annotator.show()
+
+    def loadCorpora(self):
+        file_path = QFileDialog.getOpenFileName(self,
+                                                'Open Corpus File', os.getcwd(), '*.corpus')
+
+    def loadData(self, item):
+        gloss = item.text()
+        sign = self.corpus[gloss]
+
+        self.config1.clearAll()
+        self.config2.clearAll()
+
+        for confignum, handnum in itertools.product([1,2], [1,2]):
+            name = 'config{}hand{}'.format(confignum, handnum)
+            confighand = sign[name]
+
+            if confignum == 1:
+                configTab = self.config1
+            else:
+                configTab = self.config2
+
+            transcription = getattr(configTab, 'hand{}Transcription'.format(handnum))
+            for slot in transcription.slots:
+                if slot.num == 1:
+                    if confighand[0] == '_' or not confighand[0]:
+                        slot.setChecked(False)
+                    else:
+                        slot.setChecked(True)
+                else:
+                    text = confighand[slot.num - 1]
+                    slot.setText('' if text == '_' else text)
+                    slot.updateFlags(sign.flags[name][slot.num - 1])
+
+        for option in GLOBAL_OPTIONS:
+            name = option + 'Button'
+            button = getattr(self, name)
+            button.setChecked(sign[option])
+
+        #TODO: Set parameters
+
+
+class WordListView(QListWidget):
+
+    def __init__(self):
+        super().__init__()
+
+
+    def mousePressEvent(self, event):
+        #originalItem =  [i for i in self.selectedItems()][0]
+        super().mousePressEvent(event)
+        if event.button() == Qt.LeftButton:
+            selectedItem = [i for i in self.selectedItems()][0]
+            self.itemClicked.emit(selectedItem)
+
