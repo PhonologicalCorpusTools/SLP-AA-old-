@@ -1,9 +1,9 @@
-from imports import (Qt, QDialog, QVBoxLayout, QHBoxLayout, QTabWidget, QPushButton, QFont, QListWidget,
+from imports import (Qt, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTabWidget, QPushButton, QFont, QListWidget,
                      QComboBox, QCheckBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QFrame, QButtonGroup,
                      QRadioButton, QLineEdit, QMenu, QAction, QCompleter, QStringListModel)
-from gui.transcriptions import TranscriptionConfigTab, TranscriptionInfo
+from transcriptions import TranscriptionConfigTab, TranscriptionInfo
 from image import *
-from constants import GLOBAL_OPTIONS, FINGER_SYMBOLS, SYMBOL_DESCRIPTIONS
+from constants import GLOBAL_OPTIONS, FINGER_SYMBOLS, CONTACT_SYMBOLS, SYMBOL_DESCRIPTIONS
 
 FONT_NAME = 'Arial'
 FONT_SIZE = 12
@@ -591,10 +591,6 @@ class TranscriptionSearchDialog(SearchDialog):
 
     def __init__(self, corpus, recents, blankValue, wildcard):
         super().__init__()
-
-        print('recents', recents)
-        print('blankValue', blankValue)
-        print('wildcard', wildcard)
 
         self.corpus = corpus
         self.recents = recents

@@ -3,8 +3,8 @@ import os, re
 from collections import OrderedDict
 from random import choice
 from parameters import defaultParameters
-from gui.parameterwidgets import ParameterTreeModel
-from gui.transcriptions import Flag
+from parameterwidgets import ParameterTreeModel
+from transcriptions import Flag
 from constants import GLOBAL_OPTIONS
 
 X_IN_BOX = '\u2327'
@@ -38,17 +38,13 @@ class Corpus():
             return value
 
     def regExSearch(self, query):
-        expressions = [[query[0], query[1]], [query[2], query[3]]]
+        expressions = [ [query[0], query[1]], [query[2], query[3]] ]
         match_list = list()
         for word in self:
-            #print('word: ', word)
-            for config_num, hand_num in [(1, 1), (1, 2), (2, 1), (2, 2)]:
+            for config_num, hand_num in [(1,1), (1,2), (2,1), (2,2)]:
                 slots = getattr(word, 'config{}hand{}'.format(config_num, hand_num))
-                #print('slots_list: ', slots)
                 slots = ''.join([slot if slot else '_' for slot in slots])
-                #print('slots: ', slots)
                 regex = re.compile(expressions[config_num - 1][hand_num - 1])
-                #print('regex: ', regex)
                 if regex.match(slots) is None:
                     break
             else:
