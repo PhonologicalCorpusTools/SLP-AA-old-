@@ -76,7 +76,6 @@ class PhonologicalSearchDialog(QDialog):
         buttonLayout.addWidget(recentButton)
         buttonLayout.addWidget(cancelButton)
 
-
 class BasicSearchTab(QWidget):
 
     def __init__(self):
@@ -93,12 +92,12 @@ class BasicSearchTab(QWidget):
                                                         fg='Apply only the finger configuration',
                                                         nf='Apply only the number of extended fingers')
         self.handPanel = LogicRadioButtonGroup('vertical',
-                                               'c1h1',
-                                               title='Configuration/Hand',
-                                               c1h1='Configuration 1 Hand 1',
-                                               c1h2='Configuration 1 Hand 2',
-                                               c2h1='Configuration 2 Hand 1',
-                                               c2h2='Configuration 2 Hand 2',)
+                                               'h1c1',
+                                               title='Hand/Configuration',
+                                               h1c1='Hand 1 Configuration 1',
+                                               h1c2='Hand 1 Configuration 2',
+                                               h2c1='Hand 2 Configuration 1',
+                                               h2c2='Hand 2 Configuration 2',)
         self.modePanel = LogicRadioButtonGroup('vertical',
                                                'p',
                                                title='Search mode',
@@ -141,32 +140,32 @@ class BasicSearchTab(QWidget):
             'searchMode': 'Positive'
         }
 
-        if handconfig == 'Configuration 1 Hand 1':
-            c1h1 = handconfigvalue
-            c1h2 = neutralvalue
-            c2h1 = neutralvalue
-            c2h2 = neutralvalue
-        elif handconfig == 'Configuration 1 Hand 2':
-            c1h1 = neutralvalue
-            c1h2 = handconfigvalue
-            c2h1 = neutralvalue
-            c2h2 = neutralvalue
-        elif handconfig == 'Configuration 2 Hand 1':
-            c1h1 = neutralvalue
-            c1h2 = neutralvalue
-            c2h1 = handconfigvalue
-            c2h2 = neutralvalue
+        if handconfig == 'Hand 1 Configuration 1':
+            h1c1 = handconfigvalue
+            h1c2 = neutralvalue
+            h2c1 = neutralvalue
+            h2c2 = neutralvalue
+        elif handconfig == 'Hand 1 Configuration 2':
+            h1c1 = neutralvalue
+            h1c2 = handconfigvalue
+            h2c1 = neutralvalue
+            h2c2 = neutralvalue
+        elif handconfig == 'Hand 2 Configuration 1':
+            h1c1 = neutralvalue
+            h1c2 = neutralvalue
+            h2c1 = handconfigvalue
+            h2c2 = neutralvalue
         else:
-            c1h1 = neutralvalue
-            c1h2 = neutralvalue
-            c2h1 = neutralvalue
-            c2h2 = handconfigvalue
+            h1c1 = neutralvalue
+            h1c2 = neutralvalue
+            h2c1 = neutralvalue
+            h2c2 = handconfigvalue
 
         return {
-            'c1h1': c1h1,
-            'c1h2': c1h2,
-            'c2h1': c2h1,
-            'c2h2': c2h2,
+            'h1c1': h1c1,
+            'h1c2': h1c2,
+            'h2c1': h2c1,
+            'h2c2': h2c2,
             'logic': 'All four hand/configuration specifications'
         }
 
@@ -179,17 +178,17 @@ class AdvancedSearchTab(QWidget):
                 'border: 5px solid #9B9B9B;' \
                 'top: -0.75em;}'
 
-        self.c1h1Tab = AdvancedFingerTab()
-        self.c1h2Tab = AdvancedFingerTab()
-        self.c2h1Tab = AdvancedFingerTab()
-        self.c2h2Tab = AdvancedFingerTab()
+        self.h1c1Tab = AdvancedFingerTab()
+        self.h1c2Tab = AdvancedFingerTab()
+        self.h2c1Tab = AdvancedFingerTab()
+        self.h2c2Tab = AdvancedFingerTab()
 
         handTab = QTabWidget()
         handTab.setStyleSheet(style)
-        handTab.addTab(self.c1h1Tab, 'Config1Hand1')
-        handTab.addTab(self.c1h2Tab, 'Config1Hand2')
-        handTab.addTab(self.c2h1Tab, 'Config2Hand1')
-        handTab.addTab(self.c2h2Tab, 'Config2Hand2')
+        handTab.addTab(self.h1c1Tab, 'Hand1Config1')
+        handTab.addTab(self.h1c2Tab, 'Hand1Config2')
+        handTab.addTab(self.h2c1Tab, 'Hand2Config1')
+        handTab.addTab(self.h2c2Tab, 'Hand2Config2')
 
         self.logicPanel = LogicRadioButtonGroup('horizontal', 'all', 'Signs should contain',
                                                 all='All four hand/configuration specifications',
@@ -202,10 +201,10 @@ class AdvancedSearchTab(QWidget):
 
     def value(self):
         return {
-            'c1h1': self.c1h1Tab.value(),
-            'c1h2': self.c1h2Tab.value(),
-            'c2h1': self.c2h1Tab.value(),
-            'c2h2': self.c2h2Tab.value(),
+            'h1c1': self.h1c1Tab.value(),
+            'h1c2': self.h1c2Tab.value(),
+            'h2c1': self.h2c1Tab.value(),
+            'h2c2': self.h2c2Tab.value(),
             'logic': self.logicPanel.value()
         }
 
@@ -289,23 +288,120 @@ class ExtendedFingerSearchDialog(FunctionDialog):
         self.advancedTab = AdvancedSearchTab()
 
         self.searchTab = QTabWidget()
+        #self.searchTab.currentChanged.connect(self.curTabChange)
         self.searchTab.addTab(self.basicTab, 'Basic search')
         self.searchTab.addTab(self.advancedTab, 'Advanced search')
 
         mainLayout.addWidget(self.searchTab, 0, 0)
+        #self.testWidget = ExtendedFingerPanel()
 
-        #####This part should be removed later#####
+        #configTab = QTabWidget()
+        #configTab.addTab(self.testWidget, 'Test')
+        #mainLayout.addWidget(configTab)
+
+        #self.fingerConfigGroup = ExtendedFingerPanel()
+        #mainLayout.addWidget(self.fingerConfigGroup, 0, 0, 1, 2)
+
+        #self.fingerNumberGroup = NumExtendedFingerPanel()
+        #mainLayout.addWidget(self.fingerNumberGroup, 1, 0, 1, 2)
+
+        #self.relationlogicGroup = LogicRadioButtonGroup('vertical', 'a', title='Relation between finger configuration and '
+        #                                                                  'number of extended fingers',
+        #                                           a='Apply both',
+        #                                           o='Apply either',
+        #                                           fg='Apply only the finger configuration',
+        #                                           nf='Apply only the number of extended fingers')
+        #mainLayout.addWidget(self.relationlogicGroup, 2, 0, 1, 1)
+
+        #self.modeGroup = LogicRadioButtonGroup('vertical', 'p', title='Search mode', p='Positive', n='Negative')
+        #mainLayout.addWidget(self.modeGroup, 2, 1, 1, 1)
+
         self.testButton = QPushButton('test')
         mainLayout.addWidget(self.testButton, 1, 0)
         self.testButton.clicked.connect(self.test)
-        #####This part should be removed later#####
 
         self.layout().insertLayout(0, mainLayout)
+        #self.curTabChange(0)
+
+    #def curTabChange(self, index):
+    #    for i in range(self.searchTab.count()):
+    #        if i == index:
+    #            self.searchTab.widget(i).setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+    #        else:
+    #            self.searchTab.widget(i).setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
     def test(self):
         res = self.generateKwargs()
-        ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
+        #pprint(res)
+        ret = extended_finger_search(self.corpus, res['h1c1'], res['h2c1'], res['h1c2'], res['h2c2'], res['logic'])
         pprint(ret)
+
+
+    def generateRegExp(self):
+        def generate_subset(s, n):
+            return list(combinations(s, n))
+
+        fingerConfig = self.fingerConfigGroup.value()
+
+        extendedFingers = list()
+        for finger in self.fingers:
+            if fingerConfig[finger] == 'Extended':
+                extendedFingers.append(finger)
+
+        fingerConfigLogic = fingerConfig['logic']
+
+        fingerConfigRegExps = list()
+        if fingerConfigLogic == 'All of the extensions':
+            fingerConfigRegExp = r''
+            for finger in self.fingers:
+                reg = self.fingerConfigDict[finger][fingerConfig[finger]]
+                fingerConfigRegExp += reg
+            fingerConfigRegExps.append(fingerConfigRegExp)
+        else:  ## 'Any of the extendions'
+            for n in range(len(extendedFingers) + 1):
+                combs = generate_subset(extendedFingers, n)
+                for comb in combs:
+                    fingers_reg = r''
+                    for finger in self.fingers:
+                        if finger in comb:
+                            reg = self.fingerConfigDict[finger]['Extended']
+                            fingers_reg += reg
+                        elif finger in extendedFingers:
+                            reg = self.fingerConfigDict[finger]['Either']
+                            fingers_reg += reg
+                        else:
+                            reg = self.fingerConfigDict[finger][fingerConfig[finger]]
+                            fingers_reg += reg
+                    fingerConfigRegExps.append(fingers_reg)
+
+        fingerNumRegExps = list()
+
+        numFingers = self.fingerNumberGroup.value()
+        for num in numFingers:
+            combs = generate_subset(self.fingers, num)
+            for comb in combs:
+                fingers_reg = r''
+                for finger in self.fingers:
+                    if finger in comb:
+                        reg = self.fingerConfigDict[finger]['Extended']
+                        fingers_reg += reg
+                    else:
+                        reg = self.fingerConfigDict[finger]['Not extended']
+                        fingers_reg += reg
+                fingerNumRegExps.append(fingers_reg)
+
+        #relationLogic = self.relationlogicGroup.value()
+
+        #if relationLogic == 'Apply both':
+        #    regExps = set(fingerConfigRegExps) & set(fingerNumRegExps)
+        #elif relationLogic == 'Apply either':
+        #    regExps = set(fingerConfigRegExps) | set(fingerNumRegExps)
+        #elif relationLogic == 'Apply only the finger configuration':
+        #    regExps = set(fingerConfigRegExps)
+        #else:
+        #    regExps = set(fingerNumRegExps)
+
+        return set(fingerConfigRegExps), set(fingerNumRegExps)
 
     def generateKwargs(self):
         kwargs = dict()
@@ -316,10 +412,10 @@ class ExtendedFingerSearchDialog(FunctionDialog):
         else:
             value = self.advancedTab.value()
 
-        kwargs['c1h1'] = value['c1h1']
-        kwargs['c1h2'] = value['c1h2']
-        kwargs['c2h1'] = value['c2h1']
-        kwargs['c2h2'] = value['c2h2']
+        kwargs['h1c1'] = value['h1c1']
+        kwargs['h1c2'] = value['h1c2']
+        kwargs['h2c1'] = value['h2c1']
+        kwargs['h2c2'] = value['h2c2']
         kwargs['logic'] = value['logic']
         return kwargs
 
@@ -419,7 +515,9 @@ class NumExtendedFingerPanel(QGroupBox):
         return checkedNum
 
 
+
 class ExtendedFingerPanel(QGroupBox):
+    #fingers = ['thumb', 'index', 'middle', 'ring', 'pinky']
 
     def __init__(self):
         super().__init__('Finger configuration')
@@ -429,6 +527,7 @@ class ExtendedFingerPanel(QGroupBox):
         fingerExtensionSpecificationLayout = QHBoxLayout()
         mainLayout.addLayout(fingerExtensionSpecificationLayout)
 
+        # TODO: might want to reimplement this by loop through the list
         self.optionsForT = FingerOptionGroup('Thumb')
         self.optionsForI = FingerOptionGroup('Index')
         self.optionsForM = FingerOptionGroup('Middle')
@@ -519,6 +618,61 @@ class ExtendedFingerPanel(QGroupBox):
         return valueDict
 
 
+
+
+class AdvancedOptionDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        mainLayout = QVBoxLayout()
+        self.setLayout(mainLayout)
+
+        numberOfExtendedFingerGroup = QGroupBox('Number of extended fingers')
+        mainLayout.addWidget(numberOfExtendedFingerGroup)
+
+        groupLayout = QVBoxLayout()
+        numberOfExtendedFingerGroup.setLayout(groupLayout)
+
+        buttonLayout = QHBoxLayout()
+        groupLayout.addLayout(buttonLayout)
+
+        zero = QCheckBox('0')
+        one = QCheckBox('1')
+        two = QCheckBox('2')
+        three = QCheckBox('3')
+        four = QCheckBox('4')
+        five = QCheckBox('5')
+        zero.setChecked(True)
+        one.setChecked(True)
+        two.setChecked(True)
+        three.setChecked(True)
+        four.setChecked(True)
+        five.setChecked(True)
+
+        buttonLayout.addWidget(zero)
+        buttonLayout.addWidget(one)
+        buttonLayout.addWidget(two)
+        buttonLayout.addWidget(three)
+        buttonLayout.addWidget(four)
+        buttonLayout.addWidget(five)
+
+        logicLayoyt = QHBoxLayout()
+        logicHeading = QLabel('Signs should contain:')
+        logicGroup = LogicRadioButtonGroup('horizontal', 'a', a='All of the above', o='Any of the above')
+        logicLayoyt.addWidget(logicHeading, alignment=Qt.AlignLeft)
+        logicLayoyt.addWidget(logicGroup, alignment=Qt.AlignLeft)
+        groupLayout.addLayout(logicLayoyt)
+
+        # bolded the relevant part / from the main window
+        relationGroup = QGroupBox('Relation between the specifications for extended fingers and the number of fingers')
+        mainLayout.addWidget(relationGroup)
+
+        relationGroupLayout = QHBoxLayout()
+        relationGroup.setLayout(relationGroupLayout)
+
+        relationlogicGroup = LogicRadioButtonGroup('vertical', 'a', a='Both apply', o='Either applies')
+        relationGroupLayout.addWidget(relationlogicGroup)
+
+
 class LogicRadioButtonGroup(QGroupBox):
     def __init__(self, direction, default, title='', **kwarg):
         super().__init__(title)
@@ -545,6 +699,7 @@ class LogicRadioButtonGroup(QGroupBox):
             else:
                 option.setChecked(False)
 
+
     def value(self):
         checked = self.buttonGroup.checkedButton()
         return checked.text()
@@ -568,7 +723,6 @@ class FingerOptionGroup(QGroupBox):
                   'Not extended': r'(?P<pinky>.4(?P<pinky_mcp>[^HEe])..)',
                   'Either': r'(?P<pinky>.4(?P<pinky_mcp>.)..)'}
     }
-
     def __init__(self, groupName):
         super().__init__(groupName)
 
@@ -621,6 +775,7 @@ class FingerOptionGroup(QGroupBox):
             regExp = self.fingerOptionDict['pinky'][chosen]
 
         return regExp
+
 
     def value(self):
         checked = self.buttonGroup.checkedButton()
