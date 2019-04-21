@@ -1,5 +1,5 @@
 from imports import (QThread, Signal, QDialog, QVBoxLayout, QPushButton,
-                     QHBoxLayout)
+                     QHBoxLayout, Slot)
 
 
 class FunctionWorker(QThread):
@@ -14,8 +14,8 @@ class FunctionWorker(QThread):
 
     def setParams(self, kwargs):
         self.kwargs = kwargs
-        self.kwargs['call_back'] = self.emitProgress
-        self.kwargs['stop_check'] = self.stopCheck
+        #self.kwargs['call_back'] = self.emitProgress
+        #self.kwargs['stop_check'] = self.stopCheck
         #self.stopped = False
         #self.total = None
 
@@ -87,16 +87,17 @@ class FunctionDialog(QDialog):
         layout.addLayout(acLayout)
         self.setLayout(layout)
 
+    @Slot(object)
     def setResults(self, results):
-        self.results = results
+        pass  # Implemented in subclasses
 
     def generateKwargs(self):
-        pass  # Implemented by subclasses
+        pass  # Implemented in subclasses
 
     def calc(self):
         kwargs = self.generateKwargs()
-        if kwargs is None:
-            return
+        #if kwargs is None:
+        #    return
         self.thread.setParams(kwargs)
         self.thread.start()
 
@@ -104,7 +105,7 @@ class FunctionDialog(QDialog):
 
         #self.progressDialog.reset()
         #if result:
-        self.accept()
+        #self.accept()
 
     def newTable(self):
         self.update = False
@@ -115,6 +116,7 @@ class FunctionDialog(QDialog):
         self.calc()
 
     def open_about(self):
+        #TODO: implement this
         pass
         #self.aboutWindow = HelpDialog(self, self.name)
         #self.aboutWindow.exec_()

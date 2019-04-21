@@ -31,35 +31,6 @@ def check_finger_match(word, reg_exps):
     return False
 
 
-def run_extended_finger_search(corpus, search_mode, relation_logic, finger_config_reg_exps, finger_num_reg_exps):
-    finger_config_matches = set()
-    finger_num_matches = set()
-    for word in corpus:
-        match_finger_config = check_finger_match(word, finger_config_reg_exps)
-        match_finger_num = check_finger_match(word, finger_num_reg_exps)
-
-        if match_finger_config:
-            finger_config_matches.add(word.gloss)
-
-        if match_finger_num:
-            finger_num_matches.add(word.gloss)
-
-    if relation_logic == 'Apply both':
-        print('=====Apply both=====')
-        ret = finger_config_matches & finger_num_matches
-        pprint(ret)
-    elif relation_logic == 'Apply either':
-        print('=====Apply either=====')
-        ret = finger_config_matches | finger_num_matches
-        pprint(ret)
-    elif relation_logic == 'Apply only the finger configuration':
-        print('=====Apply only the finger configuration=====')
-        pprint(finger_config_matches)
-    else:
-        print('=====Apply only the number of extended fingers=====')
-        pprint(finger_num_matches)
-
-
 def match_specification(slots, spec):
     finger_config_reg_exps = spec['fingerConfigRegExps']  # a set
     finger_number_reg_exps = spec['fingerNumberRegExps']  # a set
@@ -103,17 +74,26 @@ def extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic):
     # logic part: if "and", means that all four have to be true
     # if "or", means that only one of them has to be true
 
-    ret = set()
+    ret = list()
     for word in corpus:
+        #print('=====', word.gloss, '=====')
         c1h1_slots = ''.join([slot if slot else '_' for slot in word.config1hand1])
         c1h2_slots = ''.join([slot if slot else '_' for slot in word.config1hand2])
         c2h1_slots = ''.join([slot if slot else '_' for slot in word.config2hand1])
         c2h2_slots = ''.join([slot if slot else '_' for slot in word.config2hand2])
+        #print(c1h1_slots)
+        #print(c1h2_slots)
+        #print(c2h1_slots)
+        #print(c2h2_slots)
 
         c1h1_match = match_specification(c1h1_slots, c1h1)
         c1h2_match = match_specification(c1h2_slots, c1h2)
         c2h1_match = match_specification(c2h1_slots, c2h1)
         c2h2_match = match_specification(c2h2_slots, c2h2)
+        #print(c1h1_match)
+        #print(c1h2_match)
+        #print(c2h1_match)
+        #print(c2h2_match)
 
         if logic == 'All four hand/configuration specifications':
             matched = all([c1h1_match, c1h2_match, c2h1_match, c2h2_match])
@@ -121,7 +101,7 @@ def extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic):
             matched = any([c1h1_match, c1h2_match, c2h1_match, c2h2_match])
 
         if matched:
-            ret.add(word.gloss)
+            ret.append(word)
 
     return ret
 

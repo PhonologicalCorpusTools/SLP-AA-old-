@@ -1,6 +1,6 @@
 from imports import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QLabel, QButtonGroup,
                      QRadioButton, QApplication, QGridLayout, QTabWidget, QWidget,
-                     QSizePolicy, Qt)
+                     QSizePolicy, Qt, Slot)
 from gui.transcriptions import TranscriptionConfigTab
 from constants import GLOBAL_OPTIONS
 import sys
@@ -12,7 +12,16 @@ from analysis.phonological_search import extended_finger_search
 
 class EFWorker(FunctionWorker):
     def run(self):
-        pass
+        corpus = self.kwargs.pop('corpus')
+        c1h1 = self.kwargs.pop('c1h1')
+        c1h2 = self.kwargs.pop('c1h2')
+        c2h1 = self.kwargs.pop('c2h1')
+        c2h2 = self.kwargs.pop('c2h2')
+        logic = self.kwargs.pop('logic')
+
+        results = extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic)
+        #pprint(self.results)
+        self.dataReady.emit(results)
 
 
 class PhonologicalSearchDialog(QDialog):
@@ -256,26 +265,28 @@ class AdvancedFingerTab(QWidget):
 
 
 class ExtendedFingerSearchDialog(FunctionDialog):
-    header = ['Sign', 'Match', 'Token frequency']
+    header = ['Corpus', 'Sign', 'Token frequency']
     about = 'Extended finger search'
     name = 'extended finger search'
 
     fingers = ['thumb', 'index', 'middle', 'ring', 'pinky']
-    fingerConfigDict = {'thumb': {'Extended': r'(?P<thumb>_(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).)..\u2205/......',
-                                  'Not extended': r'(?P<thumb>_(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).)..\u2205/......',
-                                  'Either': r'(?P<thumb>_(?P<thumb_opposition>.).(?<thumb_mcp>.).)..\u2205/......'},
-                        'index': {'Extended': r'(?P<index>1(?P<index_mcp>[HEe])..)',
-                                  'Not extended': r'(?P<index>1(?P<index_mcp>[^HEe])..)',
-                                  'Either': r'(?P<index>1(?P<index_mcp>.)..)'},
-                        'middle': {'Extended': r'(?P<middle>.2(?P<middle_mcp>[HEe])..)',
-                                   'Not extended': r'(?P<middle>.2(?P<middle_mcp>[^HEe])..)',
-                                   'Either': r'(?P<middle>.2(?P<middle_mcp>.)..)'},
-                        'ring': {'Extended': r'(?P<ring>.3(?P<ring_mcp>[HEe])..)',
-                                 'Not extended': r'(?P<ring>.3(?P<ring_mcp>[^HEe])..)',
-                                 'Either': r'(?P<ring>.3(?P<ring_mcp>.)..)'},
-                        'pinky': {'Extended': r'(?P<pinky>.4(?P<pinky_mcp>[HEe])..)',
-                                  'Not extended': r'(?P<pinky>.4(?P<pinky_mcp>[^HEe])..)',
-                                  'Either': r'(?P<pinky>.4(?P<pinky_mcp>.)..)'}}
+    fingerConfigDict = {
+        'thumb': {'Extended': r'(?P<thumb>.(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).).+.\u2205/.+.....',
+                  'Not extended': r'(?P<thumb>.(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).).+.\u2205/.+.....',
+                  'Either': r'(?P<thumb>.(?P<thumb_opposition>.).(?<thumb_mcp>.).).+.\u2205/.+.....'},
+        'index': {'Extended': r'(?P<index>1(?P<index_mcp>[HEe])..)',
+                  'Not extended': r'(?P<index>1(?P<index_mcp>[^HEe])..)',
+                  'Either': r'(?P<index>1(?P<index_mcp>.)..)'},
+        'middle': {'Extended': r'(?P<middle>.+2(?P<middle_mcp>[HEe])..)',
+                   'Not extended': r'(?P<middle>.+2(?P<middle_mcp>[^HEe])..)',
+                   'Either': r'(?P<middle>.+2(?P<middle_mcp>.)..)'},
+        'ring': {'Extended': r'(?P<ring>.+3(?P<ring_mcp>[HEe])..)',
+                 'Not extended': r'(?P<ring>.+3(?P<ring_mcp>[^HEe])..)',
+                 'Either': r'(?P<ring>.+3(?P<ring_mcp>.)..)'},
+        'pinky': {'Extended': r'(?P<pinky>.+4(?P<pinky_mcp>[HEe])..)',
+                  'Not extended': r'(?P<pinky>.+4(?P<pinky_mcp>[^HEe])..)',
+                  'Either': r'(?P<pinky>.+4(?P<pinky_mcp>.)..)'}
+    }
 
     def __init__(self, corpus, parent, settings, recent):
         super().__init__(parent, settings, EFWorker())
@@ -295,17 +306,17 @@ class ExtendedFingerSearchDialog(FunctionDialog):
         mainLayout.addWidget(self.searchTab, 0, 0)
 
         #####This part should be removed later#####
-        self.testButton = QPushButton('test')
-        mainLayout.addWidget(self.testButton, 1, 0)
-        self.testButton.clicked.connect(self.test)
+        #self.testButton = QPushButton('test')
+        #mainLayout.addWidget(self.testButton, 1, 0)
+        #self.testButton.clicked.connect(self.test)
         #####This part should be removed later#####
 
         self.layout().insertLayout(0, mainLayout)
 
-    def test(self):
-        res = self.generateKwargs()
-        ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
-        pprint(ret)
+    #def test(self):
+    #    res = self.generateKwargs()
+    #    ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
+    #    pprint(ret)
 
     def generateKwargs(self):
         kwargs = dict()
@@ -316,6 +327,7 @@ class ExtendedFingerSearchDialog(FunctionDialog):
         else:
             value = self.advancedTab.value()
 
+        kwargs['corpus'] = self.corpus
         kwargs['c1h1'] = value['c1h1']
         kwargs['c1h2'] = value['c1h2']
         kwargs['c2h1'] = value['c2h1']
@@ -323,25 +335,36 @@ class ExtendedFingerSearchDialog(FunctionDialog):
         kwargs['logic'] = value['logic']
         return kwargs
 
+    @Slot(object)
+    def setResults(self, results):
+        #TODO: need to modify token frequency when implemented (right not there is not frquency info)
+        #TODO: double check thread method to properly place accept()
+        self.results = list()
+        for sign in results:
+            self.results.append({'Corpus': self.corpus.name,
+                                 'Sign': sign.gloss,
+                                 'Token frequency': 1})
+        self.accept()
+
 
 class NumExtendedFingerPanel(QGroupBox):
     fingers = ['thumb', 'index', 'middle', 'ring', 'pinky']
     fingerConfigDict = {
-        'thumb': {'Extended': r'(?P<thumb>_(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).)..\u2205/......',
-                  'Not extended': r'(?P<thumb>_(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).)..\u2205/......',
-                  'Either': r'(?P<thumb>_(?P<thumb_opposition>.).(?<thumb_mcp>.).)..\u2205/......'},
+        'thumb': {'Extended': r'(?P<thumb>.(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).).+.\u2205/.+.....',
+                  'Not extended': r'(?P<thumb>.(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).).+.\u2205/.+.....',
+                  'Either': r'(?P<thumb>.(?P<thumb_opposition>.).(?<thumb_mcp>.).).+.\u2205/.+.....'},
         'index': {'Extended': r'(?P<index>1(?P<index_mcp>[HEe])..)',
                   'Not extended': r'(?P<index>1(?P<index_mcp>[^HEe])..)',
                   'Either': r'(?P<index>1(?P<index_mcp>.)..)'},
-        'middle': {'Extended': r'(?P<middle>.2(?P<middle_mcp>[HEe])..)',
-                   'Not extended': r'(?P<middle>.2(?P<middle_mcp>[^HEe])..)',
-                   'Either': r'(?P<middle>.2(?P<middle_mcp>.)..)'},
-        'ring': {'Extended': r'(?P<ring>.3(?P<ring_mcp>[HEe])..)',
-                 'Not extended': r'(?P<ring>.3(?P<ring_mcp>[^HEe])..)',
-                 'Either': r'(?P<ring>.3(?P<ring_mcp>.)..)'},
-        'pinky': {'Extended': r'(?P<pinky>.4(?P<pinky_mcp>[HEe])..)',
-                  'Not extended': r'(?P<pinky>.4(?P<pinky_mcp>[^HEe])..)',
-                  'Either': r'(?P<pinky>.4(?P<pinky_mcp>.)..)'}
+        'middle': {'Extended': r'(?P<middle>.+2(?P<middle_mcp>[HEe])..)',
+                   'Not extended': r'(?P<middle>.+2(?P<middle_mcp>[^HEe])..)',
+                   'Either': r'(?P<middle>.+2(?P<middle_mcp>.)..)'},
+        'ring': {'Extended': r'(?P<ring>.+3(?P<ring_mcp>[HEe])..)',
+                 'Not extended': r'(?P<ring>.+3(?P<ring_mcp>[^HEe])..)',
+                 'Either': r'(?P<ring>.+3(?P<ring_mcp>.)..)'},
+        'pinky': {'Extended': r'(?P<pinky>.+4(?P<pinky_mcp>[HEe])..)',
+                  'Not extended': r'(?P<pinky>.+4(?P<pinky_mcp>[^HEe])..)',
+                  'Either': r'(?P<pinky>.+4(?P<pinky_mcp>.)..)'}
     }
 
     def __init__(self):
@@ -552,21 +575,21 @@ class LogicRadioButtonGroup(QGroupBox):
 
 class FingerOptionGroup(QGroupBox):
     fingerOptionDict = {
-        'thumb': {'Extended': r'(?P<thumb>_(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).)..\u2205/......',
-                  'Not extended': r'(?P<thumb>_(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).)..\u2205/......',
-                  'Either': r'(?P<thumb>_(?P<thumb_opposition>.).(?<thumb_mcp>.).)..\u2205/......'},
+        'thumb': {'Extended': r'(?P<thumb>.(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).).+.\u2205/.+.....',
+                  'Not extended': r'(?P<thumb>.(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).).+.\u2205/.+.....',
+                  'Either': r'(?P<thumb>.(?P<thumb_opposition>.).(?<thumb_mcp>.).).+.\u2205/.+.....'},
         'index': {'Extended': r'(?P<index>1(?P<index_mcp>[HEe])..)',
                   'Not extended': r'(?P<index>1(?P<index_mcp>[^HEe])..)',
                   'Either': r'(?P<index>1(?P<index_mcp>.)..)'},
-        'middle': {'Extended': r'(?P<middle>.2(?P<middle_mcp>[HEe])..)',
-                   'Not extended': r'(?P<middle>.2(?P<middle_mcp>[^HEe])..)',
-                   'Either': r'(?P<middle>.2(?P<middle_mcp>.)..)'},
-        'ring': {'Extended': r'(?P<ring>.3(?P<ring_mcp>[HEe])..)',
-                 'Not extended': r'(?P<ring>.3(?P<ring_mcp>[^HEe])..)',
-                 'Either': r'(?P<ring>.3(?P<ring_mcp>.)..)'},
-        'pinky': {'Extended': r'(?P<pinky>.4(?P<pinky_mcp>[HEe])..)',
-                  'Not extended': r'(?P<pinky>.4(?P<pinky_mcp>[^HEe])..)',
-                  'Either': r'(?P<pinky>.4(?P<pinky_mcp>.)..)'}
+        'middle': {'Extended': r'(?P<middle>.+2(?P<middle_mcp>[HEe])..)',
+                   'Not extended': r'(?P<middle>.+2(?P<middle_mcp>[^HEe])..)',
+                   'Either': r'(?P<middle>.+2(?P<middle_mcp>.)..)'},
+        'ring': {'Extended': r'(?P<ring>.+3(?P<ring_mcp>[HEe])..)',
+                 'Not extended': r'(?P<ring>.+3(?P<ring_mcp>[^HEe])..)',
+                 'Either': r'(?P<ring>.+3(?P<ring_mcp>.)..)'},
+        'pinky': {'Extended': r'(?P<pinky>.+4(?P<pinky_mcp>[HEe])..)',
+                  'Not extended': r'(?P<pinky>.+4(?P<pinky_mcp>[^HEe])..)',
+                  'Either': r'(?P<pinky>.+4(?P<pinky_mcp>.)..)'}
     }
 
     def __init__(self, groupName):

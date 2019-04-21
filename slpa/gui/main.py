@@ -16,6 +16,7 @@ from gui.colour import *
 from constants import GLOBAL_OPTIONS
 from gui.parameterwidgets import ParameterDialog, ParameterTreeModel
 from gui.phonological_search import PhonologicalSearchDialog, ExtendedFingerSearchDialog
+from gui.results_windows import ResultsWindow
 #from slpa import __version__ as currentSLPAversion
 from pprint import pprint
 
@@ -2151,6 +2152,7 @@ def clean(item):
             pass
 
 #TODO: add settings arguments
+#TODO: disable editing function for slots
 class AnalyzerMainWindow(QMainWindow):
     def __init__(self, corpus):
         super().__init__()
@@ -2289,7 +2291,12 @@ class AnalyzerMainWindow(QMainWindow):
 
     def searchByExtendedFingers(self):
         searchDialog = ExtendedFingerSearchDialog(self.corpus, self, None, None)
-        searchDialog.exec_()
+        success = searchDialog.exec_()
+        if success:
+            self.EFResultWindow = ResultsWindow('Extended Finger Search Results',
+                                                searchDialog,
+                                                self)
+            self.EFResultWindow.show()
 
     def switchMode(self):
         #pass

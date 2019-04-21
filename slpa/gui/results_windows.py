@@ -1,25 +1,66 @@
 import csv
 from imports import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QFrame,
-                     QFileDialog, QAbstractTableModel, QHeaderView, Qt,
-                     QModelIndex, QTableView, QAbstractItemView, QSizePolicy, QApplication)
+                     QFileDialog, QAbstractTableModel, QHeaderView, Qt, QModelIndex,
+                     QTableView, QAbstractItemView, QSizePolicy, QApplication, QVariant,
+                     QAbstractScrollArea)
+
+
+class ResultsTableModel(QAbstractTableModel):
+    def __init__(self, header, results):
+        super().__init__()
+        self.header = header
+        self.results = results  # results is a list of dictionaries
+
+    def rowCount(self, parent=None, *args, **kwargs):
+        return len(self.results)
+
+    def appendRows(self, entries):
+        numOfRows = self.rowCount()
+        self.beginInsertRows(QModelIndex(), numOfRows, numOfRows+len(entries)-1)
+        for entry in entries:
+            self.results.append(entry)
+        self.endInsertRows()
+
+    def columnCount(self, parent=None, *args, **kwargs):
+        return len(self.header)
+
+    def data(self, index, role=Qt.DisplayRole):
+        row = index.row()
+        column = index.column()
+        if not index.isValid() or not (0 <= row < len(self.results)):
+            return None
+
+        entry = self.results[row]
+
+        if role == Qt.DisplayRole:
+            column_name = self.header[column]
+            return entry[column_name]
+        else:
+            return None
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role != Qt.DisplayRole:
+            return QVariant()
+        if orientation == Qt.Horizontal:
+            header = self.header[section]
+            return QVariant(header)
+        return QVariant(int(section + 1))
+
 
 class ResultsWindow(QDialog):
     def __init__(self, title, dialog, parent):
-        QDialog.__init__(self, parent=parent)
+        super().__init__(parent=parent)
+        self.setWindowTitle(title)
         self.dialog = dialog
-        dataModel = ResultsModel(self.dialog.header, self.dialog.results, self._parent.settings)
-        layout = QVBoxLayout()
-        self.table = TableWidget()
-        self.table.setModel(dataModel)
-        try:
-            self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        except AttributeError:
-            self.table.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
-        layout.addWidget(self.table)
-        self.aclayout = QHBoxLayout()
+        dataModel = ResultsTableModel(self.dialog.header, self.dialog.results)
 
-        self.redoButton = QPushButton('Reopen function dialog')
-        self.redoButton.clicked.connect(self.redo)
+        self.table = ResultsTableView()
+        self.table.setModel(dataModel)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
+        # The option buttons
+        self.reopenButton = QPushButton('Reopen function dialog')
+        self.reopenButton.clicked.connect(self.reopen)
 
         self.saveButton = QPushButton('Save to file')
         self.saveButton.clicked.connect(self.save)
@@ -27,55 +68,71 @@ class ResultsWindow(QDialog):
         self.closeButton = QPushButton('Close window')
         self.closeButton.clicked.connect(self.reject)
 
-        self.aclayout.addWidget(self.redoButton)
-        self.aclayout.addWidget(self.saveButton)
-        self.aclayout.addWidget(self.closeButton)
-
-        #acframe = QFrame()
-        #acframe.setLayout(self.aclayout)
-
-        layout.addLayout(self.aclayout)
-        self.setLayout(layout)
-
+        # Appearance
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
-        self.setWindowTitle(title)
-        dialogWidth = self.table.horizontalHeader().length() + 50
-        dialogHeight = self.table.verticalHeader().length() + 50
+        dialogWidth = self.table.horizontalHeader().length() + 25
+        dialogHeight = self.table.verticalHeader().length() + 25
         self.resize(dialogWidth, dialogHeight)
 
-    def sizeHint(self):
-        sz = QDialog.sizeHint(self)
-        minWidth = self.table.calcWidth()+41
-        if sz.width() < minWidth:
+        # Layout
+        buttonLayout = QHBoxLayout()
+        buttonLayout.addWidget(self.reopenButton)
+        buttonLayout.addWidget(self.saveButton)
+        buttonLayout.addWidget(self.closeButton)
 
-            sz.setWidth(minWidth)
-        if sz.height() < 400:
-            sz.setHeight(400)
-        return sz
+        mainLayout = QVBoxLayout()
+        mainLayout.addWidget(self.table)
+        mainLayout.addLayout(buttonLayout)
 
-    def redo(self):
-        print(self.dialog.exec_())
-        print(self.dialog.update)
+        self.setLayout(mainLayout)
+
+    # def sizeHint(self):
+    #     sz = QDialog.sizeHint(self)
+    #     minWidth = self.table.calcWidth()+41
+    #     if sz.width() < minWidth:
+    #
+    #         sz.setWidth(minWidth)
+    #     if sz.height() < 400:
+    #         sz.setHeight(400)
+    #     return sz
+
+    def reopen(self):
+        #TODO: maybe modify this so that function and result windows can appear together
         if self.dialog.exec_():
             if self.dialog.update:
-                self.table.model().addRows(self.dialog.results)
+                self.table.model().appendRows(self.dialog.results)
+                self.table.resizeColumnsToContents()
+                self.table.resizeRowsToContents()
             else:
-                dataModel = ResultsModel(self.dialog.header,self.dialog.results, self._parent.settings)
+                dataModel = ResultsTableModel(self.dialog.header, self.dialog.results)
                 self.table.setModel(dataModel)
+                self.table.resizeColumnsToContents()
+                self.table.resizeRowsToContents()
         self.raise_()
         self.activateWindow()
 
     def save(self):
-        filename = QFileDialog.getSaveFileName(self,'Choose save file',
-                        filter = 'Text files (*.txt *.csv)')
+        fileDialog = QFileDialog(caption='Save results')
+        fileDialog.setAcceptMode(QFileDialog.AcceptSave)
+        fileDialog.setFileMode(QFileDialog.AnyFile)
+        fileDialog.setNameFilter('Text files (*.txt *.csv)')
+        fileDialog.selectFile('results')
+        fileDialog.setDefaultSuffix('txt')
 
-        if filename and filename[0]:
+        if fileDialog.exec_():
+            filename = fileDialog.selectedFiles()
             with open(filename[0], mode='w', encoding='utf-8-sig') as f:
+                model = self.table.model()
                 writer = csv.writer(f, delimiter='\t')
-                writer.writerow(self.table.model().columns)
-                for row in self.table.model().rows:
-                    writer.writerow(row)
+                writer.writerow(model.header)
+                for row in range(model.rowCount()):
+                    entry = list()
+                    for column in range(model.columnCount()):
+                        idx = model.index(row, column)
+                        dataPoint = str(model.data(idx))
+                        entry.append(dataPoint)
+                    writer.writerow(entry)
 
 
 class BaseTableModel(QAbstractTableModel):
@@ -161,9 +218,10 @@ class BaseTableModel(QAbstractTableModel):
             del self.rows[i]
             self.endRemoveRows()
 
+
 class ResultsModel(BaseTableModel):
-    def __init__(self, header, results, settings, parent=None):
-        QAbstractTableModel.__init__(self,parent)
+    def __init__(self, header, results, settings):
+        QAbstractTableModel.__init__(self)
         self.settings = settings
         headerDynamic = []
         headerStatic = []
@@ -201,49 +259,51 @@ class ResultsModel(BaseTableModel):
         self.rows = currRows
 
 
-class TableWidget(QTableView):
-    def __init__(self,parent=None):
-        super(TableWidget, self).__init__(parent=parent)
+class ResultsTableView(QTableView):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
 
+        # Appearance of the table
         self.verticalHeader().hide()
+        self.horizontalHeader().setMinimumSectionSize(50)
+        #self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+        # Behavior of the table
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
-
-        self.horizontalHeader().setMinimumSectionSize(70)
-
         self.setSortingEnabled(True)
-        self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
 
-        self.clip = QApplication.clipboard()
+        #self.clip = QApplication.clipboard()
 
-    def keyPressEvent(self, e):
-        if (e.modifiers() & Qt.ControlModifier):
-            try:
-                selected = self.selectionModel().selectedRows()
-            except AttributeError:
-                super().keyPressEvent(e)
-                return
-            if e.key() == Qt.Key_C: #copy
-                copyInfo = list()
-                for row in selected:
-                    copy = list()
-                    for col in range(self.model().columnCount()):
-                        ind = self.model().index(row.row(),col)
-                        copy.append(self.model().data(ind, Qt.DisplayRole))
-                    copy = '\t'.join(copy)
-                    copyInfo.append(copy)
-                copyInfo = '\n'.join(copyInfo)
-                self.clip.setText(copyInfo)
+    # def keyPressEvent(self, e):
+    #     if (e.modifiers() & Qt.ControlModifier):
+    #         try:
+    #             selected = self.selectionModel().selectedRows()
+    #         except AttributeError:
+    #             super().keyPressEvent(e)
+    #             return
+    #         if e.key() == Qt.Key_C: #copy
+    #             copyInfo = list()
+    #             for row in selected:
+    #                 copy = list()
+    #                 for col in range(self.model().columnCount()):
+    #                     ind = self.model().index(row.row(),col)
+    #                     copy.append(self.model().data(ind, Qt.DisplayRole))
+    #                 copy = '\t'.join(copy)
+    #                 copyInfo.append(copy)
+    #             copyInfo = '\n'.join(copyInfo)
+    #             self.clip.setText(copyInfo)
 
 
-    def setModel(self,model):
-        super(TableWidget, self).setModel(model)
-        self.resizeColumnsToContents()
+    #def setModel(self, model):
+    #    super().setModel(model)
+    #    #super(TableWidget, self).setModel(model)
+    #    self.resizeColumnsToContents()
 
-    def calcWidth(self):
-        header = self.horizontalHeader()
-        width = self.horizontalOffset()
-        for i in range(header.count()):
-            width += header.sectionSize(i)
-        return width
+    # def calcWidth(self):
+    #     header = self.horizontalHeader()
+    #     width = self.horizontalOffset()
+    #     for i in range(header.count()):
+    #         width += header.sectionSize(i)
+    #     return width
