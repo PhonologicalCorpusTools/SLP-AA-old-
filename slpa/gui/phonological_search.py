@@ -114,18 +114,27 @@ class BasicSearchTab(QWidget):
                                                p='Positive',
                                                n='Negative')
 
+        includeIPanel = QGroupBox('Additional')
+        self.includeIbutton = QCheckBox('Treat "i" as extended')
+        self.includeIbutton.setChecked(False)
+
+        includeILayout = QHBoxLayout()
+        includeIPanel.setLayout(includeILayout)
+        includeILayout.addWidget(self.includeIbutton)
+
         mainLayout = QGridLayout()
         self.setLayout(mainLayout)
         mainLayout.addWidget(self.fingerConfigPanel, 0, 0, 1, 3)
         mainLayout.addWidget(self.fingerNumberPanel, 1, 0, 1, 3)
-        mainLayout.addWidget(self.relationlogicPanel, 2, 0, 1, 1)
-        mainLayout.addWidget(self.handPanel, 2, 1, 1, 1)
+        mainLayout.addWidget(self.relationlogicPanel, 2, 0, 2, 1)
+        mainLayout.addWidget(self.handPanel, 2, 1, 2, 1)
         mainLayout.addWidget(self.modePanel, 2, 2, 1, 1)
+        mainLayout.addWidget(includeIPanel, 3, 2, 1, 1)
 
     def value(self):
         handconfig = self.handPanel.value()
-        fingerConfigRegExps = self.fingerConfigPanel.generateRegExp()
-        fingerNumberRegExps = self.fingerNumberPanel.generateRegExp()
+        fingerConfigRegExps = self.fingerConfigPanel.generateRegExp(self.includeIbutton.isChecked())
+        fingerNumberRegExps = self.fingerNumberPanel.generateRegExp(self.includeIbutton.isChecked())
         reltionLogic = self.relationlogicPanel.value()
         searchMode = self.modePanel.value()
 
@@ -238,27 +247,38 @@ class AdvancedFingerTab(QWidget):
                                                title='Search mode',
                                                p='Positive',
                                                n='Negative')
+
+        self.includeIPanel = QGroupBox('Additional')
+        self.includeIbutton = QCheckBox('Treat "i" as extended')
+        self.includeIbutton.setChecked(False)
+
+        includeILayout = QHBoxLayout()
+        self.includeIPanel.setLayout(includeILayout)
+        includeILayout.addWidget(self.includeIbutton)
+
         self.default = QPushButton('Return to default')
         self.default.clicked.connect(self.setToDefault)
 
         mainLayout = QGridLayout()
         self.setLayout(mainLayout)
-        mainLayout.addWidget(self.fingerConfigPanel, 0, 0, 1, 2)
-        mainLayout.addWidget(self.fingerNumberPanel, 1, 0, 1, 2)
+        mainLayout.addWidget(self.fingerConfigPanel, 0, 0, 1, 3)
+        mainLayout.addWidget(self.fingerNumberPanel, 1, 0, 1, 3)
         mainLayout.addWidget(self.relationlogicPanel, 2, 0, 2, 1)
-        mainLayout.addWidget(self.modePanel, 2, 1, 1, 1)
-        mainLayout.addWidget(self.default, 3, 1, 1, 1)
+        mainLayout.addWidget(self.modePanel, 2, 1, 2, 1)
+        mainLayout.addWidget(self.includeIPanel, 2, 2, 1, 1)
+        mainLayout.addWidget(self.default, 3, 2, 1, 1)
 
     def setToDefault(self):
         self.fingerConfigPanel.setToDefault()
         self.fingerNumberPanel.setToDefault()
         self.relationlogicPanel.setToDefault('Apply both')
         self.modePanel.setToDefault('Positive')
+        self.includeIbutton.setChecked(False)
 
     def value(self):
         return {
-            'fingerConfigRegExps': self.fingerConfigPanel.generateRegExp(),
-            'fingerNumberRegExps': self.fingerNumberPanel.generateRegExp(),
+            'fingerConfigRegExps': self.fingerConfigPanel.generateRegExp(self.includeIbutton.isChecked()),
+            'fingerNumberRegExps': self.fingerNumberPanel.generateRegExp(self.includeIbutton.isChecked()),
             'relationLogic': self.relationlogicPanel.value(),
             'searchMode': self.modePanel.value()
         }
@@ -268,25 +288,6 @@ class ExtendedFingerSearchDialog(FunctionDialog):
     header = ['Corpus', 'Sign', 'Token frequency']
     about = 'Extended finger search'
     name = 'extended finger search'
-
-    fingers = ['thumb', 'index', 'middle', 'ring', 'pinky']
-    fingerConfigDict = {
-        'thumb': {'Extended': r'(?P<thumb>.(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).).+.\u2205/.+.....',
-                  'Not extended': r'(?P<thumb>.(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).).+.\u2205/.+.....',
-                  'Either': r'(?P<thumb>.(?P<thumb_opposition>.).(?<thumb_mcp>.).).+.\u2205/.+.....'},
-        'index': {'Extended': r'(?P<index>1(?P<index_mcp>[HEe])..)',
-                  'Not extended': r'(?P<index>1(?P<index_mcp>[^HEe])..)',
-                  'Either': r'(?P<index>1(?P<index_mcp>.)..)'},
-        'middle': {'Extended': r'(?P<middle>.+2(?P<middle_mcp>[HEe])..)',
-                   'Not extended': r'(?P<middle>.+2(?P<middle_mcp>[^HEe])..)',
-                   'Either': r'(?P<middle>.+2(?P<middle_mcp>.)..)'},
-        'ring': {'Extended': r'(?P<ring>.+3(?P<ring_mcp>[HEe])..)',
-                 'Not extended': r'(?P<ring>.+3(?P<ring_mcp>[^HEe])..)',
-                 'Either': r'(?P<ring>.+3(?P<ring_mcp>.)..)'},
-        'pinky': {'Extended': r'(?P<pinky>.+4(?P<pinky_mcp>[HEe])..)',
-                  'Not extended': r'(?P<pinky>.+4(?P<pinky_mcp>[^HEe])..)',
-                  'Either': r'(?P<pinky>.+4(?P<pinky_mcp>.)..)'}
-    }
 
     def __init__(self, corpus, parent, settings, recent):
         super().__init__(parent, settings, EFWorker())
@@ -349,7 +350,25 @@ class ExtendedFingerSearchDialog(FunctionDialog):
 
 class NumExtendedFingerPanel(QGroupBox):
     fingers = ['thumb', 'index', 'middle', 'ring', 'pinky']
-    fingerConfigDict = {
+    fingerConfigDict_with_i = {
+        'thumb': {'Extended': r'(?P<thumb>.(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEei]).).+.\u2205/.+.....',
+                  'Not extended': r'(?P<thumb>.(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEei]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEei]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEei]).).+.\u2205/.+.....',
+                  'Either': r'(?P<thumb>.(?P<thumb_opposition>.).(?<thumb_mcp>.).).+.\u2205/.+.....'},
+        'index': {'Extended': r'(?P<index>1(?P<index_mcp>[HEei])..)',
+                  'Not extended': r'(?P<index>1(?P<index_mcp>[^HEei])..)',
+                  'Either': r'(?P<index>1(?P<index_mcp>.)..)'},
+        'middle': {'Extended': r'(?P<middle>.+2(?P<middle_mcp>[HEei])..)',
+                   'Not extended': r'(?P<middle>.+2(?P<middle_mcp>[^HEei])..)',
+                   'Either': r'(?P<middle>.+2(?P<middle_mcp>.)..)'},
+        'ring': {'Extended': r'(?P<ring>.+3(?P<ring_mcp>[HEei])..)',
+                 'Not extended': r'(?P<ring>.+3(?P<ring_mcp>[^HEei])..)',
+                 'Either': r'(?P<ring>.+3(?P<ring_mcp>.)..)'},
+        'pinky': {'Extended': r'(?P<pinky>.+4(?P<pinky_mcp>[HEei])..)',
+                  'Not extended': r'(?P<pinky>.+4(?P<pinky_mcp>[^HEei])..)',
+                  'Either': r'(?P<pinky>.+4(?P<pinky_mcp>.)..)'}
+    }
+
+    fingerConfigDict_without_i = {
         'thumb': {'Extended': r'(?P<thumb>.(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).).+.\u2205/.+.....',
                   'Not extended': r'(?P<thumb>.(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).).+.\u2205/.+.....',
                   'Either': r'(?P<thumb>.(?P<thumb_opposition>.).(?<thumb_mcp>.).).+.\u2205/.+.....'},
@@ -407,7 +426,7 @@ class NumExtendedFingerPanel(QGroupBox):
         self.four.setChecked(True)
         self.five.setChecked(True)
 
-    def generateRegExp(self):
+    def generateRegExp(self, includeI):
         def generate_subset(s, n):
             """
             Helper function for calculating "from s take n"
@@ -424,12 +443,20 @@ class NumExtendedFingerPanel(QGroupBox):
             for comb in combs:
                 fingers_reg = r''
                 for finger in self.fingers:
-                    if finger in comb:
-                        reg = self.fingerConfigDict[finger]['Extended']
-                        fingers_reg += reg
+                    if includeI:
+                        if finger in comb:
+                            reg = self.fingerConfigDict_with_i[finger]['Extended']
+                            fingers_reg += reg
+                        else:
+                            reg = self.fingerConfigDict_with_i[finger]['Not extended']
+                            fingers_reg += reg
                     else:
-                        reg = self.fingerConfigDict[finger]['Not extended']
-                        fingers_reg += reg
+                        if finger in comb:
+                            reg = self.fingerConfigDict_without_i[finger]['Extended']
+                            fingers_reg += reg
+                        else:
+                            reg = self.fingerConfigDict_without_i[finger]['Not extended']
+                            fingers_reg += reg
                 regExps.add(fingers_reg)
 
         return regExps
@@ -477,7 +504,7 @@ class ExtendedFingerPanel(QGroupBox):
         self.optionsForP.setToDefault()
         self.logicGroup.setToDefault('All of the extensions')
 
-    def generateRegExp(self):
+    def generateRegExp(self, includeI):
         """
         :return: A set of regular expressions that represent the finger configuration
         """
@@ -493,11 +520,11 @@ class ExtendedFingerPanel(QGroupBox):
         if fingerConfigLogic == 'All of the extensions':
             # This is the easy case: just concatenate the regular expression for each finger
             regExp = re.compile(
-                self.optionsForT.generateRegExp() +
-                self.optionsForI.generateRegExp() +
-                self.optionsForM.generateRegExp() +
-                self.optionsForR.generateRegExp() +
-                self.optionsForP.generateRegExp())
+                self.optionsForT.generateRegExp(includeI) +
+                self.optionsForI.generateRegExp(includeI) +
+                self.optionsForM.generateRegExp(includeI) +
+                self.optionsForR.generateRegExp(includeI) +
+                self.optionsForP.generateRegExp(includeI))
             regExps.add(regExp)
 
         else:  # 'Any of the extendions'
@@ -519,13 +546,13 @@ class ExtendedFingerPanel(QGroupBox):
                         finger = option.title().lower()
                         # if so, we need to get the 'Extended' regular expression
                         if finger in comb:
-                            reg = option.getExtendedRegExp()
+                            reg = option.getExtendedRegExp(includeI)
                             fingers_reg += reg
                         elif finger in extendedFingers:  # the finger not in comb but still specified as extended
-                            reg = option.getNotExtendedRegExp()
+                            reg = option.getNotExtendedRegExp(includeI)
                             fingers_reg += reg
                         else:  # else just get its original specification
-                            reg = option.generateRegExp()
+                            reg = option.generateRegExp(includeI)
                             fingers_reg += reg
                     regExps.add(fingers_reg)
         return regExps
@@ -574,7 +601,25 @@ class LogicRadioButtonGroup(QGroupBox):
 
 
 class FingerOptionGroup(QGroupBox):
-    fingerOptionDict = {
+    fingerOptionDict_with_i = {
+        'thumb': {'Extended': r'(?P<thumb>.(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEei]).).+.\u2205/.+.....',
+                  'Not extended': r'(?P<thumb>.(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEei]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEei]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEei]).).+.\u2205/.+.....',
+                  'Either': r'(?P<thumb>.(?P<thumb_opposition>.).(?<thumb_mcp>.).).+.\u2205/.+.....'},
+        'index': {'Extended': r'(?P<index>1(?P<index_mcp>[HEei])..)',
+                  'Not extended': r'(?P<index>1(?P<index_mcp>[^HEei])..)',
+                  'Either': r'(?P<index>1(?P<index_mcp>.)..)'},
+        'middle': {'Extended': r'(?P<middle>.+2(?P<middle_mcp>[HEei])..)',
+                   'Not extended': r'(?P<middle>.+2(?P<middle_mcp>[^HEei])..)',
+                   'Either': r'(?P<middle>.+2(?P<middle_mcp>.)..)'},
+        'ring': {'Extended': r'(?P<ring>.+3(?P<ring_mcp>[HEei])..)',
+                 'Not extended': r'(?P<ring>.+3(?P<ring_mcp>[^HEei])..)',
+                 'Either': r'(?P<ring>.+3(?P<ring_mcp>.)..)'},
+        'pinky': {'Extended': r'(?P<pinky>.+4(?P<pinky_mcp>[HEei])..)',
+                  'Not extended': r'(?P<pinky>.+4(?P<pinky_mcp>[^HEei])..)',
+                  'Either': r'(?P<pinky>.+4(?P<pinky_mcp>.)..)'}
+    }
+
+    fingerOptionDict_without_i = {
         'thumb': {'Extended': r'(?P<thumb>.(?P<thumb_opposition>[LU]).(?<thumb_mcp>[HEe]).).+.\u2205/.+.....',
                   'Not extended': r'(?P<thumb>.(?P<thumb_opposition_1>[^LU]).(?<thumb_mcp_1>[HEe]).|_(?P<thumb_opposition_2>[LU]).(?<thumb_mcp_2>[^HEe]).|_(?P<thumb_opposition_3>[^LU]).(?<thumb_mcp_3>[^HEe]).).+.\u2205/.+.....',
                   'Either': r'(?P<thumb>.(?P<thumb_opposition>.).(?<thumb_mcp>.).).+.\u2205/.+.....'},
@@ -616,32 +661,56 @@ class FingerOptionGroup(QGroupBox):
         self.notExtended.setChecked(False)
         self.either.setChecked(True)
 
-    def getExtendedRegExp(self):
+    def getExtendedRegExp(self, includeI):
         finger = self.title().lower()
-        return self.fingerOptionDict[finger]['Extended']
+        if includeI:
+            regExp = self.fingerOptionDict_with_i[finger]['Extended']
+        else:
+            regExp = self.fingerOptionDict_without_i[finger]['Extended']
+        return regExp
 
-    def getEitherRegExp(self):
+    def getEitherRegExp(self, includeI):
         finger = self.title().lower()
-        return self.fingerOptionDict[finger]['Either']
+        if includeI:
+            regExp = self.fingerOptionDict_with_i[finger]['Either']
+        else:
+            regExp = self.fingerOptionDict_without_i[finger]['Either']
+        return regExp
 
-    def getNotExtendedRegExp(self):
+    def getNotExtendedRegExp(self, includeI):
         finger = self.title().lower()
-        return self.fingerOptionDict[finger]['Not extended']
+        if includeI:
+            regExp = self.fingerOptionDict_with_i[finger]['Not extended']
+        else:
+            regExp = self.fingerOptionDict_without_i[finger]['Not extended']
+        return regExp
 
-    def generateRegExp(self):
+    def generateRegExp(self, includeI):
         finger = self.title()
         chosen = self.buttonGroup.checkedButton().text()
 
-        if finger == 'Thumb':
-            regExp = self.fingerOptionDict['thumb'][chosen]
-        elif finger == 'Index':
-            regExp = self.fingerOptionDict['index'][chosen]
-        elif finger == 'Middle':
-            regExp = self.fingerOptionDict['middle'][chosen]
-        elif finger == 'Ring':
-            regExp = self.fingerOptionDict['ring'][chosen]
+        if includeI:
+            if finger == 'Thumb':
+                regExp = self.fingerOptionDict_with_i['thumb'][chosen]
+            elif finger == 'Index':
+                regExp = self.fingerOptionDict_with_i['index'][chosen]
+            elif finger == 'Middle':
+                regExp = self.fingerOptionDict_with_i['middle'][chosen]
+            elif finger == 'Ring':
+                regExp = self.fingerOptionDict_with_i['ring'][chosen]
+            else:
+                regExp = self.fingerOptionDict_with_i['pinky'][chosen]
         else:
-            regExp = self.fingerOptionDict['pinky'][chosen]
+            if finger == 'Thumb':
+                regExp = self.fingerOptionDict_without_i['thumb'][chosen]
+            elif finger == 'Index':
+                regExp = self.fingerOptionDict_without_i['index'][chosen]
+            elif finger == 'Middle':
+                regExp = self.fingerOptionDict_without_i['middle'][chosen]
+            elif finger == 'Ring':
+                regExp = self.fingerOptionDict_without_i['ring'][chosen]
+            else:
+                regExp = self.fingerOptionDict_without_i['pinky'][chosen]
 
         return regExp
 
