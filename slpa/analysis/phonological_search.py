@@ -68,7 +68,47 @@ def match_specification(slots, spec):
         return not matched
 
 
-def extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic):
+def find_sign_type(sign):
+    c1h1 = ''.join([slot if slot else '_' for slot in sign.config1hand1])
+    c1h2 = ''.join([slot if slot else '_' for slot in sign.config1hand2])
+    c2h1 = ''.join([slot if slot else '_' for slot in sign.config2hand1])
+    c2h2 = ''.join([slot if slot else '_' for slot in sign.config2hand2])
+
+    if (c1h1 == '_______∅/______1____2____3____4___' and c2h1 == '_______∅/______1____2____3____4___')\
+            or (c1h2 == '_______∅/______1____2____3____4___' and c2h2 == '_______∅/______1____2____3____4___'):
+        typ = 'one'
+    else:
+        typ = 'two'
+
+    return typ
+
+
+def filter_logic(logic, c1h1_match, c1h2_match, c2h1_match, c2h2_match):
+    if logic == 'All four hand/configuration specifications':
+        matched = all([c1h1_match, c1h2_match, c2h1_match, c2h2_match])
+    else:
+        matched = any([c1h1_match, c1h2_match, c2h1_match, c2h2_match])
+    return matched
+
+
+def filter_type(actual, desired):
+    if desired == 'Only one-hand signs':
+        if actual == 'one':
+            matched = True
+        else:
+            matched = False
+    elif desired == 'Only two-hand signs':
+        if actual == 'two':
+            matched = True
+        else:
+            matched = False
+    else:  # either
+        matched = True
+
+    return matched
+
+
+def extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic, sign_type):
     # loop through the words in the corpus
     # for each word, find if each hand/configuration matches the specification
     # logic part: if "and", means that all four have to be true
@@ -76,31 +116,22 @@ def extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic):
 
     ret = list()
     for word in corpus:
-        #print('=====', word.gloss, '=====')
+        actual_type = find_sign_type(word)
+
         c1h1_slots = ''.join([slot if slot else '_' for slot in word.config1hand1])
         c1h2_slots = ''.join([slot if slot else '_' for slot in word.config1hand2])
         c2h1_slots = ''.join([slot if slot else '_' for slot in word.config2hand1])
         c2h2_slots = ''.join([slot if slot else '_' for slot in word.config2hand2])
-        #print(c1h1_slots)
-        #print(c1h2_slots)
-        #print(c2h1_slots)
-        #print(c2h2_slots)
 
         c1h1_match = match_specification(c1h1_slots, c1h1)
         c1h2_match = match_specification(c1h2_slots, c1h2)
         c2h1_match = match_specification(c2h1_slots, c2h1)
         c2h2_match = match_specification(c2h2_slots, c2h2)
-        #print(c1h1_match)
-        #print(c1h2_match)
-        #print(c2h1_match)
-        #print(c2h2_match)
 
-        if logic == 'All four hand/configuration specifications':
-            matched = all([c1h1_match, c1h2_match, c2h1_match, c2h2_match])
-        else:
-            matched = any([c1h1_match, c1h2_match, c2h1_match, c2h2_match])
+        logic_matched = filter_logic(logic, c1h1_match, c1h2_match, c2h1_match, c2h2_match)
+        type_matched = filter_type(actual_type, sign_type)
 
-        if matched:
+        if logic_matched and type_matched:
             ret.append(word)
 
     return ret

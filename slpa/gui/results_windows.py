@@ -159,7 +159,7 @@ class BaseTableModel(QAbstractTableModel):
             self.rows.reverse()
         self.layoutChanged.emit()
 
-    def data(self, index, role = None):
+    def data(self, index, role=None):
         if not index.isValid():
             return None
         elif role != Qt.DisplayRole:

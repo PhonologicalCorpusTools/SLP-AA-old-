@@ -18,8 +18,9 @@ class EFWorker(FunctionWorker):
         c2h1 = self.kwargs.pop('c2h1')
         c2h2 = self.kwargs.pop('c2h2')
         logic = self.kwargs.pop('logic')
+        sign_type = self.kwargs.pop('signType')
 
-        results = extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic)
+        results = extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic, sign_type)
         #pprint(self.results)
         self.dataReady.emit(results)
 
@@ -91,8 +92,20 @@ class BasicSearchTab(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.handPanel = LogicRadioButtonGroup('horizontal',
+                                               'c1h1',
+                                               title='Configuration/Hand',
+                                               c1h1='Config1Hand1',
+                                               c1h2='Config1Hand2',
+                                               c2h1='Config2Hand1',
+                                               c2h2='Config2Hand2', )
+
+        self.includeIbutton = QCheckBox('Treat "i" as extended')
+        self.includeIbutton.setChecked(False)
+
         self.fingerConfigPanel = ExtendedFingerPanel()
         self.fingerNumberPanel = NumExtendedFingerPanel()
+
         self.relationlogicPanel = LogicRadioButtonGroup('vertical',
                                                         'a',
                                                         title='Relation between finger configuration and '
@@ -101,35 +114,29 @@ class BasicSearchTab(QWidget):
                                                         o='Apply either',
                                                         fg='Apply only the finger configuration',
                                                         nf='Apply only the number of extended fingers')
-        self.handPanel = LogicRadioButtonGroup('vertical',
-                                               'c1h1',
-                                               title='Configuration/Hand',
-                                               c1h1='Configuration 1 Hand 1',
-                                               c1h2='Configuration 1 Hand 2',
-                                               c2h1='Configuration 2 Hand 1',
-                                               c2h2='Configuration 2 Hand 2',)
+
+        self.signTypePanel = LogicRadioButtonGroup('vertical',
+                                                   'e',
+                                                   title='Sign type',
+                                                   sg='Only one-hand signs',
+                                                   db='Only two-hand signs',
+                                                   e='Either')
+
         self.modePanel = LogicRadioButtonGroup('vertical',
                                                'p',
                                                title='Search mode',
                                                p='Positive',
                                                n='Negative')
 
-        includeIPanel = QGroupBox('Additional')
-        self.includeIbutton = QCheckBox('Treat "i" as extended')
-        self.includeIbutton.setChecked(False)
-
-        includeILayout = QHBoxLayout()
-        includeIPanel.setLayout(includeILayout)
-        includeILayout.addWidget(self.includeIbutton)
-
         mainLayout = QGridLayout()
         self.setLayout(mainLayout)
-        mainLayout.addWidget(self.fingerConfigPanel, 0, 0, 1, 3)
-        mainLayout.addWidget(self.fingerNumberPanel, 1, 0, 1, 3)
-        mainLayout.addWidget(self.relationlogicPanel, 2, 0, 2, 1)
-        mainLayout.addWidget(self.handPanel, 2, 1, 2, 1)
-        mainLayout.addWidget(self.modePanel, 2, 2, 1, 1)
-        mainLayout.addWidget(includeIPanel, 3, 2, 1, 1)
+        mainLayout.addWidget(self.handPanel, 0, 0, 1, 2)
+        mainLayout.addWidget(self.includeIbutton, 0, 2, 1, 1)
+        mainLayout.addWidget(self.fingerConfigPanel, 1, 0, 1, 3)
+        mainLayout.addWidget(self.fingerNumberPanel, 2, 0, 1, 3)
+        mainLayout.addWidget(self.relationlogicPanel, 3, 0, 1, 1)
+        mainLayout.addWidget(self.signTypePanel, 3, 1, 1, 1)
+        mainLayout.addWidget(self.modePanel, 3, 2, 1, 1)
 
     def value(self):
         handconfig = self.handPanel.value()
@@ -185,7 +192,8 @@ class BasicSearchTab(QWidget):
             'c1h2': c1h2,
             'c2h1': c2h1,
             'c2h2': c2h2,
-            'logic': 'All four hand/configuration specifications'
+            'logic': 'All four hand/configuration specifications',
+            'signType': self.signTypePanel.value()
         }
 
 
@@ -213,10 +221,18 @@ class AdvancedSearchTab(QWidget):
                                                 all='All four hand/configuration specifications',
                                                 any='Any of the four hand/configuration specifications')
 
+        self.signTypePanel = LogicRadioButtonGroup('horizontal',
+                                                   'e',
+                                                   title='Sign type',
+                                                   sg='Only one-hand signs',
+                                                   db='Only two-hand signs',
+                                                   e='Either')
+
         mainLayout = QVBoxLayout()
         self.setLayout(mainLayout)
         mainLayout.addWidget(handTab)
         mainLayout.addWidget(self.logicPanel)
+        mainLayout.addWidget(self.signTypePanel)
 
     def value(self):
         return {
@@ -224,7 +240,8 @@ class AdvancedSearchTab(QWidget):
             'c1h2': self.c1h2Tab.value(),
             'c2h1': self.c2h1Tab.value(),
             'c2h2': self.c2h2Tab.value(),
-            'logic': self.logicPanel.value()
+            'logic': self.logicPanel.value(),
+            'signType': self.signTypePanel.value()
         }
 
 
@@ -248,13 +265,8 @@ class AdvancedFingerTab(QWidget):
                                                p='Positive',
                                                n='Negative')
 
-        self.includeIPanel = QGroupBox('Additional')
         self.includeIbutton = QCheckBox('Treat "i" as extended')
         self.includeIbutton.setChecked(False)
-
-        includeILayout = QHBoxLayout()
-        self.includeIPanel.setLayout(includeILayout)
-        includeILayout.addWidget(self.includeIbutton)
 
         self.default = QPushButton('Return to default')
         self.default.clicked.connect(self.setToDefault)
@@ -265,7 +277,7 @@ class AdvancedFingerTab(QWidget):
         mainLayout.addWidget(self.fingerNumberPanel, 1, 0, 1, 3)
         mainLayout.addWidget(self.relationlogicPanel, 2, 0, 2, 1)
         mainLayout.addWidget(self.modePanel, 2, 1, 2, 1)
-        mainLayout.addWidget(self.includeIPanel, 2, 2, 1, 1)
+        mainLayout.addWidget(self.includeIbutton, 2, 2, 1, 1)
         mainLayout.addWidget(self.default, 3, 2, 1, 1)
 
     def setToDefault(self):
@@ -334,6 +346,7 @@ class ExtendedFingerSearchDialog(FunctionDialog):
         kwargs['c2h1'] = value['c2h1']
         kwargs['c2h2'] = value['c2h2']
         kwargs['logic'] = value['logic']
+        kwargs['signType'] = value['signType']
         return kwargs
 
     @Slot(object)
