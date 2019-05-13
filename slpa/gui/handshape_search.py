@@ -6,6 +6,7 @@ from constants import GLOBAL_OPTIONS
 import sys
 import os
 from gui.function_windows import FunctionDialog, FunctionWorker
+from gui.phonological_search import LogicRadioButtonGroup
 from image import getMediaFilePath
 import regex as re
 from pprint import pprint
@@ -63,7 +64,25 @@ class HandshapeSearchDialog(FunctionDialog):
         c2h2Layout.addWidget(self.c2h2List)
         self.c2h2Group.setLayout(c2h2Layout)
 
-        self.unmarkedGroup = QGroupBox('Unmarked signs')
+        self.otherGroup = QGroupBox('Others')
+        self.otherList = QListWidget(self)
+        self.otherList.setIconSize(QSize(50, 50))
+        #self.otherList.setUniformItemSizes(True)
+        self.otherList.setViewMode(QListView.IconMode)
+        self.otherList.setDragEnabled(True)
+        self.otherList.setAcceptDrops(False)
+
+        everything = QListWidgetItem('all', self.otherList)
+        everything.setIcon(QIcon(os.path.join(self.mediaPath, 'all.png')))
+
+        empty = QListWidgetItem('empty', self.otherList)
+        empty.setIcon(QIcon(os.path.join(self.mediaPath, 'empty.png')))
+
+        otherLayout = QVBoxLayout()
+        otherLayout.addWidget(self.otherList)
+        self.otherGroup.setLayout(otherLayout)
+
+        self.unmarkedGroup = QGroupBox('Unmarked handshapes')
         self.unmarkedList = QListWidget(self)
         self.unmarkedList.setIconSize(QSize(100, 100))
         self.unmarkedList.setViewMode(QListView.IconMode)
@@ -77,34 +96,58 @@ class HandshapeSearchDialog(FunctionDialog):
         B = QListWidgetItem('B', self.unmarkedList)
         B.setIcon(QIcon(os.path.join(self.mediaPath, 'B.png')))
 
+        w = QListWidgetItem('w', self.unmarkedList)
+        w.setIcon(QIcon(os.path.join(self.mediaPath, 'w.png')))
+
+        one = QListWidgetItem('1', self.unmarkedList)
+        one.setIcon(QIcon(os.path.join(self.mediaPath, '1.png')))
+
         six = QListWidgetItem('6', self.unmarkedList)
         six.setIcon(QIcon(os.path.join(self.mediaPath, '6.png')))
 
         less = QListWidgetItem('<', self.unmarkedList)
         less.setIcon(QIcon(os.path.join(self.mediaPath, '<.png')))
 
+        more = QListWidgetItem('>', self.unmarkedList)
+        more.setIcon(QIcon(os.path.join(self.mediaPath, '>.png')))
+
         unmarkedLayout = QVBoxLayout()
         unmarkedLayout.addWidget(self.unmarkedList)
         self.unmarkedGroup.setLayout(unmarkedLayout)
 
-        self.markedGroup = QGroupBox('Marked signs')
+        self.markedGroup = QGroupBox('Marked handshapes')
         self.markedList = QListWidget()
         self.markedList.setIconSize(QSize(100, 100))
         self.markedList.setViewMode(QListView.IconMode)
         self.markedList.setDragEnabled(True)
         self.markedList.setAcceptDrops(False)
         self.markedList.setMinimumHeight(125)
+
+        g = QListWidgetItem('g', self.markedList)
+        g.setIcon(QIcon(os.path.join(self.mediaPath, 'g.png')))
+
+        seven = QListWidgetItem('7', self.markedList)
+        seven.setIcon(QIcon(os.path.join(self.mediaPath, '7.png')))
+
         markedLayout = QVBoxLayout()
         markedLayout.addWidget(self.markedList)
         self.markedGroup.setLayout(markedLayout)
+
+        self.logicPanel = LogicRadioButtonGroup('vertical',
+                                           'any',
+                                           title='Signs should contain...',
+                                           any='Any of the above configurations',
+                                           all='All of the above configurations')
 
         mainLayout = QGridLayout()
         mainLayout.addWidget(self.c1h1Group, 0, 0, 1, 1)
         mainLayout.addWidget(self.c1h2Group, 0, 1, 1, 1)
         mainLayout.addWidget(self.c2h1Group, 0, 2, 1, 1)
         mainLayout.addWidget(self.c2h2Group, 0, 3, 1, 1)
-        mainLayout.addWidget(self.unmarkedGroup, 1, 0, 1, 4)
-        mainLayout.addWidget(self.markedGroup, 2, 0, 1, 4)
+        mainLayout.addWidget(self.logicPanel, 1, 0, 1, 2)
+        mainLayout.addWidget(self.otherGroup, 1, 2, 1, 2)
+        mainLayout.addWidget(self.unmarkedGroup, 2, 0, 1, 4)
+        mainLayout.addWidget(self.markedGroup, 3, 0, 1, 4)
 
         #####This part should be removed later#####
         #self.testButton = QPushButton('test')
@@ -134,7 +177,7 @@ class HandshapeSearchDialog(FunctionDialog):
                                  'Token frequency': 1})
         self.accept()
 
-app = QApplication(sys.argv)
-main = HandshapeSearchDialog(None, None, None, None)
-main.show()
-sys.exit(app.exec_())
+#app = QApplication(sys.argv)
+#main = HandshapeSearchDialog(None, None, None, None)
+#main.show()
+#sys.exit(app.exec_())
