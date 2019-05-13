@@ -1,6 +1,6 @@
 from imports import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QLabel, QButtonGroup,
                      QRadioButton, QApplication, QGridLayout, QTabWidget, QWidget,
-                     QSizePolicy, Qt, Slot)
+                     QSizePolicy, Qt, Slot, QLineEdit)
 from gui.transcriptions import TranscriptionConfigTab
 from constants import GLOBAL_OPTIONS
 import sys
@@ -127,6 +127,8 @@ class BasicSearchTab(QWidget):
                                                title='Search mode',
                                                p='Positive',
                                                n='Negative')
+        self.notePanel = QLineEdit()
+        self.notePanel.setPlaceholderText('Enter notes here...')
 
         mainLayout = QGridLayout()
         self.setLayout(mainLayout)
@@ -137,6 +139,7 @@ class BasicSearchTab(QWidget):
         mainLayout.addWidget(self.relationlogicPanel, 3, 0, 1, 1)
         mainLayout.addWidget(self.signTypePanel, 3, 1, 1, 1)
         mainLayout.addWidget(self.modePanel, 3, 2, 1, 1)
+        mainLayout.addWidget(self.notePanel, 4, 0, 1, 3)
 
     def value(self):
         handconfig = self.handPanel.value()
@@ -193,7 +196,8 @@ class BasicSearchTab(QWidget):
             'c2h1': c2h1,
             'c2h2': c2h2,
             'logic': 'All four hand/configuration specifications',
-            'signType': self.signTypePanel.value()
+            'signType': self.signTypePanel.value(),
+            'note': self.notePanel.text()
         }
 
 
@@ -227,12 +231,15 @@ class AdvancedSearchTab(QWidget):
                                                    sg='Only one-hand signs',
                                                    db='Only two-hand signs',
                                                    e='Either')
+        self.notePanel = QLineEdit()
+        self.notePanel.setPlaceholderText('Enter notes here...')
 
         mainLayout = QVBoxLayout()
         self.setLayout(mainLayout)
         mainLayout.addWidget(handTab)
         mainLayout.addWidget(self.logicPanel)
         mainLayout.addWidget(self.signTypePanel)
+        mainLayout.addWidget(self.notePanel)
 
     def value(self):
         return {
@@ -241,7 +248,8 @@ class AdvancedSearchTab(QWidget):
             'c2h1': self.c2h1Tab.value(),
             'c2h2': self.c2h2Tab.value(),
             'logic': self.logicPanel.value(),
-            'signType': self.signTypePanel.value()
+            'signType': self.signTypePanel.value(),
+            'note': self.notePanel.text()
         }
 
 
@@ -297,7 +305,7 @@ class AdvancedFingerTab(QWidget):
 
 
 class ExtendedFingerSearchDialog(FunctionDialog):
-    header = ['Corpus', 'Sign', 'Token frequency']
+    header = ['Corpus', 'Sign', 'Token frequency', 'Note']
     about = 'Extended finger search'
     name = 'extended finger search'
 
@@ -347,6 +355,7 @@ class ExtendedFingerSearchDialog(FunctionDialog):
         kwargs['c2h2'] = value['c2h2']
         kwargs['logic'] = value['logic']
         kwargs['signType'] = value['signType']
+        self.note = value['note']
         return kwargs
 
     @Slot(object)
@@ -357,7 +366,8 @@ class ExtendedFingerSearchDialog(FunctionDialog):
         for sign in results:
             self.results.append({'Corpus': self.corpus.name,
                                  'Sign': sign.gloss,
-                                 'Token frequency': 1})
+                                 'Token frequency': 1,
+                                 'Note': self.note})
         self.accept()
 
 
