@@ -462,10 +462,10 @@ while get_choice != 3:
         collapse_list = []
         collapse_val =""
         while collapse_val != "done":
+            print("Currently collapsed values:" + str(collapse_list))
             collapse_val = input("Please enter the values you would like to collapse. \nSeparate the values you want to collpase with a / \nAn example would be \"e/E\" \nEnter here(or type \'done\'):")
             if (len(collapse_val)==3) & (collapse_val[1]=="/"):
                 collapse_list.append(collapse_val.split("/"))
-                print(collapse_list)
                 print("\n")
             else:
                 if collapse_val != "done":
