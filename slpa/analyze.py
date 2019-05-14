@@ -122,8 +122,12 @@ def readMyFile(filename):
         csvReader = csv.reader(csvDataFile, skipinitialspace=True,delimiter=',', quoting=csv.QUOTE_NONE)
         next(csvReader)
         for row in csvReader:
+            
+            
             front_removed = row[5:]
             both_removed = front_removed
+
+            
             if len(both_removed) == 151:
                 both_removed = both_removed[:len(front_removed)-7]
                 both_removed = split_arr_fourths(both_removed)
@@ -330,9 +334,14 @@ def reliability_analysis_diff(basedict, compareddict,word,column,pathname):
 
 
 def reliability_analysis_diff1(basedict, compareddict,word,row,pathname,colist):
+    # for each hand configuration, prepend "@" to work with 1-based indexing
     for config in range(0,len(conf_list)):
+
+        # mutate the constants that are always constant 
         mutated_arr1 = ["@"] + mutate_constants(basedict[word][config])
         mutated_arr2 = ["@"] + mutate_constants(compareddict[word][config])
+
+        
         for part in range(1,len(parts_list)):
             range_list = get_range(part)
             single_number_list = []
