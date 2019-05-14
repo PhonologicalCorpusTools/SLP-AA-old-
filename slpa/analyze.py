@@ -377,8 +377,7 @@ def reliability_analysis_diff1(basedict, compareddict,word,row,pathname,colist):
         
 
 
-print("Would you like to: \n1. Compare all files in folder to a base file (Save and show in excel sheet) \n2. Combine all files to base file to be able to plug into R")
-get_choice = weird_function("1-2")
+
 
 """
 if get_choice == 1:
@@ -386,107 +385,113 @@ if get_choice == 1:
     first_dict = readMyFile(filepath1)
     second_dict = readMyFile(filepath2)
     reliability_analysis(first_dict,second_dict)"""
-if get_choice == 1:
 
-    wb = xlwt.Workbook()
-    folderpath, filepath, filearray = initializeReadMultiple();
-    base_dict = readMyFile(filepath)
+get_choice = 0
 
-    for word in base_dict.keys():
-        ex_col = 0
-        ex_row = 0
+while get_choice != 3:
+    print("\nWould you like to: \n1. Compare all files in folder to a base file (Save and show in excel sheet) \n2. Combine all files to base file to be able to plug into R \n3. Exit" )
+    get_choice = weird_function("1-3")
+    if get_choice == 1:
 
-        ws = wb.add_sheet(word)
-        
-        for config in conf_list:
-            ws.write(ex_row,ex_col,config)
-            for part in parts_list:
-                if part != "ALL summary of 1-19":
-                    ex_row += 1
-                    ws.write(ex_row,ex_col,part)
-            ex_row += 2
-        ex_col += 1
-        ex_row = 0
-        
-        for path in filearray:
-            compared_dict = readMyFile(path)
-            alt_path = path
-            alt_path = alt_path.split('/')
-            alt_path = alt_path[2].split('.')
-            alt_path = alt_path[0]
-            reliability_analysis_diff(base_dict, compared_dict,word,ex_col,alt_path)
-            ex_col +=1
+        wb = xlwt.Workbook()
+        folderpath, filepath, filearray = initializeReadMultiple();
+        base_dict = readMyFile(filepath)
 
-    save_filename = input("What would you like to call this file?: ")
-    wb.save(folderpath+save_filename + '.xls')
+        for word in base_dict.keys():
+            ex_col = 0
+            ex_row = 0
 
-elif get_choice == 2:
-
-    wb = xlwt.Workbook()
-    folderpath, filepath, filearray = initializeReadMultiple();
-    base_dict = readMyFile(filepath)
-
-    ws = wb.add_sheet("ALL DATA")
-
-    header_list = ["Folder","Word","Configuration","Part","Base File","Compared Files","Result"]
-    header_col=0
-    for word in header_list:
-        ws.write(0,header_col, word)
-        header_col += 1
-
-    ex_row = 1
-    for word in base_dict.keys():
-        for path in filearray:
+            ws = wb.add_sheet(word)
+            
             for config in conf_list:
+                ws.write(ex_row,ex_col,config)
                 for part in parts_list:
-                    ex_col = 0
                     if part != "ALL summary of 1-19":
-                        ws.write(ex_row,ex_col,folderpath)
-                        ex_col += 1
-                        ws.write(ex_row,ex_col,word)
-                        ex_col += 1
-                        ws.write(ex_row,ex_col,config)
-                        ex_col += 1
-                        ws.write(ex_row,ex_col,part)
-                        ex_col += 1
-                        ws.write(ex_row,ex_col,filepath)
-                        ex_col += 1
-                        ws.write(ex_row,ex_col,path)
                         ex_row += 1
-                        
-    collapse_list = []
-    collapse_val =""
-    while collapse_val != "done":
-        collapse_val = input("Please enter the values you would like to collapse. \nSeparate the values you want to collpase with a / \nAn example would be \"e/E\" \nEnter here(or type \'done\'):")
-        if (len(collapse_val)==3) & (collapse_val[1]=="/"):
-            collapse_list.append(collapse_val.split("/"))
-            print(collapse_list)
-            print("\n")
-        else:
-            if collapse_val != "done":
-                print("Input is in incorrect format, please try again.\n")
-
-
-    
-    rower = 1
-    for word in base_dict.keys():
-        for path in filearray:
-            compared_dict = readMyFile(path)
-            alt_path = path
-            alt_path = alt_path.split('/')
-            alt_path = alt_path[2].split('.')
-            alt_path = alt_path[0]
-
-
+                        ws.write(ex_row,ex_col,part)
+                ex_row += 2
+            ex_col += 1
+            ex_row = 0
             
-            rower = reliability_analysis_diff1(base_dict, compared_dict,word,rower,alt_path,collapse_list)
-            
+            for path in filearray:
+                compared_dict = readMyFile(path)
+                alt_path = path
+                alt_path = alt_path.split('/')
+                alt_path = alt_path[2].split('.')
+                alt_path = alt_path[0]
+                reliability_analysis_diff(base_dict, compared_dict,word,ex_col,alt_path)
+                ex_col +=1
 
-            
+        save_filename = input("What would you like to call this file?: ")
+        wb.save(folderpath+save_filename + '.xls')
+
+    elif get_choice == 2:
+
+        wb = xlwt.Workbook()
+        folderpath, filepath, filearray = initializeReadMultiple();
+        base_dict = readMyFile(filepath)
+
+        ws = wb.add_sheet("ALL DATA")
+
+        header_list = ["Folder","Word","Configuration","Part","Base File","Compared Files","Result"]
+        header_col=0
+        for word in header_list:
+            ws.write(0,header_col, word)
+            header_col += 1
+
+        ex_row = 1
+        for word in base_dict.keys():
+            for path in filearray:
+                for config in conf_list:
+                    for part in parts_list:
+                        ex_col = 0
+                        if part != "ALL summary of 1-19":
+                            ws.write(ex_row,ex_col,folderpath)
+                            ex_col += 1
+                            ws.write(ex_row,ex_col,word)
+                            ex_col += 1
+                            ws.write(ex_row,ex_col,config)
+                            ex_col += 1
+                            ws.write(ex_row,ex_col,part)
+                            ex_col += 1
+                            ws.write(ex_row,ex_col,filepath)
+                            ex_col += 1
+                            ws.write(ex_row,ex_col,path)
+                            ex_row += 1
+                            
+        collapse_list = []
+        collapse_val =""
+        while collapse_val != "done":
+            collapse_val = input("Please enter the values you would like to collapse. \nSeparate the values you want to collpase with a / \nAn example would be \"e/E\" \nEnter here(or type \'done\'):")
+            if (len(collapse_val)==3) & (collapse_val[1]=="/"):
+                collapse_list.append(collapse_val.split("/"))
+                print(collapse_list)
+                print("\n")
+            else:
+                if collapse_val != "done":
+                    print("Input is in incorrect format, please try again.\n")
+
 
         
-    save_filename = input("What would you like to call this file?: ")
-    wb.save(folderpath+save_filename + '.xls')
+        rower = 1
+        for word in base_dict.keys():
+            for path in filearray:
+                compared_dict = readMyFile(path)
+                alt_path = path
+                alt_path = alt_path.split('/')
+                alt_path = alt_path[2].split('.')
+                alt_path = alt_path[0]
+
+
+                
+                rower = reliability_analysis_diff1(base_dict, compared_dict,word,rower,alt_path,collapse_list)
+                
+
+                
+
+            
+        save_filename = input("What would you like to call this file?: ")
+        wb.save(folderpath+save_filename + '.xls')
 
 
         
