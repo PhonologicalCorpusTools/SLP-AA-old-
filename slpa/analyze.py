@@ -377,15 +377,16 @@ def reliability_analysis_diff1(basedict, compareddict,word,row,pathname,colist):
         
 
 
-print("Would you like to: \n1. Compare two values (Print and show in command line) \n2. Compare all files in folder to a base file (Save and show in excel sheet) \n3. Combine all files to base file to be able to plug into R")
-get_choice = weird_function("1-3")
+print("Would you like to: \n1. Compare all files in folder to a base file (Save and show in excel sheet) \n2. Combine all files to base file to be able to plug into R")
+get_choice = weird_function("1-2")
 
+"""
 if get_choice == 1:
     filepath1,filepath2 = initializeReadTwoFiles()
     first_dict = readMyFile(filepath1)
     second_dict = readMyFile(filepath2)
-    reliability_analysis(first_dict,second_dict)
-elif get_choice == 2:
+    reliability_analysis(first_dict,second_dict)"""
+if get_choice == 1:
 
     wb = xlwt.Workbook()
     folderpath, filepath, filearray = initializeReadMultiple();
@@ -419,7 +420,7 @@ elif get_choice == 2:
     save_filename = input("What would you like to call this file?: ")
     wb.save(folderpath+save_filename + '.xls')
 
-elif get_choice == 3:
+elif get_choice == 2:
 
     wb = xlwt.Workbook()
     folderpath, filepath, filearray = initializeReadMultiple();
@@ -459,9 +460,11 @@ elif get_choice == 3:
         collapse_val = input("Please enter the values you would like to collapse. \nSeparate the values you want to collpase with a / \nAn example would be \"e/E\" \nEnter here(or type \'done\'):")
         if (len(collapse_val)==3) & (collapse_val[1]=="/"):
             collapse_list.append(collapse_val.split("/"))
+            print(collapse_list)
             print("\n")
         else:
-            print("Input is in incorrect format, please try again.\n")
+            if collapse_val != "done":
+                print("Input is in incorrect format, please try again.\n")
 
 
     
