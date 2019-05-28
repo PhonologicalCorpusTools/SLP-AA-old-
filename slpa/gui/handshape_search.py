@@ -1,7 +1,7 @@
 from imports import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QLabel, QButtonGroup,
                      QRadioButton, QApplication, QGridLayout, QTabWidget, QWidget,
                      QSizePolicy, Qt, Slot, QListWidget, QListView, QListWidgetItem, QIcon,
-                     QStandardItemModel, QStandardItem, QSize)
+                     QStandardItemModel, QStandardItem, QSize, QLineEdit)
 from constants import GLOBAL_OPTIONS
 import sys
 import os
@@ -138,6 +138,8 @@ class HandshapeSearchDialog(FunctionDialog):
                                            title='Signs should contain...',
                                            any='Any of the above configurations',
                                            all='All of the above configurations')
+        self.notePanel = QLineEdit()
+        self.notePanel.setPlaceholderText('Enter notes here...')
 
         mainLayout = QGridLayout()
         mainLayout.addWidget(self.c1h1Group, 0, 0, 1, 1)
@@ -148,6 +150,7 @@ class HandshapeSearchDialog(FunctionDialog):
         mainLayout.addWidget(self.otherGroup, 1, 2, 1, 2)
         mainLayout.addWidget(self.unmarkedGroup, 2, 0, 1, 4)
         mainLayout.addWidget(self.markedGroup, 3, 0, 1, 4)
+        mainLayout.addWidget(self.notePanel, 4, 0, 1, 4)
 
         #####This part should be removed later#####
         #self.testButton = QPushButton('test')

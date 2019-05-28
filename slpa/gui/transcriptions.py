@@ -272,7 +272,7 @@ class TranscriptionSlot(QLineEdit):
         self.num = num
         self.field = field
         self.styleSheetString = ("QLineEdit{{background: {}; border: {};}} "
-                                "QLineEdit:hover{{background {};border: {}; }}")
+                                 "QLineEdit:hover{{background {};border: {}; }}")
         self.defaultBackground = 'white'
         self.defaultBorder = '1px solid grey'
         self.flaggedBackground = 'pink'
@@ -285,7 +285,7 @@ class TranscriptionSlot(QLineEdit):
         qregexp = QRegExp(regex)
         qregexp.setCaseSensitivity(Qt.CaseInsensitive)
         self.setValidator(QRegExpValidator(qregexp))
-        if self.num in [6,10,20,25,30]:
+        if self.num in [6, 10, 20, 25, 30]:
             self.setMaxLength(2)
             #these slots are the only ones that can contain digraphs
             #slots 6 and 10 can contain the digraph 'fr'

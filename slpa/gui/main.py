@@ -2286,7 +2286,7 @@ class AnalyzerMainWindow(QMainWindow):
         self.searchByExtendedFingersAct = QAction('Search by extended fingers...', self, triggered=self.searchByExtendedFingers)
 
     def searchByTranscription(self):
-        searchDialog = PhonologicalSearchDialog(self, self.corpus)
+        searchDialog = TranscriptionSearchDialog(self.corpus, self, None, None)
         searchDialog.exec_()
 
     def searchByExtendedFingers(self):
