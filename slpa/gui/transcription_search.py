@@ -12,6 +12,7 @@ from image import getMediaFilePath
 import regex as re
 from pprint import pprint
 from completer_test import TransConfigTab
+from gui.phonological_search import LogicRadioButtonGroup
 
 
 class TSWorker(FunctionWorker):
@@ -35,14 +36,43 @@ class TranscriptionSearchDialog(FunctionDialog):
         globalLayout = QHBoxLayout()
         globalFrame.setLayout(globalLayout)
 
-        forearmButton = QCheckBox('Forearm')
-        globalLayout.addWidget(forearmButton)
-        estimatedButton = QCheckBox('Estimated')
-        globalLayout.addWidget(estimatedButton)
-        uncertainButton = QCheckBox('Uncertain')
-        globalLayout.addWidget(uncertainButton)
-        incompleteButton = QCheckBox('Incomplete')
-        globalLayout.addWidget(incompleteButton)
+        #forearmButton = QCheckBox('Forearm')
+        #globalLayout.addWidget(forearmButton)
+        #estimatedButton = QCheckBox('Estimated')
+        #globalLayout.addWidget(estimatedButton)
+        #uncertainButton = QCheckBox('Uncertain')
+        #globalLayout.addWidget(uncertainButton)
+        #incompleteButton = QCheckBox('Incomplete')
+        #globalLayout.addWidget(incompleteButton)
+
+        forearmLogic = LogicRadioButtonGroup('vertical', 'e',
+                                             title='Forearm',
+                                             y='Yes', n='No', e='Either')
+
+        estimateLogic = LogicRadioButtonGroup('vertical', 'e',
+                                              title='Estimated',
+                                              y='Yes', n='No', e='Either')
+
+        uncertainLogic = LogicRadioButtonGroup('vertical', 'e',
+                                               title='Uncertain',
+                                               y='Yes', n='No', e='Either')
+
+        incompleteLogic = LogicRadioButtonGroup('vertical', 'e',
+                                                title='Incomplete',
+                                                y='Yes', n='No', e='Either')
+
+        configLogic = LogicRadioButtonGroup('vertical', 'e',
+                                            title='Configuration',
+                                            one='One-config signs', two='Two-config signs', e='Either')
+
+        handLogic = LogicRadioButtonGroup('vertical', 'e',
+                                          title='Hand',
+                                          one='One-hand signs', two='Two-hand signs', e='Either')
+
+        globalLayout.addWidget(forearmLogic)
+        globalLayout.addWidget(estimateLogic)
+        globalLayout.addWidget(uncertainLogic)
+        globalLayout.addWidget(incompleteLogic)
 
         config1Frame = QGroupBox('Config 1')
         config1Layout = QVBoxLayout()
@@ -60,11 +90,17 @@ class TranscriptionSearchDialog(FunctionDialog):
         config2 = TransConfigTab()
         config2Layout.addWidget(config2)
 
+        self.notePanel = QLineEdit()
+        self.notePanel.setPlaceholderText('Enter notes here...')
+
         mainLayout = QGridLayout()
         self.setLayout(mainLayout)
-        mainLayout.addWidget(globalFrame, 0, 0)
-        mainLayout.addWidget(config1Frame, 1, 0)
-        mainLayout.addWidget(config2Frame, 2, 0)
+        mainLayout.addWidget(globalFrame, 0, 0, 1, 2)
+        mainLayout.addWidget(configLogic, 0, 2, 1, 1)
+        mainLayout.addWidget(handLogic, 0, 3, 1, 1)
+        mainLayout.addWidget(config1Frame, 1, 0, 1, 4)
+        mainLayout.addWidget(config2Frame, 2, 0, 1, 4)
+        mainLayout.addWidget(self.notePanel, 3, 2, 1, 2)
         self.layout().insertLayout(0, mainLayout)
 
     #def test(self):
