@@ -1,20 +1,20 @@
-import traceback
+#import traceback
 import itertools
-import os
-import sys
+#import os
+#import sys
 import subprocess
 import collections
 import parameters
 import decorators
-import anytree
-import random
+#import anytree
+#import random
 from xml.etree import ElementTree as xmlElementTree
-from imports import *
+#from imports import *
 from handshapes import *
 from lexicon import *
 from binary import *
 from transcriptions import *
-from constraints import *
+#from constraints import *
 from constraintwidgets import *
 from notes import *
 from search import *
