@@ -17,8 +17,8 @@ if sys.platform.startswith('win'):
         sys.stdout = FakeSTD()
         sys.stderr = FakeSTD()
 
-def run_slpa():
 
+def run_slpa():
     app = QApplicationMessaging(sys.argv)
     if app.isRunning():
         if len(sys.argv) > 1:

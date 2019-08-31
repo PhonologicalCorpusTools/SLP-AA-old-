@@ -360,7 +360,7 @@ class MainWindow(QMainWindow):
 
         #Make hand image and accompanying info
         self.infoPanel = QHBoxLayout()
-        self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
+        self.handImage = HandShapeImage(getMediaFilePath('hand.JPG'))
         self.infoPanel.addWidget(self.handImage)
         self.transcriptionInfo = TranscriptionInfo()
         self.infoPanel.addLayout(self.transcriptionInfo)
@@ -1504,11 +1504,16 @@ class MainWindow(QMainWindow):
                                  triggered=self.switchMode)
 
     def switchMode(self):
+        if self.corpus is None:
+            reply = QMessageBox.critical(self, 'Missing corpus',
+                                         'There is no corpus loaded. Please load a corpus before switching'
+                                         'to the analyzer mode.')
+            return
+
         self.writeSettings()
         self.close()
         self.analyzer = AnalyzerMainWindow(self.corpus)
         self.analyzer.show()
-
 
     def forceComptibilityUpdate(self):
         file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', os.getcwd(), '*.corpus')
@@ -2158,12 +2163,6 @@ class AnalyzerMainWindow(QMainWindow):
         super().__init__()
 
         self.corpus = corpus
-
-
-        #=====
-        #pprint(self.corpus.wordlist)
-        #=====
-
         self.setWindowTitle('SLP-Analyzer')
 
         centralWidget = QWidget()
@@ -2242,7 +2241,6 @@ class AnalyzerMainWindow(QMainWindow):
         splitter.addWidget(rightFrame)
         mainLayout.addWidget(splitter)
 
-        # =====
         for word in self.corpus:
             wordList.addItem(word.gloss)
 

@@ -627,7 +627,7 @@ class TranscriptionSearchDialog(SearchDialog):
 
         #Add hand image
         self.infoPanel = QHBoxLayout()
-        self.handImage = HandShapeImage(getMediaFilePath('hand.png'))
+        self.handImage = HandShapeImage(getMediaFilePath('hand.JPG'))
         self.infoPanel.addWidget(self.handImage)
         self.transcriptionInfo = TranscriptionInfo()
         self.infoPanel.addLayout(self.transcriptionInfo)
