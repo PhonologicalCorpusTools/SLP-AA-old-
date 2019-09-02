@@ -2209,7 +2209,7 @@ class AnalyzerMainWindow(QMainWindow):
         config1Frame.setLayout(config1Layout)
         rightLayout.addWidget(config1Frame)
 
-        self.config1 = TranscriptionConfigTab(1)
+        self.config1 = TranscriptionConfigTab(1, view_only=True)
         config1Layout.addWidget(self.config1)
 
         config2Frame = QGroupBox('Config 2')
@@ -2217,7 +2217,7 @@ class AnalyzerMainWindow(QMainWindow):
         config2Frame.setLayout(config2Layout)
         rightLayout.addWidget(config2Frame)
 
-        self.config2 = TranscriptionConfigTab(2)
+        self.config2 = TranscriptionConfigTab(2, view_only=True)
         config2Layout.addWidget(self.config2)
 
         parameterFrame = QGroupBox('Parameter')

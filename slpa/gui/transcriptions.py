@@ -12,7 +12,7 @@ class TranscriptionLayout(QVBoxLayout):
     defaultFont = QFont('Arial', 12)
     fontMetric = QFontMetricsF(defaultFont)
 
-    def __init__(self, hand=None):
+    def __init__(self, view_only, hand=None):
         super().__init__()
 
         self.setSpacing(0)
@@ -26,7 +26,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.lineLayout.setSpacing(0)
         self.lineLayout.setContentsMargins(0, 0, 0, 0)
 
-        self.generateSlots()
+        self.generateSlots(view_only)
         self.generateViolationLabels()
         self.generateFields()
 
@@ -126,55 +126,55 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot26.setText('3')
         self.slot31.setText('4')
 
-    def generateSlots(self):
+    def generateSlots(self, view_only):
         #FIELD 1 (Forearm)
         self.slot1 = TranscriptionCheckBox(1)
         self.slots.append(self.slot1)
 
         #FIELD 2 (Thumb)
-        self.slot2 = TranscriptionSlot(2, 2, '[LUO\\?]', list('LUO?'))
-        self.slot3 = TranscriptionSlot(3, 2, '[{<=\\?]', list('{<=?'))
-        self.slot4 = TranscriptionSlot(4, 2, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot5 = TranscriptionSlot(5, 2, '[EeFfHi\\?]', list('HEeiFf?'))
+        self.slot2 = TranscriptionSlot(2, 2, '[LUO\\?]', list('LUO?'), view_only)
+        self.slot3 = TranscriptionSlot(3, 2, '[{<=\\?]', list('{<=?'), view_only)
+        self.slot4 = TranscriptionSlot(4, 2, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot5 = TranscriptionSlot(5, 2, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
 
         #FIELD 3 (Thumb/Finger Contact)
-        self.slot6 = TranscriptionSlot(6, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'])
-        self.slot7 = TranscriptionSlot(7, 3, '[-dpM\\?]', list('-dpM?'))
-        self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL])
-        self.slot9 = TranscriptionSlot(9, 3, '/', ['/'])
-        self.slot10 = TranscriptionSlot(10, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'])
-        self.slot11 = TranscriptionSlot(11, 3, '[-dmpM\\?]', list('-dmpM?'))
-        self.slot12 = TranscriptionSlot(12, 3, '[-1\s\\?]', ['-','1','?'])
-        self.slot13 = TranscriptionSlot(13, 3, '[-2\s\\?]', ['-','2','?'])
-        self.slot14 = TranscriptionSlot(14, 3, '[-3\s\\?]', ['-','3','?'])
-        self.slot15 = TranscriptionSlot(15, 3, '[-4\s\\?]', ['-','4','?'])
+        self.slot6 = TranscriptionSlot(6, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'], view_only)
+        self.slot7 = TranscriptionSlot(7, 3, '[-dpM\\?]', list('-dpM?'), view_only)
+        self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL], view_only)
+        self.slot9 = TranscriptionSlot(9, 3, '/', ['/'], view_only)
+        self.slot10 = TranscriptionSlot(10, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'], view_only)
+        self.slot11 = TranscriptionSlot(11, 3, '[-dmpM\\?]', list('-dmpM?'), view_only)
+        self.slot12 = TranscriptionSlot(12, 3, '[-1\s\\?]', ['-','1','?'], view_only)
+        self.slot13 = TranscriptionSlot(13, 3, '[-2\s\\?]', ['-','2','?'], view_only)
+        self.slot14 = TranscriptionSlot(14, 3, '[-3\s\\?]', ['-','3','?'], view_only)
+        self.slot15 = TranscriptionSlot(15, 3, '[-4\s\\?]', ['-','4','?'], view_only)
 
         #FIELD 4 (Index)
-        self.slot16 = TranscriptionSlot(16, 4, '1', ['1'])
-        self.slot17 = TranscriptionSlot(17, 4, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot18 = TranscriptionSlot(18, 4, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot19 = TranscriptionSlot(19, 4, '[EeFfHi\\?]', list('HEeiFf?'))
+        self.slot16 = TranscriptionSlot(16, 4, '1', ['1'], view_only)
+        self.slot17 = TranscriptionSlot(17, 4, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot18 = TranscriptionSlot(18, 4, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot19 = TranscriptionSlot(19, 4, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
 
         #FIELD 5 (Middle)
-        self.slot20 = TranscriptionSlot(20, 5, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'])
-        self.slot21 = TranscriptionSlot(21, 5, '2', ['2'])
-        self.slot22 = TranscriptionSlot(22, 5, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot23 = TranscriptionSlot(23, 5, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot24 = TranscriptionSlot(24, 5, '[EeFfHi\\?]', list('HEeiFf?'))
+        self.slot20 = TranscriptionSlot(20, 5, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
+        self.slot21 = TranscriptionSlot(21, 5, '2', ['2'], view_only)
+        self.slot22 = TranscriptionSlot(22, 5, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot23 = TranscriptionSlot(23, 5, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot24 = TranscriptionSlot(24, 5, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
 
         #FIELD 6 (Ring)
-        self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'])
-        self.slot26 = TranscriptionSlot(26, 6, '3', ['3'])
-        self.slot27 = TranscriptionSlot(27, 6, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot28 = TranscriptionSlot(28, 6, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot29 = TranscriptionSlot(29, 6, '[EeFfHi\\?]', list('HEeiFf?'))
+        self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
+        self.slot26 = TranscriptionSlot(26, 6, '3', ['3'], view_only)
+        self.slot27 = TranscriptionSlot(27, 6, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot28 = TranscriptionSlot(28, 6, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot29 = TranscriptionSlot(29, 6, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
 
         #FIELD 7 (Middle)
-        self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'])
-        self.slot31 = TranscriptionSlot(31, 7, '4', ['4'])
-        self.slot32 = TranscriptionSlot(32, 7, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot33 = TranscriptionSlot(33, 7, '[EeFfHi\\?]', list('HEeiFf?'))
-        self.slot34 = TranscriptionSlot(34, 7, '[EeFfHi\\?]', list('HEeiFf?'))
+        self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
+        self.slot31 = TranscriptionSlot(31, 7, '4', ['4'], view_only)
+        self.slot32 = TranscriptionSlot(32, 7, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot33 = TranscriptionSlot(33, 7, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
+        self.slot34 = TranscriptionSlot(34, 7, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
 
     def isEmpty(self):
         if self.slot1.isChecked():
@@ -267,7 +267,7 @@ class TranscriptionSlot(QLineEdit):
     slotSelectionChanged = Signal(int)
     slotFlagged = Signal(int, bool)
 
-    def __init__(self, num, field, regex, completer_options):
+    def __init__(self, num, field, regex, completer_options, view_only):
         super().__init__()
         self.num = num
         self.field = field
@@ -330,6 +330,10 @@ class TranscriptionSlot(QLineEdit):
         # set button context menu policy
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
+
+        # set the slot to be uneditable
+        if view_only:
+            self.setEnabled(False)
 
         # create context menu
         self.makeMenu()
@@ -789,14 +793,14 @@ class TranscriptionPasteDialog(QDialog):
 
 class TranscriptionConfigTab(QWidget):
 
-    def __init__(self, hand_number):
+    def __init__(self, number, view_only=False):
         QWidget.__init__(self)
 
         self.configLayout = QGridLayout()
 
-        self.hand1Transcription = TranscriptionLayout(hand=1)
+        self.hand1Transcription = TranscriptionLayout(view_only, hand=1)
         self.configLayout.addLayout(self.hand1Transcription, 0, 0)
-        self.hand2Transcription = TranscriptionLayout(hand=2)
+        self.hand2Transcription = TranscriptionLayout(view_only, hand=2)
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
         self.setLayout(self.configLayout)
 
