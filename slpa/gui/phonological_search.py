@@ -326,12 +326,6 @@ class ExtendedFingerSearchDialog(FunctionDialog):
 
         mainLayout.addWidget(self.searchTab, 0, 0)
 
-        #####This part should be removed later#####
-        #self.testButton = QPushButton('test')
-        #mainLayout.addWidget(self.testButton, 1, 0)
-        #self.testButton.clicked.connect(self.test)
-        #####This part should be removed later#####
-
         self.layout().insertLayout(0, mainLayout)
 
     #def test(self):

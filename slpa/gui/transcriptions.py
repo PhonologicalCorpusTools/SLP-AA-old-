@@ -299,6 +299,7 @@ class TranscriptionSlot(QLineEdit):
         completer.setMaxVisibleItems(8)
         self.setCompleter(completer)
         self.completer().activated.connect(self.completerActivated)
+
         style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
 

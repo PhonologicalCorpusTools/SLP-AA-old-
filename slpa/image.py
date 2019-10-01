@@ -24,7 +24,6 @@ class HandShapeImage(QLabel):
         file_name = 'hand_slot{}.JPG'.format(e)
         img = QPixmap(getMediaFilePath(file_name))
         self.setPixmap(img.scaled(self.width(), self.height(), Qt.KeepAspectRatio))
-        #self.setPixmap(QPixmap(getMediaFilePath(file_name)))
 
     @Slot(int)
     def useReverseImage(self, e):
