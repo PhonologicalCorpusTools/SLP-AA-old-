@@ -1,6 +1,6 @@
 from collections import defaultdict
 from math import log2 as log
-from transcriptions import STANDARD_SYMBOLS
+from gui.transcriptions import STANDARD_SYMBOLS
 from imports import (QDialog, QHBoxLayout, QVBoxLayout, QGroupBox, QRadioButton, QButtonGroup, QPushButton,
                     QStackedWidget, QWidget, QComboBox, QMessageBox, QLabel, QLineEdit, QTableWidget, QTableWidgetItem)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-from main import MainWindow, QApplicationMessaging
+from gui.main import MainWindow, QApplicationMessaging
 
 if sys.platform.startswith('win'):
     if getattr(sys, 'frozen', False):
@@ -17,8 +17,8 @@ if sys.platform.startswith('win'):
         sys.stdout = FakeSTD()
         sys.stderr = FakeSTD()
 
-def run_slpa():
 
+def run_slpa():
     app = QApplicationMessaging(sys.argv)
     if app.isRunning():
         if len(sys.argv) > 1:

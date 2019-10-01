@@ -1,5 +1,5 @@
 import pickle
-import parameterwidgets
+from gui import parameterwidgets
 import anytree
 
 class SLPAUnpickler(pickle._Unpickler):
@@ -13,16 +13,16 @@ class SLPAUnpickler(pickle._Unpickler):
         if name == 'ParameterTreeModel':
             return getattr(parameterwidgets, 'OldParameterTreeModel')
 
-        try:
-            return super().find_class(module, name)
-        except ModuleNotFoundError:
-            module = module[4:]
-            return super().find_class(module, name)
-        #if module == 'transcriptions':
-        #    module = 'gui.transcriptions'
-        #if module == 'parameterwidgets':
-        #    module = 'gui.parameterwidgets'
-        #return super().find_class(module, name)
+        #try:
+        #    return super().find_class(module, name)
+        #except ModuleNotFoundError:
+        #    module = module[4:]
+        #    return super().find_class(module, name)
+        if module == 'transcriptions':
+            module = 'gui.transcriptions'
+        if module == 'parameterwidgets':
+            module = 'gui.parameterwidgets'
+        return super().find_class(module, name)
 
 def load_binary(path):
     with open(path, 'rb') as f:
@@ -31,6 +31,6 @@ def load_binary(path):
     return obj
 
 def save_binary(obj, path):
-    with open(path,'wb') as f:
+    with open(path, 'wb') as f:
         pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
 
