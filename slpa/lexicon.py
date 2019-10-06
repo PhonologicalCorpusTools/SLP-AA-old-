@@ -1,5 +1,6 @@
 #from slpa import __version__ as currentSLPAversion
-import os, re
+import os
+import re
 from collections import OrderedDict
 from random import choice
 from parameters import defaultParameters
@@ -103,10 +104,10 @@ class Sign():
 
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
                        'parameters': defaultParameters,
-                       'flags': {'config1hand1':[Flag(False,False) for n in range(34)],
-                                 'config1hand2':[Flag(False,False) for n in range(34)],
-                                 'config2hand1':[Flag(False,False) for n in range(34)],
-                                 'config2hand2':[Flag(False,False) for n in range(34)]},
+                       'flags': {'config1hand1': [Flag(False, False) for n in range(34)],
+                                 'config1hand2': [Flag(False, False) for n in range(34)],
+                                 'config2hand1': [Flag(False, False) for n in range(34)],
+                                 'config2hand2': [Flag(False, False) for n in range(34)]},
                        'signNotes': str()}
     for option in GLOBAL_OPTIONS:
         sign_attributes[option] = False

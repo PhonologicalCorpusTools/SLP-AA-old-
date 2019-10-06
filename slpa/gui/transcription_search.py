@@ -7,11 +7,12 @@ import sys
 import os
 from gui.function_windows import FunctionDialog, FunctionWorker
 from gui.transcriptions import TranscriptionConfigTab
-from gui.phonological_search import LogicRadioButtonGroup
 from image import getMediaFilePath
 import regex as re
 from pprint import pprint
 from gui.helperwidgets import LogicRadioButtonGroup
+from analysis.transcription_search import transcription_search
+
 
 NULL = '\u2205'
 X_IN_BOX = '\u2327'
@@ -64,7 +65,9 @@ class TransSlot(QPushButton):
 
         self.menu = QMenu()
 
-        for option in options:
+        self.options = options
+
+        for option in self.options:
             symbol = QAction(option, self, checkable=True, triggered=self.updateSymbol)
             self.menu.addAction(symbol)
 
@@ -288,6 +291,7 @@ class TransSlot(QPushButton):
     def value(self):
         symbols = set(self.getSelectedSymbols()) | set(self.text())
         results = {'selected': symbols,
+                   'options': self.options,
                    'positive': self.positive,
                    'flag_estimate': self.isEstimate,
                    'flag_uncertain': self.isUncertain}
@@ -421,13 +425,58 @@ class TransConfigTab(QWidget):
         self.setLayout(mainLayout)
 
     def value(self):
-        return (self.hand1Trans.value(), self.hand2Trans.value())
+        hand1 = list()
+        for field in self.hand1Trans.value():
+            for slot in field:
+                slot_dict = dict()
+                slot_dict['flag_estimate'] = slot['flag_estimate']
+                slot_dict['flag_uncertain'] = slot['flag_uncertain']
+                if slot['positive']:
+                    if slot['selected'] == {'*'}:
+                        slot_dict['allowed'] = {r'.+'}
+                    else:
+                        slot_dict['allowed'] = set(slot['selected'])
+                else:
+                    if slot['selected'] == {'*'}:
+                        slot_dict['allowed'] = set()
+                    else:
+                        slot_dict['allowed'] = set(slot['options']) - set(slot['selected'])
+                hand1.append(slot_dict)
+
+        hand2 = list()
+        for field in self.hand2Trans.value():
+            for slot in field:
+                slot_dict = dict()
+                slot_dict['flag_estimate'] = slot['flag_estimate']
+                slot_dict['flag_uncertain'] = slot['flag_uncertain']
+                if slot['positive']:
+                    if slot['selected'] == {'*'}:
+                        slot_dict['allowed'] = {r'.+'}
+                    else:
+                        slot_dict['allowed'] = set(slot['selected'])
+                else:
+                    if slot['selected'] == {'*'}:
+                        slot_dict['allowed'] = set()
+                    else:
+                        slot_dict['allowed'] = set(slot['options']) - set(slot['selected'])
+                hand2.append(slot_dict)
+
+        return (tuple(hand1), tuple(hand2))
 
 
 class TSWorker(FunctionWorker):
     def run(self):
-        # TODO: implement this
-        pass
+        corpus = self.kwargs.pop('corpus')
+        c1h1 = self.kwargs.pop('c1h1')
+        c1h2 = self.kwargs.pop('c1h2')
+        c2h1 = self.kwargs.pop('c2h1')
+        c2h2 = self.kwargs.pop('c2h2')
+        logic = self.kwargs.pop('logic')
+        sign_type = self.kwargs.pop('signType')
+
+        results = extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic, sign_type)
+        #pprint(self.results)
+        self.dataReady.emit(results)
 
 
 class TranscriptionSearchDialog(FunctionDialog):
@@ -514,15 +563,44 @@ class TranscriptionSearchDialog(FunctionDialog):
                    'hand': self.handLogic.value(),
                    'config1': self.config1.value(),
                    'config2': self.config2.value()}
-        pprint(results)
+        #pprint(results)
+        transcription_search(self.corpus, self.forearmLogic.value(), self.estimateLogic.value(),
+                             self.uncertainLogic.value(), self.incompleteLogic.value(),
+                             self.configLogic.value(), self.handLogic.value(),
+                             self.config1.value(), self.config2.value())
+
+
+        #for word in self.corpus:
+        #    print(''.join([slot if slot else '_' for slot in word.config1hand1[1:]]))
+        #    print(''.join([slot if slot else '_' for slot in word.config1hand2[1:]]))
+        #    print(''.join([slot if slot else '_' for slot in word.config2hand1[1:]]))
+        #    print(''.join([slot if slot else '_' for slot in word.config2hand2[1:]]))
+        #    pprint(word.flags['config1hand1'][0][0])
+        #    print('forearm:', word.forearm)
+        #    print('estimated:', word.estimated)
+        #    print('uncertain:', word.uncertain)
+        #    print('incomplete:', word.incomplete)
+
         return results
     #    res = self.generateKwargs()
     #    ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
     #    pprint(ret)
 
     def generateKwargs(self):
-        # TODO: implement this
-        pass
+        kwargs = dict()
+
+        kwargs['corpus'] = self.corpus
+        kwargs['forearm'] = self.forearmLogic.value()
+        kwargs['estimated'] = self.estimateLogic.value()
+        kwargs['uncertain'] = self.uncertainLogic.value()
+        kwargs['incomplete'] = self.incompleteLogic.value()
+        kwargs['configuration'] = self.configLogic.value()
+        kwargs['hand'] = self.handLogic.value()
+        kwargs['config1'] = self.config1.value()
+        kwargs['config2'] = self.config2.value()
+        self.note = self.notePanel.text()
+
+        return kwargs
 
     @Slot(object)
     def setResults(self, results):

@@ -9,12 +9,13 @@ from binary import *
 from gui.transcriptions import *
 from gui.constraintwidgets import *
 from gui.notes import *
-from gui.search import *
+#from gui.search import *
 from image import *
 from gui.functional_load import *
 from gui.colour import *
 from constants import GLOBAL_OPTIONS
 from gui.parameterwidgets import ParameterDialog, ParameterTreeModel
+from gui.transcription_search import TranscriptionSearchDialog
 from gui.phonological_search import PhonologicalSearchDialog, ExtendedFingerSearchDialog
 from gui.results_windows import ResultsWindow
 #from slpa import __version__ as currentSLPAversion

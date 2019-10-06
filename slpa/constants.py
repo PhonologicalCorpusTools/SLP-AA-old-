@@ -11,6 +11,8 @@ FINGER_SYMBOLS = ['H', 'E', 'e', 'i', 'F', 'f', '?']
 
 CONTACT_SYMBOLS = ['{', '<', '=', 'x-', 'x', 'x+', X_IN_BOX, '?']
 
+RE_SYMBOLS = {'+': r'\+', '?': r'\?', 'x+': r'x\+'}
+
 SYMBOL_DESCRIPTIONS = {
     'L': 'lateral',
     'U': 'unopposed',
