@@ -146,19 +146,19 @@ def check_slot_symbol(word, config1, config2):
     re_c2h1 = re.compile('^' + generate_hand_re(c2h1) + '$')
     re_c2h2 = re.compile('^' + generate_hand_re(c2h2) + '$')
 
-    print('====================')
-    print(c1h1_slots)
-    print(re_c1h1)
-    print('====================')
-    print(c1h2_slots)
-    print(re_c1h2)
-    print('====================')
-    print(c2h1_slots)
-    print(re_c2h1)
-    print('====================')
-    print(c2h2_slots)
-    print(re_c2h2)
-    print('====================')
+    #print('====================')
+    #print(c1h1_slots)
+    #print(re_c1h1)
+    #print('====================')
+    #print(c1h2_slots)
+    #print(re_c1h2)
+    #print('====================')
+    #print(c2h1_slots)
+    #print(re_c2h1)
+    #print('====================')
+    #print(c2h2_slots)
+    #print(re_c2h2)
+    #print('====================')
 
 
     return all([bool(re_c1h1.match(c1h1_slots)),
@@ -192,32 +192,33 @@ def transcription_search(corpus, forearm, estimated, uncertain, incomplete, conf
 
     ret = list()
     for word in corpus:
-        print(word)
+        #print(word)
         if not check_global_options(word, (forearm, estimated, uncertain, incomplete)):
-            print('global')
+            #print('global')
             continue
 
         if not check_config_type(word, configuration):
-            print('config')
+            #print('config')
             continue
 
         if not check_hand_type(word, hand):
-            print('hand')
+            #print('hand')
             continue
 
         if not check_estimate_flag(word, config1, config2):
-            print('estimate')
+            #print('estimate')
             continue
 
         if not check_uncertain_flag(word, config1, config2):
-            print('uncertain')
+            #print('uncertain')
             continue
 
         if not check_slot_symbol(word, config1, config2):
             print('slot')
+            print(word)
             continue
 
         ret.append(word)
 
-    print(ret)
+    #print(ret)
     return ret

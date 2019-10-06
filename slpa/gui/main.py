@@ -2286,7 +2286,12 @@ class AnalyzerMainWindow(QMainWindow):
 
     def searchByTranscription(self):
         searchDialog = TranscriptionSearchDialog(self.corpus, self, None, None)
-        searchDialog.exec_()
+        success = searchDialog.exec_()
+        if success:
+            self.TSResultWindow = ResultsWindow('Transcription Search Results',
+                                                searchDialog,
+                                                self)
+            self.TSResultWindow.show()
 
     def searchByExtendedFingers(self):
         searchDialog = ExtendedFingerSearchDialog(self.corpus, self, None, None)

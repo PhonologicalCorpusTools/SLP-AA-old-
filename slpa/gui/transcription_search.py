@@ -1,14 +1,6 @@
-from imports import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QLabel, QButtonGroup,
-                     QRadioButton, QApplication, QGridLayout, QTabWidget, QWidget,
-                     QSizePolicy, Qt, Slot, QListWidget, QListView, QListWidgetItem, QIcon,
-                     QStandardItemModel, QStandardItem, QSize, QLineEdit, QMenu, QAction)
-from constants import GLOBAL_OPTIONS
-import sys
-import os
+from imports import (QVBoxLayout, QHBoxLayout, QGroupBox, QPushButton, QLabel,
+                     QGridLayout, QWidget, Qt, Slot, QLineEdit, QMenu, QAction)
 from gui.function_windows import FunctionDialog, FunctionWorker
-from gui.transcriptions import TranscriptionConfigTab
-from image import getMediaFilePath
-import regex as re
 from pprint import pprint
 from gui.helperwidgets import LogicRadioButtonGroup
 from analysis.transcription_search import transcription_search
@@ -467,15 +459,17 @@ class TransConfigTab(QWidget):
 class TSWorker(FunctionWorker):
     def run(self):
         corpus = self.kwargs.pop('corpus')
-        c1h1 = self.kwargs.pop('c1h1')
-        c1h2 = self.kwargs.pop('c1h2')
-        c2h1 = self.kwargs.pop('c2h1')
-        c2h2 = self.kwargs.pop('c2h2')
-        logic = self.kwargs.pop('logic')
-        sign_type = self.kwargs.pop('signType')
+        forearm = self.kwargs.pop('forearm')
+        estimated = self.kwargs.pop('estimated')
+        uncertain = self.kwargs.pop('uncertain')
+        incomplete = self.kwargs.pop('incomplete')
+        configuration = self.kwargs.pop('configuration')
+        hand = self.kwargs.pop('hand')
+        config1 = self.kwargs.pop('config1')
+        config2 = self.kwargs.pop('config2')
 
-        results = extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic, sign_type)
-        #pprint(self.results)
+        results = transcription_search(corpus, forearm, estimated, uncertain, incomplete, configuration, hand,
+                                       config1, config2)
         self.dataReady.emit(results)
 
 
@@ -549,42 +543,23 @@ class TranscriptionSearchDialog(FunctionDialog):
         mainLayout.addWidget(config2Frame, 2, 0, 1, 4)
         mainLayout.addWidget(self.notePanel, 3, 2, 1, 2)
 
-        self.testButton = QPushButton('test')
-        mainLayout.addWidget(self.testButton, 3, 0)
-        self.testButton.clicked.connect(self.test)
+        #self.testButton = QPushButton('test')
+        #mainLayout.addWidget(self.testButton, 3, 0)
+        #self.testButton.clicked.connect(self.test)
         self.layout().insertLayout(0, mainLayout)
 
-    def test(self):
-        results = {'forearmLogic': self.forearmLogic.value(),
-                   'estimated': self.estimateLogic.value(),
-                   'uncertain': self.uncertainLogic.value(),
-                   'incomplete': self.incompleteLogic.value(),
-                   'configuration': self.configLogic.value(),
-                   'hand': self.handLogic.value(),
-                   'config1': self.config1.value(),
-                   'config2': self.config2.value()}
-        #pprint(results)
-        transcription_search(self.corpus, self.forearmLogic.value(), self.estimateLogic.value(),
-                             self.uncertainLogic.value(), self.incompleteLogic.value(),
-                             self.configLogic.value(), self.handLogic.value(),
-                             self.config1.value(), self.config2.value())
-
-
-        #for word in self.corpus:
-        #    print(''.join([slot if slot else '_' for slot in word.config1hand1[1:]]))
-        #    print(''.join([slot if slot else '_' for slot in word.config1hand2[1:]]))
-        #    print(''.join([slot if slot else '_' for slot in word.config2hand1[1:]]))
-        #    print(''.join([slot if slot else '_' for slot in word.config2hand2[1:]]))
-        #    pprint(word.flags['config1hand1'][0][0])
-        #    print('forearm:', word.forearm)
-        #    print('estimated:', word.estimated)
-        #    print('uncertain:', word.uncertain)
-        #    print('incomplete:', word.incomplete)
-
-        return results
-    #    res = self.generateKwargs()
-    #    ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
-    #    pprint(ret)
+    # def test(self):
+    #     results = {'forearmLogic': self.forearmLogic.value(),
+    #                'estimated': self.estimateLogic.value(),
+    #                'uncertain': self.uncertainLogic.value(),
+    #                'incomplete': self.incompleteLogic.value(),
+    #                'configuration': self.configLogic.value(),
+    #                'hand': self.handLogic.value(),
+    #                'config1': self.config1.value(),
+    #                'config2': self.config2.value()}
+    #     pprint(results)
+    #
+    #     return results
 
     def generateKwargs(self):
         kwargs = dict()
@@ -610,7 +585,8 @@ class TranscriptionSearchDialog(FunctionDialog):
         for sign in results:
             self.results.append({'Corpus': self.corpus.name,
                                  'Sign': sign.gloss,
-                                 'Token frequency': 1})
+                                 'Token frequency': 1,
+                                 'Note': self.note})
         self.accept()
 
 
