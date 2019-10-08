@@ -9,7 +9,7 @@ from binary import *
 from gui.transcriptions import *
 from gui.constraintwidgets import *
 from gui.notes import *
-#from gui.search import *
+from gui.search import *
 from image import *
 from gui.functional_load import *
 from gui.colour import *
@@ -1157,11 +1157,11 @@ class MainWindow(QMainWindow):
         self.notesMenu.addAction(self.addCorpusNotesAct)
         self.notesMenu.addAction(self.addSignNotesAct)
 
-        self.searchMenu = self.menuBar().addMenu('&Search')
-        self.searchMenu.addAction(self.transcriptionSearchAct)
-        self.searchMenu.addAction(self.phraseSearchAct)
-        self.searchMenu.addAction(self.glossSearchAct)
-        self.searchMenu.addAction(self.funcloadAct)
+        #self.searchMenu = self.menuBar().addMenu('&Search')
+        #self.searchMenu.addAction(self.transcriptionSearchAct)
+        #self.searchMenu.addAction(self.phraseSearchAct)
+        #self.searchMenu.addAction(self.glossSearchAct)
+        #self.searchMenu.addAction(self.funcloadAct)
 
         if not hasattr(sys, 'frozen'):
             self.debugMenu = self.menuBar().addMenu('&Debug')
@@ -1361,9 +1361,9 @@ class MainWindow(QMainWindow):
                                 self,
                                 triggered = self.mergeCorpus)
 
-        self.funcloadAct = QAction('Calculate functional load...',
-                                   self,
-                                   triggered = self.funcLoad)
+        #self.funcloadAct = QAction('Calculate functional load...',
+        #                           self,
+        #                           triggered = self.funcLoad)
 
 
         self.copyAct = QAction('&Copy a transcription...',
@@ -1378,17 +1378,17 @@ class MainWindow(QMainWindow):
                                self,
                                triggered = self.autoFillTranscription)
 
-        self.glossSearchAct = QAction('Search by &gloss...',
-                                      self,
-                                      triggered = lambda x: self.searchCorpus(searchType = 'gloss'))
+        #self.glossSearchAct = QAction('Search by &gloss...',
+        #                              self,
+        #                              triggered = lambda x: self.searchCorpus(searchType = 'gloss'))
 
-        self.transcriptionSearchAct = QAction('Search by &transcription...',
-                                              self,
-                                              triggered = lambda x: self.searchCorpus(searchType = 'transcriptions'))
+        #self.transcriptionSearchAct = QAction('Search by &transcription...',
+        #                                      self,
+        #                                      triggered = lambda x: self.searchCorpus(searchType = 'transcriptions'))
 
-        self.phraseSearchAct = QAction('Search by descriptive &phrase...',
-                                       self,
-                                       triggered = lambda x: self.searchCorpus(searchType = 'phrases'))
+        #self.phraseSearchAct = QAction('Search by descriptive &phrase...',
+        #                               self,
+        #                               triggered = lambda x: self.searchCorpus(searchType = 'phrases'))
 
         self.overwriteAllGlossesAct = QAction('Resave all glosses in new style',
                                               self,
