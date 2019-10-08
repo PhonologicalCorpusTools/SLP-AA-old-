@@ -932,6 +932,7 @@ class MainWindow(QMainWindow):
         self.askSaveChanges = False
         self.corpusList.clear()
         self.newGloss()
+        self.corpusDock.setWindowTitle(self.corpus.name)
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
 
@@ -2171,7 +2172,7 @@ class AnalyzerMainWindow(QMainWindow):
         mainLayout = QVBoxLayout()
         centralWidget.setLayout(mainLayout)
 
-        wordFrame = QGroupBox('Word')
+        wordFrame = QGroupBox(self.corpus.name)
         wordLayout = QVBoxLayout()
         wordFrame.setLayout(wordLayout)
         # mainLayout.addWidget(wordFrame)
