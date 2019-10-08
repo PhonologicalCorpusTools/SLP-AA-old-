@@ -64,6 +64,12 @@ class TransSlot(QPushButton):
             self.menu.addAction(symbol)
 
         self.menu.addSeparator()
+        selectAllAction = QAction('Select all', self, checkable=False, triggered=self.selectAll)
+        self.menu.addAction(selectAllAction)
+        resetToStarAction = QAction('Reset to *', self, checkable=False, triggered=self.resetToStar)
+        self.menu.addAction(resetToStarAction)
+
+        self.menu.addSeparator()
         self.negAction = QAction('Set negative', self, checkable=True, triggered=self.setNeg)
         self.menu.addAction(self.negAction)
         self.setMenu(self.menu)
@@ -127,6 +133,16 @@ class TransSlot(QPushButton):
             style = self.styleSheetString.format(self.background, self.border, self.textColor, self.textFont)
 
         self.setStyleSheet(style)
+
+    def resetToStar(self):
+        for act in self.menu.actions()[:-3]:
+            act.setChecked(False)
+        self.updateSymbol()
+
+    def selectAll(self):
+        for act in self.menu.actions()[:-3]:
+            act.setChecked(True)
+        self.updateSymbol()
 
     def setNeg(self):
         if self.negAction.isChecked():
