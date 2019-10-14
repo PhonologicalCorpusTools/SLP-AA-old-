@@ -1,15 +1,138 @@
 from imports import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QLabel, QButtonGroup,
-                     QRadioButton, QApplication, QGridLayout, QTabWidget, QWidget,
-                     QSizePolicy, Qt, Slot, QListWidget, QListView, QListWidgetItem, QIcon,
-                     QStandardItemModel, QStandardItem, QSize, QLineEdit)
+                     QRadioButton, QApplication, QGridLayout, QTabWidget, QWidget, QPixmap,
+                     QSizePolicy, Qt, Slot, QListWidget, QListView, QListWidgetItem, QIcon, QImage, QPoint,
+                     QStandardItemModel, QStandardItem, QSize, QLineEdit, QMenu, QAction, QMimeData, QDrag, QEvent)
 from constants import GLOBAL_OPTIONS
 import sys
 import os
 from gui.function_windows import FunctionDialog, FunctionWorker
-from gui.phonological_search import LogicRadioButtonGroup
+from gui.helperwidgets import LogicRadioButtonGroup
 from image import getMediaFilePath
 import regex as re
 from pprint import pprint
+
+
+class ConfigHandList(QListWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAcceptDrops(True)
+        self.setDragEnabled(True)
+        self.setDropIndicatorShown(True)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
+        self.makeMenu()
+
+    def getSetOfItemLabels(self):
+        labels = set()
+        numItems = self.count()
+        for i in range(numItems):
+            label = self.item(i).text()
+            labels.add(label)
+        return labels
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasText() and event.mimeData().hasImage():
+            label = event.mimeData().text()
+            if label in self.getSetOfItemLabels():
+                event.ignore()
+            else:
+                event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasText() and event.mimeData().hasImage():
+            label = event.mimeData().text()
+            if label in self.getSetOfItemLabels():
+                event.ignore()
+            else:
+                event.setDropAction(Qt.CopyAction)
+                event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        if event.mimeData().hasText() and event.mimeData().hasImage():
+            label = event.mimeData().text()
+            if label in self.getSetOfItemLabels():
+                event.ignore()
+            else:
+                symbol = QListWidgetItem(label, self)
+                img = event.mimeData().imageData()
+                symbol.setIcon(QIcon(QPixmap(img)))
+
+                event.setDropAction(Qt.CopyAction)
+                event.accept()
+        else:
+            event.ignore()
+
+    def showContextMenu(self, point):
+        self.popMenu.exec_(self.mapToGlobal(point))
+
+    def removeSelectedItem(self):
+        selected = self.selectedItems()
+        if not selected:
+            return False
+        for item in selected:
+            self.takeItem(self.row(item))
+            del item
+        return True
+
+    def makeMenu(self):
+        self.popMenu = QMenu(self)
+        self.removeAct = QAction('Remove', self, triggered=self.removeSelectedItem, checkable=False)
+        self.popMenu.addAction(self.removeAct)
+
+
+class ConfigHandPanel(QGroupBox):
+    def __init__(self, title):
+        super().__init__(title)
+        self.selectionList = ConfigHandList(parent=self)
+        Layout = QVBoxLayout()
+        Layout.addWidget(self.selectionList)
+        self.setLayout(Layout)
+
+
+class HandshapePanel(QGroupBox):
+    def __init__(self, title):
+        super().__init__(title)
+        self.handshapeList = HandshapeList(os.path.join(os.path.dirname(os.getcwd()), 'media'))
+        unmarkedLayout = QVBoxLayout()
+        unmarkedLayout.addWidget(self.handshapeList)
+        self.setLayout(unmarkedLayout)
+
+    def addHandshape(self, symbol):
+        self.handshapeList.addHandshape(symbol)
+
+
+class HandshapeList(QListWidget):
+    def __init__(self, mediaPath, parent=None):
+        super().__init__(parent)
+        self.mediaPath = mediaPath
+        self.setIconSize(QSize(100, 100))
+        self.setViewMode(QListView.IconMode)
+        self.setDragEnabled(True)
+        self.setAcceptDrops(False)
+        self.setMinimumHeight(125)
+
+    def addHandshape(self, symbol):
+        item = QListWidgetItem(symbol, self)
+        item.setIcon(QIcon(os.path.join(self.mediaPath, symbol + '.png')))
+
+    def startDrag(self, e):
+        selectedshape = self.selectedItems()[0]
+        symbol = selectedshape.text()
+        icon = selectedshape.icon().pixmap(100, 100)
+
+        mime = QMimeData()
+        mime.setImageData(QImage(os.path.join(self.mediaPath, symbol + '.png')))
+        mime.setText(symbol)
+
+        drag = QDrag(self)
+        drag.setMimeData(mime)
+        drag.setPixmap(icon)
+        drag.setHotSpot(QPoint(icon.width()/2, icon.height()/2))
+        drag.exec_(Qt.CopyAction)
 
 
 class HSWorker(FunctionWorker):
@@ -19,7 +142,7 @@ class HSWorker(FunctionWorker):
 
 
 class HandshapeSearchDialog(FunctionDialog):
-    header = ['Corpus', 'Sign', 'Token frequency']
+    header = ['Corpus', 'Sign', 'Token frequency', 'Note']
     about = 'Handshape search'
     name = 'handshape search'
     mediaPath = os.path.join(os.path.dirname(os.getcwd()), 'media')
@@ -30,114 +153,15 @@ class HandshapeSearchDialog(FunctionDialog):
         self.corpus = corpus
         self.recent = recent
 
-        # TODO: implement remove action
-        self.c1h1Group = QGroupBox('Config1Hand1')
-        self.c1h1List = QListWidget()
-        self.c1h1List.setAcceptDrops(True)
-        self.c1h1List.setDragEnabled(True)
-        #self.c1h1List.supportedDropActions()
-        c1h1Layout = QVBoxLayout()
-        c1h1Layout.addWidget(self.c1h1List)
-        self.c1h1Group.setLayout(c1h1Layout)
-
-        self.c1h2Group = QGroupBox('Config1Hand2')
-        self.c1h2List = QListWidget()
-        self.c1h2List.setAcceptDrops(True)
-        self.c1h2List.setDragEnabled(True)
-        c1h2Layout = QVBoxLayout()
-        c1h2Layout.addWidget(self.c1h2List)
-        self.c1h2Group.setLayout(c1h2Layout)
-
-        self.c2h1Group = QGroupBox('Config2Hand1')
-        self.c2h1List = QListWidget()
-        self.c2h1List.setAcceptDrops(True)
-        self.c2h1List.setDragEnabled(True)
-        c2h1Layout = QVBoxLayout()
-        c2h1Layout.addWidget(self.c2h1List)
-        self.c2h1Group.setLayout(c2h1Layout)
-
-        self.c2h2Group = QGroupBox('Config2Hand2')
-        self.c2h2List = QListWidget()
-        self.c2h2List.setAcceptDrops(True)
-        self.c2h2List.setDragEnabled(True)
-        c2h2Layout = QVBoxLayout()
-        c2h2Layout.addWidget(self.c2h2List)
-        self.c2h2Group.setLayout(c2h2Layout)
-
-        self.otherGroup = QGroupBox('Others')
-        self.otherList = QListWidget(self)
-        self.otherList.setIconSize(QSize(50, 50))
-        #self.otherList.setUniformItemSizes(True)
-        self.otherList.setViewMode(QListView.IconMode)
-        self.otherList.setDragEnabled(True)
-        self.otherList.setAcceptDrops(False)
-
-        everything = QListWidgetItem('all', self.otherList)
-        everything.setIcon(QIcon(os.path.join(self.mediaPath, 'all.png')))
-
-        empty = QListWidgetItem('empty', self.otherList)
-        empty.setIcon(QIcon(os.path.join(self.mediaPath, 'empty.png')))
-
-        otherLayout = QVBoxLayout()
-        otherLayout.addWidget(self.otherList)
-        self.otherGroup.setLayout(otherLayout)
-
-        self.unmarkedGroup = QGroupBox('Unmarked handshapes')
-        self.unmarkedList = QListWidget(self)
-        self.unmarkedList.setIconSize(QSize(100, 100))
-        self.unmarkedList.setViewMode(QListView.IconMode)
-        self.unmarkedList.setDragEnabled(True)
-        self.unmarkedList.setAcceptDrops(False)
-        self.unmarkedList.setMinimumHeight(125)
-
-        A = QListWidgetItem('A', self.unmarkedList)
-        A.setIcon(QIcon(os.path.join(self.mediaPath, 'A.png')))
-
-        B = QListWidgetItem('B', self.unmarkedList)
-        B.setIcon(QIcon(os.path.join(self.mediaPath, 'B.png')))
-
-        w = QListWidgetItem('w', self.unmarkedList)
-        w.setIcon(QIcon(os.path.join(self.mediaPath, 'w.png')))
-
-        one = QListWidgetItem('1', self.unmarkedList)
-        one.setIcon(QIcon(os.path.join(self.mediaPath, '1.png')))
-
-        six = QListWidgetItem('6', self.unmarkedList)
-        six.setIcon(QIcon(os.path.join(self.mediaPath, '6.png')))
-
-        less = QListWidgetItem('<', self.unmarkedList)
-        less.setIcon(QIcon(os.path.join(self.mediaPath, '<.png')))
-
-        more = QListWidgetItem('>', self.unmarkedList)
-        more.setIcon(QIcon(os.path.join(self.mediaPath, '>.png')))
-
-        unmarkedLayout = QVBoxLayout()
-        unmarkedLayout.addWidget(self.unmarkedList)
-        self.unmarkedGroup.setLayout(unmarkedLayout)
-
-        self.markedGroup = QGroupBox('Marked handshapes')
-        self.markedList = QListWidget()
-        self.markedList.setIconSize(QSize(100, 100))
-        self.markedList.setViewMode(QListView.IconMode)
-        self.markedList.setDragEnabled(True)
-        self.markedList.setAcceptDrops(False)
-        self.markedList.setMinimumHeight(125)
-
-        g = QListWidgetItem('g', self.markedList)
-        g.setIcon(QIcon(os.path.join(self.mediaPath, 'g.png')))
-
-        seven = QListWidgetItem('7', self.markedList)
-        seven.setIcon(QIcon(os.path.join(self.mediaPath, '7.png')))
-
-        markedLayout = QVBoxLayout()
-        markedLayout.addWidget(self.markedList)
-        self.markedGroup.setLayout(markedLayout)
+        self.createConfigHand()
+        self.createHandshapes()
 
         self.logicPanel = LogicRadioButtonGroup('vertical',
-                                           'any',
-                                           title='Signs should contain...',
-                                           any='Any of the above configurations',
-                                           all='All of the above configurations')
+                                                'any',
+                                                title='Signs should contain...',
+                                                any='Any of the above configurations',
+                                                all='All of the above configurations')
+
         self.notePanel = QLineEdit()
         self.notePanel.setPlaceholderText('Enter notes here...')
 
@@ -165,6 +189,33 @@ class HandshapeSearchDialog(FunctionDialog):
     #    ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
     #    pprint(ret)
 
+    def createConfigHand(self):
+        self.c1h1Group = ConfigHandPanel('Config1Hand1')
+        self.c1h2Group = ConfigHandPanel('Config1Hand2')
+        self.c2h1Group = ConfigHandPanel('Config2Hand1')
+        self.c2h2Group = ConfigHandPanel('Config2Hand2')
+
+    def createHandshapes(self):
+        # unmarked handshapes
+        self.unmarkedGroup = HandshapePanel('Unmarked handshapes')
+        self.unmarkedGroup.addHandshape('A_O')
+        self.unmarkedGroup.addHandshape('B_1')
+        self.unmarkedGroup.addHandshape('w_B')
+        self.unmarkedGroup.addHandshape('1_A')
+        self.unmarkedGroup.addHandshape('6_S')
+        self.unmarkedGroup.addHandshape('<_C')
+        self.unmarkedGroup.addHandshape('>_5')
+
+        # marked handshapes
+        self.markedGroup = HandshapePanel('Marked handshapes')
+        self.markedGroup.addHandshape('g')
+        self.markedGroup.addHandshape('7')
+
+        # other
+        self.otherGroup = HandshapePanel('Others')
+        self.otherGroup.addHandshape('all')
+        self.otherGroup.addHandshape('empty')
+
     def generateKwargs(self):
         # TODO: implement this
         pass
@@ -177,10 +228,11 @@ class HandshapeSearchDialog(FunctionDialog):
         for sign in results:
             self.results.append({'Corpus': self.corpus.name,
                                  'Sign': sign.gloss,
-                                 'Token frequency': 1})
+                                 'Token frequency': 1,
+                                 'Note': self.notePanel.text()})
         self.accept()
 
-#app = QApplication(sys.argv)
-#main = HandshapeSearchDialog(None, None, None, None)
-#main.show()
-#sys.exit(app.exec_())
+app = QApplication(sys.argv)
+main = HandshapeSearchDialog(None, None, None, None)
+main.show()
+sys.exit(app.exec_())

@@ -378,7 +378,6 @@ class TranscriptionSlot(QLineEdit):
         self.popMenu.addAction(self.changeEstimateAct)
         self.popMenu.addAction(self.changeUncertaintyAct)
 
-
     def showContextMenu(self, point):
         self.popMenu.exec_(self.mapToGlobal(point))
 
