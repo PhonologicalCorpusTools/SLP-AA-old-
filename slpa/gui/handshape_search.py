@@ -57,6 +57,15 @@ class ConfigHandList(QListWidget):
             if label in self.getSetOfItemLabels():
                 event.ignore()
             else:
+                if label == 'all' or label == 'empty':
+                    while self.count() > 0:
+                        item = self.takeItem(0)
+                        del item
+                else:
+                    if 'all' in self.getSetOfItemLabels() or 'empty' in self.getSetOfItemLabels():
+                        item = self.takeItem(0)
+                        del item
+
                 symbol = QListWidgetItem(label, self)
                 img = event.mimeData().imageData()
                 symbol.setIcon(QIcon(QPixmap(img)))
