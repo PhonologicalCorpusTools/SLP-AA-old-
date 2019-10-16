@@ -1,5 +1,5 @@
 from imports import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QLabel, QButtonGroup,
-                     QRadioButton, QApplication, QGridLayout, QTabWidget, QWidget, QPixmap,
+                     QRadioButton, QApplication, QGridLayout, QTabWidget, QWidget, QPixmap, QScrollArea,
                      QSizePolicy, Qt, Slot, QListWidget, QListView, QListWidgetItem, QIcon, QImage, QPoint,
                      QStandardItemModel, QStandardItem, QSize, QLineEdit, QMenu, QAction, QMimeData, QDrag, QEvent)
 from constants import GLOBAL_OPTIONS
@@ -162,6 +162,46 @@ class HandshapeSearchDialog(FunctionDialog):
         self.corpus = corpus
         self.recent = recent
 
+        # container widget for scroll
+        container = QWidget()
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(container)
+
+        globalFrame = QGroupBox('Global options')
+        globalLayout = QHBoxLayout()
+        globalFrame.setLayout(globalLayout)
+
+        self.forearmLogic = LogicRadioButtonGroup('vertical', 'e',
+                                                  title='Forearm',
+                                                  y='Yes', n='No', e='Either')
+
+        self.estimateLogic = LogicRadioButtonGroup('vertical', 'e',
+                                                   title='Estimated',
+                                                   y='Yes', n='No', e='Either')
+
+        self.uncertainLogic = LogicRadioButtonGroup('vertical', 'e',
+                                                    title='Uncertain',
+                                                    y='Yes', n='No', e='Either')
+
+        self.incompleteLogic = LogicRadioButtonGroup('vertical', 'e',
+                                                     title='Incomplete',
+                                                     y='Yes', n='No', e='Either')
+        globalLayout.addWidget(self.forearmLogic)
+        globalLayout.addWidget(self.estimateLogic)
+        globalLayout.addWidget(self.uncertainLogic)
+        globalLayout.addWidget(self.incompleteLogic)
+
+        self.configLogic = LogicRadioButtonGroup('vertical', 'e',
+                                                 title='Configuration',
+                                                 one='One-config signs', two='Two-config signs', e='Either')
+
+        self.handLogic = LogicRadioButtonGroup('vertical', 'e',
+                                               title='Hand',
+                                               one='One-hand signs', two='Two-hand signs', e='Either')
+
+
         self.createConfigHand()
         self.createHandshapes()
 
@@ -175,23 +215,27 @@ class HandshapeSearchDialog(FunctionDialog):
         self.notePanel.setPlaceholderText('Enter notes here...')
 
         mainLayout = QGridLayout()
-        mainLayout.addWidget(self.c1h1Group, 0, 0, 1, 1)
-        mainLayout.addWidget(self.c1h2Group, 0, 1, 1, 1)
-        mainLayout.addWidget(self.c2h1Group, 0, 2, 1, 1)
-        mainLayout.addWidget(self.c2h2Group, 0, 3, 1, 1)
-        mainLayout.addWidget(self.logicPanel, 1, 0, 1, 2)
-        mainLayout.addWidget(self.otherGroup, 1, 2, 1, 2)
-        mainLayout.addWidget(self.unmarkedGroup, 2, 0, 1, 4)
-        mainLayout.addWidget(self.markedGroup, 3, 0, 1, 4)
-        mainLayout.addWidget(self.notePanel, 4, 0, 1, 4)
+        mainLayout.addWidget(globalFrame, 0, 0, 1, 2)
+        mainLayout.addWidget(self.configLogic, 0, 2, 1, 1)
+        mainLayout.addWidget(self.handLogic, 0, 3, 1, 1)
+        mainLayout.addWidget(self.c1h1Group, 1, 0, 1, 1)
+        mainLayout.addWidget(self.c1h2Group, 1, 1, 1, 1)
+        mainLayout.addWidget(self.c2h1Group, 1, 2, 1, 1)
+        mainLayout.addWidget(self.c2h2Group, 1, 3, 1, 1)
+        mainLayout.addWidget(self.logicPanel, 2, 0, 1, 2)
+        mainLayout.addWidget(self.otherGroup, 2, 2, 1, 2)
+        mainLayout.addWidget(self.unmarkedGroup, 3, 0, 1, 4)
+        mainLayout.addWidget(self.markedGroup, 4, 0, 1, 4)
+        mainLayout.addWidget(self.notePanel, 5, 0, 1, 4)
+        container.setLayout(mainLayout)
 
         #####This part should be removed later#####
         #self.testButton = QPushButton('test')
         #mainLayout.addWidget(self.testButton, 1, 0)
         #self.testButton.clicked.connect(self.test)
         #####This part should be removed later#####
-
-        self.layout().insertLayout(0, mainLayout)
+        self.layout().insertWidget(0, scroll)
+        #self.layout().insertLayout(0, mainLayout)
 
     #def test(self):
     #    res = self.generateKwargs()

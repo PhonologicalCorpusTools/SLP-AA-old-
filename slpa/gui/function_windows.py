@@ -83,9 +83,11 @@ class FunctionDialog(QDialog):
         #                                 '</FONT>'.format('\n'.join(self.about)))
         #                                )
 
-        layout = QVBoxLayout()
-        layout.addLayout(acLayout)
-        self.setLayout(layout)
+        majorLayout = QVBoxLayout()
+        majorLayout.addLayout(acLayout)
+
+        self.setLayout(majorLayout)
+        self.resize(1000, 500)
 
     @Slot(object)
     def setResults(self, results):
