@@ -22,6 +22,9 @@ class ConfigHandList(QListWidget):
         self.customContextMenuRequested.connect(self.showContextMenu)
         self.makeMenu()
 
+        any = QListWidgetItem('any', self)
+        any.setIcon(QIcon(os.path.join(os.path.join(os.path.dirname(os.getcwd()), 'media'), 'any.png')))
+
     def getSetOfItemLabels(self):
         labels = set()
         numItems = self.count()
@@ -57,12 +60,12 @@ class ConfigHandList(QListWidget):
             if label in self.getSetOfItemLabels():
                 event.ignore()
             else:
-                if label == 'all' or label == 'empty':
+                if label == 'any' or label == 'empty':
                     while self.count() > 0:
                         item = self.takeItem(0)
                         del item
                 else:
-                    if 'all' in self.getSetOfItemLabels() or 'empty' in self.getSetOfItemLabels():
+                    if 'any' in self.getSetOfItemLabels() or 'empty' in self.getSetOfItemLabels():
                         item = self.takeItem(0)
                         del item
 
@@ -266,7 +269,7 @@ class HandshapeSearchDialog(FunctionDialog):
 
         # other
         self.otherGroup = HandshapePanel('Others')
-        self.otherGroup.addHandshape('all')
+        self.otherGroup.addHandshape('any')
         self.otherGroup.addHandshape('empty')
 
     def generateKwargs(self):

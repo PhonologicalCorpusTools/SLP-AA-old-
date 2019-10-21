@@ -1,4 +1,4 @@
-from imports import (QThread, Signal, QDialog, QVBoxLayout, QPushButton,
+from imports import (QThread, Signal, QDialog, QVBoxLayout, QPushButton, QScrollArea, QWidget,
                      QHBoxLayout, Slot)
 
 
