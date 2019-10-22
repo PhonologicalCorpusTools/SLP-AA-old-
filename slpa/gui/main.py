@@ -217,14 +217,14 @@ class BlenderOutputWindow(QDialog):
         layout.addWidget(self.imageLabel)
         self.setLayout(layout)
 
-class CorpusList(QListWidget):
 
+class CorpusList(QListWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
 
     def mousePressEvent(self, event):
-        originalItem =  [i for i in self.selectedItems()][0]
+        #originalItem = [i for i in self.selectedItems()][0]
         super().mousePressEvent(event)
         if event.button() == Qt.LeftButton:
             if self.parent.autoSave:
@@ -248,9 +248,10 @@ class CorpusList(QListWidget):
                     selectedItem = [i for i in self.selectedItems()][0]
                     self.itemClicked.emit(selectedItem)
 
-                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole: #go back and edit the gloss
-                    self.setCurrentItem(originalItem)
-                    self.itemClicked.emit(originalItem)
+                #elif alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole: #go back and edit the gloss
+                #    self.setCurrentItem(originalItem)
+                #    self.itemClicked.emit(originalItem)
+
 
 class MergeCorpusMessageBox(QMessageBox):
 
@@ -910,7 +911,7 @@ class MainWindow(QMainWindow):
         self.dockWrapper = QWidget()
         self.dockLayout = QVBoxLayout()
         self.dockWrapper.setLayout(self.dockLayout)
-        self.corpusList = CorpusList(self) #QListWidget(self)
+        self.corpusList = CorpusList(self)  #QListWidget(self)
         #self.corpusList.currentItemChanged.connect(self.loadHandShape)
         self.corpusList.itemClicked.connect(self.loadHandShape)
         self.dockLayout.addWidget(self.corpusList)
@@ -992,7 +993,7 @@ class MainWindow(QMainWindow):
                     return
         # else: #corpus exists
         if not checkForDuplicates:
-            isDuplicate = True
+            isDuplicate = False
             #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
             #to save a gloss, under certain circumstances
         elif kwargs['gloss'] in self.corpus.wordlist and self.showDuplicateWarning:
@@ -1009,6 +1010,7 @@ class MainWindow(QMainWindow):
                 pass
             elif role == QMessageBox.RejectRole:#edit
                 return
+
         self.updateCorpus(kwargs, isDuplicate)
         save_binary(self.corpus, self.corpus.path)
         self.corpus = load_binary(self.corpus.path)
@@ -1078,11 +1080,11 @@ class MainWindow(QMainWindow):
     def generateKwargs(self):
         #This is called whenever the corpus is updated/saved
         kwargs = {'path': None,
-                'config1': None, 'config2': None,
-                'flags': None, 'parameters': None,
-                'corpusNotes': None, 'signNotes': None,
-                'forearm': False, 'estimated': False,
-                'uncertain': False, 'incomplete': False, 'reduplicated': False}
+                  'config1': None, 'config2': None,
+                  'flags': None, 'parameters': None,
+                  'corpusNotes': None, 'signNotes': None,
+                  'forearm': False, 'estimated': False,
+                  'uncertain': False, 'incomplete': False, 'reduplicated': False}
 
         config1 = self.configTabs.widget(0)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
