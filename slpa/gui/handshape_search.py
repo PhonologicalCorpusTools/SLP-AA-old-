@@ -104,6 +104,15 @@ class ConfigHandPanel(QGroupBox):
         Layout.addWidget(self.selectionList)
         self.setLayout(Layout)
 
+    def value(self):
+        labels = set()
+        numItems = self.selectionList.count()
+        for i in range(numItems):
+            label = self.selectionList.item(i).text()
+            labels.add(label)
+        return labels
+
+
 
 class HandshapePanel(QGroupBox):
     def __init__(self, title):
@@ -233,17 +242,17 @@ class HandshapeSearchDialog(FunctionDialog):
         container.setLayout(mainLayout)
 
         #####This part should be removed later#####
-        #self.testButton = QPushButton('test')
-        #mainLayout.addWidget(self.testButton, 1, 0)
-        #self.testButton.clicked.connect(self.test)
+        self.testButton = QPushButton('test')
+        mainLayout.addWidget(self.testButton, 6, 0, 1, 1)
+        self.testButton.clicked.connect(self.test)
         #####This part should be removed later#####
         self.layout().insertWidget(0, scroll)
         #self.layout().insertLayout(0, mainLayout)
 
-    #def test(self):
-    #    res = self.generateKwargs()
+    def test(self):
+        res = self.generateKwargs()
     #    ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
-    #    pprint(ret)
+        pprint(res)
 
     def createConfigHand(self):
         self.c1h1Group = ConfigHandPanel('Config1Hand1')
@@ -261,6 +270,7 @@ class HandshapeSearchDialog(FunctionDialog):
         self.unmarkedGroup.addHandshape('6_S')
         self.unmarkedGroup.addHandshape('<_C')
         self.unmarkedGroup.addHandshape('>_5')
+        self.unmarkedGroup.addHandshape(']_B')
 
         # marked handshapes
         self.markedGroup = HandshapePanel('Marked handshapes')
@@ -273,8 +283,23 @@ class HandshapeSearchDialog(FunctionDialog):
         self.otherGroup.addHandshape('empty')
 
     def generateKwargs(self):
-        # TODO: implement this
-        pass
+        kwargs = dict()
+
+        kwargs['corpus'] = self.corpus
+        kwargs['forearm'] = self.forearmLogic.value()
+        kwargs['estimated'] = self.estimateLogic.value()
+        kwargs['uncertain'] = self.uncertainLogic.value()
+        kwargs['incomplete'] = self.incompleteLogic.value()
+        kwargs['configuration'] = self.configLogic.value()
+        kwargs['hand'] = self.handLogic.value()
+        kwargs['logic'] = self.logicPanel.value()
+        kwargs['config1hand1'] = self.c1h1Group.value()
+        kwargs['config1hand2'] = self.c1h2Group.value()
+        kwargs['config2hand1'] = self.c2h1Group.value()
+        kwargs['config2hand2'] = self.c2h2Group.value()
+        self.note = self.notePanel.text()
+
+        return kwargs
 
     @Slot(object)
     def setResults(self, results):
