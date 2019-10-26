@@ -16,7 +16,8 @@ from gui.colour import *
 from constants import GLOBAL_OPTIONS
 from gui.parameterwidgets import ParameterDialog, ParameterTreeModel
 from gui.transcription_search import TranscriptionSearchDialog
-from gui.phonological_search import PhonologicalSearchDialog, ExtendedFingerSearchDialog
+from gui.handshape_search import HandshapeSearchDialog
+from gui.phonological_search import ExtendedFingerSearchDialog
 from gui.results_windows import ResultsWindow
 #from slpa import __version__ as currentSLPAversion
 from pprint import pprint
@@ -2161,7 +2162,6 @@ def clean(item):
             pass
 
 #TODO: add settings arguments
-#TODO: disable editing function for slots
 class AnalyzerMainWindow(QMainWindow):
     def __init__(self, corpus):
         super().__init__()
@@ -2280,6 +2280,7 @@ class AnalyzerMainWindow(QMainWindow):
         self.searchMenu = self.menuBar().addMenu('&Search')
         self.searchMenu.addAction(self.searchByTranscriptionAct)
         self.searchMenu.addAction(self.searchByExtendedFingersAct)
+        self.searchMenu.addAction(self.searchByHandshapesAct)
 
     def createActions(self):
         self.loadCorporaAction = QAction('&Load corpora...', self, statusTip='Load a corpus',
@@ -2289,8 +2290,21 @@ class AnalyzerMainWindow(QMainWindow):
                                  statusTip='Switch to annotator mode',
                                  triggered=self.switchMode)
 
-        self.searchByTranscriptionAct = QAction('Search by transcription...', self, triggered=self.searchByTranscription)
-        self.searchByExtendedFingersAct = QAction('Search by extended fingers...', self, triggered=self.searchByExtendedFingers)
+        self.searchByTranscriptionAct = QAction('Search by transcription...', self,
+                                                triggered=self.searchByTranscription)
+        self.searchByExtendedFingersAct = QAction('Search by extended fingers...', self,
+                                                  triggered=self.searchByExtendedFingers)
+        self.searchByHandshapesAct = QAction('Search by handshapes...', self,
+                                             triggered=self.searchByHandshapes)
+
+    def searchByHandshapes(self):
+        searchDialog = HandshapeSearchDialog(self.corpus, self, None, None)
+        success = searchDialog.exec_()
+        if success:
+            self.HSResultWindow = ResultsWindow('Handshape Search Results',
+                                                searchDialog,
+                                                self)
+            self.HSResultWindow.show()
 
     def searchByTranscription(self):
         searchDialog = TranscriptionSearchDialog(self.corpus, self, None, None)

@@ -3,13 +3,11 @@ from imports import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QP
                      QSizePolicy, Qt, Slot, QListWidget, QListView, QListWidgetItem, QIcon, QImage, QPoint,
                      QStandardItemModel, QStandardItem, QSize, QLineEdit, QMenu, QAction, QMimeData, QDrag, QEvent)
 from constants import GLOBAL_OPTIONS
-import sys
-import os
 from gui.function_windows import FunctionDialog, FunctionWorker
 from gui.helperwidgets import LogicRadioButtonGroup
-from image import getMediaFilePath
 import regex as re
 from pprint import pprint
+from image import getMediaFilePath
 
 
 class ConfigHandList(QListWidget):
@@ -22,8 +20,9 @@ class ConfigHandList(QListWidget):
         self.customContextMenuRequested.connect(self.showContextMenu)
         self.makeMenu()
 
+        # set the default to 'any'
         any = QListWidgetItem('any', self)
-        any.setIcon(QIcon(os.path.join(os.path.join(os.path.dirname(os.getcwd()), 'media'), 'any.png')))
+        any.setIcon(QIcon(getMediaFilePath('any.png')))
 
     def getSetOfItemLabels(self):
         labels = set()
@@ -113,11 +112,10 @@ class ConfigHandPanel(QGroupBox):
         return labels
 
 
-
 class HandshapePanel(QGroupBox):
     def __init__(self, title):
         super().__init__(title)
-        self.handshapeList = HandshapeList(os.path.join(os.path.dirname(os.getcwd()), 'media'))
+        self.handshapeList = HandshapeList(parent=self)
         unmarkedLayout = QVBoxLayout()
         unmarkedLayout.addWidget(self.handshapeList)
         self.setLayout(unmarkedLayout)
@@ -127,9 +125,8 @@ class HandshapePanel(QGroupBox):
 
 
 class HandshapeList(QListWidget):
-    def __init__(self, mediaPath, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.mediaPath = mediaPath
         self.setIconSize(QSize(100, 100))
         self.setViewMode(QListView.IconMode)
         self.setDragEnabled(True)
@@ -138,7 +135,7 @@ class HandshapeList(QListWidget):
 
     def addHandshape(self, symbol):
         item = QListWidgetItem(symbol, self)
-        item.setIcon(QIcon(os.path.join(self.mediaPath, symbol + '.png')))
+        item.setIcon(QIcon(getMediaFilePath(symbol + '.png')))
 
     def startDrag(self, e):
         selectedshape = self.selectedItems()[0]
@@ -146,7 +143,7 @@ class HandshapeList(QListWidget):
         icon = selectedshape.icon().pixmap(100, 100)
 
         mime = QMimeData()
-        mime.setImageData(QImage(os.path.join(self.mediaPath, symbol + '.png')))
+        mime.setImageData(QImage(getMediaFilePath(symbol + '.png')))
         mime.setText(symbol)
 
         drag = QDrag(self)
@@ -166,7 +163,6 @@ class HandshapeSearchDialog(FunctionDialog):
     header = ['Corpus', 'Sign', 'Token frequency', 'Note']
     about = 'Handshape search'
     name = 'handshape search'
-    mediaPath = os.path.join(os.path.dirname(os.getcwd()), 'media')
 
     def __init__(self, corpus, parent, settings, recent):
         super().__init__(parent, settings, HSWorker())
@@ -313,7 +309,7 @@ class HandshapeSearchDialog(FunctionDialog):
                                  'Note': self.notePanel.text()})
         self.accept()
 
-app = QApplication(sys.argv)
-main = HandshapeSearchDialog(None, None, None, None)
-main.show()
-sys.exit(app.exec_())
+#app = QApplication(sys.argv)
+#main = HandshapeSearchDialog(None, None, None, None)
+#main.show()
+#sys.exit(app.exec_())
