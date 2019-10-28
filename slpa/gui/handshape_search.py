@@ -240,10 +240,10 @@ class HandshapeSearchDialog(FunctionDialog):
         self.createHandshapes()
 
         self.logicPanel = LogicRadioButtonGroup('vertical',
-                                                'any',
+                                                'all',
                                                 title='Signs should contain...',
-                                                any='Any of the above configurations',
-                                                all='All of the above configurations')
+                                                all='All of the above configurations',
+                                                any='Any of the above configurations')
 
         self.notePanel = QLineEdit()
         self.notePanel.setPlaceholderText('Enter notes here...')
@@ -264,12 +264,11 @@ class HandshapeSearchDialog(FunctionDialog):
         container.setLayout(mainLayout)
 
         #####This part should be removed later#####
-        self.testButton = QPushButton('test')
-        mainLayout.addWidget(self.testButton, 6, 0, 1, 1)
-        self.testButton.clicked.connect(self.test)
+        #self.testButton = QPushButton('test')
+        #mainLayout.addWidget(self.testButton, 6, 0, 1, 1)
+        #self.testButton.clicked.connect(self.test)
         #####This part should be removed later#####
         self.layout().insertWidget(0, scroll)
-        #self.layout().insertLayout(0, mainLayout)
 
     def handleConfigChange(self, option):
         if option == 'One-config signs':
@@ -308,10 +307,10 @@ class HandshapeSearchDialog(FunctionDialog):
                 self.c1h2Group.setEnabled(True)
                 self.c2h2Group.setEnabled(True)
 
-    def test(self):
-        res = self.generateKwargs()
+    #def test(self):
+    #    res = self.generateKwargs()
     #    ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
-        pprint(res)
+    #    pprint(res)
 
     def createConfigHand(self):
         self.c1h1Group = ConfigHandPanel('Config1Hand1')
