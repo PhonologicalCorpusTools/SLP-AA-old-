@@ -214,8 +214,8 @@ def transcription_search(corpus, forearm, estimated, uncertain, incomplete, conf
             continue
 
         if not check_slot_symbol(word, config1, config2):
-            print('slot')
-            print(word)
+            #print('slot')
+            #print(word)
             continue
 
         ret.append(word)
