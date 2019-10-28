@@ -6,6 +6,7 @@ from constants import GLOBAL_OPTIONS
 from gui.function_windows import FunctionDialog, FunctionWorker
 from gui.helperwidgets import LogicRadioButtonGroup
 import regex as re
+import sys
 from pprint import pprint
 from image import getMediaFilePath
 
@@ -13,16 +14,22 @@ from image import getMediaFilePath
 class ConfigHandList(QListWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setEnabled(True)
         self.setAcceptDrops(True)
         self.setDragEnabled(True)
         self.setDropIndicatorShown(True)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
         self.makeMenu()
+        self.setToSpecified('any')
 
-        # set the default to 'any'
-        any = QListWidgetItem('any', self)
-        any.setIcon(QIcon(getMediaFilePath('any.png')))
+    def setToSpecified(self, specified):
+        while self.count() > 0:
+            item = self.takeItem(0)
+            del item
+
+        spec = QListWidgetItem(specified, self)
+        spec.setIcon(QIcon(getMediaFilePath(specified + '.png')))
 
     def getSetOfItemLabels(self):
         labels = set()
@@ -87,6 +94,9 @@ class ConfigHandList(QListWidget):
         for item in selected:
             self.takeItem(self.row(item))
             del item
+
+        if self.count() == 0:
+            self.setToSpecified('any')
         return True
 
     def makeMenu(self):
@@ -204,10 +214,12 @@ class HandshapeSearchDialog(FunctionDialog):
         self.configLogic = LogicRadioButtonGroup('vertical', 'e',
                                                  title='Configuration',
                                                  one='One-config signs', two='Two-config signs', e='Either')
+        self.configLogic.chosen.connect(self.handleConfigChange)
 
         self.handLogic = LogicRadioButtonGroup('vertical', 'e',
                                                title='Hand',
                                                one='One-hand signs', two='Two-hand signs', e='Either')
+        self.handLogic.chosen.connect(self.handleHandChange)
 
 
         self.createConfigHand()
@@ -244,6 +256,43 @@ class HandshapeSearchDialog(FunctionDialog):
         #####This part should be removed later#####
         self.layout().insertWidget(0, scroll)
         #self.layout().insertLayout(0, mainLayout)
+
+    def handleConfigChange(self, option):
+        if option == 'One-config signs':
+            self.c2h1Group.selectionList.setToSpecified('empty')
+            self.c2h2Group.selectionList.setToSpecified('empty')
+            #self.c2h1Group.selectionList.setEnabled(False)
+            #self.c2h2Group.selectionList.setEnabled(False)
+            self.c2h1Group.setEnabled(False)
+            self.c2h2Group.setEnabled(False)
+        else:
+            if self.handLogic.value() == 'One-hand signs':
+                #self.c2h1Group.selectionList.setEnabled(True)
+                self.c2h1Group.setEnabled(True)
+            else:
+                #self.c2h1Group.selectionList.setEnabled(True)
+                #self.c2h2Group.selectionList.setEnabled(True)
+                self.c2h1Group.setEnabled(True)
+                self.c2h2Group.setEnabled(True)
+
+
+    def handleHandChange(self, option):
+        if option == 'One-hand signs':
+            self.c1h2Group.selectionList.setToSpecified('empty')
+            self.c2h2Group.selectionList.setToSpecified('empty')
+            #self.c1h2Group.selectionList.setEnabled(False)
+            #self.c2h2Group.selectionList.setEnabled(False)
+            self.c1h2Group.setEnabled(False)
+            self.c2h2Group.setEnabled(False)
+        else:
+            if self.configLogic.value() == 'One-config signs':
+                #self.c1h2Group.selectionList.setEnabled(True)
+                self.c1h2Group.setEnabled(True)
+            else:
+                #self.c1h2Group.selectionList.setEnabled(True)
+                #self.c2h2Group.selectionList.setEnabled(True)
+                self.c1h2Group.setEnabled(True)
+                self.c2h2Group.setEnabled(True)
 
     def test(self):
         res = self.generateKwargs()

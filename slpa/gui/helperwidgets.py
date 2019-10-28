@@ -1,6 +1,8 @@
-from imports import QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioButton
+from imports import QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioButton, Signal
 
 class LogicRadioButtonGroup(QGroupBox):
+    chosen = Signal(str)
+
     def __init__(self, direction, default, title='', **kwarg):
         super().__init__(title)
 
@@ -14,6 +16,7 @@ class LogicRadioButtonGroup(QGroupBox):
 
         for short_name, text in kwarg.items():
             button = QRadioButton(text)
+            button.clicked.connect(self.selected)
             if short_name == default:
                 button.setChecked(True)
             self.buttonGroup.addButton(button)
@@ -29,3 +32,6 @@ class LogicRadioButtonGroup(QGroupBox):
     def value(self):
         checked = self.buttonGroup.checkedButton()
         return checked.text()
+
+    def selected(self):
+        self.chosen.emit(self.buttonGroup.checkedButton().text())
