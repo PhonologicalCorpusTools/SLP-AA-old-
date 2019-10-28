@@ -5,6 +5,7 @@ from imports import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QP
 from constants import GLOBAL_OPTIONS
 from gui.function_windows import FunctionDialog, FunctionWorker
 from gui.helperwidgets import LogicRadioButtonGroup
+from analysis.handshape_search import handshape_search
 import regex as re
 import sys
 from pprint import pprint
@@ -165,8 +166,21 @@ class HandshapeList(QListWidget):
 
 class HSWorker(FunctionWorker):
     def run(self):
-        # TODO: implement this
-        pass
+        corpus = self.kwargs.pop('corpus')
+        forearm = self.kwargs.pop('forearm')
+        estimated = self.kwargs.pop('estimated')
+        uncertain = self.kwargs.pop('uncertain')
+        incomplete = self.kwargs.pop('incomplete')
+        configuration = self.kwargs.pop('configuration')
+        hand = self.kwargs.pop('hand')
+        logic = self.kwargs.pop('logic')
+        c1h1 = self.kwargs.pop('config1hand1')
+        c1h2 = self.kwargs.pop('config1hand2')
+        c2h1 = self.kwargs.pop('config2hand1')
+        c2h2 = self.kwargs.pop('config2hand2')
+
+        results = handshape_search(corpus, forearm, estimated, uncertain, incomplete, configuration, hand, logic, c1h1, c1h2, c2h1, c2h2)
+        self.dataReady.emit(results)
 
 
 class HandshapeSearchDialog(FunctionDialog):

@@ -1,6 +1,7 @@
-from analysis.unmarked_handshapes import HandshapeC
+from analysis.unmarked_handshapes import HandshapeAny, HandshapeEmpty, HandshapeC
 from analysis.transcription_search import check_global_options, check_config_type, check_hand_type
 
+handshape_mapping = {'C': HandshapeC, 'any': HandshapeAny, 'empty': HandshapeEmpty}
 
 def handshape_search(corpus, forearm, estimated, uncertain, incomplete, config, hand, logic, c1h1, c1h2, c2h1, c2h2):
     """
@@ -30,4 +31,27 @@ def handshape_search(corpus, forearm, estimated, uncertain, incomplete, config, 
         if not check_hand_type(word, hand):
             continue
 
+        if not check_handshape(word, logic, c1h1, c1h2, c2h1, c2h2):
+            continue
+
+        ret.append(word)
+
     return ret
+
+
+def check_handshape(sign, logic, c1h1, c1h2, c2h1, c2h2):
+    sign_c1h1 = [slot if slot else '_' for slot in sign.config1hand1[1:]]
+    sign_c1h2 = [slot if slot else '_' for slot in sign.config1hand2[1:]]
+    sign_c2h1 = [slot if slot else '_' for slot in sign.config2hand1[1:]]
+    sign_c2h2 = [slot if slot else '_' for slot in sign.config2hand2[1:]]
+
+    if logic == 'Any of the above configurations':
+        return any([any([handshape_mapping[shape]().match(sign_c1h1) for shape in c1h1]),
+                    any([handshape_mapping[shape]().match(sign_c1h2) for shape in c1h2]),
+                    any([handshape_mapping[shape]().match(sign_c2h1) for shape in c2h1]),
+                    any([handshape_mapping[shape]().match(sign_c2h2) for shape in c2h2])])
+    else:  # logic == 'All of the above configurations'
+        return all([any([handshape_mapping[shape]().match(sign_c1h1) for shape in c1h1]),
+                    any([handshape_mapping[shape]().match(sign_c1h2) for shape in c1h2]),
+                    any([handshape_mapping[shape]().match(sign_c2h1) for shape in c2h1]),
+                    any([handshape_mapping[shape]().match(sign_c2h2) for shape in c2h2])])

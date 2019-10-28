@@ -1,7 +1,52 @@
+from constants import X_IN_BOX, NULL
+
+
+class HandshapeEmpty(object):
+    options = [
+        ['_'], ['_'], ['_'], ['_'],
+        ['_'], ['_'], [NULL], ['/'], ['_'], ['_'], ['_'], ['_'], ['_'], ['_'],
+        ['1'], ['_'], ['_'], ['_'],
+        ['_'], ['2'], ['_'], ['_'], ['_'],
+        ['_'], ['3'], ['_'], ['_'], ['_'],
+        ['_'], ['4'], ['_'], ['_'], ['_']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, HandshapeEmpty.options):
+            if symbol not in allowed:
+                return False
+        return True
+
+
+class HandshapeAny(object):
+    options = [
+        ['L', 'U', 'O', '?', '_'], ['{', '<', '=', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'],
+        ['-', 't', 'fr', 'b', 'r', 'u', '?', '_'], ['-', 'd', 'p', 'M', '?', '_'], [NULL], ['/'], ['-', 't', 'fr', 'b', 'r', 'u', '?', '_'], ['-', 'd', 'm', 'p', 'M', '?', '_'], ['-', '1', '?', '_'], ['-', '2', '?', '_'], ['-', '3', '?', '_'], ['-', '4', '?', '_'],
+        ['1'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'],
+        ['{', '<', '=', 'x-', 'x', 'x+', X_IN_BOX, '?', '_'], ['2'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'],
+        ['{', '<', '=', 'x-', 'x', 'x+', X_IN_BOX, '?', '_'], ['3'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'],
+        ['{', '<', '=', 'x-', 'x', 'x+', X_IN_BOX, '?', '_'], ['4'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_'], ['H', 'E', 'e', 'i', 'F', 'f', '?', '_']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, HandshapeAny.options):
+            if symbol not in allowed:
+                return False
+        return True
+
+
 class HandshapeC(object):
     options = [
         ['O'], ['<'], ['E', 'e', 'i'], ['E', 'e', 'i'],
-        ['-'], ['-'], ['0'], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],
+        ['-'], ['-'], [NULL], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],
         ['1'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
         ['=', 'x-'], ['2'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
         ['=', 'x-'], ['3'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
@@ -98,15 +143,5 @@ class HandshapeC(object):
         return all([HandshapeC.satisfy_const1(sign), HandshapeC.satisfy_const2(sign), HandshapeC.satisfy_const3(sign),
                     HandshapeC.satisfy_const4(sign), HandshapeC.satisfy_const5(sign), HandshapeC.satisfy_const6(sign)])
 
-
-sign = ['O', '<', 'E', 'E',
-        '-', '-', '0', '/', '-', '-', '-', '-', '-', '-',
-        '1', 'e', 'e', 'e',
-        '=', '2', 'e', 'e', 'e',
-        '=', '3', 'e', 'e', 'e',
-        '=', '4', 'e', 'e', 'e']
-
-c = HandshapeC()
-print(c.match(sign))
 
 
