@@ -6,7 +6,6 @@ from constants import GLOBAL_OPTIONS
 from gui.function_windows import FunctionDialog, FunctionWorker
 from gui.helperwidgets import LogicRadioButtonGroup
 from analysis.handshape_search import handshape_search
-import regex as re
 import sys
 from pprint import pprint
 from image import getMediaFilePath
@@ -321,14 +320,14 @@ class HandshapeSearchDialog(FunctionDialog):
     def createHandshapes(self):
         # unmarked handshapes
         self.unmarkedGroup = HandshapePanel('Unmarked handshapes')
-        self.unmarkedGroup.addHandshape('A_O')
-        self.unmarkedGroup.addHandshape('B_1')
-        self.unmarkedGroup.addHandshape('w_B')
-        self.unmarkedGroup.addHandshape('1_A')
-        self.unmarkedGroup.addHandshape('6_S')
-        self.unmarkedGroup.addHandshape('<_C')
-        self.unmarkedGroup.addHandshape('>_5')
-        self.unmarkedGroup.addHandshape(']_B')
+        self.unmarkedGroup.addHandshape('O')
+        self.unmarkedGroup.addHandshape('1')
+        self.unmarkedGroup.addHandshape('B1')
+        self.unmarkedGroup.addHandshape('A')
+        self.unmarkedGroup.addHandshape('S')
+        self.unmarkedGroup.addHandshape('C')
+        self.unmarkedGroup.addHandshape('5')
+        self.unmarkedGroup.addHandshape('B2')
 
         # marked handshapes
         self.markedGroup = HandshapePanel('Marked handshapes')

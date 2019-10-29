@@ -1,7 +1,16 @@
 from analysis.unmarked_handshapes import HandshapeAny, HandshapeEmpty, HandshapeC
 from analysis.transcription_search import check_global_options, check_config_type, check_hand_type
 
-handshape_mapping = {'<_C': HandshapeC, 'any': HandshapeAny, 'empty': HandshapeEmpty}
+handshape_mapping = {'O': HandshapeAny,
+                     '1': HandshapeAny,
+                     'B1': HandshapeAny,
+                     'A': HandshapeAny,
+                     'S': HandshapeAny,
+                     'C': HandshapeC,
+                     '5': HandshapeAny,
+                     'B2': HandshapeAny,
+                     'any': HandshapeAny,
+                     'empty': HandshapeEmpty}
 
 def handshape_search(corpus, forearm, estimated, uncertain, incomplete, config, hand, logic, c1h1, c1h2, c2h1, c2h2):
     """
