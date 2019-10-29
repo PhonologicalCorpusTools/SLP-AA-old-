@@ -2179,9 +2179,9 @@ class AnalyzerMainWindow(QMainWindow):
         wordFrame.setLayout(wordLayout)
         # mainLayout.addWidget(wordFrame)
 
-        searchField = QLineEdit()
-        searchField.setPlaceholderText('Search...')
-        wordLayout.addWidget(searchField, alignment=Qt.AlignRight)
+        #searchField = QLineEdit()
+        #searchField.setPlaceholderText('Search...')
+        #wordLayout.addWidget(searchField, alignment=Qt.AlignRight)
 
         wordList = WordListView()
         wordList.itemClicked.connect(self.loadData)
