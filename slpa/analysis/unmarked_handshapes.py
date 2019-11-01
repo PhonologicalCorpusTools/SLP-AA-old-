@@ -144,4 +144,59 @@ class HandshapeC(object):
                     HandshapeC.satisfy_const4(sign), HandshapeC.satisfy_const5(sign), HandshapeC.satisfy_const6(sign)])
 
 
+class Handshape1(object):
+    options = [
+        ['O'], ['<', '='], ['i', 'f', 'F'], ['i', 'f', 'F'],
+        ['t', 'fr'], ['d'], [NULL], ['/'], ['b'], ['m'], ['-'], ['2'], ['-'], ['-'],
+        ['1'], ['e', 'E'], ['e', 'E'], ['H'],
+        ['='], ['2'], ['i', 'f'], ['i', 'f'], ['i', 'f'],
+        ['='], ['3'], ['f', 'F'], ['i', 'f'], ['i', 'f'],
+        ['='], ['4'], ['F', 'f'], ['i', 'f'], ['i', 'f']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: no combination of "i" and "F" options[2] and options[3]
+    @staticmethod
+    def satisfy_const1(sign):
+        if (sign[2], sign[3]) in [('i', 'F')]:
+            return False
+        else:
+            return True
+
+    # constraint2: no "e" + "H" for options[15], options[16], and options[17]
+    @staticmethod
+    def satisfy_const2(sign):
+        if (sign[15], sign[17]) == ('e', 'H') or (sign[16], sign[17]) == ('e', 'H'):
+            return False
+        else:
+            return True
+
+    # constraint3: no "i" + "F" for options[25], options[26], and options[27]
+    @staticmethod
+    def satisfy_const3(sign):
+        if (sign[25], sign[26]) == ('F', 'i') or (sign[25], sign[27]) == ('F', 'i'):
+            return False
+        else:
+            return True
+
+    # constraint4: no "i" + "F" for options[30], options[31], and options[32]
+    @staticmethod
+    def satisfy_const4(sign):
+        if (sign[30], sign[31]) == ('F', 'i') or (sign[30], sign[32]) == ('F', 'i'):
+            return False
+        else:
+            return True
+
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, Handshape1.options):
+            if symbol not in allowed:
+                return False
+
+        return all([HandshapeC.satisfy_const1(sign), HandshapeC.satisfy_const2(sign), HandshapeC.satisfy_const3(sign),
+                    HandshapeC.satisfy_const4(sign)])
+
+
 
