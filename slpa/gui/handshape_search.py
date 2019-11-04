@@ -320,14 +320,14 @@ class HandshapeSearchDialog(FunctionDialog):
     def createHandshapes(self):
         # unmarked handshapes
         self.unmarkedGroup = HandshapePanel('Unmarked handshapes')
-        self.unmarkedGroup.addHandshape('O')
-        self.unmarkedGroup.addHandshape('1')
-        self.unmarkedGroup.addHandshape('B1')
         self.unmarkedGroup.addHandshape('A')
-        self.unmarkedGroup.addHandshape('S')
-        self.unmarkedGroup.addHandshape('C')
-        self.unmarkedGroup.addHandshape('5')
+        self.unmarkedGroup.addHandshape('B1')
         self.unmarkedGroup.addHandshape('B2')
+        self.unmarkedGroup.addHandshape('C')
+        self.unmarkedGroup.addHandshape('O')
+        self.unmarkedGroup.addHandshape('S')
+        self.unmarkedGroup.addHandshape('1')
+        self.unmarkedGroup.addHandshape('5')
 
         # marked handshapes
         self.markedGroup = HandshapePanel('Marked handshapes')

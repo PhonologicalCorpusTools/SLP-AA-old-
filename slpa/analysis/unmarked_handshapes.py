@@ -301,10 +301,11 @@ class HandshapeS(object):
             if symbol not in allowed:
                 return False
 
-        #return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])
+        # Constraint 4 and 5 are relaxed
+        return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])
 
-        return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign),
-                    HandshapeS.satisfy_const4(sign), HandshapeS.satisfy_const5(sign)])
+        #return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign),
+        #            HandshapeS.satisfy_const4(sign), HandshapeS.satisfy_const5(sign)])
 
 
 class HandshapeA(object):
@@ -320,15 +321,45 @@ class HandshapeA(object):
     def __init__(self):
         super().__init__()
 
-    # constraint1: option[1] and option[3]: "{" can happen only if option[3] if "F"
+    # constraint1: option[3] and option[5]: option[5] can't be "p" or "-" when option[3] is "i"
     @staticmethod
     def satisfy_const1(sign):
-        if (sign[1], sign[3]) in [('{', 'e'), ('{', 'i')]:
+        if (sign[3], sign[5]) in [('i', 'p'), ('i', '-')]:
             return False
         else:
             return True
 
+    # constraint2: option[15] and option[17]: option[17] cannot be "E" or "e" in option[15] is "f"
+    @staticmethod
+    def satisfy_const2(sign):
+        if (sign[15], sign[17]) in [('f', 'E'), ('f', 'e')]:
+            return False
+        else:
+            return True
 
+    # constraint3: option[20] and option[22]: option[22] cannot be "E" or "e" in option[20] is "f"
+    @staticmethod
+    def satisfy_const3(sign):
+        if (sign[20], sign[22]) in [('f', 'E'), ('f', 'e')]:
+            return False
+        else:
+            return True
+
+    # constraint4: option[25] and option[27]: option[27] cannot be "E" or "e" in option[25] is "f"
+    @staticmethod
+    def satisfy_const4(sign):
+        if (sign[25], sign[27]) in [('f', 'E'), ('f', 'e')]:
+            return False
+        else:
+            return True
+
+    # constraint5: option[30] and option[32]: option[32] cannot be "E" or "e" in option[30] is "f"
+    @staticmethod
+    def satisfy_const5(sign):
+        if (sign[30], sign[32]) in [('f', 'E'), ('f', 'e')]:
+            return False
+        else:
+            return True
 
     @staticmethod
     def match(sign):
