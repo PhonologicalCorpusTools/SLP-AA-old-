@@ -301,8 +301,40 @@ class HandshapeS(object):
             if symbol not in allowed:
                 return False
 
-        return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign),
-                    HandshapeS.satisfy_const4(sign), HandshapeS.satisfy_const5(sign)])
+        return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])
+
+        #return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign),
+        #            HandshapeS.satisfy_const4(sign), HandshapeS.satisfy_const5(sign)])
+
+
+class HandshapeA(object):
+    options = [
+        ['U'], ['='], ['e', 'E'], ['H', 'E', 'e', 'i'],
+        ['fr'], ['d', 'p', '-'], [NULL], ['/'], ['r'], ['p'], ['1'], ['-'], ['-'], ['-'],
+        ['1'], ['F', 'f'], ['F'], ['F', 'f', 'i', 'e', 'E'],
+        ['='], ['2'], ['F', 'f'], ['F'], ['F', 'f', 'i', 'e', 'E'],
+        ['='], ['3'], ['F', 'f'], ['F'], ['F', 'f', 'i', 'e', 'E'],
+        ['='], ['4'], ['F', 'f'], ['F', 'f'], ['F', 'f', 'i', 'e', 'E']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: option[1] and option[3]: "{" can happen only if option[3] if "F"
+    @staticmethod
+    def satisfy_const1(sign):
+        if (sign[1], sign[3]) in [('{', 'e'), ('{', 'i')]:
+            return False
+        else:
+            return True
 
 
 
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, HandshapeA.options):
+            if symbol not in allowed:
+                return False
+
+        return all([HandshapeA.satisfy_const1(sign), HandshapeA.satisfy_const2(sign), HandshapeA.satisfy_const3(sign),
+                    HandshapeA.satisfy_const4(sign), HandshapeA.satisfy_const5(sign)])
