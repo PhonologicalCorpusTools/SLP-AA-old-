@@ -1,5 +1,7 @@
 from constants import X_IN_BOX, NULL
 
+ORDER = {'H': 5, 'E': 4, 'e': 3, 'i': 2, 'F': 1, 'f': 0}
+
 
 class HandshapeEmpty(object):
     options = [
@@ -195,8 +197,112 @@ class Handshape1(object):
             if symbol not in allowed:
                 return False
 
-        return all([HandshapeC.satisfy_const1(sign), HandshapeC.satisfy_const2(sign), HandshapeC.satisfy_const3(sign),
-                    HandshapeC.satisfy_const4(sign)])
+        return all([Handshape1.satisfy_const1(sign), Handshape1.satisfy_const2(sign), Handshape1.satisfy_const3(sign),
+                    Handshape1.satisfy_const4(sign)])
+
+
+class HandshapeS(object):
+    options = [
+        ['O'], ['=', '{'], ['i', 'f', 'e'], ['i', 'f', 'F', 'e'],
+        ['u', 'fr'], ['d'], [NULL], ['/'], ['b'], ['m'], ['1', '-'], ['2', '-'], ['3', '-'], ['-'],
+        ['1'], ['F', 'f'], ['F'], ['F', 'f'],
+        ['='], ['2'], ['F', 'f'], ['F'], ['F', 'f', 'i'],
+        ['='], ['3'], ['f', 'F'], ['F'], ['F', 'f', 'i'],
+        ['='], ['4'], ['F', 'f'], ['F', 'f'], ['F', 'f', 'i']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: option[1] and option[3]: "{" can happen only if option[3] if "F"
+    @staticmethod
+    def satisfy_const1(sign):
+        if (sign[1], sign[3]) in [('{', 'e'), ('{', 'i')]:
+            return False
+        else:
+            return True
+
+    # constraint2: option[3], option[4], option[10], option[11], option[12]:
+    # "u" (option[4]) can happen only if thumb only contacts finger 1 (option[10]), or thumb's DIP is "F" (option[3])
+    @staticmethod
+    def satisfy_const2(sign):
+        if sign[4] == 'u':
+            if (sign[10], sign[11], sign[12]) != ('1', '-', '-'):
+                return False
+
+            if sign[3] != 'F':
+                return False
+
+            return True
+        else:
+            return True
+
+    # constraint3: option[10], option[11], option[12]:
+    # Minimum contact of one finger, Maximum 2, but they have to be adjacent to each other (e.g., [12--], not [1-3-])
+    @staticmethod
+    def satisfy_const3(sign):
+        # Minimum contact of one finger
+        if (sign[10], sign[11], sign[12]) == ('-', '-', '-'):
+            return False
+        # Maximum 2, but they have to be adjacent to each other (e.g., [12--], not [1-3-])
+        elif (sign[10], sign[11], sign[12]) in [('1', '2', '3'), ('1', '-', '3')]:
+            return False
+        else:
+            return True
+
+    # constraint4: option[15], option[20], option[25], option[30]: they have to have all the same flexion value (e.g., f, f, f, f),
+    # or from finger 1 to finger 4 have an increasing flexion value (e.g., f,f,F,F) or increasing-decreasing (e.g.: f,F,F,f),
+    # but not decreasing flexion (e.g.: F, f,f,f), decreasing-increasing (e.g.: F,f,f,F) or f, F, f, F.
+    @staticmethod
+    def satisfy_const4(sign):
+        def is_decreasing_first(sign):
+            values = [ORDER[sign[15]], ORDER[sign[20]], ORDER[sign[25]], ORDER[sign[30]]]
+            compare = list()
+            for i in range(4-1):
+                if values[i] > values[i+1]:
+                    compare.append('decrease')
+                elif values[i] < values[i+1]:
+                    compare.append('increase')
+
+            if not compare:
+                return False
+            else:
+                if compare[0] == 'decrease':
+                    return True
+                else:
+                    return False
+
+        return not is_decreasing_first(sign)
+
+        # constraint5: option[17], option[22], option[27], option[32]: they have to have all the same flexion value (e.g., f,f,f,f),
+        # or from thumb to finger 4 have an increasing flexion value (e.g., f, f, F, F, but not the other way around (e.g., F, f, f, i,),
+        # or F, f, F, i.
+    @staticmethod
+    def satisfy_const5(sign):
+        def has_decreasing(sign):
+            values = [ORDER[sign[17]], ORDER[sign[22]], ORDER[sign[27]], ORDER[sign[32]]]
+            compare = list()
+            for i in range(4 - 1):
+                if values[i] > values[i + 1]:
+                    compare.append('decrease')
+                elif values[i] < values[i + 1]:
+                    compare.append('increase')
+
+            if not compare:
+                return False
+            else:
+                return 'decrease' in compare
+
+        return not has_decreasing(sign)
+
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, HandshapeS.options):
+            if symbol not in allowed:
+                return False
+
+        return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign),
+                    HandshapeS.satisfy_const4(sign), HandshapeS.satisfy_const5(sign)])
 
 
 
