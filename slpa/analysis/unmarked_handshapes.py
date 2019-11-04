@@ -301,10 +301,10 @@ class HandshapeS(object):
             if symbol not in allowed:
                 return False
 
-        return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])
+        #return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])
 
-        #return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign),
-        #            HandshapeS.satisfy_const4(sign), HandshapeS.satisfy_const5(sign)])
+        return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign),
+                    HandshapeS.satisfy_const4(sign), HandshapeS.satisfy_const5(sign)])
 
 
 class HandshapeA(object):
