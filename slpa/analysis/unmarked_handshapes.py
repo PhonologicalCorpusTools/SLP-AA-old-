@@ -397,3 +397,60 @@ class HandshapeA(object):
         return all([HandshapeA.satisfy_const1(sign), HandshapeA.satisfy_const2(sign), HandshapeA.satisfy_const3(sign),
                     HandshapeA.satisfy_const4(sign), HandshapeA.satisfy_const5(sign), HandshapeA.satisfy_const6(sign),
                     HandshapeA.satisfy_const7(sign)])
+
+
+class HandshapeB2(object):  #B2 = Plain B (Brentari, 2005)
+    options = [
+        ['L', 'U'], ['<', '='], ['E', 'e', 'i'], ['E', 'e', 'i'],
+        ['-'], ['-'], [NULL], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],
+        ['1'], ['E', 'e', 'i'], ['E', 'e', 'i'], ['E', 'e'],
+        ['=', 'x-'], ['2'], ['E', 'e', 'i'], ['E', 'e', 'i'], ['E', 'e'],
+        ['=', 'x-'], ['3'], ['E', 'e', 'i'], ['E', 'e', 'i'], ['E', 'e', 'i'],
+        ['<', '=', 'x-'], ['4'], ['E', 'e', 'i'], ['E', 'e', 'i'], ['E', 'e']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: option[15], option[20], option[25], option[30]: no [E]...[i], order doesn't matter
+    @staticmethod
+    def satisfy_const1(sign):
+        for s1, s2 in [(sign[15], sign[20]), (sign[15], sign[25]), (sign[15], sign[30]),
+                       (sign[20], sign[25]), (sign[20], sign[30]),
+                       (sign[25], sign[30])]:
+            if (s1, s2) in [('E', 'i'), ('i', 'E')]:
+                return False
+        else:
+            return True
+
+    # TODO: ASK
+    # constraint2: option[16], option[21], option[26], option[31]: no [E]...[i], order doesn't matter
+    @staticmethod
+    def satisfy_const2(sign):
+        for s1, s2 in [(sign[16], sign[21]), (sign[16], sign[26]), (sign[16], sign[31]),
+                       (sign[21], sign[26]), (sign[21], sign[31]),
+                       (sign[26], sign[31])]:
+            if (s1, s2) in [('E', 'i'), ('i', 'E')]:
+                return False
+        else:
+            return True
+
+    # constraint3: 4([15], [16], [17]), 5([20], [21], [22]), 6([25], [26], [27]), 7([30], [31], [32]): no [E]...[i], order doesn't matter
+    @staticmethod
+    def satisfy_const3(sign):
+        for s1, s2 in [(sign[15], sign[16]), (sign[15], sign[17]), (sign[16], sign[17]),
+                       (sign[20], sign[21]), (sign[20], sign[22]), (sign[21], sign[22]),
+                       (sign[25], sign[26]), (sign[25], sign[27]), (sign[26], sign[27]),
+                       (sign[30], sign[31]), (sign[30], sign[32]), (sign[31], sign[32])]:
+            if (s1, s2) in [('E', 'i'), ('i', 'E')]:
+                return False
+        else:
+            return True
+
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, HandshapeB2.options):
+            if symbol not in allowed:
+                return False
+
+        return all([HandshapeB2.satisfy_const1(sign), HandshapeB2.satisfy_const2(sign), HandshapeB2.satisfy_const3(sign)])
