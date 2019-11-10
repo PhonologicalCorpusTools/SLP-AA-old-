@@ -3,6 +3,14 @@ from constants import X_IN_BOX, NULL
 ORDER = {'H': 5, 'E': 4, 'e': 3, 'i': 2, 'F': 1, 'f': 0}
 
 
+def increasing_flexion(*args):
+    for i in range(len(args)-1):
+        if ORDER[args[i+1]] - ORDER[args[i]] > 0:  # decreasing
+            return False
+    else:
+        return True
+
+
 class HandshapeEmpty(object):
     options = [
         ['_'], ['_'], ['_'], ['_'],
@@ -361,6 +369,25 @@ class HandshapeA(object):
         else:
             return True
 
+    # TODO: Ask about this constraint
+    # constraint6: option[17], option[22], option[27]: they cannot be more than two values apart with the adjacent finger,
+    # except in between option[27] and option[32]
+    @staticmethod
+    def satisfy_const6(sign):
+        def difference(value1, value2):
+            value1 = ORDER[value1]
+            value2 = ORDER[value2]
+            return abs(value1 - value2)
+
+        return not (difference(sign[17], sign[22]) > 2 or difference(sign[22], sign[27]) > 2)
+
+    # TODO: Ask about this constraint
+    # constraint7: option[17], option[22], option[27], option[32]: they have to have all the same flexion or from index to finger4
+    # have an increasing flexion value but not the other way around
+    @staticmethod
+    def satisfy_const7(sign):
+        return increasing_flexion(sign[17], sign[22], sign[27], sign[32])
+
     @staticmethod
     def match(sign):
         for symbol, allowed in zip(sign, HandshapeA.options):
@@ -368,4 +395,5 @@ class HandshapeA(object):
                 return False
 
         return all([HandshapeA.satisfy_const1(sign), HandshapeA.satisfy_const2(sign), HandshapeA.satisfy_const3(sign),
-                    HandshapeA.satisfy_const4(sign), HandshapeA.satisfy_const5(sign)])
+                    HandshapeA.satisfy_const4(sign), HandshapeA.satisfy_const5(sign), HandshapeA.satisfy_const6(sign),
+                    HandshapeA.satisfy_const7(sign)])
