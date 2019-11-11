@@ -209,6 +209,33 @@ class Handshape1(object):
                     Handshape1.satisfy_const4(sign)])
 
 
+class Handshape5(object):
+    options = [
+        ['L', 'U'], ['{'], ['E', 'e', 'f'], ['H', 'E', 'e'],
+        ['-'], ['-'], [NULL], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],
+        ['1'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
+        ['{', '<', '='], ['2'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
+        ['{', '<', '='], ['3'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
+        ['{', '<', '='], ['4'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: option[2], option[3]: no combination of "e" and "H"
+    @staticmethod
+    def satisfy_const1(sign):
+        return (sign[2], sign[3]) != ('e', 'H')
+
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, Handshape5.options):
+            if symbol not in allowed:
+                return False
+
+        return Handshape5.satisfy_const1(sign)
+
+
 class HandshapeS(object):
     options = [
         ['O'], ['=', '{'], ['i', 'f', 'e'], ['i', 'f', 'F', 'e'],

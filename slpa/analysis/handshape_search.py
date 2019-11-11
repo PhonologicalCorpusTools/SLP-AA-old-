@@ -1,5 +1,5 @@
 from analysis.unmarked_handshapes import (HandshapeAny, HandshapeEmpty, HandshapeC, Handshape1, HandshapeS, HandshapeA,
-                                          HandshapeB1, HandshapeB2)
+                                          HandshapeB1, HandshapeB2, Handshape5)
 from analysis.transcription_search import check_global_options, check_config_type, check_hand_type
 
 handshape_mapping = {'O': HandshapeAny,
@@ -8,7 +8,7 @@ handshape_mapping = {'O': HandshapeAny,
                      'A': HandshapeA,
                      'S': HandshapeS,
                      'C': HandshapeC,
-                     '5': HandshapeAny,
+                     '5': Handshape5,
                      'B2': HandshapeB2,
                      'any': HandshapeAny,
                      'empty': HandshapeEmpty}
