@@ -399,6 +399,87 @@ class HandshapeA(object):
                     HandshapeA.satisfy_const7(sign)])
 
 
+class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
+    #TODO: ASK ABOUT "?"
+    options = [
+        ['O'], ['{', '<', '='], ['H', 'E', 'e', 'i', 'F', 'f', '?'], ['H', 'E', 'e', 'i', 'F', 'f', '?'],
+        ['-', 'r'], ['-', 'd'], [NULL], ['/'], ['-', 'f'], ['-', 'p'], ['-', '1'], ['-', '2'], ['-', '3'], ['-', '4'],
+        ['1'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
+        ['<', '='], ['2'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
+        ['<', '='], ['3'], ['H', 'E', 'e', 'i'], ['H', 'E', 'e', 'i'], ['H', 'E', 'e', 'i'],
+        ['<', '='], ['4'], ['H', 'E', 'e', 'i'], ['H', 'E', 'e', 'i'], ['H', 'E', 'e', 'i']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # TODO: ASK
+    # constraint1: Thumb-finger contact will always be [rd0/fp....] but the finger will co-vary with other values as follows:
+    # (a) If there is thumb-finger contact (option[10], option[11], option[12], option[13]), thumb is abducted (option[1]) (i.e., {)
+    # (b) If there is thumb-finger contact (option[10], option[11], option[12], option[13]), finger extension is 'e' or 'E'
+    # (c) If there is contact with finger 1, the thumb extension is 'e' or 'E'
+    # (d) If there is contact with finger 2, the thumb extension is 'e' or 'E'
+    # (e) If there is contact with finger 3, the thumb extension is 'i', 'e', or 'E'
+    # (f) If there is contact with finger 4, the thumb extension is 'i', 'e', or 'E'
+    # (g) Unlikely but for simplicity: [O{EE][rd0/fp---4]
+
+    @staticmethod
+    def satisfy_const1(sign):
+        # (a)
+        if sign[10] == '1' or sign[11] == '2' or sign[12] == '3' or sign[13] == '4':
+            if sign[1] != '{':
+                return False
+
+        # (b)
+        if sign[10] == '1' or sign[11] == '2' or sign[12] == '3' or sign[13] == '4':
+            for s in [sign[15], sign[16], sign[17],  # index
+                      sign[20], sign[21], sign[22],  # middle
+                      sign[25], sign[26], sign[27],  # ring
+                      sign[30], sign[31], sign[32]]:  # pinky
+                if s not in ['e', 'E']:
+                    return False
+
+        # (c)
+        if sign[10] == '1':
+            for s in [sign[2], sign[3]]:
+                if s not in ['e', 'E']:
+                    return False
+
+        # (d)
+        if sign[11] == '2':
+            for s in [sign[2], sign[3]]:
+                if s not in ['e', 'E']:
+                    return False
+
+        # (e)
+        if sign[12] == '3':
+            for s in [sign[2], sign[3]]:
+                if s not in ['i', 'e', 'E']:
+                    return False
+
+        # (f)
+        if sign[13] == '4':
+            for s in [sign[2], sign[3]]:
+                if s not in ['i', 'e', 'E']:
+                    return False
+
+        return True
+
+    # TODO: ASK
+    # constraint2: Across fingers, the values must match with all fingers by one value
+    @staticmethod
+    def satisfy_const2(sign):
+        return True
+
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, HandshapeB1.options):
+            if symbol not in allowed:
+                return False
+
+        return all([HandshapeB1.satisfy_const1(sign), HandshapeB1.satisfy_const2(sign)])
+
+
 class HandshapeB2(object):  #B2 = Plain B (Brentari, 2005)
     options = [
         ['L', 'U'], ['<', '='], ['E', 'e', 'i'], ['E', 'e', 'i'],
