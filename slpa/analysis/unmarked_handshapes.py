@@ -1,6 +1,6 @@
 from constants import X_IN_BOX, NULL
 
-ORDER = {'H': 5, 'E': 4, 'e': 3, 'i': 2, 'F': 1, 'f': 0}
+ORDER = {'H': 5, 'E': 4, 'e': 3, 'i': 2, 'f': 1, 'F': 0}
 
 
 def increasing_flexion(*args):
@@ -210,6 +210,7 @@ class Handshape1(object):
 
 
 class Handshape5(object):
+    #TODO: ASK, SEEMS TO OVERLAP WITH B
     options = [
         ['L', 'U'], ['{'], ['E', 'e', 'f'], ['H', 'E', 'e'],
         ['-'], ['-'], [NULL], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],
@@ -234,6 +235,38 @@ class Handshape5(object):
                 return False
 
         return Handshape5.satisfy_const1(sign)
+
+
+class HandshapeO(object):
+    options = [
+        ['O'], ['{'], ['e', 'i'], ['i', 'f', 'F'],
+        ['fr', 't'], ['d'], [NULL], ['/'], ['fr', 't'], ['d'], ['-', '1'], ['-', '2'], ['-', '3'], ['-'],
+        ['1'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f'],
+        ['=', 'x-'], ['2'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f'],
+        ['=', 'x-'], ['3'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f'],
+        ['=', 'x-'], ['4'], ['e', 'i', 'f'], ['e', 'i'], ['E', 'e', 'i']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: option[2], option[3]: can't be more than two values apart from each other
+    @staticmethod
+    def satisfy_const1(sign):
+        return (sign[2], sign[3]) != ('e', 'F')
+
+    # constraint2: option[10], option[11], option[12]: can't all be '-'
+    @staticmethod
+    def satisfy_const2(sign):
+        return (sign[10], sign[11], sign[12]) != ('-', '-', '-')
+
+    @staticmethod
+    def match(sign):
+        for symbol, allowed in zip(sign, HandshapeO.options):
+            if symbol not in allowed:
+                return False
+
+        return all([HandshapeO.satisfy_const1(sign), HandshapeO.satisfy_const2(sign)])
 
 
 class HandshapeS(object):

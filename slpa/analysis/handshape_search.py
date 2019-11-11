@@ -1,17 +1,21 @@
-from analysis.unmarked_handshapes import (HandshapeAny, HandshapeEmpty, HandshapeC, Handshape1, HandshapeS, HandshapeA,
-                                          HandshapeB1, HandshapeB2, Handshape5)
+from analysis.unmarked_handshapes import (HandshapeAny, HandshapeEmpty,
+                                          HandshapeA, HandshapeB1, HandshapeB2, HandshapeC, HandshapeO, HandshapeS,
+                                          Handshape1, Handshape5)
 from analysis.transcription_search import check_global_options, check_config_type, check_hand_type
 
-handshape_mapping = {'O': HandshapeAny,
-                     '1': Handshape1,
-                     'B1': HandshapeB1,
-                     'A': HandshapeA,
-                     'S': HandshapeS,
-                     'C': HandshapeC,
-                     '5': Handshape5,
-                     'B2': HandshapeB2,
-                     'any': HandshapeAny,
-                     'empty': HandshapeEmpty}
+handshape_mapping = {
+    'any': HandshapeAny,
+    'empty': HandshapeEmpty,
+    'A': HandshapeA,
+    'B1': HandshapeB1,
+    'B2': HandshapeB2,
+    'C': HandshapeC,
+    'O': HandshapeO,
+    'S': HandshapeS,
+    '1': Handshape1,
+    '5': Handshape5
+}
+
 
 def handshape_search(corpus, forearm, estimated, uncertain, incomplete, config, hand, logic, c1h1, c1h2, c2h1, c2h2):
     """
