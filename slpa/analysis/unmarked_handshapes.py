@@ -156,12 +156,12 @@ class HandshapeC(object):
 
 class Handshape1(object):
     options = [
-        ['O'], ['<', '='], ['i', 'f', 'F'], ['i', 'f', 'F'],
-        ['t', 'fr'], ['d'], [NULL], ['/'], ['b'], ['m'], ['-'], ['2'], ['-'], ['-'],
-        ['1'], ['e', 'E'], ['e', 'E'], ['H'],
-        ['='], ['2'], ['i', 'f'], ['i', 'f'], ['i', 'f'],
-        ['='], ['3'], ['f', 'F'], ['i', 'f'], ['i', 'f'],
-        ['='], ['4'], ['F', 'f'], ['i', 'f'], ['i', 'f']
+        ['O'], ['<', '=', '?'], ['i', 'f', 'F', '?'], ['i', 'f', 'F', '?'],
+        ['t', 'fr', '?'], ['d', '?'], [NULL], ['/'], ['b'], ['m', '?'], ['-', '?'], ['2', '?'], ['-', '?'], ['-', '?'],
+        ['1'], ['e', 'E'], ['e', 'E', '?'], ['H', '?'],
+        ['='], ['2'], ['i', 'f'], ['i', 'f', '?'], ['i', 'f', '?'],
+        ['='], ['3'], ['f', 'F'], ['i', 'f', '?'], ['i', 'f', '?'],
+        ['='], ['4'], ['F', 'f'], ['i', 'f', '?'], ['i', 'f', '?']
     ]
 
     def __init__(self):
@@ -210,14 +210,13 @@ class Handshape1(object):
 
 
 class Handshape5(object):
-    #TODO: ASK, SEEMS TO OVERLAP WITH B
     options = [
         ['L', 'U'], ['{'], ['E', 'e', 'f'], ['H', 'E', 'e'],
         ['-'], ['-'], [NULL], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],
         ['1'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
-        ['{', '<', '='], ['2'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
-        ['{', '<', '='], ['3'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
-        ['{', '<', '='], ['4'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e']
+        ['{', '<'], ['2'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
+        ['{', '<'], ['3'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
+        ['{', '<'], ['4'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e']
     ]
 
     def __init__(self):
@@ -271,12 +270,12 @@ class HandshapeO(object):
 
 class HandshapeS(object):
     options = [
-        ['O'], ['=', '{'], ['i', 'f', 'e'], ['i', 'f', 'F', 'e'],
-        ['u', 'fr'], ['d'], [NULL], ['/'], ['b'], ['m'], ['1', '-'], ['2', '-'], ['3', '-'], ['-'],
-        ['1'], ['F', 'f'], ['F'], ['F', 'f'],
-        ['='], ['2'], ['F', 'f'], ['F'], ['F', 'f', 'i'],
-        ['='], ['3'], ['f', 'F'], ['F'], ['F', 'f', 'i'],
-        ['='], ['4'], ['F', 'f'], ['F', 'f'], ['F', 'f', 'i']
+        ['O'], ['=', '{', '?'], ['i', 'f', 'e', '?'], ['i', 'f', 'F', 'e', '?'],
+        ['u', 'fr', '?'], ['d', '?'], [NULL], ['/'], ['b', '?'], ['m', '?'], ['1', '-', '?'], ['2', '-', '?'], ['3', '-', '?'], ['-', '?'],
+        ['1'], ['F', 'f'], ['F', '?'], ['F', 'f', '?'],
+        ['='], ['2'], ['F', 'f'], ['F', '?'], ['F', 'f', 'i', '?'],
+        ['='], ['3'], ['f', 'F'], ['F', '?'], ['F', 'f', 'i', '?'],
+        ['='], ['4'], ['F', 'f'], ['F', 'f', '?'], ['F', 'f', 'i', '?']
     ]
 
     def __init__(self):
@@ -386,6 +385,9 @@ class HandshapeA(object):
         ['='], ['4'], ['F', 'f'], ['F', 'f'], ['F', 'f', 'i', 'e', 'E']
     ]
 
+    # Add H
+    # Add question mark for finger joints
+
     def __init__(self):
         super().__init__()
 
@@ -429,7 +431,6 @@ class HandshapeA(object):
         else:
             return True
 
-    # TODO: Ask about this constraint
     # constraint6: option[17], option[22], option[27]: they cannot be more than two values apart with the adjacent finger,
     # except in between option[27] and option[32]
     @staticmethod
@@ -441,7 +442,6 @@ class HandshapeA(object):
 
         return not (difference(sign[17], sign[22]) > 2 or difference(sign[22], sign[27]) > 2)
 
-    # TODO: Ask about this constraint
     # constraint7: option[17], option[22], option[27], option[32]: they have to have all the same flexion or from index to finger4
     # have an increasing flexion value but not the other way around
     @staticmethod
@@ -460,10 +460,11 @@ class HandshapeA(object):
 
 
 class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
-    #TODO: ASK ABOUT "?"
+    # TODO: ASK ABOUT "?" -> not visible
+    # qustion mark for both opposed B and S and one
     options = [
-        ['O'], ['{', '<', '='], ['H', 'E', 'e', 'i', 'F', 'f', '?'], ['H', 'E', 'e', 'i', 'F', 'f', '?'],
-        ['-', 'r'], ['-', 'd'], [NULL], ['/'], ['-', 'f'], ['-', 'p'], ['-', '1'], ['-', '2'], ['-', '3'], ['-', '4'],
+        ['O'], ['{', '<', '=', '?'], ['H', 'E', 'e', 'i', 'F', 'f', '?'], ['H', 'E', 'e', 'i', 'F', 'f', '?'],
+        ['-', 'u', 'fr', '?'], ['-', 'd', '?'], [NULL], ['/'], ['-', 'fr', '?'], ['-', 'p', '?'], ['-', '1', '?'], ['-', '2', '?'], ['-', '3', '?'], ['-', '4', '?'],
         ['1'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
         ['<', '='], ['2'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
         ['<', '='], ['3'], ['H', 'E', 'e', 'i'], ['H', 'E', 'e', 'i'], ['H', 'E', 'e', 'i'],
@@ -473,7 +474,6 @@ class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
     def __init__(self):
         super().__init__()
 
-    # TODO: ASK
     # constraint1: Thumb-finger contact will always be [rd0/fp....] but the finger will co-vary with other values as follows:
     # (a) If there is thumb-finger contact (option[10], option[11], option[12], option[13]), thumb is abducted (option[1]) (i.e., {)
     # (b) If there is thumb-finger contact (option[10], option[11], option[12], option[13]), finger extension is 'e' or 'E'
@@ -481,7 +481,7 @@ class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
     # (d) If there is contact with finger 2, the thumb extension is 'e' or 'E'
     # (e) If there is contact with finger 3, the thumb extension is 'i', 'e', or 'E'
     # (f) If there is contact with finger 4, the thumb extension is 'i', 'e', or 'E'
-    # (g) Unlikely but for simplicity: [O{EE][rd0/fp---4]
+    # (g) Unlikely but for simplicity: [O{EE][ud0/fp---4]
 
     @staticmethod
     def satisfy_const1(sign):
@@ -564,7 +564,6 @@ class HandshapeB2(object):  #B2 = Plain B (Brentari, 2005)
         else:
             return True
 
-    # TODO: ASK
     # constraint2: option[16], option[21], option[26], option[31]: no [E]...[i], order doesn't matter
     @staticmethod
     def satisfy_const2(sign):
