@@ -136,10 +136,10 @@ def check_slot_symbol(word, config1, config2):
     c2h1 = config2[0]
     c2h2 = config2[1]
 
-    c1h1_slots = ''.join([slot if slot else '_' for slot in word.config1hand1[1:]])
-    c1h2_slots = ''.join([slot if slot else '_' for slot in word.config1hand2[1:]])
-    c2h1_slots = ''.join([slot if slot else '_' for slot in word.config2hand1[1:]])
-    c2h2_slots = ''.join([slot if slot else '_' for slot in word.config2hand2[1:]])
+    c1h1_slots = '.'.join([slot if slot else '_' for slot in word.config1hand1[1:]])
+    c1h2_slots = '.'.join([slot if slot else '_' for slot in word.config1hand2[1:]])
+    c2h1_slots = '.'.join([slot if slot else '_' for slot in word.config2hand1[1:]])
+    c2h2_slots = '.'.join([slot if slot else '_' for slot in word.config2hand2[1:]])
 
     re_c1h1 = re.compile('^' + generate_hand_re(c1h1) + '$')
     re_c1h2 = re.compile('^' + generate_hand_re(c1h2) + '$')
@@ -160,7 +160,6 @@ def check_slot_symbol(word, config1, config2):
     #print(re_c2h2)
     #print('====================')
 
-
     return all([bool(re_c1h1.match(c1h1_slots)),
                 bool(re_c1h2.match(c1h2_slots)),
                 bool(re_c2h1.match(c2h1_slots)),
@@ -173,8 +172,9 @@ def generate_slot_re(allowed_set):
 
 
 def generate_hand_re(hand_slots):
-    pattern = ''.join([generate_slot_re(slot['allowed']) for slot in hand_slots])
+    pattern = r'\.'.join([generate_slot_re(slot['allowed']) for slot in hand_slots])
     return pattern
+
 
 def transcription_search(corpus, forearm, estimated, uncertain, incomplete, configuration, hand, config1, config2):
     '''

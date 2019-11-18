@@ -297,7 +297,7 @@ class TransSlot(QPushButton):
         self.setStyleSheet(style)
 
     def value(self):
-        symbols = set(self.getSelectedSymbols()) | set(self.text())
+        symbols = set(self.getSelectedSymbols()) | {self.text()}
         results = {'selected': symbols,
                    'options': self.options,
                    'positive': self.positive,
