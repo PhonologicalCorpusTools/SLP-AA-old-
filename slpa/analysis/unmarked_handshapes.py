@@ -1,14 +1,17 @@
 from constants import X_IN_BOX, NULL
 
+#TODO: check for '?'
 ORDER = {'H': 5, 'E': 4, 'e': 3, 'i': 2, 'f': 1, 'F': 0}
 
 
-def increasing_flexion(*args):
-    for i in range(len(args)-1):
-        if ORDER[args[i+1]] - ORDER[args[i]] > 0:  # decreasing
-            return False
-    else:
-        return True
+def increasing_or_equal_flexion(*args):
+    """
+    return if the specified finger slots are in increased flexion
+    :param args: slots in question
+    :return: Boolean: true if all slots are in increased flexion
+    """
+    # latter - former <= 0 for all pairs
+    return all([ORDER[args[i+1]] - ORDER[args[i]] <= 0 for i in range(len(args)-1)])
 
 
 class HandshapeEmpty(object):
@@ -26,10 +29,7 @@ class HandshapeEmpty(object):
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, HandshapeEmpty.options):
-            if symbol not in allowed:
-                return False
-        return True
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeEmpty.options)])
 
 
 class HandshapeAny(object):
@@ -47,10 +47,7 @@ class HandshapeAny(object):
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, HandshapeAny.options):
-            if symbol not in allowed:
-                return False
-        return True
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeAny.options)])
 
 
 class HandshapeC(object):
@@ -146,11 +143,8 @@ class HandshapeC(object):
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, HandshapeC.options):
-            if symbol not in allowed:
-                return False
-
-        return all([HandshapeC.satisfy_const1(sign), HandshapeC.satisfy_const2(sign), HandshapeC.satisfy_const3(sign),
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeC.options)]) and \
+               all([HandshapeC.satisfy_const1(sign), HandshapeC.satisfy_const2(sign), HandshapeC.satisfy_const3(sign),
                     HandshapeC.satisfy_const4(sign), HandshapeC.satisfy_const5(sign), HandshapeC.satisfy_const6(sign)])
 
 
@@ -158,10 +152,10 @@ class Handshape1(object):
     options = [
         ['O'], ['<', '=', '?'], ['i', 'f', 'F', '?'], ['i', 'f', 'F', '?'],
         ['t', 'fr', '?'], ['d', '?'], [NULL], ['/'], ['b'], ['m', '?'], ['-', '?'], ['2', '?'], ['-', '?'], ['-', '?'],
-        ['1'], ['e', 'E'], ['e', 'E', '?'], ['H', '?'],
+        ['1'], ['E', 'e'], ['E', 'e'], ['H'],
         ['='], ['2'], ['i', 'f'], ['i', 'f', '?'], ['i', 'f', '?'],
         ['='], ['3'], ['f', 'F'], ['i', 'f', '?'], ['i', 'f', '?'],
-        ['='], ['4'], ['F', 'f'], ['i', 'f', '?'], ['i', 'f', '?']
+        ['='], ['4'], ['f', 'F'], ['i', 'f', '?'], ['i', 'f', '?']
     ]
 
     def __init__(self):
@@ -201,11 +195,8 @@ class Handshape1(object):
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, Handshape1.options):
-            if symbol not in allowed:
-                return False
-
-        return all([Handshape1.satisfy_const1(sign), Handshape1.satisfy_const2(sign), Handshape1.satisfy_const3(sign),
+        return all([symbol in allowed for symbol, allowed in zip(sign, Handshape1.options)]) and \
+               all([Handshape1.satisfy_const1(sign), Handshape1.satisfy_const2(sign), Handshape1.satisfy_const3(sign),
                     Handshape1.satisfy_const4(sign)])
 
 
@@ -238,12 +229,12 @@ class Handshape5(object):
 
 class HandshapeO(object):
     options = [
-        ['O'], ['{'], ['e', 'i'], ['i', 'f', 'F'],
-        ['fr', 't'], ['d'], [NULL], ['/'], ['fr', 't'], ['d'], ['-', '1'], ['-', '2'], ['-', '3'], ['-'],
-        ['1'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f'],
-        ['=', 'x-'], ['2'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f'],
-        ['=', 'x-'], ['3'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f'],
-        ['=', 'x-'], ['4'], ['e', 'i', 'f'], ['e', 'i'], ['E', 'e', 'i']
+        ['O'], ['{'], ['e', 'i'], ['i', 'f', 'F', '?'],
+        ['t', 'fr'], ['d'], [NULL], ['/'], ['t', 'fr'], ['d'], ['-', '1'], ['-', '2'], ['-', '3'], ['-'],
+        ['1'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
+        ['=', 'x-'], ['2'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
+        ['=', 'x-'], ['3'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
+        ['=', 'x-'], ['4'], ['e', 'i', 'f'], ['e', 'i'], ['E', 'e', 'i', '?']
     ]
 
     def __init__(self):
@@ -261,21 +252,18 @@ class HandshapeO(object):
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, HandshapeO.options):
-            if symbol not in allowed:
-                return False
-
-        return all([HandshapeO.satisfy_const1(sign), HandshapeO.satisfy_const2(sign)])
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeO.options)]) and \
+               all([HandshapeO.satisfy_const1(sign), HandshapeO.satisfy_const2(sign)])
 
 
 class HandshapeS(object):
     options = [
-        ['O'], ['=', '{', '?'], ['i', 'f', 'e', '?'], ['i', 'f', 'F', 'e', '?'],
-        ['u', 'fr', '?'], ['d', '?'], [NULL], ['/'], ['b', '?'], ['m', '?'], ['1', '-', '?'], ['2', '-', '?'], ['3', '-', '?'], ['-', '?'],
-        ['1'], ['F', 'f'], ['F', '?'], ['F', 'f', '?'],
-        ['='], ['2'], ['F', 'f'], ['F', '?'], ['F', 'f', 'i', '?'],
-        ['='], ['3'], ['f', 'F'], ['F', '?'], ['F', 'f', 'i', '?'],
-        ['='], ['4'], ['F', 'f'], ['F', 'f', '?'], ['F', 'f', 'i', '?']
+        ['O'], ['{', '=', '?'], ['e', 'i', 'f', '?'], ['e', 'i', 'f', 'F', '?'],
+        ['fr', 'u', '?'], ['d', '?'], [NULL], ['/'], ['b', '?'], ['m', '?'], ['-', '1', '?'], ['-', '2', '?'], ['-', '3', '?'], ['-', '?'],
+        ['1'], ['f', 'F'], ['F', '?'], ['f', 'F', '?'],
+        ['='], ['2'], ['f', 'F'], ['F', '?'], ['i', 'f', 'F', '?'],
+        ['='], ['3'], ['f', 'F'], ['F', '?'], ['i', 'f', 'F', '?'],
+        ['='], ['4'], ['f', 'F'], ['f', 'F', '?'], ['i', 'f', 'F', '?']
     ]
 
     def __init__(self):
@@ -341,9 +329,9 @@ class HandshapeS(object):
 
         return not is_decreasing_first(sign)
 
-        # constraint5: option[17], option[22], option[27], option[32]: they have to have all the same flexion value (e.g., f,f,f,f),
-        # or from thumb to finger 4 have an increasing flexion value (e.g., f, f, F, F, but not the other way around (e.g., F, f, f, i,),
-        # or F, f, F, i.
+    # constraint5: option[17], option[22], option[27], option[32]: they have to have all the same flexion value (e.g., f,f,f,f),
+    # or from thumb to finger 4 have an increasing flexion value (e.g., f, f, F, F, but not the other way around (e.g., F, f, f, i,),
+    # or F, f, F, i.
     @staticmethod
     def satisfy_const5(sign):
         def has_decreasing(sign):
@@ -364,25 +352,18 @@ class HandshapeS(object):
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, HandshapeS.options):
-            if symbol not in allowed:
-                return False
-
-        # Constraint 4 and 5 are relaxed
-        return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])
-
-        #return all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign),
-        #            HandshapeS.satisfy_const4(sign), HandshapeS.satisfy_const5(sign)])
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeS.options)]) and \
+               all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])  # Constraint 4 and 5 are relaxed
 
 
 class HandshapeA(object):
     options = [
-        ['U'], ['='], ['e', 'E'], ['H', 'E', 'e', 'i'],
-        ['fr'], ['d', 'p', '-'], [NULL], ['/'], ['r'], ['p'], ['1'], ['-'], ['-'], ['-'],
-        ['1'], ['F', 'f'], ['F'], ['F', 'f', 'i', 'e', 'E'],
-        ['='], ['2'], ['F', 'f'], ['F'], ['F', 'f', 'i', 'e', 'E'],
-        ['='], ['3'], ['F', 'f'], ['F'], ['F', 'f', 'i', 'e', 'E'],
-        ['='], ['4'], ['F', 'f'], ['F', 'f'], ['F', 'f', 'i', 'e', 'E']
+        ['U'], ['='], ['E', 'e'], ['H', 'E', 'e', 'i'],
+        ['fr'], ['-', 'd', 'p'], [NULL], ['/'], ['r'], ['p'], ['1'], ['-'], ['-'], ['-'],
+        ['1'], ['f', 'F'], ['F', '?'], ['E', 'e', 'i', 'f', 'F', '?'],
+        ['='], ['2'], ['f', 'F'], ['F', '?'], ['E', 'e', 'i', 'f', 'F', '?'],
+        ['='], ['3'], ['f', 'F'], ['F', '?'], ['E', 'e', 'i', 'f', 'F', '?'],
+        ['='], ['4'], ['f', 'F'], ['f', 'F', '?'], ['E', 'e', 'i', 'f', 'F', '?']
     ]
 
     # Add H
@@ -446,25 +427,20 @@ class HandshapeA(object):
     # have an increasing flexion value but not the other way around
     @staticmethod
     def satisfy_const7(sign):
-        return increasing_flexion(sign[17], sign[22], sign[27], sign[32])
+        return increasing_or_equal_flexion(sign[17], sign[22], sign[27], sign[32])
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, HandshapeA.options):
-            if symbol not in allowed:
-                return False
-
-        return all([HandshapeA.satisfy_const1(sign), HandshapeA.satisfy_const2(sign), HandshapeA.satisfy_const3(sign),
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeA.options)]) and \
+               all([HandshapeA.satisfy_const1(sign), HandshapeA.satisfy_const2(sign), HandshapeA.satisfy_const3(sign),
                     HandshapeA.satisfy_const4(sign), HandshapeA.satisfy_const5(sign), HandshapeA.satisfy_const6(sign),
                     HandshapeA.satisfy_const7(sign)])
 
 
 class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
-    # TODO: ASK ABOUT "?" -> not visible
-    # qustion mark for both opposed B and S and one
     options = [
-        ['O'], ['{', '<', '=', '?'], ['H', 'E', 'e', 'i', 'F', 'f', '?'], ['H', 'E', 'e', 'i', 'F', 'f', '?'],
-        ['-', 'u', 'fr', '?'], ['-', 'd', '?'], [NULL], ['/'], ['-', 'fr', '?'], ['-', 'p', '?'], ['-', '1', '?'], ['-', '2', '?'], ['-', '3', '?'], ['-', '4', '?'],
+        ['O'], ['{', '<', '=', '?'], ['H', 'E', 'e', 'i', 'f', 'F', '?'], ['H', 'E', 'e', 'i', 'f', 'F', '?'],
+        ['-', 'fr', 'u', '?'], ['-', 'd', '?'], [NULL], ['/'], ['-', 'fr', '?'], ['-', 'p', '?'], ['-', '1', '?'], ['-', '2', '?'], ['-', '3', '?'], ['-', '4', '?'],
         ['1'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
         ['<', '='], ['2'], ['H', 'E', 'e'], ['H', 'E', 'e'], ['H', 'E', 'e'],
         ['<', '='], ['3'], ['H', 'E', 'e', 'i'], ['H', 'E', 'e', 'i'], ['H', 'E', 'e', 'i'],
@@ -533,11 +509,8 @@ class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, HandshapeB1.options):
-            if symbol not in allowed:
-                return False
-
-        return all([HandshapeB1.satisfy_const1(sign), HandshapeB1.satisfy_const2(sign)])
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeB1.options)]) and \
+               all([HandshapeB1.satisfy_const1(sign), HandshapeB1.satisfy_const2(sign)])
 
 
 class HandshapeB2(object):  #B2 = Plain B (Brentari, 2005)
@@ -589,8 +562,5 @@ class HandshapeB2(object):  #B2 = Plain B (Brentari, 2005)
 
     @staticmethod
     def match(sign):
-        for symbol, allowed in zip(sign, HandshapeB2.options):
-            if symbol not in allowed:
-                return False
-
-        return all([HandshapeB2.satisfy_const1(sign), HandshapeB2.satisfy_const2(sign), HandshapeB2.satisfy_const3(sign)])
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeB2.options)]) and \
+               all([HandshapeB2.satisfy_const1(sign), HandshapeB2.satisfy_const2(sign), HandshapeB2.satisfy_const3(sign)])
