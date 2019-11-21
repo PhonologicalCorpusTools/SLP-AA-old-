@@ -201,6 +201,14 @@ class Handshape1(object):
 
 
 class Handshape5(object):
+    # note that for canonical we have one extra slot in the very beginning, which is always '_'
+    canonical = ('_', 'L', '{', 'f', 'E',
+                 '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
+                 '1', 'E', 'E', 'E',
+                 '<', '2', 'E', 'E', 'E',
+                 '<', '3', 'E', 'E', 'E',
+                 '=', '4', 'E', 'E', 'E')
+
     options = [
         ['L', 'U'], ['{'], ['E', 'e', 'f'], ['H', 'E', 'e'],
         ['-'], ['-'], [NULL], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],

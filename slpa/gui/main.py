@@ -19,6 +19,7 @@ from gui.transcription_search import TranscriptionSearchDialog
 from gui.handshape_search import HandshapeSearchDialog
 from gui.phonological_search import ExtendedFingerSearchDialog
 from gui.results_windows import ResultsWindow
+from gui.helperwidgets import PredefinedHandshapeDialog
 #from slpa import __version__ as currentSLPAversion
 from pprint import pprint
 
@@ -356,6 +357,27 @@ class MainWindow(QMainWindow):
         self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
 
+        self.selected = QButtonGroup()
+        self.config1hand1selection = QRadioButton()
+        self.config1hand1selection.setChecked(True)
+        self.config1hand2selection = QRadioButton()
+        self.config2hand1selection = QRadioButton()
+        self.config2hand2selection = QRadioButton()
+        self.selected.addButton(self.config1hand1selection)
+        self.selected.addButton(self.config1hand2selection)
+        self.selected.addButton(self.config2hand1selection)
+        self.selected.addButton(self.config2hand2selection)
+        self.selected.setId(self.config1hand1selection, 1)
+        self.selected.setId(self.config1hand2selection, 2)
+        self.selected.setId(self.config2hand1selection, 3)
+        self.selected.setId(self.config2hand2selection, 4)
+
+
+        self.configTabs.widget(0).hand1Transcription.lineLayout.insertWidget(0, self.config1hand1selection)
+        self.configTabs.widget(0).hand2Transcription.lineLayout.insertWidget(0, self.config1hand2selection)
+        self.configTabs.widget(1).hand1Transcription.lineLayout.insertWidget(0, self.config2hand1selection)
+        self.configTabs.widget(1).hand2Transcription.lineLayout.insertWidget(0, self.config2hand2selection)
+
         #Add "global" handshape options (as checkboxes)
         self.globalOptionsLayout = QHBoxLayout()
         self.setupGlobalOptions()
@@ -370,7 +392,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(self.infoPanel)
 
         #Connect transcription signals to various main window slots
-        for k in [0,1]:
+        for k in [0, 1]:
             self.configTabs.widget(k).hand1Transcription.slots[0].stateChanged.connect(self.userMadeChanges)
             self.forearmChecked.connect(self.configTabs.widget(k).hand1Transcription.slot1.setChecked)
 
@@ -1053,7 +1075,7 @@ class MainWindow(QMainWindow):
         config1.clearAll()
         config2.clearAll()
 
-        for confignum,handnum in itertools.product([1,2], [1,2]):
+        for confignum, handnum in itertools.product([1, 2], [1, 2]):
             name = 'config{}hand{}'.format(confignum, handnum)
             confighand = sign[name]
             configTab = self.configTabs.widget(confignum-1)
@@ -1142,6 +1164,7 @@ class MainWindow(QMainWindow):
         self.editMenu.addAction(self.copyAct)
         self.editMenu.addAction(self.pasteAct)
         self.editMenu.addAction(self.autofillAct)
+        self.editMenu.addAction(self.predefineAct)
 
         self.constraintsMenu = self.menuBar().addMenu('&Constraints')
         self.constraintsMenu.addAction(self.setConstraintsAct)
@@ -1327,6 +1350,10 @@ class MainWindow(QMainWindow):
                     if symbol is not None:
                         getattr(self.configTabs.widget(widgetnum), attribute_name)[slot].setText(symbol)
 
+    def predefineTranscription(self):
+        handshapeDialog = PredefinedHandshapeDialog(parent=self)
+        handshapeDialog.show()
+
     def mergeCorpus(self):
         if self.corpus is None:
             alert = QMessageBox()
@@ -1369,7 +1396,6 @@ class MainWindow(QMainWindow):
         #                           self,
         #                           triggered = self.funcLoad)
 
-
         self.copyAct = QAction('&Copy a transcription...',
                               self,
                               triggered = self.copyTranscription)
@@ -1381,6 +1407,10 @@ class MainWindow(QMainWindow):
         self.autofillAct = QAction('&Autofill transcription slots...',
                                self,
                                triggered = self.autoFillTranscription)
+
+        self.predefineAct = QAction('&Open predefined handshapes...',
+                                    self,
+                                    triggered=self.predefineTranscription)
 
         #self.glossSearchAct = QAction('Search by &gloss...',
         #                              self,
@@ -2343,7 +2373,7 @@ class AnalyzerMainWindow(QMainWindow):
         self.config1.clearAll()
         self.config2.clearAll()
 
-        for confignum, handnum in itertools.product([1,2], [1,2]):
+        for confignum, handnum in itertools.product([1, 2], [1, 2]):
             name = 'config{}hand{}'.format(confignum, handnum)
             confighand = sign[name]
 
