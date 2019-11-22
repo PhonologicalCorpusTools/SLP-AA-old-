@@ -1,8 +1,6 @@
 from constants import X_IN_BOX, NULL
 
-#TODO: check for '?'
 ORDER = {'H': 5, 'E': 4, 'e': 3, 'i': 2, 'f': 1, 'F': 0}
-
 
 def increasing_or_equal_flexion(*args):
     """
@@ -12,6 +10,21 @@ def increasing_or_equal_flexion(*args):
     """
     # latter - former <= 0 for all pairs
     return all([ORDER[args[i+1]] - ORDER[args[i]] <= 0 for i in range(len(args)-1)])
+
+
+def is_decreasing_flexion_first(*args):
+    """
+    return if the first comparison is decreasing for flexion
+    :param sign:
+    :return:
+    """
+    # decreasing flexion: latter - former > 0
+
+    for i in range(len(args)-1):
+        if ORDER[args[i+1]] - ORDER[args[i]] > 0:
+            return True
+    else:
+        return False
 
 
 class HandshapeEmpty(object):
@@ -315,48 +328,23 @@ class HandshapeS(object):
 
     # constraint4: option[15], option[20], option[25], option[30]: they have to have all the same flexion value (e.g., f, f, f, f),
     # or from finger 1 to finger 4 have an increasing flexion value (e.g., f,f,F,F) or increasing-decreasing (e.g.: f,F,F,f),
-    # but not decreasing flexion (e.g.: F, f,f,f), decreasing-increasing (e.g.: F,f,f,F) or f, F, f, F.
+    # but not decreasing flexion (e.g.: F,f,f,f), decreasing-increasing (e.g.: F,f,f,F) or f, F, f, F.
     @staticmethod
     def satisfy_const4(sign):
-        def is_decreasing_first(sign):
-            values = [ORDER[sign[15]], ORDER[sign[20]], ORDER[sign[25]], ORDER[sign[30]]]
-            compare = list()
-            for i in range(4-1):
-                if values[i] > values[i+1]:
-                    compare.append('decrease')
-                elif values[i] < values[i+1]:
-                    compare.append('increase')
+        if any([symbol == '?' for symbol in [sign[15], sign[20], sign[25], sign[30]]]):
+            return True
 
-            if not compare:
-                return False
-            else:
-                if compare[0] == 'decrease':
-                    return True
-                else:
-                    return False
-
-        return not is_decreasing_first(sign)
+        return not is_decreasing_flexion_first(sign[15], sign[20], sign[25], sign[30])
 
     # constraint5: option[17], option[22], option[27], option[32]: they have to have all the same flexion value (e.g., f,f,f,f),
     # or from thumb to finger 4 have an increasing flexion value (e.g., f, f, F, F, but not the other way around (e.g., F, f, f, i,),
     # or F, f, F, i.
     @staticmethod
     def satisfy_const5(sign):
-        def has_decreasing(sign):
-            values = [ORDER[sign[17]], ORDER[sign[22]], ORDER[sign[27]], ORDER[sign[32]]]
-            compare = list()
-            for i in range(4 - 1):
-                if values[i] > values[i + 1]:
-                    compare.append('decrease')
-                elif values[i] < values[i + 1]:
-                    compare.append('increase')
+        if any([symbol == '?' for symbol in [sign[17], sign[22], sign[27], sign[32]]]):
+            return True
 
-            if not compare:
-                return False
-            else:
-                return 'decrease' in compare
-
-        return not has_decreasing(sign)
+        return increasing_or_equal_flexion(sign[17], sign[22], sign[27], sign[32])
 
     @staticmethod
     def match(sign):
@@ -429,12 +417,18 @@ class HandshapeA(object):
             value2 = ORDER[value2]
             return abs(value1 - value2)
 
+        if any([symbol == '?' for symbol in [sign[17], sign[22], sign[27]]]):
+            return True
+
         return not (difference(sign[17], sign[22]) > 2 or difference(sign[22], sign[27]) > 2)
 
     # constraint7: option[17], option[22], option[27], option[32]: they have to have all the same flexion or from index to finger4
     # have an increasing flexion value but not the other way around
     @staticmethod
     def satisfy_const7(sign):
+        if any([symbol == '?' for symbol in [sign[17], sign[22], sign[27], sign[32]]]):
+            return True
+
         return increasing_or_equal_flexion(sign[17], sign[22], sign[27], sign[32])
 
     @staticmethod
@@ -509,11 +503,30 @@ class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
 
         return True
 
-    # TODO: ASK
     # constraint2: Across fingers, the values must match with all fingers by one value
+    # option[15], [20], [25], [30]
+    # option[16], [21], [26], [31]
+    # option[17], [22], [27], [32]
     @staticmethod
     def satisfy_const2(sign):
-        return True
+        def difference(value1, value2):
+            value1 = ORDER[value1]
+            value2 = ORDER[value2]
+            return abs(value1 - value2)
+
+        if any([symbol == '?' for symbol in [sign[15], sign[16], sign[17],
+                                             sign[20], sign[21], sign[22],
+                                             sign[25], sign[26], sign[27],
+                                             sign[30], sign[31], sign[32]]]):
+            return True
+
+        MCPs = [sign[15], sign[20], sign[25], sign[30]]
+        PIPs = [sign[16], sign[21], sign[26], sign[31]]
+        DIPs = [sign[17], sign[22], sign[27], sign[32]]
+
+        return all([difference(MCPs[i + 1] - MCPs[i]) <= 1 for i in range(3)]) and \
+               all([difference(PIPs[i + 1] - PIPs[i]) <= 1 for i in range(3)]) and \
+               all([difference(DIPs[i + 1] - DIPs[i]) <= 1 for i in range(3)])
 
     @staticmethod
     def match(sign):
