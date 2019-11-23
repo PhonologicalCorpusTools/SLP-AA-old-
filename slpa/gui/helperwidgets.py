@@ -1,7 +1,8 @@
 from imports import (QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioButton, Signal, QDialog, QListWidget,
                      QSize, QListView, QIcon, QListWidgetItem, Qt)
 from image import getMediaFilePath
-from analysis.unmarked_handshapes import Handshape5
+from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, HandshapeB1, HandshapeB2, HandshapeC,
+                                          HandshapeO, HandshapeS)
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -44,8 +45,14 @@ class LogicRadioButtonGroup(QGroupBox):
 class HandshapePanel(QGroupBox):
 
     handshape_mapping = {
-        '1': Handshape5,
+        '1': Handshape1,
         '5': Handshape5,
+        'A': HandshapeA,
+        'B1': HandshapeB1,
+        'B2': HandshapeB2,
+        'C': HandshapeC,
+        'O': HandshapeO,
+        'S': HandshapeS,
         'g': Handshape5
     }
 
@@ -106,6 +113,12 @@ class PredefinedHandshapeDialog(QDialog):
         unmarkedhandshape = HandshapePanel('Unmarked handshapes', parent=self)
         unmarkedhandshape.addHandshape('1')
         unmarkedhandshape.addHandshape('5')
+        unmarkedhandshape.addHandshape('A')
+        unmarkedhandshape.addHandshape('B1')
+        unmarkedhandshape.addHandshape('B2')
+        unmarkedhandshape.addHandshape('C')
+        unmarkedhandshape.addHandshape('O')
+        unmarkedhandshape.addHandshape('S')
         mainLayout.addWidget(unmarkedhandshape)
 
         markedhandshape = HandshapePanel('Marked handshapes', parent=self)
