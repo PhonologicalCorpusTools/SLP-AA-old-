@@ -1160,7 +1160,7 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.quitAct)
         self.fileMenu.addAction(self.switchAct)
 
-        self.editMenu = self.menuBar().addMenu('&Edit')
+        self.editMenu = self.menuBar().addMenu('\u200C&Edit')
         self.editMenu.addAction(self.copyAct)
         self.editMenu.addAction(self.pasteAct)
         self.editMenu.addAction(self.autofillAct)
