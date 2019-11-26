@@ -112,9 +112,7 @@ class Sign():
     for option in GLOBAL_OPTIONS:
         sign_attributes[option] = False
 
-
-    sorted_attributes = ['gloss', 'config1', 'config2',
-                         'parameters', 'flags', 'notes']
+    sorted_attributes = ['gloss', 'config1', 'config2', 'parameters', 'flags', 'notes']
 
     headers = ['gloss', 'config1hand1', 'config1hand2', 'config2hand1', 'config2hand2']
 
@@ -175,7 +173,7 @@ class Sign():
     def data(self):
         return OrderedDict([(key, getattr(self, key)) for key in Sign.sorted_attributes])
 
-    def export(self, include_fields=True, blank_space = '_', x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
+    def export(self, include_fields=True, blank_space='_', x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
         output = list()
         output.append(self.gloss)
         for config_num in [1,2]:
@@ -251,3 +249,15 @@ class Sign():
                                                                      ''.join(transcription[24:29]),
                                                                      ''.join(transcription[29:34]))
         return transcription
+
+    def get_transcription(self):
+        '''
+        Give a tuple of four strings, with each string corresponding to a hand/configuration
+        Also, the first slot is not included
+        :return: a tuple of four strings
+        '''
+        c1h1 = '.'.join([slot if slot else '_' for slot in self.config1hand1[1:]])
+        c1h2 = '.'.join([slot if slot else '_' for slot in self.config1hand2[1:]])
+        c2h1 = '.'.join([slot if slot else '_' for slot in self.config2hand1[1:]])
+        c2h2 = '.'.join([slot if slot else '_' for slot in self.config2hand2[1:]])
+        return c1h1, c1h2, c2h1, c2h2

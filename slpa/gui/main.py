@@ -332,14 +332,19 @@ class MainWindow(QMainWindow):
         topLayout.addWidget(self.openBlenderButton)
 
         # Copy and paste transcriptions
-        self.copyButton = QPushButton('Copy')
-        self.pasteButton = QPushButton('Paste')
-        self.copyButton.clicked.connect(self.copyTranscription)
-        self.pasteButton.clicked.connect(self.pasteTranscription)
-        topLayout.addWidget(self.copyButton)
-        topLayout.addWidget(self.pasteButton)
+        #self.copyButton = QPushButton('Copy')
+        #self.pasteButton = QPushButton('Paste')
+        #self.copyButton.clicked.connect(self.copyTranscription)
+        #self.pasteButton.clicked.connect(self.pasteTranscription)
+        #topLayout.addWidget(self.copyButton)
+        #topLayout.addWidget(self.pasteButton)
 
-        #Add parameters button
+        # Predefined handshapes
+        self.predefineButton = QPushButton('Predefined handshapes')
+        self.predefineButton.clicked.connect(self.predefineTranscription)
+        topLayout.addWidget(self.predefineButton)
+
+        # Add parameters button
         paramButton = QPushButton('View Parameters')
         paramButton.clicked.connect(self.showParameterTree)
         topLayout.addWidget(paramButton)
@@ -1164,7 +1169,7 @@ class MainWindow(QMainWindow):
         self.editMenu.addAction(self.copyAct)
         self.editMenu.addAction(self.pasteAct)
         self.editMenu.addAction(self.autofillAct)
-        self.editMenu.addAction(self.predefineAct)
+        #self.editMenu.addAction(self.predefineAct)
 
         self.constraintsMenu = self.menuBar().addMenu('&Constraints')
         self.constraintsMenu.addAction(self.setConstraintsAct)
@@ -1408,9 +1413,9 @@ class MainWindow(QMainWindow):
                                self,
                                triggered = self.autoFillTranscription)
 
-        self.predefineAct = QAction('&Open predefined handshapes...',
-                                    self,
-                                    triggered=self.predefineTranscription)
+        #self.predefineAct = QAction('&Open predefined handshapes...',
+        #                            self,
+        #                            triggered=self.predefineTranscription)
 
         #self.glossSearchAct = QAction('Search by &gloss...',
         #                              self,
