@@ -362,12 +362,17 @@ class MainWindow(QMainWindow):
         self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
         layout.addWidget(self.configTabs)
 
+        # Push button at the beginning for predefined handshapes
         self.selected = QButtonGroup()
         self.config1hand1selection = QRadioButton()
+        self.config1hand1selection.setToolTip('Select for predefined handshapes')
         self.config1hand1selection.setChecked(True)
         self.config1hand2selection = QRadioButton()
+        self.config1hand2selection.setToolTip('Select for predefined handshapes')
         self.config2hand1selection = QRadioButton()
+        self.config2hand1selection.setToolTip('Select for predefined handshapes')
         self.config2hand2selection = QRadioButton()
+        self.config2hand2selection.setToolTip('Select for predefined handshapes')
         self.selected.addButton(self.config1hand1selection)
         self.selected.addButton(self.config1hand2selection)
         self.selected.addButton(self.config2hand1selection)
