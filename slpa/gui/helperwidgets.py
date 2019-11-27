@@ -1,5 +1,5 @@
 from imports import (QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioButton, Signal, QDialog, QListWidget,
-                     QSize, QListView, QIcon, QListWidgetItem, Qt, QTabWidget, QWidget)
+                     QSize, QListView, QIcon, QListWidgetItem, Qt, QTabWidget, QWidget, QSizePolicy)
 from image import getMediaFilePath
 from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, HandshapeB1, HandshapeB2, HandshapeC,
                                           HandshapeO, HandshapeS)
@@ -67,12 +67,14 @@ class HandshapePanel(QGroupBox):
     def addHandshape(self, symbol):
         self.handshapeList.addHandshape(symbol)
 
-    def fillSlots(self, item):
-        #TODO: improve this ugly code
-        config1 = self.parent().parent().parent().parent().parent().configTabs.widget(0)
-        config2 = self.parent().parent().parent().parent().parent().configTabs.widget(1)
+    def sizeHint(self):
+        return QSize(self.parent().parent().width(), super().sizeHint().height())
 
-        selected = self.parent().parent().parent().parent().parent().selected.checkedId()
+    def fillSlots(self, item):
+        config1 = self.parent().parent().parent().configTabs.widget(0)
+        config2 = self.parent().parent().parent().configTabs.widget(1)
+
+        selected = self.parent().parent().parent().selected.checkedId()
         if selected == 1:
             transcription = config1.hand1Transcription
         elif selected == 2:
@@ -94,11 +96,13 @@ class HandshapeList(QListWidget):
         super().__init__(parent)
         self.setIconSize(QSize(50, 50))
         self.setViewMode(QListView.IconMode)
-        self.setMinimumHeight(125)
 
     def addHandshape(self, symbol):
         item = QListWidgetItem(symbol, self)
         item.setIcon(QIcon(getMediaFilePath(symbol + '.png')))
+
+    def sizeHint(self):
+        return QSize(self.parent().width(), super().sizeHint().height())
 
 
 class PredefinedHandshapeDialog(QDialog):
@@ -106,7 +110,8 @@ class PredefinedHandshapeDialog(QDialog):
         super().__init__(parent=parent)
 
         self.resize(750, 250)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Window | Qt.CustomizeWindowHint | Qt.WindowTitleHint |
+        self.setWindowTitle('Predefined handshapes')
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Window | Qt.WindowTitleHint |
                             Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
 
         mainLayout = QVBoxLayout()
@@ -128,6 +133,11 @@ class PredefinedHandshapeDialog(QDialog):
 
         languageTab.addTab(ASLHandshapeInventory, 'ASL')
 
+        KSLHandshapeInventory = HandshapeInventory(parent=self)
+        KSLHandshapeInventory.addUnmarkedHandshape('1')
+
+        languageTab.addTab(KSLHandshapeInventory, 'KSL')
+
 
         #unmarkedhandshape = HandshapePanel('Unmarked handshapes', parent=self)
         #unmarkedhandshape.addHandshape('1')
@@ -148,6 +158,8 @@ class PredefinedHandshapeDialog(QDialog):
 class HandshapeInventory(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
+        self.parentW = parent
+
         layout = QVBoxLayout()
         self.setLayout(layout)
 
@@ -162,3 +174,6 @@ class HandshapeInventory(QWidget):
 
     def addMarkedHandshape(self, label):
         self.markedhandshape.addHandshape(label)
+
+    def parent(self):
+        return self.parentW

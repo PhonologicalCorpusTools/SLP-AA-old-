@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SLP-Annotator.iml" filepath="$PROJECT_DIR$/.idea/SLP-Annotator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SLP-AA.iml" filepath="$PROJECT_DIR$/.idea/SLP-AA.iml" />
     </modules>
   </component>
 </project>
