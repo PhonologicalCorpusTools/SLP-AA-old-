@@ -106,6 +106,7 @@ class HandshapeList(QListWidget):
 
 
 class PredefinedHandshapeDialog(QDialog):
+    closeSignal = Signal(str)
     def __init__(self, parent):
         super().__init__(parent=parent)
 
@@ -138,6 +139,9 @@ class PredefinedHandshapeDialog(QDialog):
 
         languageTab.addTab(KSLHandshapeInventory, 'KSL')
 
+    def closeEvent(self, QCloseEvent):
+        self.closeSignal.emit('closed')
+        super().closeEvent(QCloseEvent)
 
         #unmarkedhandshape = HandshapePanel('Unmarked handshapes', parent=self)
         #unmarkedhandshape.addHandshape('1')
