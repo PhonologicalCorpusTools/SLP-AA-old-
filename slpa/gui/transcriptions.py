@@ -70,6 +70,11 @@ class TranscriptionLayout(QVBoxLayout):
         self.connectSlotSignals()
 
         self.predefined = QLabel('')
+        self.predefined.setFixedSize(20, 20)
+        self.predefined.setStyleSheet('background-color: darkgray;'
+                                      'border-style: outset;'
+                                      'border-color: black;'
+                                      'border-width: 1px;')
         self.lineLayout.addWidget(self.predefined)
 
     def updateFlags(self, flags):
