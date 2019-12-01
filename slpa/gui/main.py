@@ -948,6 +948,9 @@ class MainWindow(QMainWindow):
         self.corpusList.setCurrentRow(0)
         self.corpusList.itemClicked.emit(self.corpusList.currentItem())
         self.corpusNotes.setText(self.corpus.notes)
+
+        self.transcriptionInfo.signNoteText.setText(self.currentHandShape().notes)
+
         self.signNotes.setText(self.currentHandShape().notes)
         save_binary(self.corpus, self.corpus.path)
         self.showMaximized()
@@ -1053,6 +1056,9 @@ class MainWindow(QMainWindow):
             #else it's just a string
         sign = self.corpus[gloss]
         self.gloss.setText(sign['gloss'])
+
+        self.transcriptionInfo.signNoteText.setText(sign['signNotes'])
+
         self.signNotes.setText(sign['signNotes'])
         config1 = self.configTabs.widget(0)
         config2 = self.configTabs.widget(1)

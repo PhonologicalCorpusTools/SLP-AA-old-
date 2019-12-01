@@ -661,6 +661,18 @@ class TranscriptionInfo(QGridLayout):
         titleFont = QFont('Arial', 15)
         infoFont = QFont('Arial', 12)
 
+        noteTitle = QLabel('Sign notes')
+        #self.addWidget(noteTitle, 0, 0, 1, 1)
+        self.signNoteText = QLineEdit()
+        #self.addWidget(self.signNoteText, 1, 0, 1, 2)
+
+        self.signNoteGroup = QGroupBox()
+        groupLayout = QVBoxLayout()
+        self.signNoteGroup.setLayout(groupLayout)
+        groupLayout.addWidget(noteTitle)
+        groupLayout.addWidget(self.signNoteText)
+        self.addWidget(self.signNoteGroup, 0, 0, 1, 2)
+
         self.fieldTypeTitle = QLabel('Field type')
         self.fieldTypeTitle.setFont(titleFont)
         self.fieldTypeInfo = QLabel('None selected')
@@ -692,9 +704,9 @@ class TranscriptionInfo(QGridLayout):
                   (self.slotNumberTitle, self.slotNumberInfo), (self.slotTypeTitle, self.slotTypeInfo),
                   (self.slotOptionsTitle, self.slotOptionsInfo)]
         for row in range(len(tuples)):
-            title,info = tuples.pop(0)
-            self.addWidget(title, row, 0)
-            self.addWidget(info, row, 1)
+            title, info = tuples.pop(0)
+            self.addWidget(title, row+1, 0)
+            self.addWidget(info, row+1, 1)
 
         self.purposeDict = {1: 'Shows if forearm is involved',
                             2: 'Thumb oppositional positions (CM rotation)',
