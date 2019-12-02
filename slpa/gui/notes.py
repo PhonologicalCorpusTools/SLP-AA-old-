@@ -1,5 +1,6 @@
 from imports import QVBoxLayout, QPlainTextEdit, QDialog
 
+
 class NotesDialog(QDialog):
 
     def __init__(self):

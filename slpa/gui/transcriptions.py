@@ -654,6 +654,10 @@ class TranscriptionField(QVBoxLayout):
 
 
 class TranscriptionInfo(QGridLayout):
+    signNoteEdited = Signal(bool)
+
+    def textEdited(self, text):
+        self.signNoteEdited.emit(True)
 
     def __init__(self):
         super().__init__()
@@ -662,9 +666,8 @@ class TranscriptionInfo(QGridLayout):
         infoFont = QFont('Arial', 12)
 
         noteTitle = QLabel('Sign notes')
-        #self.addWidget(noteTitle, 0, 0, 1, 1)
         self.signNoteText = QLineEdit()
-        #self.addWidget(self.signNoteText, 1, 0, 1, 2)
+        self.signNoteText.textEdited.connect(self.textEdited)
 
         self.signNoteGroup = QGroupBox()
         groupLayout = QVBoxLayout()

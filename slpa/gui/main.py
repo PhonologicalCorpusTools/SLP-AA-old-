@@ -74,8 +74,8 @@ class QApplicationMessaging(QApplication):
         socket.waitForBytesWritten(self._timeout)
         socket.disconnectFromServer()
 
-class ConfigLayout(QGridLayout):
 
+class ConfigLayout(QGridLayout):
     def __init__(self, n, handshapes, hand2):
         QGridLayout.__init__(self)
         self.setSpacing(0)
@@ -90,6 +90,7 @@ class ConfigLayout(QGridLayout):
         self.addWidget(self.handShapeMatch, 1, 0)
         self.hand2 = hand2
         self.handShapeMatch.clicked.connect(self.hand2.match)
+
 
 class GlossLayout(QHBoxLayout):
     def __init__(self, parent = None, comboBoxes = None):
@@ -107,6 +108,7 @@ class GlossLayout(QHBoxLayout):
     def setText(self, newText):
         self.glossEdit.setText(newText)
 
+
 class HandConfigurationNames(QVBoxLayout):
     def __init__(self):
         QVBoxLayout.__init__(self)
@@ -121,7 +123,6 @@ class HandConfigurationNames(QVBoxLayout):
 
 
 class VideoPlayer(QWidget):
-
     def __init__(self, parent=None):
         super(VideoPlayer, self).__init__(parent)
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
@@ -205,8 +206,8 @@ class VideoPlayer(QWidget):
     def changeMedia(self):
         pass
 
-class BlenderOutputWindow(QDialog):
 
+class BlenderOutputWindow(QDialog):
     def __init__(self, image_name, gloss):
         super().__init__()
         self.setModal(False)
@@ -241,12 +242,12 @@ class CorpusList(QListWidget):
                 alert.addButton('Continue but don\'t save', QMessageBox.NoRole)
                 alert.addButton('Go back', QMessageBox.RejectRole)
                 result = alert.exec_()
-                if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole: #continue and save
+                if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole:  #continue and save
                     self.parent.saveCorpus(checkForDuplicates=False)
                     selectedItem = [i for i in self.selectedItems()][0]
                     self.itemClicked.emit(selectedItem)
 
-                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:# continue but don't save
+                elif alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:  #continue but don't save
                     selectedItem = [i for i in self.selectedItems()][0]
                     self.itemClicked.emit(selectedItem)
 
@@ -256,7 +257,6 @@ class CorpusList(QListWidget):
 
 
 class MergeCorpusMessageBox(QMessageBox):
-
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Duplicate entry')
@@ -265,7 +265,6 @@ class MergeCorpusMessageBox(QMessageBox):
         self.addButton('Overwrite with the new sign', QMessageBox.ResetRole)
         self.alwaysMergeCheckBox = QCheckBox('Do this for all future duplicates')
         self.setCheckBox(self.alwaysMergeCheckBox)
-
 
 
 class MainWindow(QMainWindow):
@@ -372,6 +371,7 @@ class MainWindow(QMainWindow):
         self.handImage = HandShapeImage(getMediaFilePath('hand.JPG'))
         self.infoPanel.addWidget(self.handImage)
         self.transcriptionInfo = TranscriptionInfo()
+        self.transcriptionInfo.signNoteEdited.connect(self.signNoteEdited)
         self.infoPanel.addLayout(self.transcriptionInfo)
         layout.addLayout(self.infoPanel)
 
@@ -408,11 +408,15 @@ class MainWindow(QMainWindow):
         self.parameterDialog = None
         self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
         self.initCorpusNotes()
-        self.initSignNotes()
+        #self.initSignNotes()
         self.makeCorpusDock()
 
         self.showMaximized()
         #self.defineTabOrder()
+
+    def signNoteEdited(self, edited):
+        if edited:
+            self.askSaveChanges = True
 
     def resizeEvent(self, e):
         self.showMaximized()
@@ -927,7 +931,7 @@ class MainWindow(QMainWindow):
 
     def loadCorpus(self, showFileDialog = True):
         file_path = QFileDialog.getOpenFileName(self,
-                'Open Corpus File', os.getcwd(), '*.corpus')
+                                                'Open Corpus File', os.getcwd(), '*.corpus')
         file_path = file_path[0]
         if not file_path:
             return None
@@ -951,7 +955,7 @@ class MainWindow(QMainWindow):
 
         self.transcriptionInfo.signNoteText.setText(self.currentHandShape().notes)
 
-        self.signNotes.setText(self.currentHandShape().notes)
+        #self.signNotes.setText(self.currentHandShape().notes)
         save_binary(self.corpus, self.corpus.path)
         self.showMaximized()
 
@@ -996,7 +1000,7 @@ class MainWindow(QMainWindow):
                 kwargs['name'] = os.path.split(path)[1].split('.')[0]
                 self.corpus = Corpus(kwargs)
 
-            elif role == QMessageBox.NoRole: # load existing corpus and add to it
+            elif role == QMessageBox.NoRole:  # load existing corpus and add to it
                 self.loadCorpus()
                 if self.corpus is None:
                     # corpus will be None if the user opened a file dialog, then changed their mind and cancelled
@@ -1059,7 +1063,7 @@ class MainWindow(QMainWindow):
 
         self.transcriptionInfo.signNoteText.setText(sign['signNotes'])
 
-        self.signNotes.setText(sign['signNotes'])
+        #self.signNotes.setText(sign['signNotes'])
         config1 = self.configTabs.widget(0)
         config2 = self.configTabs.widget(1)
         config1.clearAll()
@@ -1115,7 +1119,8 @@ class MainWindow(QMainWindow):
         kwargs['flags'] = flags
         kwargs['parameters'] = self.parameterDialog.saveParameters()
         kwargs['corpusNotes'] = self.corpusNotes.getText()
-        kwargs['signNotes'] = self.signNotes.getText()
+        kwargs['signNotes'] = self.transcriptionInfo.signNoteText.text()
+        #kwargs['signNotes'] = self.signNotes.getText()
         if not kwargs['signNotes']:
             kwargs['signNotes'] == 'None'
         for option in GLOBAL_OPTIONS:
@@ -1135,7 +1140,6 @@ class MainWindow(QMainWindow):
         dialog.exec_()
         resultsTable = FunctionalLoadResultsTable(dialog.results)
         resultsTable.exec_()
-
 
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu('&File')
@@ -1172,7 +1176,7 @@ class MainWindow(QMainWindow):
 
         self.notesMenu = self.menuBar().addMenu('&Notes')
         self.notesMenu.addAction(self.addCorpusNotesAct)
-        self.notesMenu.addAction(self.addSignNotesAct)
+        #self.notesMenu.addAction(self.addSignNotesAct)
 
         #self.searchMenu = self.menuBar().addMenu('&Search')
         #self.searchMenu.addAction(self.transcriptionSearchAct)
@@ -1290,7 +1294,6 @@ class MainWindow(QMainWindow):
                 return
             else:
                 matches = False
-
 
         if matches:
             remove = list()
@@ -1563,10 +1566,10 @@ class MainWindow(QMainWindow):
                                          self,
                                          statusTip = 'Open a notepad for information about the corpus',
                                          triggered = self.addCorpusNotes)
-        self.addSignNotesAct = QAction('Edit &sign notes...',
-                                        self,
-                                       statusTip = 'Open a notepad for information about the current sign',
-                                       triggered = self.addSignNotes)
+        #self.addSignNotesAct = QAction('Edit &sign notes...',
+        #                               self,
+        #                               statusTip='Open a notepad for information about the current sign',
+        #                               triggered=self.addSignNotes)
 
         self.switchAct = QAction('Switch to analyzer mode',
                                  self,
@@ -1607,12 +1610,12 @@ class MainWindow(QMainWindow):
             title = 'Notes for {} corpus'.format(self.corpus.name)
         self.corpusNotes.setWindowTitle(title)
 
-    def initSignNotes(self):
-        self.signNotes = NotesDialog()
-        if self.gloss.text():
-            self.signNotes.setWindowTitle('Notes for the sign {}'.format(self.gloss.text()))
-        else:
-            self.signNotes.setWindowTitle('Notes for an unglossed sign')
+    #def initSignNotes(self):
+    #    self.signNotes = NotesDialog()
+    #    if self.gloss.text():
+    #        self.signNotes.setWindowTitle('Notes for the sign {}'.format(self.gloss.text()))
+    #    else:
+    #        self.signNotes.setWindowTitle('Notes for an unglossed sign')
 
     def addCorpusNotes(self):
         if self.corpus is None:
@@ -1623,14 +1626,14 @@ class MainWindow(QMainWindow):
         self.corpusNotes.raise_()
         self.askSaveChanges = True
 
-    def addSignNotes(self):
-        if self.gloss.text():
-            self.signNotes.setWindowTitle('Notes for the sign {}'.format(self.gloss.text()))
-        else:
-            self.signNotes.setWindowTitle('Notes for an unglossed sign')
-        self.signNotes.show()
-        self.signNotes.raise_()
-        self.askSaveChanges = True
+    #def addSignNotes(self):
+    #    if self.gloss.text():
+    #        self.signNotes.setWindowTitle('Notes for the sign {}'.format(self.gloss.text()))
+    #    else:
+    #        self.signNotes.setWindowTitle('Notes for an unglossed sign')
+    #    self.signNotes.show()
+    #    self.signNotes.raise_()
+    #    self.askSaveChanges = True
 
     def setConstraints(self):
         dialog = ConstraintsDialog(self.constraints)
@@ -1925,11 +1928,12 @@ class MainWindow(QMainWindow):
 
         self.parameterDialog.accept()
         self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
-        self.initSignNotes()
+        #self.initSignNotes()
         for widget in self.globalOptionsWidgets:
             widget.setChecked(False)
         self.askSaveChanges = False
         self.showMaximized()
+
 
 class GlobalOptionCheckBox(QCheckBox):
 
@@ -1938,6 +1942,7 @@ class GlobalOptionCheckBox(QCheckBox):
         self.setText(text)
         self.setFont(QFont(FONT_NAME, FONT_SIZE))
         self.clicked.connect(slot)
+
 
 class MergeCorpusDialog(QDialog):
 
