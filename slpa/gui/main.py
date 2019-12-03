@@ -79,7 +79,7 @@ class ConfigLayout(QGridLayout):
     def __init__(self, n, handshapes, hand2):
         QGridLayout.__init__(self)
         self.setSpacing(0)
-        self.setContentsMargins(0,0,0,0)
+        self.setContentsMargins(0, 0, 0, 0)
 
         # self.forearmButton = QCheckBox('1. Forearm')
         # self.addWidget(self.forearmButton, 0, 1)
@@ -93,10 +93,10 @@ class ConfigLayout(QGridLayout):
 
 
 class GlossLayout(QHBoxLayout):
-    def __init__(self, parent = None, comboBoxes = None):
+    def __init__(self, parent=None, comboBoxes=None):
         QHBoxLayout.__init__(self)
         defaultFont = QFont(FONT_NAME, FONT_SIZE)
-        self.setContentsMargins(-1,-1,-1,0)
+        self.setContentsMargins(-1, -1, -1, 0)
         self.glossEdit = QLineEdit()
         self.glossEdit.setFont(defaultFont)
         self.glossEdit.setPlaceholderText('Gloss')
@@ -277,7 +277,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.setWindowTitle('SLP-Annotator')
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
-        self.setContentsMargins(0,0,0,0)
+        self.setContentsMargins(0, 0, 0, 0)
 
         #Set "global" variables
         self.askSaveChanges = False
@@ -590,7 +590,7 @@ class MainWindow(QMainWindow):
                          self.configTabs.widget(1).hand1Transcription[-1])
         self.setTabOrder(self.configTabs.widget(1).hand1Transcription[-1],
                          self.configTabs.widget(1).hand2Transcription[0])
-        for k in range(1,35):
+        for k in range(1, 35):
             try:
                 self.setTabOrder(self.configTabs.widget(1).hand2Transcription[k],
                                 self.configTabs.widget(1).hand2Transcription[k+1])
@@ -930,8 +930,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
     def loadCorpus(self, showFileDialog = True):
-        file_path = QFileDialog.getOpenFileName(self,
-                                                'Open Corpus File', os.getcwd(), '*.corpus')
+        file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', os.getcwd(), '*.corpus')
         file_path = file_path[0]
         if not file_path:
             return None
@@ -945,6 +944,7 @@ class MainWindow(QMainWindow):
         self.corpusList.clear()
         self.newGloss()
         self.corpusDock.setWindowTitle(self.corpus.name)
+
         for sign in self.corpus:
             self.corpusList.addItem(sign.gloss)
 
@@ -956,7 +956,7 @@ class MainWindow(QMainWindow):
         self.transcriptionInfo.signNoteText.setText(self.currentHandShape().notes)
 
         #self.signNotes.setText(self.currentHandShape().notes)
-        save_binary(self.corpus, self.corpus.path)
+        #save_binary(self.corpus, self.corpus.path)
         self.showMaximized()
 
     @decorators.checkForGloss
