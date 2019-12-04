@@ -659,7 +659,7 @@ class TranscriptionInfo(QGridLayout):
     def textEdited(self, text):
         self.signNoteEdited.emit(True)
 
-    def __init__(self):
+    def __init__(self, coder=None, lastUpdated=None):
         super().__init__()
 
         titleFont = QFont('Arial', 15)
@@ -710,6 +710,19 @@ class TranscriptionInfo(QGridLayout):
             title, info = tuples.pop(0)
             self.addWidget(title, row+1, 0)
             self.addWidget(info, row+1, 1)
+
+        if coder and lastUpdated:
+            self.metaInfoGroup = QGroupBox()
+            metaInfoLayout = QHBoxLayout()
+            self.metaInfoGroup.setLayout(metaInfoLayout)
+            self.coder = QLabel(coder)
+            self.lastUpdate = QLabel(str(lastUpdated))
+            metaInfoLayout.addWidget(QLabel('Coder:'))
+            metaInfoLayout.addWidget(self.coder)
+            metaInfoLayout.addWidget(QLabel('; Last updated:'))
+            metaInfoLayout.addWidget(self.lastUpdate)
+
+            self.addWidget(self.metaInfoGroup, 6, 1, 1, 1)
 
         self.purposeDict = {1: 'Shows if forearm is involved',
                             2: 'Thumb oppositional positions (CM rotation)',
@@ -784,7 +797,7 @@ class TranscriptionInfo(QGridLayout):
 
 
     def generateSlotDescription(self, symbolList):
-        return '\n'.join(['\t'.join([s,SYMBOL_DESCRIPTIONS[s]]) for s in symbolList])
+        return '\n'.join(['\t'.join([s, SYMBOL_DESCRIPTIONS[s]]) for s in symbolList])
 
 
     @Slot(int)

@@ -3,6 +3,8 @@ import subprocess
 import collections
 import parameters
 import decorators
+from getpass import getuser
+from datetime import date
 from xml.etree import ElementTree as xmlElementTree
 from lexicon import *
 from binary import *
@@ -370,7 +372,7 @@ class MainWindow(QMainWindow):
         self.infoPanel = QHBoxLayout()
         self.handImage = HandShapeImage(getMediaFilePath('hand.JPG'))
         self.infoPanel.addWidget(self.handImage)
-        self.transcriptionInfo = TranscriptionInfo()
+        self.transcriptionInfo = TranscriptionInfo(coder=getuser(), lastUpdated=date.today())
         self.transcriptionInfo.signNoteEdited.connect(self.signNoteEdited)
         self.infoPanel.addLayout(self.transcriptionInfo)
         layout.addLayout(self.infoPanel)
