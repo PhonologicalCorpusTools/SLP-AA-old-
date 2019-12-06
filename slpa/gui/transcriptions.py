@@ -1,5 +1,6 @@
 from collections import namedtuple
 from imports import *
+from image import getMediaFilePath
 
 from constants import *
 
@@ -69,13 +70,19 @@ class TranscriptionLayout(QVBoxLayout):
         self.flagList = [False for n in range(34)]
         self.connectSlotSignals()
 
-        self.predefined = QLabel('')
-        self.predefined.setFixedSize(20, 20)
-        self.predefined.setStyleSheet('background-color: darkgray;'
-                                      'border-style: outset;'
-                                      'border-color: black;'
-                                      'border-width: 1px;')
-        self.lineLayout.addWidget(self.predefined)
+        self.predefinedImage = QLabel()
+        self.predefinedImage.setFixedSize(50, 50)
+        handshapeImage = QPixmap(getMediaFilePath('empty.png'))
+        self.predefinedImage.setPixmap(handshapeImage.scaled(self.predefinedImage.width(), self.predefinedImage.height(), Qt.KeepAspectRatio))
+        self.lineLayout.addWidget(self.predefinedImage)
+
+        self.predefinedLabel = QLabel('')
+        self.predefinedLabel.setFixedSize(20, 20)
+        self.predefinedLabel.setStyleSheet('background-color: darkgray;'
+                                           'border-style: outset;'
+                                           'border-color: black;'
+                                           'border-width: 1px;')
+        self.lineLayout.addWidget(self.predefinedLabel)
 
     def updateFlags(self, flags):
         for flag, slot in zip(flags[1:], self.slots[1:]):
@@ -171,8 +178,10 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot31.setText('4')
 
     def updateLabel(self, p_str):
-        handshape = predefined_handshape_mapping.get(tuple(self.values()), '')
-        self.predefined.setText(handshape)
+        handshapeLabel = predefined_handshape_mapping.get(tuple(self.values()), '')
+        handshapeImage = QPixmap(getMediaFilePath(handshapeLabel + '.png'))
+        self.predefinedLabel.setText(handshapeLabel)
+        self.predefinedImage.setPixmap(handshapeImage.scaled(self.predefinedImage.width(), self.predefinedImage.height(), Qt.KeepAspectRatio))
 
     def generateSlots(self, view_only):
         #FIELD 1 (Forearm)

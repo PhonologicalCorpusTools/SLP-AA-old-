@@ -101,7 +101,6 @@ class Corpus():
 
 
 class Sign():
-
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
                        'parameters': defaultParameters,
                        'flags': {'config1hand1': [Flag(False, False) for n in range(34)],
