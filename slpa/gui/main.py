@@ -10,7 +10,7 @@ from lexicon import *
 from binary import *
 from gui.transcriptions import *
 from gui.constraintwidgets import *
-from gui.notes import *
+from gui.notes import NotesDialog, CoderDialog
 from gui.search import *
 from image import *
 from gui.functional_load import *
@@ -281,6 +281,9 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
         self.setContentsMargins(0, 0, 0, 0)
 
+        self.coder = getuser()
+        self.today = date.today()
+
         #Set "global" variables
         self.askSaveChanges = False
         self.constraints = dict()
@@ -372,7 +375,7 @@ class MainWindow(QMainWindow):
         self.infoPanel = QHBoxLayout()
         self.handImage = HandShapeImage(getMediaFilePath('hand.JPG'))
         self.infoPanel.addWidget(self.handImage)
-        self.transcriptionInfo = TranscriptionInfo(coder=getuser(), lastUpdated=date.today())
+        self.transcriptionInfo = TranscriptionInfo(coder=self.coder, lastUpdated=self.today)
         self.transcriptionInfo.signNoteEdited.connect(self.signNoteEdited)
         self.infoPanel.addLayout(self.transcriptionInfo)
         layout.addLayout(self.infoPanel)
@@ -1178,6 +1181,7 @@ class MainWindow(QMainWindow):
 
         self.notesMenu = self.menuBar().addMenu('&Notes')
         self.notesMenu.addAction(self.addCorpusNotesAct)
+        self.notesMenu.addAction(self.editCoderAct)
         #self.notesMenu.addAction(self.addSignNotesAct)
 
         #self.searchMenu = self.menuBar().addMenu('&Search')
@@ -1566,8 +1570,12 @@ class MainWindow(QMainWindow):
                                     triggered = self.setConstraints)
         self.addCorpusNotesAct = QAction('Edit &corpus notes...',
                                          self,
-                                         statusTip = 'Open a notepad for information about the corpus',
-                                         triggered = self.addCorpusNotes)
+                                         statusTip='Open a notepad for information about the corpus',
+                                         triggered=self.addCorpusNotes)
+        self.editCoderAct = QAction('Edit coder...',
+                                    self,
+                                    statusTip='Edit the name for the default coder',
+                                    triggered=self.editCoderAct)
         #self.addSignNotesAct = QAction('Edit &sign notes...',
         #                               self,
         #                               statusTip='Open a notepad for information about the current sign',
@@ -1577,6 +1585,12 @@ class MainWindow(QMainWindow):
                                  self,
                                  statusTip='Switch to analyzer mode',
                                  triggered=self.switchMode)
+
+    def editCoderAct(self):
+        coder = CoderDialog(self.coder, parent=self)
+        success = coder.exec_()
+        if success:
+            print(success)
 
     def switchMode(self):
         if self.corpus is None:

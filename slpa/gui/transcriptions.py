@@ -715,14 +715,14 @@ class TranscriptionInfo(QGridLayout):
             self.metaInfoGroup = QGroupBox()
             metaInfoLayout = QHBoxLayout()
             self.metaInfoGroup.setLayout(metaInfoLayout)
-            self.coder = QLabel(coder)
-            self.lastUpdate = QLabel(str(lastUpdated))
+            self.coder = QLineEdit(coder)
+            self.lastUpdate = QLineEdit(str(lastUpdated))
             metaInfoLayout.addWidget(QLabel('Coder:'))
             metaInfoLayout.addWidget(self.coder)
-            metaInfoLayout.addWidget(QLabel('; Last updated:'))
+            metaInfoLayout.addWidget(QLabel('Last updated:'))
             metaInfoLayout.addWidget(self.lastUpdate)
 
-            self.addWidget(self.metaInfoGroup, 6, 1, 1, 1)
+            self.addWidget(self.metaInfoGroup, 6, 0, 1, 2)
 
         self.purposeDict = {1: 'Shows if forearm is involved',
                             2: 'Thumb oppositional positions (CM rotation)',

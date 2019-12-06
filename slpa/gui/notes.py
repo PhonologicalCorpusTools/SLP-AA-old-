@@ -1,4 +1,4 @@
-from imports import QVBoxLayout, QPlainTextEdit, QDialog
+from imports import QVBoxLayout, QPlainTextEdit, QDialog, QHBoxLayout, QLineEdit, QLabel
 
 
 class NotesDialog(QDialog):
@@ -21,3 +21,17 @@ class NotesDialog(QDialog):
 
     def setText(self, text):
         self.notepad.setPlainText(text)
+
+
+class CoderDialog(QDialog):
+    def __init__(self, coderName, parent=None):
+        super().__init__(parent=parent)
+        self.setWindowTitle('Edit default coder name')
+
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+        self.coderName = QLineEdit(coderName)
+
+        layout.addWidget(QLabel('Default coder:'))
+        layout.addWidget(self.coderName)
+
