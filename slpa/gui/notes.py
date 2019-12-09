@@ -1,4 +1,4 @@
-from imports import QVBoxLayout, QPlainTextEdit, QDialog, QHBoxLayout, QLineEdit, QLabel
+from imports import QVBoxLayout, QPlainTextEdit, QDialog, QHBoxLayout, QLineEdit, QLabel, QPushButton
 
 
 class NotesDialog(QDialog):
@@ -28,10 +28,33 @@ class CoderDialog(QDialog):
         super().__init__(parent=parent)
         self.setWindowTitle('Edit default coder name')
 
-        layout = QHBoxLayout()
+        self._coderName = coderName
+
+        layout = QVBoxLayout()
         self.setLayout(layout)
-        self.coderName = QLineEdit(coderName)
 
-        layout.addWidget(QLabel('Default coder:'))
-        layout.addWidget(self.coderName)
+        inputLayout = QHBoxLayout()
+        layout.addLayout(inputLayout)
 
+        self.coderNameLineEdit = QLineEdit(self._coderName)
+        inputLayout.addWidget(QLabel('Default coder:'))
+        inputLayout.addWidget(self.coderNameLineEdit)
+
+        buttonLayout = QHBoxLayout()
+        layout.addLayout(buttonLayout)
+
+        okButton = QPushButton('Ok')
+        buttonLayout.addWidget(okButton)
+        okButton.clicked.connect(self.accept)
+
+        cancelButton = QPushButton('Cancel')
+        buttonLayout.addWidget(cancelButton)
+        cancelButton.clicked.connect(self.reject)
+
+    def accept(self):
+        self._coderName = self.coderNameLineEdit.text()
+        super().accept()
+
+    @property
+    def coderName(self):
+        return self._coderName

@@ -671,11 +671,15 @@ class TranscriptionInfo(QGridLayout):
     def __init__(self, coder=None, lastUpdated=None):
         super().__init__()
 
+        self.coder = coder
+        self.lastUpdated = lastUpdated
+
         titleFont = QFont('Arial', 15)
         infoFont = QFont('Arial', 12)
 
         noteTitle = QLabel('Sign notes')
         self.signNoteText = QLineEdit()
+        self.signNoteText.setPlaceholderText('Enter note here...')
         self.signNoteText.textEdited.connect(self.textEdited)
 
         self.signNoteGroup = QGroupBox()
@@ -720,16 +724,16 @@ class TranscriptionInfo(QGridLayout):
             self.addWidget(title, row+1, 0)
             self.addWidget(info, row+1, 1)
 
-        if coder and lastUpdated:
+        if self.coder and self.lastUpdated:
             self.metaInfoGroup = QGroupBox()
             metaInfoLayout = QHBoxLayout()
             self.metaInfoGroup.setLayout(metaInfoLayout)
-            self.coder = QLineEdit(coder)
-            self.lastUpdate = QLineEdit(str(lastUpdated))
+            self.coderLineEdit = QLineEdit(self.coder)
+            self.lastUpdateLineEdit = QLineEdit(str(self.lastUpdated))
             metaInfoLayout.addWidget(QLabel('Coder:'))
-            metaInfoLayout.addWidget(self.coder)
+            metaInfoLayout.addWidget(self.coderLineEdit)
             metaInfoLayout.addWidget(QLabel('Last updated:'))
-            metaInfoLayout.addWidget(self.lastUpdate)
+            metaInfoLayout.addWidget(self.lastUpdateLineEdit)
 
             self.addWidget(self.metaInfoGroup, 6, 0, 1, 2)
 
@@ -804,10 +808,15 @@ class TranscriptionInfo(QGridLayout):
                             34: self.generateSlotDescription(FINGER_SYMBOLS)
                               }
 
+    def clearSignNoteText(self):
+        self.signNoteText.clear()
+
+    def changeCoderName(self, newName):
+        self.coder = newName
+        self.coderLineEdit.setText(self.coder)
 
     def generateSlotDescription(self, symbolList):
         return '\n'.join(['\t'.join([s, SYMBOL_DESCRIPTIONS[s]]) for s in symbolList])
-
 
     @Slot(int)
     def transcriptionSlotChanged(self, e):

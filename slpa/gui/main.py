@@ -1575,7 +1575,7 @@ class MainWindow(QMainWindow):
         self.editCoderAct = QAction('Edit coder...',
                                     self,
                                     statusTip='Edit the name for the default coder',
-                                    triggered=self.editCoderAct)
+                                    triggered=self.editCoder)
         #self.addSignNotesAct = QAction('Edit &sign notes...',
         #                               self,
         #                               statusTip='Open a notepad for information about the current sign',
@@ -1586,11 +1586,11 @@ class MainWindow(QMainWindow):
                                  statusTip='Switch to analyzer mode',
                                  triggered=self.switchMode)
 
-    def editCoderAct(self):
+    def editCoder(self):
         coder = CoderDialog(self.coder, parent=self)
         success = coder.exec_()
         if success:
-            print(success)
+            self.coder = coder.coderName
 
     def switchMode(self):
         if self.corpus is None:
@@ -1944,6 +1944,8 @@ class MainWindow(QMainWindow):
 
         self.parameterDialog.accept()
         self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
+        self.transcriptionInfo.clearSignNoteText()
+        self.transcriptionInfo.changeCoderName(self.coder)
         #self.initSignNotes()
         for widget in self.globalOptionsWidgets:
             widget.setChecked(False)
