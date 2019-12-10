@@ -376,7 +376,10 @@ class MainWindow(QMainWindow):
         self.handImage = HandShapeImage(getMediaFilePath('hand.JPG'))
         self.infoPanel.addWidget(self.handImage)
         self.transcriptionInfo = TranscriptionInfo(coder=self.coder, lastUpdated=self.today)
-        self.transcriptionInfo.signNoteEdited.connect(self.signNoteEdited)
+        self.transcriptionInfo.signNoteEdited.connect(self.changeSaveFlag)
+        self.transcriptionInfo.coderUpdated.connect(self.changeSaveFlag)
+        self.transcriptionInfo.dateUpdated.connect(self.changeSaveFlag)
+
         self.infoPanel.addLayout(self.transcriptionInfo)
         layout.addLayout(self.infoPanel)
 
@@ -419,7 +422,7 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         #self.defineTabOrder()
 
-    def signNoteEdited(self, edited):
+    def changeSaveFlag(self, edited):
         if edited:
             self.askSaveChanges = True
 
@@ -1065,8 +1068,9 @@ class MainWindow(QMainWindow):
             #else it's just a string
         sign = self.corpus[gloss]
         self.gloss.setText(sign['gloss'])
-
         self.transcriptionInfo.signNoteText.setText(sign['signNotes'])
+        self.transcriptionInfo.coderLineEdit.setText(sign['coder'])
+        self.transcriptionInfo.lastUpdatedLineEdit.setText(str(sign['lastUpdated']))
 
         #self.signNotes.setText(sign['signNotes'])
         config1 = self.configTabs.widget(0)
@@ -1105,6 +1109,7 @@ class MainWindow(QMainWindow):
                   'config1': None, 'config2': None,
                   'flags': None, 'parameters': None,
                   'corpusNotes': None, 'signNotes': None,
+                  'coder': None, 'lastUpdated': None,
                   'forearm': False, 'estimated': False,
                   'uncertain': False, 'incomplete': False, 'reduplicated': False}
 
@@ -1128,6 +1133,8 @@ class MainWindow(QMainWindow):
         #kwargs['signNotes'] = self.signNotes.getText()
         if not kwargs['signNotes']:
             kwargs['signNotes'] == 'None'
+        kwargs['coder'] = self.transcriptionInfo.coder
+        kwargs['lastUpdated'] = self.transcriptionInfo.lastUpdated
         for option in GLOBAL_OPTIONS:
             kwargs[option] = getattr(self, option+'CheckBox').isChecked()
         return kwargs

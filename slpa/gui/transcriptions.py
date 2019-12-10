@@ -1,6 +1,7 @@
 from collections import namedtuple
 from imports import *
 from image import getMediaFilePath
+from datetime import date
 
 from constants import *
 
@@ -664,15 +665,14 @@ class TranscriptionField(QVBoxLayout):
 
 class TranscriptionInfo(QGridLayout):
     signNoteEdited = Signal(bool)
-
-    def textEdited(self, text):
-        self.signNoteEdited.emit(True)
+    coderUpdated = Signal(bool)
+    dateUpdated = Signal(bool)
 
     def __init__(self, coder=None, lastUpdated=None):
         super().__init__()
 
-        self.coder = coder
-        self.lastUpdated = lastUpdated
+        self._coder = coder
+        self._lastUpdated = lastUpdated
 
         titleFont = QFont('Arial', 15)
         infoFont = QFont('Arial', 12)
@@ -680,7 +680,7 @@ class TranscriptionInfo(QGridLayout):
         noteTitle = QLabel('Sign notes')
         self.signNoteText = QLineEdit()
         self.signNoteText.setPlaceholderText('Enter note here...')
-        self.signNoteText.textEdited.connect(self.textEdited)
+        self.signNoteText.textEdited.connect(self.noteTextEdited)
 
         self.signNoteGroup = QGroupBox()
         groupLayout = QVBoxLayout()
@@ -719,21 +719,24 @@ class TranscriptionInfo(QGridLayout):
         tuples = [(self.fieldNumberTitle, self.fieldNumberInfo), (self.fieldTypeTitle, self.fieldTypeInfo),
                   (self.slotNumberTitle, self.slotNumberInfo), (self.slotTypeTitle, self.slotTypeInfo),
                   (self.slotOptionsTitle, self.slotOptionsInfo)]
+
         for row in range(len(tuples)):
             title, info = tuples.pop(0)
             self.addWidget(title, row+1, 0)
             self.addWidget(info, row+1, 1)
 
-        if self.coder and self.lastUpdated:
+        if self._coder and self._lastUpdated:
             self.metaInfoGroup = QGroupBox()
             metaInfoLayout = QHBoxLayout()
             self.metaInfoGroup.setLayout(metaInfoLayout)
-            self.coderLineEdit = QLineEdit(self.coder)
-            self.lastUpdateLineEdit = QLineEdit(str(self.lastUpdated))
+            self.coderLineEdit = QLineEdit(self._coder)
+            self.coderLineEdit.textEdited.connect(self.updateCoder)
+            self.lastUpdatedLineEdit = QLineEdit(str(self._lastUpdated))
+            self.lastUpdatedLineEdit.textEdited.connect(self.updateLastUpdated)
             metaInfoLayout.addWidget(QLabel('Coder:'))
             metaInfoLayout.addWidget(self.coderLineEdit)
             metaInfoLayout.addWidget(QLabel('Last updated:'))
-            metaInfoLayout.addWidget(self.lastUpdateLineEdit)
+            metaInfoLayout.addWidget(self.lastUpdatedLineEdit)
 
             self.addWidget(self.metaInfoGroup, 6, 0, 1, 2)
 
@@ -806,14 +809,48 @@ class TranscriptionInfo(QGridLayout):
                             32: self.generateSlotDescription(FINGER_SYMBOLS),
                             33: self.generateSlotDescription(FINGER_SYMBOLS),
                             34: self.generateSlotDescription(FINGER_SYMBOLS)
-                              }
+                            }
+
+    def noteTextEdited(self, text):
+        self.signNoteEdited.emit(True)
+
+    def updateCoder(self):
+        self._coder = self.coderLineEdit.text()
+        self.coderUpdated.emit(True)
+
+    def updateLastUpdated(self):
+        #TODO: handle value error here, like throw a warning
+        dateLiterals = self.lastUpdatedLineEdit.text().strip().split('-')
+        if len(dateLiterals) == 3 and all(num.isdigit() for num in dateLiterals):
+            year, month, day = tuple([int(num.strip()) for num in dateLiterals])
+            try:
+                self._lastUpdated = date(year, month, day)
+                self.dateUpdated.emit(True)
+            except ValueError as err:
+                print('Value error: {}'.format(err))
 
     def clearSignNoteText(self):
         self.signNoteText.clear()
 
     def changeCoderName(self, newName):
-        self.coder = newName
-        self.coderLineEdit.setText(self.coder)
+        self._coder = newName
+        self.coderLineEdit.setText(self._coder)
+
+    @property
+    def coder(self):
+        return self._coder
+
+    @coder.setter
+    def coder(self, newCoder):
+        self._coder = newCoder
+
+    @property
+    def lastUpdated(self):
+        return self._lastUpdated
+
+    @lastUpdated.setter
+    def lastUpdated(self, newLastUpdated):
+        self._lastUpdated = newLastUpdated
 
     def generateSlotDescription(self, symbolList):
         return '\n'.join(['\t'.join([s, SYMBOL_DESCRIPTIONS[s]]) for s in symbolList])

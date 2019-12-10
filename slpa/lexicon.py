@@ -3,6 +3,7 @@ import os
 import re
 from collections import OrderedDict
 from random import choice
+from datetime import date
 from parameters import defaultParameters
 from gui.parameterwidgets import ParameterTreeModel
 from gui.transcriptions import Flag
@@ -11,7 +12,8 @@ from constants import GLOBAL_OPTIONS
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
 
-class Corpus():
+
+class Corpus:
     corpus_attributes = {'name': 'corpus', 'wordlist': dict(), '_discourse': None, 'path': None,
                          'specifier': None, 'inventory': None, 'inventoryModel': None, 'has_frequency': True,
                          'has_spelling': False, 'has_wordtokens': False, 'has_audio': False, 'wav_path': None,
@@ -100,14 +102,15 @@ class Corpus():
         return self.wordlist[word]
 
 
-class Sign():
+class Sign:
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
                        'parameters': defaultParameters,
                        'flags': {'config1hand1': [Flag(False, False) for n in range(34)],
                                  'config1hand2': [Flag(False, False) for n in range(34)],
                                  'config2hand1': [Flag(False, False) for n in range(34)],
                                  'config2hand2': [Flag(False, False) for n in range(34)]},
-                       'signNotes': str()}
+                       'signNotes': str(),
+                       'coder': str(), 'lastUpdated': date.today()}
     for option in GLOBAL_OPTIONS:
         sign_attributes[option] = False
 
