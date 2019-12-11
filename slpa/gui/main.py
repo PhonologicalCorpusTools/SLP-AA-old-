@@ -1064,13 +1064,17 @@ class MainWindow(QMainWindow):
             gloss = gloss.text()
         except AttributeError:
             if not gloss:
-                gloss = ''
-            #else it's just a string
+                gloss = ''  # else it's just a string
         sign = self.corpus[gloss]
         self.gloss.setText(sign['gloss'])
         self.transcriptionInfo.signNoteText.setText(sign['signNotes'])
-        self.transcriptionInfo.coderLineEdit.setText(sign['coder'])
-        self.transcriptionInfo.lastUpdatedLineEdit.setText(str(sign['lastUpdated']))
+
+        if not hasattr(sign, '_coder') or not hasattr(sign, '_lastUpdated'):
+            setattr(sign, '_coder', self.coder)
+            setattr(sign, '_lastUpdated', self.today)
+
+        self.transcriptionInfo.coderLineEdit.setText(sign['_coder'])
+        self.transcriptionInfo.lastUpdatedLineEdit.setText(str(sign['_lastUpdated']))
 
         #self.signNotes.setText(sign['signNotes'])
         config1 = self.configTabs.widget(0)
@@ -1109,7 +1113,7 @@ class MainWindow(QMainWindow):
                   'config1': None, 'config2': None,
                   'flags': None, 'parameters': None,
                   'corpusNotes': None, 'signNotes': None,
-                  'coder': None, 'lastUpdated': None,
+                  '_coder': None, '_lastUpdated': None,
                   'forearm': False, 'estimated': False,
                   'uncertain': False, 'incomplete': False, 'reduplicated': False}
 
@@ -1133,8 +1137,8 @@ class MainWindow(QMainWindow):
         #kwargs['signNotes'] = self.signNotes.getText()
         if not kwargs['signNotes']:
             kwargs['signNotes'] == 'None'
-        kwargs['coder'] = self.transcriptionInfo.coder
-        kwargs['lastUpdated'] = self.transcriptionInfo.lastUpdated
+        kwargs['_coder'] = self.transcriptionInfo.coder
+        kwargs['_lastUpdated'] = self.transcriptionInfo.lastUpdated
         for option in GLOBAL_OPTIONS:
             kwargs[option] = getattr(self, option+'CheckBox').isChecked()
         return kwargs

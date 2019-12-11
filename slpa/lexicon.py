@@ -110,7 +110,7 @@ class Sign:
                                  'config2hand1': [Flag(False, False) for n in range(34)],
                                  'config2hand2': [Flag(False, False) for n in range(34)]},
                        'signNotes': str(),
-                       'coder': str(), 'lastUpdated': date.today()}
+                       '_coder': str(), '_lastUpdated': date.today()}
     for option in GLOBAL_OPTIONS:
         sign_attributes[option] = False
 
@@ -168,6 +168,22 @@ class Sign:
     @property
     def notes(self):
         return self.signNotes
+
+    @property
+    def coder(self):
+        return self._coder
+
+    @coder.setter
+    def coder(self, newCoder):
+        self._coder = newCoder
+
+    @property
+    def lastUpdated(self):
+        return self._lastUpdated
+
+    @lastUpdated.setter
+    def lastUpdated(self, newLastUpdated):
+        self._lastUpdated = newLastUpdated
 
     def getSlot(self, n):
         return getattr(self, 'slot'+str(n))
