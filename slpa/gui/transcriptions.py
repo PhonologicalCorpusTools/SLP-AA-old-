@@ -824,10 +824,21 @@ class TranscriptionInfo(QGridLayout):
         if len(dateLiterals) == 3 and all(num.isdigit() for num in dateLiterals):
             year, month, day = tuple([int(num.strip()) for num in dateLiterals])
             try:
-                self._lastUpdated = date(year, month, day)
-                self.dateUpdated.emit(True)
+                newDate = date(year, month, day)
             except ValueError as err:
-                print('Value error: {}'.format(err))
+                #print('Value error: {}'.format(err))
+                dateAlert = QMessageBox()
+                dateAlert.setWindowTitle('Invalid date format')
+                dateAlert.setText('{}. The date format has to be YYYY-MM-DD.'.format(str(err).capitalize()))
+                dateAlert.addButton('Ok', QMessageBox.AcceptRole)
+                dateAlert.exec_()
+                #role = dateAlert.buttonRole(dateAlert.clickedButton())
+                self.lastUpdatedLineEdit.setText(str(self._lastUpdated))
+                self.dateUpdated.emit(False)
+                return
+
+            self._lastUpdated = date(year, month, day)
+            self.dateUpdated.emit(True)
 
     def clearSignNoteText(self):
         self.signNoteText.clear()
