@@ -45,7 +45,9 @@ predefined_handshape_mapping = {
      '=', '4', 'F', 'F', 'F'): 'S'
 }
 
+
 class TranscriptionLayout(QVBoxLayout):
+    updateSignal = Signal(bool)
 
     defaultFont = QFont('Arial', 12)
     fontMetric = QFontMetricsF(defaultFont)
@@ -184,6 +186,9 @@ class TranscriptionLayout(QVBoxLayout):
         self.predefinedLabel.setText(handshapeLabel)
         self.predefinedImage.setPixmap(handshapeImage.scaled(self.predefinedImage.width(), self.predefinedImage.height(), Qt.KeepAspectRatio))
 
+    def emitUpdateSignal(self, p_str):
+        self.updateSignal.emit(True)
+
     def generateSlots(self, view_only):
         #FIELD 1 (Forearm)
         self.slot1 = TranscriptionCheckBox(1)
@@ -192,74 +197,101 @@ class TranscriptionLayout(QVBoxLayout):
         #FIELD 2 (Thumb)
         self.slot2 = TranscriptionSlot(2, 2, '[LUO\\?]', list('LUO?'), view_only)
         self.slot2.textChanged.connect(self.updateLabel)
+        self.slot2.textChanged.connect(self.emitUpdateSignal)
         self.slot3 = TranscriptionSlot(3, 2, '[{<=\\?]', list('{<=?'), view_only)
         self.slot3.textChanged.connect(self.updateLabel)
+        self.slot3.textChanged.connect(self.emitUpdateSignal)
         self.slot4 = TranscriptionSlot(4, 2, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot4.textChanged.connect(self.updateLabel)
+        self.slot4.textChanged.connect(self.emitUpdateSignal)
         self.slot5 = TranscriptionSlot(5, 2, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot5.textChanged.connect(self.updateLabel)
+        self.slot5.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 3 (Thumb/Finger Contact)
         self.slot6 = TranscriptionSlot(6, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'], view_only)
         self.slot6.textChanged.connect(self.updateLabel)
+        self.slot6.textChanged.connect(self.emitUpdateSignal)
         self.slot7 = TranscriptionSlot(7, 3, '[-dpM\\?]', list('-dpM?'), view_only)
         self.slot7.textChanged.connect(self.updateLabel)
+        self.slot7.textChanged.connect(self.emitUpdateSignal)
         self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL], view_only)
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'], view_only)
         self.slot10 = TranscriptionSlot(10, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'], view_only)
         self.slot10.textChanged.connect(self.updateLabel)
+        self.slot10.textChanged.connect(self.emitUpdateSignal)
         self.slot11 = TranscriptionSlot(11, 3, '[-dmpM\\?]', list('-dmpM?'), view_only)
         self.slot11.textChanged.connect(self.updateLabel)
+        self.slot11.textChanged.connect(self.emitUpdateSignal)
         self.slot12 = TranscriptionSlot(12, 3, '[-1\s\\?]', ['-','1','?'], view_only)
         self.slot12.textChanged.connect(self.updateLabel)
+        self.slot12.textChanged.connect(self.emitUpdateSignal)
         self.slot13 = TranscriptionSlot(13, 3, '[-2\s\\?]', ['-','2','?'], view_only)
         self.slot13.textChanged.connect(self.updateLabel)
+        self.slot13.textChanged.connect(self.emitUpdateSignal)
         self.slot14 = TranscriptionSlot(14, 3, '[-3\s\\?]', ['-','3','?'], view_only)
         self.slot14.textChanged.connect(self.updateLabel)
+        self.slot14.textChanged.connect(self.emitUpdateSignal)
         self.slot15 = TranscriptionSlot(15, 3, '[-4\s\\?]', ['-','4','?'], view_only)
         self.slot15.textChanged.connect(self.updateLabel)
+        self.slot15.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 4 (Index)
         self.slot16 = TranscriptionSlot(16, 4, '1', ['1'], view_only)
         self.slot17 = TranscriptionSlot(17, 4, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot17.textChanged.connect(self.updateLabel)
+        self.slot17.textChanged.connect(self.emitUpdateSignal)
         self.slot18 = TranscriptionSlot(18, 4, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot18.textChanged.connect(self.updateLabel)
+        self.slot18.textChanged.connect(self.emitUpdateSignal)
         self.slot19 = TranscriptionSlot(19, 4, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot19.textChanged.connect(self.updateLabel)
+        self.slot19.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 5 (Middle)
         self.slot20 = TranscriptionSlot(20, 5, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
         self.slot20.textChanged.connect(self.updateLabel)
+        self.slot20.textChanged.connect(self.emitUpdateSignal)
         self.slot21 = TranscriptionSlot(21, 5, '2', ['2'], view_only)
         self.slot22 = TranscriptionSlot(22, 5, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot22.textChanged.connect(self.updateLabel)
+        self.slot22.textChanged.connect(self.emitUpdateSignal)
         self.slot23 = TranscriptionSlot(23, 5, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot23.textChanged.connect(self.updateLabel)
+        self.slot23.textChanged.connect(self.emitUpdateSignal)
         self.slot24 = TranscriptionSlot(24, 5, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot24.textChanged.connect(self.updateLabel)
+        self.slot24.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 6 (Ring)
         self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
         self.slot25.textChanged.connect(self.updateLabel)
+        self.slot25.textChanged.connect(self.emitUpdateSignal)
         self.slot26 = TranscriptionSlot(26, 6, '3', ['3'], view_only)
         self.slot27 = TranscriptionSlot(27, 6, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot27.textChanged.connect(self.updateLabel)
+        self.slot27.textChanged.connect(self.emitUpdateSignal)
         self.slot28 = TranscriptionSlot(28, 6, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot28.textChanged.connect(self.updateLabel)
+        self.slot28.textChanged.connect(self.emitUpdateSignal)
         self.slot29 = TranscriptionSlot(29, 6, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot29.textChanged.connect(self.updateLabel)
+        self.slot29.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 7 (Pinky)
         self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
         self.slot30.textChanged.connect(self.updateLabel)
+        self.slot30.textChanged.connect(self.emitUpdateSignal)
         self.slot31 = TranscriptionSlot(31, 7, '4', ['4'], view_only)
         self.slot32 = TranscriptionSlot(32, 7, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot32.textChanged.connect(self.updateLabel)
+        self.slot32.textChanged.connect(self.emitUpdateSignal)
         self.slot33 = TranscriptionSlot(33, 7, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot33.textChanged.connect(self.updateLabel)
+        self.slot33.textChanged.connect(self.emitUpdateSignal)
         self.slot34 = TranscriptionSlot(34, 7, '[EeFfHi\\?]', list('HEeiFf?'), view_only)
         self.slot34.textChanged.connect(self.updateLabel)
+        self.slot34.textChanged.connect(self.emitUpdateSignal)
 
     def isEmpty(self):
         if self.slot1.isChecked():
@@ -730,9 +762,9 @@ class TranscriptionInfo(QGridLayout):
             metaInfoLayout = QHBoxLayout()
             self.metaInfoGroup.setLayout(metaInfoLayout)
             self.coderLineEdit = QLineEdit(self._coder)
-            self.coderLineEdit.textEdited.connect(self.updateCoder)
+            self.coderLineEdit.textChanged.connect(self.updateCoder)
             self.lastUpdatedLineEdit = QLineEdit(str(self._lastUpdated))
-            self.lastUpdatedLineEdit.textEdited.connect(self.updateLastUpdated)
+            self.lastUpdatedLineEdit.textChanged.connect(self.updateLastUpdated)
             metaInfoLayout.addWidget(QLabel('Coder:'))
             metaInfoLayout.addWidget(self.coderLineEdit)
             metaInfoLayout.addWidget(QLabel('Last updated:'))
@@ -963,6 +995,7 @@ class TranscriptionPasteDialog(QDialog):
 
 
 class TranscriptionConfigTab(QWidget):
+    updateSignal = Signal(bool)
 
     def __init__(self, number, view_only=False):
         QWidget.__init__(self)
@@ -970,8 +1003,10 @@ class TranscriptionConfigTab(QWidget):
         self.configLayout = QGridLayout()
 
         self.hand1Transcription = TranscriptionLayout(view_only, hand=1)
+        self.hand1Transcription.updateSignal.connect(self.emitUpdateSignal)
         self.configLayout.addLayout(self.hand1Transcription, 0, 0)
         self.hand2Transcription = TranscriptionLayout(view_only, hand=2)
+        self.hand2Transcription.updateSignal.connect(self.emitUpdateSignal)
         self.configLayout.addLayout(self.hand2Transcription, 1, 0)
         self.setLayout(self.configLayout)
 
@@ -998,6 +1033,9 @@ class TranscriptionConfigTab(QWidget):
 
     def hands(self):
         return [self.hand1(), self.hand2()]
+
+    def emitUpdateSignal(self, value):
+        self.updateSignal.emit(value)
 
 
 class TranscriptionSelectDialog(QDialog):

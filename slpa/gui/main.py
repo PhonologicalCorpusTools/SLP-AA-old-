@@ -364,6 +364,8 @@ class MainWindow(QMainWindow):
         self.configTabs = QTabWidget()
         self.configTabs.addTab(TranscriptionConfigTab(1), 'Config 1')
         self.configTabs.addTab(TranscriptionConfigTab(2), 'Config 2')
+        self.configTabs.widget(0).updateSignal.connect(self.updateLastUpdated)
+        self.configTabs.widget(1).updateSignal.connect(self.updateLastUpdated)
         layout.addWidget(self.configTabs)
 
         #Add "global" handshape options (as checkboxes)
@@ -421,6 +423,10 @@ class MainWindow(QMainWindow):
 
         self.showMaximized()
         #self.defineTabOrder()
+
+    def updateLastUpdated(self, value):
+        if value:
+            self.transcriptionInfo.lastUpdated = self.today
 
     def changeSaveFlag(self, edited):
         if edited:
