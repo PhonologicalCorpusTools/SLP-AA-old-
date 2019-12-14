@@ -243,9 +243,9 @@ class CorpusList(QListWidget):
                 alert.addButton('Continue and save', QMessageBox.YesRole)
                 alert.addButton('Continue but don\'t save', QMessageBox.NoRole)
                 alert.addButton('Go back', QMessageBox.RejectRole)
-                result = alert.exec_()
+                alert.exec_()
                 if alert.buttonRole(alert.clickedButton()) == QMessageBox.YesRole:  #continue and save
-                    self.parent.saveCorpus(checkForDuplicates=False)
+                    self.parent.saveCorpus(checkForDuplicates=True)
                     selectedItem = [i for i in self.selectedItems()][0]
                     self.itemClicked.emit(selectedItem)
 
@@ -991,7 +991,7 @@ class MainWindow(QMainWindow):
 
     @decorators.checkForGloss
     #@decorators.checkForCorpus
-    def saveCorpus(self, event=None, checkForDuplicates=True, isDuplicate = False):
+    def saveCorpus(self, checkForDuplicates=True, isDuplicate = False):
         kwargs = self.generateKwargs()
         if self.corpus is None:
             alert = QMessageBox()
@@ -1022,21 +1022,22 @@ class MainWindow(QMainWindow):
         # else: #corpus exists
         if not checkForDuplicates:
             isDuplicate = False
-            #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
-            #to save a gloss, under certain circumstances
+
+        #this tiny if-block is to avoid a "double-checking" problem where a user is prompted twice in a row
+        #to save a gloss, under certain circumstances
         elif kwargs['gloss'] in self.corpus.wordlist and self.showDuplicateWarning:
             isDuplicate = True
             alert = QMessageBox()
             alert.setWindowTitle('Duplicate entry')
             alert.setText('A word with the gloss {} already exists in your corpus. '
-                            'What do you want to do?'.format(kwargs['gloss']))
-            alert.addButton('Overwrite exising word', QMessageBox.AcceptRole)
+                          'What do you want to do?'.format(kwargs['gloss']))
+            alert.addButton('Overwrite existing word', QMessageBox.AcceptRole)
             alert.addButton('Go back and edit the gloss', QMessageBox.RejectRole)
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
-            if role == QMessageBox.AcceptRole:#overwrite
+            if role == QMessageBox.AcceptRole:  # overwrite
                 pass
-            elif role == QMessageBox.RejectRole:#edit
+            elif role == QMessageBox.RejectRole:  # edit
                 return
 
         self.updateCorpus(kwargs, isDuplicate)
