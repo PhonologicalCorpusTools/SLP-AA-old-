@@ -2297,7 +2297,8 @@ class AnalyzerMainWindow(QMainWindow):
         #model = QStandardItemModel()
 
         rightFrame = QFrame()
-        rightLayout = QVBoxLayout()
+        #rightLayout = QVBoxLayout()
+        rightLayout = QGridLayout()
         rightFrame.setLayout(rightLayout)
         # mainLayout.addWidget(rightFrame)
 
@@ -2305,7 +2306,8 @@ class AnalyzerMainWindow(QMainWindow):
         #globalFrame.setEnabled(False)
         globalLayout = QHBoxLayout()
         globalFrame.setLayout(globalLayout)
-        rightLayout.addWidget(globalFrame)
+        rightLayout.addWidget(globalFrame, 0, 0, 1, 1)
+        #rightLayout.addWidget(globalFrame)
         self.forearmButton = QCheckBox('Forearm')
         self.forearmButton.setEnabled(False)
         globalLayout.addWidget(self.forearmButton)
@@ -2319,10 +2321,23 @@ class AnalyzerMainWindow(QMainWindow):
         self.incompleteButton.setEnabled(False)
         globalLayout.addWidget(self.incompleteButton)
 
+        metaInfoGroup = QGroupBox()
+        metaInfoLayout = QHBoxLayout()
+        metaInfoGroup.setLayout(metaInfoLayout)
+        self.coderLineEdit = QLineEdit()
+        self.coderLineEdit.setEnabled(False)
+        self.lastUpdatedLineEdit = QLineEdit()
+        self.lastUpdatedLineEdit.setEnabled(False)
+        metaInfoLayout.addWidget(QLabel('Coder:'))
+        metaInfoLayout.addWidget(self.coderLineEdit)
+        metaInfoLayout.addWidget(QLabel('Last updated:'))
+        metaInfoLayout.addWidget(self.lastUpdatedLineEdit)
+        rightLayout.addWidget(metaInfoGroup, 0, 1, 1, 1)
+
         config1Frame = QGroupBox('Config 1')
         config1Layout = QVBoxLayout()
         config1Frame.setLayout(config1Layout)
-        rightLayout.addWidget(config1Frame)
+        rightLayout.addWidget(config1Frame, 1, 0, 1, 2)
 
         self.config1 = TranscriptionConfigTab(1, view_only=True)
         config1Layout.addWidget(self.config1)
@@ -2330,7 +2345,7 @@ class AnalyzerMainWindow(QMainWindow):
         config2Frame = QGroupBox('Config 2')
         config2Layout = QVBoxLayout()
         config2Frame.setLayout(config2Layout)
-        rightLayout.addWidget(config2Frame)
+        rightLayout.addWidget(config2Frame, 2, 0, 1, 2)
 
         self.config2 = TranscriptionConfigTab(2, view_only=True)
         config2Layout.addWidget(self.config2)
@@ -2338,7 +2353,7 @@ class AnalyzerMainWindow(QMainWindow):
         parameterFrame = QGroupBox('Parameter')
         paramLayout = QHBoxLayout()
         parameterFrame.setLayout(paramLayout)
-        rightLayout.addWidget(parameterFrame)
+        rightLayout.addWidget(parameterFrame, 3, 0, 1, 2)
 
         qualityFrame = QGroupBox('Quality')
         paramLayout.addWidget(qualityFrame)
@@ -2445,6 +2460,12 @@ class AnalyzerMainWindow(QMainWindow):
     def loadData(self, item):
         gloss = item.text()
         sign = self.corpus[gloss]
+
+        self.coderLineEdit.clear()
+        self.coderLineEdit.setText(sign.coder)
+
+        self.lastUpdatedLineEdit.clear()
+        self.lastUpdatedLineEdit.setText(str(sign.lastUpdated))
 
         self.config1.clearAll()
         self.config2.clearAll()
