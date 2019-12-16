@@ -74,12 +74,14 @@ class TranscriptionLayout(QVBoxLayout):
         self.connectSlotSignals()
 
         self.predefinedImage = QLabel()
+        self.predefinedImage.setToolTip('Predefined handshape image matching the current transcription')
         self.predefinedImage.setFixedSize(50, 50)
         handshapeImage = QPixmap(getMediaFilePath('empty.png'))
         self.predefinedImage.setPixmap(handshapeImage.scaled(self.predefinedImage.width(), self.predefinedImage.height(), Qt.KeepAspectRatio))
         self.lineLayout.addWidget(self.predefinedImage)
 
         self.predefinedLabel = QLabel('')
+        self.predefinedLabel.setToolTip('Predefined handshape label matching the current transcription')
         self.predefinedLabel.setFixedSize(20, 20)
         self.predefinedLabel.setStyleSheet('background-color: darkgray;'
                                            'border-style: outset;'
