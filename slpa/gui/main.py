@@ -614,7 +614,7 @@ class MainWindow(QMainWindow):
                          self.configTabs.widget(1).hand2Transcription[-1])
 
     def writeSettings(self):
-        self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
+        self.settings = QSettings('UBC Phonology Tools', application='SLP-AA')
         self.settings.beginGroup('constraints')
         for c in MasterConstraintList:
             name = c[0]
@@ -626,6 +626,7 @@ class MainWindow(QMainWindow):
         self.settings.endGroup()
 
         self.settings.beginGroup('options')
+        self.settings.setValue('defaultCoderName', self.coder)
         self.settings.setValue('askAboutDuplicates', self.askAboutDuplicatesAct.isChecked())
         self.settings.setValue('showSaveAlert', self.alertOnCorpusSaveAct.isChecked())
         self.settings.setValue('parametersAlwaysOnTop', self.keepParametersOnTopAct.isChecked())
@@ -647,7 +648,7 @@ class MainWindow(QMainWindow):
         self.settings.endGroup()
 
     def readSettings(self, reset=False):
-        self.settings = QSettings('UBC Phonology Tools', application='SLP-Annotator')
+        self.settings = QSettings('UBC Phonology Tools', application='SLP-AA')
         if reset:
             self.settings.clear()
 
@@ -662,6 +663,7 @@ class MainWindow(QMainWindow):
         self.settings.endGroup()
 
         self.settings.beginGroup('options')
+        self.coder = self.settings.value('defaultCoderName', defaultValue=getuser(), type=str)
         self.showDuplicateWarning = self.settings.value('showDuplicateWarning', defaultValue=True, type=bool)
         self.askAboutDuplicatesAct.setChecked(self.showDuplicateWarning)
         self.showSaveAlert = self.settings.value('showSaveAlert', defaultValue=True, type=bool)
