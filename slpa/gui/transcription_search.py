@@ -504,29 +504,13 @@ class TranscriptionSearchDialog(FunctionDialog):
         globalLayout = QHBoxLayout()
         globalFrame.setLayout(globalLayout)
 
-        self.forearmLogic = LogicRadioButtonGroup('vertical', 'e',
-                                                  title='Forearm',
-                                                  y='Yes', n='No', e='Either')
+        self.forearmLogic = LogicRadioButtonGroup('vertical', 'e', title='Forearm', y='Yes', n='No', e='Either')
+        self.estimateLogic = LogicRadioButtonGroup('vertical', 'e', title='Estimated', y='Yes', n='No', e='Either')
+        self.uncertainLogic = LogicRadioButtonGroup('vertical', 'e', title='Uncertain', y='Yes', n='No', e='Either')
+        self.incompleteLogic = LogicRadioButtonGroup('vertical', 'e', title='Incomplete', y='Yes', n='No', e='Either')
 
-        self.estimateLogic = LogicRadioButtonGroup('vertical', 'e',
-                                              title='Estimated',
-                                              y='Yes', n='No', e='Either')
-
-        self.uncertainLogic = LogicRadioButtonGroup('vertical', 'e',
-                                               title='Uncertain',
-                                               y='Yes', n='No', e='Either')
-
-        self.incompleteLogic = LogicRadioButtonGroup('vertical', 'e',
-                                                title='Incomplete',
-                                                y='Yes', n='No', e='Either')
-
-        self.configLogic = LogicRadioButtonGroup('vertical', 'e',
-                                            title='Configuration',
-                                            one='One-config signs', two='Two-config signs', e='Either')
-
-        self.handLogic = LogicRadioButtonGroup('vertical', 'e',
-                                          title='Hand',
-                                          one='One-hand signs', two='Two-hand signs', e='Either')
+        self.configLogic = LogicRadioButtonGroup('vertical', 'e', title='Configuration', one='One-config signs', two='Two-config signs', e='Either')
+        self.handLogic = LogicRadioButtonGroup('vertical', 'e', title='Hand', one='One-hand signs', two='Two-hand signs', e='Either')
 
         globalLayout.addWidget(self.forearmLogic)
         globalLayout.addWidget(self.estimateLogic)
@@ -550,6 +534,16 @@ class TranscriptionSearchDialog(FunctionDialog):
         self.notePanel = QLineEdit()
         self.notePanel.setPlaceholderText('Enter notes here...')
 
+        metaInfoGroup = QGroupBox()
+        metaInfoLayout = QHBoxLayout()
+        metaInfoGroup.setLayout(metaInfoLayout)
+        self.coderLineEdit = QLineEdit()
+        self.lastUpdatedLineEdit = QLineEdit()
+        metaInfoLayout.addWidget(QLabel('Coder:'))
+        metaInfoLayout.addWidget(self.coderLineEdit)
+        metaInfoLayout.addWidget(QLabel('Last updated:'))
+        metaInfoLayout.addWidget(self.lastUpdatedLineEdit)
+
         mainLayout = QGridLayout()
         #self.setLayout(mainLayout)
         mainLayout.addWidget(globalFrame, 0, 0, 1, 2)
@@ -557,6 +551,7 @@ class TranscriptionSearchDialog(FunctionDialog):
         mainLayout.addWidget(self.handLogic, 0, 3, 1, 1)
         mainLayout.addWidget(config1Frame, 1, 0, 1, 4)
         mainLayout.addWidget(config2Frame, 2, 0, 1, 4)
+        mainLayout.addWidget(metaInfoGroup, 3, 0, 1, 2)
         mainLayout.addWidget(self.notePanel, 3, 2, 1, 2)
 
         #self.testButton = QPushButton('test')
