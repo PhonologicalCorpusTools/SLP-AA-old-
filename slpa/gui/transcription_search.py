@@ -469,8 +469,171 @@ class TransConfigTab(QWidget):
                         slot_dict['allowed'] = set(slot['options']) - set(slot['selected'])
                 hand2.append(slot_dict)
 
-        return (tuple(hand1), tuple(hand2))
+        return tuple(hand1), tuple(hand2)
 
+
+class CoderSlot(QPushButton):
+    def __init__(self, corpus):
+        super().__init__()
+        self.corpus = corpus
+
+        self.setContentsMargins(0, 0, 0, 0)
+        self.positive = True
+        self.textFont = 'normal'
+        self.styleSheetString = 'QPushButton{{font: {}}}'
+        style = self.styleSheetString.format(self.textFont)
+        self.setStyleSheet(style)
+
+        self.default = 'All coders'
+        self.setText(self.default)
+
+        self.setFixedWidth(250)
+
+        self.menu = QMenu()
+
+        self.options = sorted(list({sign.coder for sign in self.corpus}))
+
+        for option in self.options:
+            if not option:
+                option = '(empty)'
+            coder = QAction(option, self, checkable=True, triggered=self.updateText)
+            coder.setChecked(True)
+            self.menu.addAction(coder)
+
+        self.menu.addSeparator()
+        selectAllAction = QAction('Select all coders', self, checkable=False, triggered=self.selectAll)
+        self.menu.addAction(selectAllAction)
+        deselectAllAction = QAction('Deselect all coders', self, checkable=False, triggered=self.deselectAll)
+        self.menu.addAction(deselectAllAction)
+
+        self.menu.addSeparator()
+        self.negAction = QAction('Set negative', self, checkable=True, triggered=self.setNeg)
+        self.menu.addAction(self.negAction)
+        self.setMenu(self.menu)
+
+    def getSelectedCoders(self):
+        selectedCoders = list()
+        for act in self.menu.actions()[:-3]:
+            if act.isChecked():
+                selectedCoders.append(act.text())
+        return selectedCoders
+
+    def updateText(self):
+        selectedCoders = self.getSelectedCoders()
+        if selectedCoders:
+            if selectedCoders == self.options:
+                self.setText(self.default)
+            else:
+                first = selectedCoders[0]
+                if len(selectedCoders) == 1:
+                    self.setText(first)
+                else:
+                    self.setText(first + '+')
+        else:
+            self.setText('Please select at least one coder')
+
+    def deselectAll(self):
+        for act in self.menu.actions()[:-3]:
+            act.setChecked(False)
+        self.updateText()
+
+    def selectAll(self):
+        for act in self.menu.actions()[:-3]:
+            act.setChecked(True)
+        self.updateText()
+
+    def setNeg(self):
+        if self.negAction.isChecked():
+            self.positive = False
+            self.textFont = 'italic'
+        else:
+            self.positive = True
+            self.textFont = 'normal'
+
+        style = self.styleSheetString.format(self.textFont)
+        self.setStyleSheet(style)
+
+
+class LastUpdateSlot(QPushButton):
+    def __init__(self, corpus):
+        super().__init__()
+        self.corpus = corpus
+
+        self.setContentsMargins(0, 0, 0, 0)
+        self.positive = True
+        self.textFont = 'normal'
+        self.styleSheetString = 'QPushButton{{font: {}}}'
+        style = self.styleSheetString.format(self.textFont)
+        self.setStyleSheet(style)
+
+        self.default = 'All dates'
+        self.setText(self.default)
+
+        self.setFixedWidth(250)
+
+        self.menu = QMenu()
+
+        self.options = sorted(list({str(sign.lastUpdated) for sign in self.corpus}))
+
+        for option in self.options:
+            if not option:
+                option = '(empty)'
+            date = QAction(option, self, checkable=True, triggered=self.updateText)
+            date.setChecked(True)
+            self.menu.addAction(date)
+
+        self.menu.addSeparator()
+        selectAllAction = QAction('Select all dates', self, checkable=False, triggered=self.selectAll)
+        self.menu.addAction(selectAllAction)
+        deselectAllAction = QAction('Deselect all dates', self, checkable=False, triggered=self.deselectAll)
+        self.menu.addAction(deselectAllAction)
+
+        self.menu.addSeparator()
+        self.negAction = QAction('Set negative', self, checkable=True, triggered=self.setNeg)
+        self.menu.addAction(self.negAction)
+        self.setMenu(self.menu)
+
+    def getSelectedDates(self):
+        selectedDates = list()
+        for act in self.menu.actions()[:-3]:
+            if act.isChecked():
+                selectedDates.append(act.text())
+        return selectedDates
+
+    def updateText(self):
+        selectedDates = self.getSelectedDates()
+        if selectedDates:
+            if selectedDates == self.options:
+                self.setText(self.default)
+            else:
+                first = selectedDates[0]
+                if len(selectedDates) == 1:
+                    self.setText(first)
+                else:
+                    self.setText(first + '+')
+        else:
+            self.setText('Please select at least one date')
+
+    def deselectAll(self):
+        for act in self.menu.actions()[:-3]:
+            act.setChecked(False)
+        self.updateText()
+
+    def selectAll(self):
+        for act in self.menu.actions()[:-3]:
+            act.setChecked(True)
+        self.updateText()
+
+    def setNeg(self):
+        if self.negAction.isChecked():
+            self.positive = False
+            self.textFont = 'italic'
+        else:
+            self.positive = True
+            self.textFont = 'normal'
+
+        style = self.styleSheetString.format(self.textFont)
+        self.setStyleSheet(style)
 
 class TSWorker(FunctionWorker):
     def run(self):
@@ -537,12 +700,12 @@ class TranscriptionSearchDialog(FunctionDialog):
         metaInfoGroup = QGroupBox()
         metaInfoLayout = QHBoxLayout()
         metaInfoGroup.setLayout(metaInfoLayout)
-        self.coderLineEdit = QLineEdit()
-        self.lastUpdatedLineEdit = QLineEdit()
+        self.coderSlot = CoderSlot(self.corpus)
+        self.lastUpdatedSlot = LastUpdateSlot(self.corpus)
         metaInfoLayout.addWidget(QLabel('Coder:'))
-        metaInfoLayout.addWidget(self.coderLineEdit)
+        metaInfoLayout.addWidget(self.coderSlot)
         metaInfoLayout.addWidget(QLabel('Last updated:'))
-        metaInfoLayout.addWidget(self.lastUpdatedLineEdit)
+        metaInfoLayout.addWidget(self.lastUpdatedSlot)
 
         mainLayout = QGridLayout()
         #self.setLayout(mainLayout)
