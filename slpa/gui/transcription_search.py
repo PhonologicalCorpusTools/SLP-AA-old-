@@ -553,6 +553,13 @@ class CoderSlot(QPushButton):
         style = self.styleSheetString.format(self.textFont)
         self.setStyleSheet(style)
 
+    def value(self):
+        selected = {'' if coder == '(empty)' else coder for coder in self.getSelectedCoders()}
+        if self.positive:
+            return selected
+        else:
+            return set(self.options) - selected
+
 
 class LastUpdateSlot(QPushButton):
     def __init__(self, corpus):
