@@ -176,7 +176,16 @@ def generate_hand_re(hand_slots):
     return pattern
 
 
-def transcription_search(corpus, forearm, estimated, uncertain, incomplete, configuration, hand, config1, config2):
+def check_coder(sign, coders):
+    return sign.coder in coders
+
+
+def check_lastUpdated(sign, lastUpdateds):
+    return sign.lastUpdated in lastUpdateds
+
+
+def transcription_search(corpus, forearm, estimated, uncertain, incomplete, configuration, hand,
+                         config1, config2, coders, lastUpdateds):
     '''
     :param corpus: the loaded corpus
     :param forearm: Yes, No, Either
@@ -216,6 +225,12 @@ def transcription_search(corpus, forearm, estimated, uncertain, incomplete, conf
         if not check_slot_symbol(word, config1, config2):
             #print('slot')
             #print(word)
+            continue
+
+        if not check_coder(word, coders):
+            continue
+
+        if not check_lastUpdated(word, lastUpdateds):
             continue
 
         ret.append(word)

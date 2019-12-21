@@ -676,9 +676,11 @@ class TSWorker(FunctionWorker):
         hand = self.kwargs.pop('hand')
         config1 = self.kwargs.pop('config1')
         config2 = self.kwargs.pop('config2')
+        coder = self.kwargs.pop('coder')
+        lastUpdated = self.kwargs.pop('lastUpdated')
 
         results = transcription_search(corpus, forearm, estimated, uncertain, incomplete, configuration, hand,
-                                       config1, config2)
+                                       config1, config2, coder, lastUpdated)
         self.dataReady.emit(results)
 
 
@@ -777,6 +779,8 @@ class TranscriptionSearchDialog(FunctionDialog):
         kwargs['hand'] = self.handLogic.value()
         kwargs['config1'] = self.config1.value()
         kwargs['config2'] = self.config2.value()
+        kwargs['coder'] = self.coderSlot.value()
+        kwargs['lastUpdated'] = self.lastUpdatedSlot.value()
         self.note = self.notePanel.text()
 
         return kwargs
