@@ -1,3 +1,4 @@
+from datetime import date
 from imports import (QVBoxLayout, QHBoxLayout, QGroupBox, QPushButton, QLabel,
                      QGridLayout, QWidget, Qt, Slot, QLineEdit, QMenu, QAction)
 from gui.function_windows import FunctionDialog, FunctionWorker
@@ -641,6 +642,28 @@ class LastUpdateSlot(QPushButton):
 
         style = self.styleSheetString.format(self.textFont)
         self.setStyleSheet(style)
+
+    def value(self):
+        options = set()
+        for d in self.options:
+            year, month, day = tuple(d.split(sep='-'))
+            options.add(date(int(year), int(month), int(day)))
+        #print('options:')
+        #pprint(options)
+
+        selected = set()
+        for d in self.getSelectedDates():
+            year, month, day = tuple(d.split(sep='-'))
+            selected.add(date(int(year), int(month), int(day)))
+        #print('selected:')
+        #pprint(selected)
+
+        #selected = {'' if date == '(empty)' else date for date in self.getSelectedDates()}
+        if self.positive:
+            return selected
+        else:
+            return options - selected
+
 
 class TSWorker(FunctionWorker):
     def run(self):
