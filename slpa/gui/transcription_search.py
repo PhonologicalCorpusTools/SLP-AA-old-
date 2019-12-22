@@ -685,7 +685,7 @@ class TSWorker(FunctionWorker):
 
 
 class TranscriptionSearchDialog(FunctionDialog):
-    header = ['Corpus', 'Sign', 'Token frequency', 'Note']
+    header = ['Corpus', 'Sign', 'Coder', 'Last updated', 'Token frequency', 'Note']
     about = 'Transcription search'
     name = 'transcription search'
 
@@ -750,11 +750,12 @@ class TranscriptionSearchDialog(FunctionDialog):
         mainLayout.addWidget(self.notePanel, 3, 2, 1, 2)
 
         #self.testButton = QPushButton('test')
-        #mainLayout.addWidget(self.testButton, 3, 0)
+        #mainLayout.addWidget(self.testButton, 4, 0)
         #self.testButton.clicked.connect(self.test)
         self.layout().insertLayout(0, mainLayout)
 
-    # def test(self):
+    #def test(self):
+    #    pprint(self.lastUpdatedSlot.value())
     #     results = {'forearmLogic': self.forearmLogic.value(),
     #                'estimated': self.estimateLogic.value(),
     #                'uncertain': self.uncertainLogic.value(),
@@ -793,6 +794,8 @@ class TranscriptionSearchDialog(FunctionDialog):
         for sign in results:
             self.results.append({'Corpus': self.corpus.name,
                                  'Sign': sign.gloss,
+                                 'Coder': sign.coder,
+                                 'Last updated': str(sign.lastUpdated),
                                  'Token frequency': 1,
                                  'Note': self.note})
         self.accept()
