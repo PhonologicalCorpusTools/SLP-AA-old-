@@ -358,7 +358,14 @@ class MainWindow(QMainWindow):
         #Make gloss entry
         self.gloss = GlossLayout(parent=self)
         self.gloss.glossEdit.textChanged.connect(self.userMadeChanges)
-        layout.addLayout(self.gloss)
+        frequencyLayout = QHBoxLayout()
+        frequencyLayout.addLayout(self.gloss)
+
+        self.frequencySlot = QLineEdit('1')
+        self.frequencySlot.setFixedWidth(50)
+        frequencyLayout.addWidget(QLabel('Frequency:'))
+        frequencyLayout.addWidget(self.frequencySlot)
+        layout.addLayout(frequencyLayout)
 
         #Make tabs for each configuration
         self.configTabs = QTabWidget()
@@ -2269,6 +2276,7 @@ def clean(item):
         except (RuntimeError, AttributeError): # deleted or no deleteLater method
             pass
 
+
 #TODO: add settings arguments
 class AnalyzerMainWindow(QMainWindow):
     def __init__(self, corpus):
@@ -2323,23 +2331,37 @@ class AnalyzerMainWindow(QMainWindow):
         self.incompleteButton.setEnabled(False)
         globalLayout.addWidget(self.incompleteButton)
 
+        freqGroup = QGroupBox()
+        freqGroup.setFixedWidth(150)
+        freqLayout = QHBoxLayout()
+        freqGroup.setLayout(freqLayout)
+        self.freqLineEdit = QLineEdit()
+        self.freqLineEdit.setFixedWidth(50)
+        self.freqLineEdit.setEnabled(False)
+        freqLayout.addWidget(QLabel('Frequency:'))
+        freqLayout.addWidget(self.freqLineEdit)
+        rightLayout.addWidget(freqGroup, 0, 1, 1, 1)
+
         metaInfoGroup = QGroupBox()
+        metaInfoGroup.setFixedWidth(500)
         metaInfoLayout = QHBoxLayout()
         metaInfoGroup.setLayout(metaInfoLayout)
         self.coderLineEdit = QLineEdit()
+        self.coderLineEdit.setFixedWidth(150)
         self.coderLineEdit.setEnabled(False)
         self.lastUpdatedLineEdit = QLineEdit()
+        self.lastUpdatedLineEdit.setFixedWidth(100)
         self.lastUpdatedLineEdit.setEnabled(False)
         metaInfoLayout.addWidget(QLabel('Coder:'))
         metaInfoLayout.addWidget(self.coderLineEdit)
         metaInfoLayout.addWidget(QLabel('Last updated:'))
         metaInfoLayout.addWidget(self.lastUpdatedLineEdit)
-        rightLayout.addWidget(metaInfoGroup, 0, 1, 1, 1)
+        rightLayout.addWidget(metaInfoGroup, 0, 2, 1, 1)
 
         config1Frame = QGroupBox('Config 1')
         config1Layout = QVBoxLayout()
         config1Frame.setLayout(config1Layout)
-        rightLayout.addWidget(config1Frame, 1, 0, 1, 2)
+        rightLayout.addWidget(config1Frame, 1, 0, 1, 3)
 
         self.config1 = TranscriptionConfigTab(1, view_only=True)
         config1Layout.addWidget(self.config1)
@@ -2347,7 +2369,7 @@ class AnalyzerMainWindow(QMainWindow):
         config2Frame = QGroupBox('Config 2')
         config2Layout = QVBoxLayout()
         config2Frame.setLayout(config2Layout)
-        rightLayout.addWidget(config2Frame, 2, 0, 1, 2)
+        rightLayout.addWidget(config2Frame, 2, 0, 1, 3)
 
         self.config2 = TranscriptionConfigTab(2, view_only=True)
         config2Layout.addWidget(self.config2)
@@ -2355,7 +2377,7 @@ class AnalyzerMainWindow(QMainWindow):
         parameterFrame = QGroupBox('Parameter')
         paramLayout = QHBoxLayout()
         parameterFrame.setLayout(paramLayout)
-        rightLayout.addWidget(parameterFrame, 3, 0, 1, 2)
+        rightLayout.addWidget(parameterFrame, 3, 0, 1, 3)
 
         qualityFrame = QGroupBox('Quality')
         paramLayout.addWidget(qualityFrame)
