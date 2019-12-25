@@ -185,7 +185,7 @@ def check_lastUpdated(sign, lastUpdateds):
 
 
 def transcription_search(corpus, forearm, estimated, uncertain, incomplete, configuration, hand,
-                         config1, config2, coders, lastUpdateds):
+                         frequency_range, config1, config2, coders, lastUpdateds):
     '''
     :param corpus: the loaded corpus
     :param forearm: Yes, No, Either
@@ -202,6 +202,9 @@ def transcription_search(corpus, forearm, estimated, uncertain, incomplete, conf
     ret = list()
     for word in corpus:
         #print(word)
+        if word.frequency not in frequency_range:
+            continue
+
         if not check_global_options(word, (forearm, estimated, uncertain, incomplete)):
             #print('global')
             continue

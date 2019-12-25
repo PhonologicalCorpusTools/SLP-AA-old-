@@ -676,11 +676,12 @@ class TSWorker(FunctionWorker):
         hand = self.kwargs.pop('hand')
         config1 = self.kwargs.pop('config1')
         config2 = self.kwargs.pop('config2')
+        frequency_range = self.kwargs.pop('frequency_range')
         coder = self.kwargs.pop('coder')
         lastUpdated = self.kwargs.pop('lastUpdated')
 
         results = transcription_search(corpus, forearm, estimated, uncertain, incomplete, configuration, hand,
-                                       config1, config2, coder, lastUpdated)
+                                       frequency_range, config1, config2, coder, lastUpdated)
         self.dataReady.emit(results)
 
 
@@ -705,7 +706,20 @@ class TranscriptionSearchDialog(FunctionDialog):
         self.incompleteLogic = LogicRadioButtonGroup('vertical', 'e', title='Incomplete', y='Yes', n='No', e='Either')
 
         self.configLogic = LogicRadioButtonGroup('vertical', 'e', title='Configuration', one='One-config signs', two='Two-config signs', e='Either')
+        self.configLogic.setFixedWidth(150)
         self.handLogic = LogicRadioButtonGroup('vertical', 'e', title='Hand', one='One-hand signs', two='Two-hand signs', e='Either')
+        self.handLogic.setFixedWidth(150)
+
+        frequencyGroup = QGroupBox('Frequency')
+        frequencyGroup.setFixedWidth(100)
+        freqeuncyLayout = QVBoxLayout()
+        frequencyGroup.setLayout(freqeuncyLayout)
+        self.minLineEdit = QLineEdit(str(self.corpus.getFrequencyRange()[0]))
+        self.maxLineEdit = QLineEdit(str(self.corpus.getFrequencyRange()[1]))
+        freqeuncyLayout.addWidget(QLabel('From:'))
+        freqeuncyLayout.addWidget(self.minLineEdit)
+        freqeuncyLayout.addWidget(QLabel('To:'))
+        freqeuncyLayout.addWidget(self.maxLineEdit)
 
         globalLayout.addWidget(self.forearmLogic)
         globalLayout.addWidget(self.estimateLogic)
@@ -741,7 +755,8 @@ class TranscriptionSearchDialog(FunctionDialog):
 
         mainLayout = QGridLayout()
         #self.setLayout(mainLayout)
-        mainLayout.addWidget(globalFrame, 0, 0, 1, 2)
+        mainLayout.addWidget(globalFrame, 0, 0, 1, 1)
+        mainLayout.addWidget(frequencyGroup, 0, 1, 1, 1)
         mainLayout.addWidget(self.configLogic, 0, 2, 1, 1)
         mainLayout.addWidget(self.handLogic, 0, 3, 1, 1)
         mainLayout.addWidget(config1Frame, 1, 0, 1, 4)
@@ -780,6 +795,7 @@ class TranscriptionSearchDialog(FunctionDialog):
         kwargs['hand'] = self.handLogic.value()
         kwargs['config1'] = self.config1.value()
         kwargs['config2'] = self.config2.value()
+        kwargs['frequency_range'] = range(int(self.minLineEdit.text()), int(self.maxLineEdit.text()) + 1)
         kwargs['coder'] = self.coderSlot.value()
         kwargs['lastUpdated'] = self.lastUpdatedSlot.value()
         self.note = self.notePanel.text()
@@ -796,7 +812,7 @@ class TranscriptionSearchDialog(FunctionDialog):
                                  'Sign': sign.gloss,
                                  'Coder': sign.coder,
                                  'Last updated': str(sign.lastUpdated),
-                                 'Token frequency': 1,
+                                 'Token frequency': sign.frequency,
                                  'Note': self.note})
         self.accept()
 

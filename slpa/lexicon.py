@@ -101,6 +101,13 @@ class Corpus:
         word = choice(list(self.wordlist.keys()))
         return self.wordlist[word]
 
+    def getFrequencyRange(self):
+        minFreq = min(word.frequency for gloss, word in self.wordlist.items())
+        maxFreq = max(word.frequency for gloss, word in self.wordlist.items())
+
+        return minFreq, maxFreq
+
+
 
 class Sign:
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
