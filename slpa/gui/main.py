@@ -281,6 +281,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
         self.setContentsMargins(0, 0, 0, 0)
 
+        self.frequency = 1
         self.coder = getuser()
         self.today = date.today()
 
@@ -299,7 +300,7 @@ class MainWindow(QMainWindow):
         self.recentTranscriptionSearches = collections.deque(self.recentTranscriptionSearches, maxlen=self.recentSearchMax)
         #these variables are reinitialized because we don't know the maxlen value until after the readSettings() call
 
-        self.wrapper = QWidget()#placeholder for central widget in QMainWindow
+        self.wrapper = QWidget()  # placeholder for central widget in QMainWindow
         self.corpus = None
         self.globalLayout = QHBoxLayout()
 
@@ -361,8 +362,9 @@ class MainWindow(QMainWindow):
         frequencyLayout = QHBoxLayout()
         frequencyLayout.addLayout(self.gloss)
 
-        self.frequencySlot = QLineEdit('1')
+        self.frequencySlot = QLineEdit(str(self.frequency))
         self.frequencySlot.setFixedWidth(50)
+        self.frequencySlot.textChanged.connect(self.userMadeChanges)
         frequencyLayout.addWidget(QLabel('Frequency:'))
         frequencyLayout.addWidget(self.frequencySlot)
         layout.addLayout(frequencyLayout)
@@ -496,7 +498,6 @@ class MainWindow(QMainWindow):
             self.globalOptionsLayout.addWidget(widget)
             self.globalOptionsWidgets.append(widget)
 
-
     def checkForearm(self):
         self.forearmChecked.emit(self.forearmCheckBox.isChecked())
 
@@ -563,13 +564,13 @@ class MainWindow(QMainWindow):
         if result:
             include_flags = dialog.includeFlags.isChecked()
             if dialog.transcriptionID == 0:
-                self.configTabs.widget(0).hand1Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
+                self.configTabs.widget(0).hand1Transcription.updateFromCopy(self.clipboard, include_flags=include_flags)
             elif dialog.transcriptionID == 1:
-                self.configTabs.widget(0).hand2Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
+                self.configTabs.widget(0).hand2Transcription.updateFromCopy(self.clipboard, include_flags=include_flags)
             if dialog.transcriptionID == 2:
-                self.configTabs.widget(1).hand1Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
+                self.configTabs.widget(1).hand1Transcription.updateFromCopy(self.clipboard, include_flags=include_flags)
             if dialog.transcriptionID == 3:
-                self.configTabs.widget(1).hand2Transcription.updateFromCopy(self.clipboard,include_flags=include_flags)
+                self.configTabs.widget(1).hand2Transcription.updateFromCopy(self.clipboard, include_flags=include_flags)
 
     def userMadeChanges(self, e):
         self.askSaveChanges = True
@@ -589,7 +590,7 @@ class MainWindow(QMainWindow):
                          self.configTabs.widget(0).hand1Transcription[-1])
         self.setTabOrder(self.configTabs.widget(0).hand1Transcription[-1],
                          self.configTabs.widget(0).hand2Transcription[0])
-        for k in range(1,35):
+        for k in range(1, 35):
             try:
                 self.setTabOrder(self.configTabs.widget(0).hand2Transcription[k],
                                  self.configTabs.widget(0).hand2Transcription[k+1])
@@ -601,10 +602,10 @@ class MainWindow(QMainWindow):
                          self.configTabs.widget(1))
         self.setTabOrder(self.configTabs.widget(1),
                          self.configTabs.widget(1).hand1Transcription[0])
-        for k in range(1,35):
+        for k in range(1, 35):
             try:
                 self.setTabOrder(self.configTabs.widget(1).hand1Transcription[k],
-                         self.configTabs.widget(1).hand1Transcription[k+1])
+                                 self.configTabs.widget(1).hand1Transcription[k+1])
             except IndexError:
                 pass
         self.setTabOrder(self.configTabs.widget(1).hand1Transcription[-2],
@@ -614,7 +615,7 @@ class MainWindow(QMainWindow):
         for k in range(1, 35):
             try:
                 self.setTabOrder(self.configTabs.widget(1).hand2Transcription[k],
-                                self.configTabs.widget(1).hand2Transcription[k+1])
+                                 self.configTabs.widget(1).hand2Transcription[k+1])
             except IndexError:
                 pass
         self.setTabOrder(self.configTabs.widget(1).hand2Transcription[-2],
@@ -700,7 +701,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, e):
         self.writeSettings()
         try:
-            os.remove(os.path.join(os.getcwd(),'handCode.txt'))
+            os.remove(os.path.join(os.getcwd(), 'handCode.txt'))
         except FileNotFoundError:
             pass
         #super().closeEvent(QCloseEvent())
@@ -1085,6 +1086,10 @@ class MainWindow(QMainWindow):
         self.gloss.setText(sign['gloss'])
         self.transcriptionInfo.signNoteText.setText(sign['signNotes'])
 
+        if not hasattr(sign, '_frequency'):
+            setattr(sign, '_frequency', self.frequency)
+        self.frequencySlot.setText(str(sign['_frequency']))
+
         if not hasattr(sign, '_coder') or not hasattr(sign, '_lastUpdated'):
             setattr(sign, '_coder', self.coder)
             setattr(sign, '_lastUpdated', self.today)
@@ -1155,6 +1160,7 @@ class MainWindow(QMainWindow):
             kwargs['signNotes'] == 'None'
         kwargs['_coder'] = self.transcriptionInfo.coder
         kwargs['_lastUpdated'] = self.transcriptionInfo.lastUpdated
+        kwargs['_frequency'] = int(self.frequencySlot.text())
         for option in GLOBAL_OPTIONS:
             kwargs[option] = getattr(self, option+'CheckBox').isChecked()
         return kwargs
@@ -2319,15 +2325,22 @@ class AnalyzerMainWindow(QMainWindow):
         rightLayout.addWidget(globalFrame, 0, 0, 1, 1)
         #rightLayout.addWidget(globalFrame)
         self.forearmButton = QCheckBox('Forearm')
+        self.forearmButton.setStyleSheet('color: dimgray;')
         self.forearmButton.setEnabled(False)
         globalLayout.addWidget(self.forearmButton)
+
         self.estimatedButton = QCheckBox('Estimated')
+        self.estimatedButton.setStyleSheet('color: dimgray;')
         self.estimatedButton.setEnabled(False)
         globalLayout.addWidget(self.estimatedButton)
+
         self.uncertainButton = QCheckBox('Uncertain')
+        self.uncertainButton.setStyleSheet('color: dimgray;')
         self.uncertainButton.setEnabled(False)
         globalLayout.addWidget(self.uncertainButton)
+
         self.incompleteButton = QCheckBox('Incomplete')
+        self.incompleteButton.setStyleSheet('color: dimgray;')
         self.incompleteButton.setEnabled(False)
         globalLayout.addWidget(self.incompleteButton)
 
@@ -2338,6 +2351,7 @@ class AnalyzerMainWindow(QMainWindow):
         self.freqLineEdit = QLineEdit()
         self.freqLineEdit.setFixedWidth(50)
         self.freqLineEdit.setEnabled(False)
+        self.freqLineEdit.setStyleSheet('color: dimgray;')
         freqLayout.addWidget(QLabel('Frequency:'))
         freqLayout.addWidget(self.freqLineEdit)
         rightLayout.addWidget(freqGroup, 0, 1, 1, 1)
@@ -2349,9 +2363,13 @@ class AnalyzerMainWindow(QMainWindow):
         self.coderLineEdit = QLineEdit()
         self.coderLineEdit.setFixedWidth(150)
         self.coderLineEdit.setEnabled(False)
+        self.coderLineEdit.setStyleSheet('color: dimgray;')
+
         self.lastUpdatedLineEdit = QLineEdit()
         self.lastUpdatedLineEdit.setFixedWidth(100)
         self.lastUpdatedLineEdit.setEnabled(False)
+        self.lastUpdatedLineEdit.setStyleSheet('color: dimgray;')
+
         metaInfoLayout.addWidget(QLabel('Coder:'))
         metaInfoLayout.addWidget(self.coderLineEdit)
         metaInfoLayout.addWidget(QLabel('Last updated:'))
@@ -2478,12 +2496,14 @@ class AnalyzerMainWindow(QMainWindow):
         self.annotator.show()
 
     def loadCorpora(self):
-        file_path = QFileDialog.getOpenFileName(self,
-                                                'Open Corpus File', os.getcwd(), '*.corpus')
+        file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', os.getcwd(), '*.corpus')
 
     def loadData(self, item):
         gloss = item.text()
         sign = self.corpus[gloss]
+
+        self.freqLineEdit.clear()
+        self.freqLineEdit.setText(str(sign.frequency))
 
         self.coderLineEdit.clear()
         self.coderLineEdit.setText(sign.coder)
@@ -2527,7 +2547,6 @@ class WordListView(QListWidget):
 
     def __init__(self):
         super().__init__()
-
 
     def mousePressEvent(self, event):
         #originalItem =  [i for i in self.selectedItems()][0]

@@ -110,7 +110,7 @@ class Sign:
                                  'config2hand1': [Flag(False, False) for n in range(34)],
                                  'config2hand2': [Flag(False, False) for n in range(34)]},
                        'signNotes': str(),
-                       '_coder': str(), '_lastUpdated': date.today()}
+                       '_frequency': 1, '_coder': str(), '_lastUpdated': date.today()}
     for option in GLOBAL_OPTIONS:
         sign_attributes[option] = False
 
@@ -164,6 +164,14 @@ class Sign:
 
     def __repr__(self):
         return self.__str__()
+
+    @property
+    def frequency(self):
+        return self._frequency
+
+    @frequency.setter
+    def frequency(self, newFreq):
+        self._frequency = newFreq
 
     @property
     def notes(self):
