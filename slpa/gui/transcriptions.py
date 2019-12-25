@@ -211,7 +211,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot5.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 3 (Thumb/Finger Contact)
-        self.slot6 = TranscriptionSlot(6, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'], view_only)
+        self.slot6 = TranscriptionSlot(6, 3, '[-tbruf(?=r$)\\?]', ['-', 't', 'fr', 'b', 'r', 'u', '?'], view_only)
         self.slot6.textChanged.connect(self.updateLabel)
         self.slot6.textChanged.connect(self.emitUpdateSignal)
         self.slot7 = TranscriptionSlot(7, 3, '[-dpM\\?]', list('-dpM?'), view_only)
@@ -219,22 +219,22 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot7.textChanged.connect(self.emitUpdateSignal)
         self.slot8 = TranscriptionSlot(8, 3, NULL, [NULL], view_only)
         self.slot9 = TranscriptionSlot(9, 3, '/', ['/'], view_only)
-        self.slot10 = TranscriptionSlot(10, 3, '[-tbruf(?=r$)\\?]', ['-','t','fr','b','r','u','?'], view_only)
+        self.slot10 = TranscriptionSlot(10, 3, '[-tbruf(?=r$)\\?]', ['-', 't', 'fr', 'b', 'r', 'u', '?'], view_only)
         self.slot10.textChanged.connect(self.updateLabel)
         self.slot10.textChanged.connect(self.emitUpdateSignal)
         self.slot11 = TranscriptionSlot(11, 3, '[-dmpM\\?]', list('-dmpM?'), view_only)
         self.slot11.textChanged.connect(self.updateLabel)
         self.slot11.textChanged.connect(self.emitUpdateSignal)
-        self.slot12 = TranscriptionSlot(12, 3, '[-1\s\\?]', ['-','1','?'], view_only)
+        self.slot12 = TranscriptionSlot(12, 3, '[-1\s\\?]', ['-', '1', '?'], view_only)
         self.slot12.textChanged.connect(self.updateLabel)
         self.slot12.textChanged.connect(self.emitUpdateSignal)
-        self.slot13 = TranscriptionSlot(13, 3, '[-2\s\\?]', ['-','2','?'], view_only)
+        self.slot13 = TranscriptionSlot(13, 3, '[-2\s\\?]', ['-', '2', '?'], view_only)
         self.slot13.textChanged.connect(self.updateLabel)
         self.slot13.textChanged.connect(self.emitUpdateSignal)
-        self.slot14 = TranscriptionSlot(14, 3, '[-3\s\\?]', ['-','3','?'], view_only)
+        self.slot14 = TranscriptionSlot(14, 3, '[-3\s\\?]', ['-', '3', '?'], view_only)
         self.slot14.textChanged.connect(self.updateLabel)
         self.slot14.textChanged.connect(self.emitUpdateSignal)
-        self.slot15 = TranscriptionSlot(15, 3, '[-4\s\\?]', ['-','4','?'], view_only)
+        self.slot15 = TranscriptionSlot(15, 3, '[-4\s\\?]', ['-', '4', '?'], view_only)
         self.slot15.textChanged.connect(self.updateLabel)
         self.slot15.textChanged.connect(self.emitUpdateSignal)
 
@@ -251,7 +251,8 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot19.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 5 (Middle)
-        self.slot20 = TranscriptionSlot(20, 5, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
+        self.slot20 = TranscriptionSlot(20, 5, '[{<=\u2327x(?=-+$)\\?]', ['{', '<', '=', 'x', 'x+', 'x-', X_IN_BOX, '?'],
+                                        view_only)
         self.slot20.textChanged.connect(self.updateLabel)
         self.slot20.textChanged.connect(self.emitUpdateSignal)
         self.slot21 = TranscriptionSlot(21, 5, '2', ['2'], view_only)
@@ -266,7 +267,8 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot24.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 6 (Ring)
-        self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
+        self.slot25 = TranscriptionSlot(25, 6, '[{<=\u2327x(?=-+$)\\?]', ['{', '<', '=', 'x', 'x+', 'x-', X_IN_BOX, '?'],
+                                        view_only)
         self.slot25.textChanged.connect(self.updateLabel)
         self.slot25.textChanged.connect(self.emitUpdateSignal)
         self.slot26 = TranscriptionSlot(26, 6, '3', ['3'], view_only)
@@ -281,7 +283,8 @@ class TranscriptionLayout(QVBoxLayout):
         self.slot29.textChanged.connect(self.emitUpdateSignal)
 
         #FIELD 7 (Pinky)
-        self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)\\?]', ['{','<','=','x','x+','x-',X_IN_BOX, '?'], view_only)
+        self.slot30 = TranscriptionSlot(30, 7, '[{<=\u2327x(?=-+$)\\?]', ['{', '<', '=', 'x', 'x+', 'x-', X_IN_BOX, '?'],
+                                        view_only)
         self.slot30.textChanged.connect(self.updateLabel)
         self.slot30.textChanged.connect(self.emitUpdateSignal)
         self.slot31 = TranscriptionSlot(31, 7, '4', ['4'], view_only)
@@ -299,7 +302,7 @@ class TranscriptionLayout(QVBoxLayout):
         if self.slot1.isChecked():
             return False
         for slot in self.slots[1:]:
-            if slot.num in [8,9,16,21,26,31]:
+            if slot.num in [8, 9, 16, 21, 26, 31]:
                 continue
                 #these slots have automatically filled values, and they cannot be edited by the user
             if slot.text():
@@ -323,7 +326,7 @@ class TranscriptionLayout(QVBoxLayout):
     def clearTranscriptionSlots(self):
         self.slot1.setChecked(False)
         for s in self.slots[1:]:
-            if s.num in [8,16,21,26,31]:
+            if s.num in [8, 16, 21, 26, 31]:
                 continue
             else:
                 s.setText('')
@@ -341,12 +344,12 @@ class TranscriptionLayout(QVBoxLayout):
 
     def blenderCode(self):
         transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format('V' if self.slot1.isChecked() else '_',
-                                                                     ''.join([self[n].getText() for n in range(1,5)]),
-                                                                     ''.join([self[n].getText() for n in range(5,15)]),
-                                                                     ''.join([self[n].getText() for n in range(15,19)]),
-                                                                     ''.join([self[n].getText() for n in range(19,24)]),
-                                                                     ''.join([self[n].getText() for n in range(24,29)]),
-                                                                     ''.join([self[n].getText() for n in range(29,34)]))
+                                                                     ''.join([self[n].getText() for n in range(1, 5)]),
+                                                                     ''.join([self[n].getText() for n in range(5, 15)]),
+                                                                     ''.join([self[n].getText() for n in range(15, 19)]),
+                                                                     ''.join([self[n].getText() for n in range(19, 24)]),
+                                                                     ''.join([self[n].getText() for n in range(24, 29)]),
+                                                                     ''.join([self[n].getText() for n in range(29, 34)]))
         return transcription
 
     def updateFromCopy(self, other, include_flags = True):
@@ -392,8 +395,8 @@ class TranscriptionSlot(QLineEdit):
         super().__init__()
         self.num = num
         self.field = field
-        self.styleSheetString = ("QLineEdit{{background: {}; border: {};}} "
-                                 "QLineEdit:hover{{background {};border: {}; }}")
+        self.styleSheetString = ("QLineEdit{{color: {}; background: {}; border: {};}} "
+                                 "QLineEdit:hover{{background {};border: {};}}")
         self.defaultBackground = 'white'
         self.defaultBorder = '1px solid grey'
         self.flaggedBackground = 'pink'
@@ -421,9 +424,6 @@ class TranscriptionSlot(QLineEdit):
         self.setCompleter(completer)
         self.completer().activated.connect(self.completerActivated)
 
-        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
-        self.setStyleSheet(style)
-
         if self.num == 8:
             self.setText(NULL)
             self.setEnabled(False)
@@ -449,13 +449,21 @@ class TranscriptionSlot(QLineEdit):
             self.setEnabled(False)
             self.setToolTip('Slot 31. Represents pinky finger. Always marked as 4.')
 
-        # set button context menu policy
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.showContextMenu)
-
         # set the slot to be uneditable
         if view_only:
             self.setEnabled(False)
+
+        if self.isEnabled():
+            self.textColor = 'black'
+        else:
+            self.textColor = 'dimgray'
+
+        style = self.styleSheetString.format(self.textColor, self.background, self.border, self.background, self.border)
+        self.setStyleSheet(style)
+
+        # set button context menu policy
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
 
         # create context menu
         self.makeMenu()
@@ -479,7 +487,7 @@ class TranscriptionSlot(QLineEdit):
             self.border = self.defaultBorder
             self.changeEstimateAct.setChecked(False)
 
-        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        style = self.styleSheetString.format(self.textColor, self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
 
     def removeFlags(self):
@@ -489,7 +497,7 @@ class TranscriptionSlot(QLineEdit):
         self.background = self.defaultBackground
         self.changeEstimateAct.setChecked(False)
         self.changeUncertaintyAct.setChecked(False)
-        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        style = self.styleSheetString.format(self.textColor, self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
 
     def makeMenu(self):
@@ -509,7 +517,7 @@ class TranscriptionSlot(QLineEdit):
         else:
             self.border = self.defaultBorder
             self.isEstimate = False
-        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        style = self.styleSheetString.format(self.textColor, self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
 
     def changeUncertainty(self, e=None):
@@ -519,7 +527,7 @@ class TranscriptionSlot(QLineEdit):
         else:
             self.background = self.defaultBackground
             self.isUncertain = False
-        style = self.styleSheetString.format(self.background, self.border, self.background, self.border)
+        style = self.styleSheetString.format(self.textColor, self.background, self.border, self.background, self.border)
         self.setStyleSheet(style)
         self.slotFlagged.emit(self.num-1, True)
 
