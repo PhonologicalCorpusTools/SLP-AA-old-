@@ -281,7 +281,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
         self.setContentsMargins(0, 0, 0, 0)
 
-        self.frequency = 1
+        self.frequency = 1.0
         self.coder = getuser()
         self.today = date.today()
 
@@ -718,7 +718,7 @@ class MainWindow(QMainWindow):
 
     def checkForFlags(self):
         for word in self.corpus:
-            newflags = {k:list() for k in word.flags.keys()}
+            newflags = {k: list() for k in word.flags.keys()}
             for key,value in word.flags.items():
                 newflags[key] = [Flag(v, False) for v in value]
                 #SET TO UNCERTAIN
@@ -1160,7 +1160,7 @@ class MainWindow(QMainWindow):
             kwargs['signNotes'] == 'None'
         kwargs['_coder'] = self.transcriptionInfo.coder
         kwargs['_lastUpdated'] = self.transcriptionInfo.lastUpdated
-        kwargs['_frequency'] = int(self.frequencySlot.text())
+        kwargs['_frequency'] = float(self.frequencySlot.text())
         for option in GLOBAL_OPTIONS:
             kwargs[option] = getattr(self, option+'CheckBox').isChecked()
         return kwargs

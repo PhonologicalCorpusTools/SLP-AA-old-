@@ -19,7 +19,7 @@ class Corpus:
                          'has_spelling': False, 'has_wordtokens': False, 'has_audio': False, 'wav_path': None,
                          '_attributes': list(),
                          'corpusNotes': str(),
-                         '_version': 0.1#currentSLPAversion
+                         '_version': 0.1  #currentSLPAversion
                          }
     basic_attributes = ['spelling', 'transcription', 'frequency']
 
@@ -117,7 +117,7 @@ class Sign:
                                  'config2hand1': [Flag(False, False) for n in range(34)],
                                  'config2hand2': [Flag(False, False) for n in range(34)]},
                        'signNotes': str(),
-                       '_frequency': 1, '_coder': str(), '_lastUpdated': date.today()}
+                       '_frequency': 1.0, '_coder': str(), '_lastUpdated': date.today()}
     for option in GLOBAL_OPTIONS:
         sign_attributes[option] = False
 

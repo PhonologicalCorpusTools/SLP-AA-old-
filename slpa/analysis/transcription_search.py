@@ -202,7 +202,7 @@ def transcription_search(corpus, forearm, estimated, uncertain, incomplete, conf
     ret = list()
     for word in corpus:
         #print(word)
-        if word.frequency not in frequency_range:
+        if not frequency_range[0] <= word.frequency <= frequency_range[1]:
             continue
 
         if not check_global_options(word, (forearm, estimated, uncertain, incomplete)):

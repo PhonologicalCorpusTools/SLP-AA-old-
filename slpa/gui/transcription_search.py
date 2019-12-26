@@ -697,6 +697,7 @@ class TranscriptionSearchDialog(FunctionDialog):
         self.recent = recent
 
         globalFrame = QGroupBox('Global options')
+        globalFrame.setFixedWidth(500)
         globalLayout = QHBoxLayout()
         globalFrame.setLayout(globalLayout)
 
@@ -731,6 +732,7 @@ class TranscriptionSearchDialog(FunctionDialog):
         config1Frame.setLayout(config1Layout)
 
         self.config1 = TransConfigTab()
+        self.config1.setFixedWidth(1250)
         config1Layout.addWidget(self.config1)
 
         config2Frame = QGroupBox('Config 2')
@@ -738,6 +740,7 @@ class TranscriptionSearchDialog(FunctionDialog):
         config2Frame.setLayout(config2Layout)
 
         self.config2 = TransConfigTab()
+        self.config2.setFixedWidth(1250)
         config2Layout.addWidget(self.config2)
 
         self.notePanel = QLineEdit()
@@ -795,7 +798,7 @@ class TranscriptionSearchDialog(FunctionDialog):
         kwargs['hand'] = self.handLogic.value()
         kwargs['config1'] = self.config1.value()
         kwargs['config2'] = self.config2.value()
-        kwargs['frequency_range'] = range(int(self.minLineEdit.text()), int(self.maxLineEdit.text()) + 1)
+        kwargs['frequency_range'] = (float(self.minLineEdit.text()), float(self.maxLineEdit.text()))
         kwargs['coder'] = self.coderSlot.value()
         kwargs['lastUpdated'] = self.lastUpdatedSlot.value()
         self.note = self.notePanel.text()
