@@ -1509,10 +1509,10 @@ class MainWindow(QMainWindow):
                                          self,
                                          triggered = self.printCorpusObject)
 
-        self.importCorpusAct = QAction('&Import corpus from csv...',
+        self.importCorpusAct = QAction('&Import corpus from tsv...',
                                        self,
-                                       statusTip = 'Import from csv file',
-                                       triggered = self.importCorpus)
+                                       statusTip='Import from tsv file',
+                                       triggered=self.importCorpus)
 
         self.setBlenderPathAct = QAction('Set path to Blender...',
                                          self,
@@ -1587,10 +1587,10 @@ class MainWindow(QMainWindow):
                 self,
                 statusTip="Quit", triggered=self.closeEvent)
 
-        self.exportCorpusAct = QAction('&Export corpus as csv...',
-                                    self,
-                                    statusTip='Save corpus as csv for opening as a spreadsheet',
-                                    triggered=self.exportCorpus)
+        self.exportCorpusAct = QAction('&Export corpus as tsv...',
+                                       self,
+                                       statusTip='Save corpus as tsv for opening as a spreadsheet',
+                                       triggered=self.exportCorpus)
 
         self.setRestrictionsAct = QAction('Allow &unrestricted transcriptions',
                                     self,
@@ -1816,14 +1816,14 @@ class MainWindow(QMainWindow):
         if self.corpus is not None:
             alert = QMessageBox()
             alert.setWindowTitle('Warning')
-            alert.setText(('You currently have an open corpus, and you will lose any unsaved changes. '
-                            'What would you like to do?'))
+            alert.setText('You currently have an open corpus, and you will lose any unsaved changes. '
+                          'What would you like to do?')
             alert.addButton('Return to corpus', QMessageBox.NoRole)
             alert.addButton('Continue', QMessageBox.YesRole)
             alert.exec_()
             if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
                 return
-        filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from CSV', os.getcwd(), '*.csv')
+        filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from TSV', os.getcwd(), '*.tsv')
         filepath = filepath[0]
         if not filepath:
             return
@@ -1846,18 +1846,18 @@ class MainWindow(QMainWindow):
                           'SLPAnnotator by selecting File > Save as...\n\n'
                           'What do you want to do?'.format(filename, filename))
 
-            alert.addButton('Import CSV file', QMessageBox.AcceptRole)
+            alert.addButton('Import TSV file', QMessageBox.AcceptRole)
             alert.addButton('Cancel', QMessageBox.RejectRole)
             alert.exec_()
             if alert.buttonRole(alert.clickedButton()) == QMessageBox.RejectRole:
                 return
 
         if showAlert:
-            corpus = Corpus({'name':filename+'-import', 'path': os.path.join(filepath, filename+'-1.corpus')})
+            corpus = Corpus({'name': filename+'-import', 'path': os.path.join(filepath, filename+'-1.corpus')})
         else:
             corpus = Corpus({'name': filename, 'path':os.path.join(filepath, filename+'.corpus')})
 
-        with open(os.path.join(filepath, filename+'.csv'), mode='r', encoding='utf-8') as f:
+        with open(os.path.join(filepath, filename+'.tsv'), mode='r', encoding='utf-8') as f:
             headers = f.readline().strip()
             headers = headers.split('\t')
             #print('headers', headers)
@@ -1874,11 +1874,11 @@ class MainWindow(QMainWindow):
             for line in f:
                 line = line.strip()
                 line = line.split('\t')
-                data = {h:l for (h,l) in zip(headers, line)}
+                data = {h: l for h, l in zip(headers, line)}
                 kwargs = dict()
                 flags = dict()
-                transcriptions = [ [[None for n in range(34)], [None for n in range(34)]],
-                                   [[None for n in range(34)], [None for n in range(34)]] ]
+                transcriptions = [[[None for n in range(34)], [None for n in range(34)]],
+                                  [[None for n in range(34)], [None for n in range(34)]]]
                 for config in [1, 2]:
                     for hand in [1, 2]:
                         for n in range(1,35):
@@ -1931,7 +1931,7 @@ class MainWindow(QMainWindow):
 
         if message is not None:
             alert = QMessageBox()
-            alert.setWindowTitle('Loading from csv')
+            alert.setWindowTitle('Loading from tsv')
             alert.setText(('There is a problem loading the parameters from your corpus.\n'
                            '{}\n'
                            'If you continue, SLPA will load your corpus with default parameters. {}\n'
@@ -2046,6 +2046,7 @@ class MergeCorpusDialog(QDialog):
         self.filename = None
         super().reject()
 
+
 class ExportCorpusDialog(QDialog):
 
     def __init__(self):
@@ -2158,12 +2159,12 @@ class ExportCorpusDialog(QDialog):
         self.setLayout(layout)
 
     def getSaveName(self):
-        savename = QFileDialog.getSaveFileName(self, 'Export Corpus as CSV', os.getcwd(), '*.csv')
+        savename = QFileDialog.getSaveFileName(self, 'Export Corpus as TSV', os.getcwd(), '*.tsv')
         path = savename[0]
         if not path:
             return
-        if not path.endswith('.csv'):
-            path = path + '.csv'
+        if not path.endswith('.tsv'):
+            path = path + '.tsv'
         self.fileNameEdit.setText(path)
 
     def accept(self):
