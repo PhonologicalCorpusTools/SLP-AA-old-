@@ -1697,7 +1697,6 @@ class MainWindow(QMainWindow):
         self.transcriptionRestrictionsChanged.emit(restricted)
 
     def exportCorpus(self):
-
         if not self.corpus:
             alert = QMessageBox()
             alert.setWindowTitle('No corpus')
@@ -1742,8 +1741,9 @@ class MainWindow(QMainWindow):
                 alert.exec_()
 
     @classmethod
-    def getSignDataForExport(self, sign=None, include_fields=False, blank_space='_',
-                             x_in_box=X_IN_BOX, null=NULL, parameter_format='xml'):
+    def getSignDataForExport(self, sign=None, include_fields=False, blank_space='_', x_in_box=X_IN_BOX, null=NULL,
+                             parameter_format='xml'):
+
         def add_fields(transcription):
             transcription = '[{}]1[{}]2[{}]3[{}]4[{}]5[{}]6[{}]7'.format(transcription[0],
                                                                          ''.join(transcription[1:5]),
@@ -1797,6 +1797,11 @@ class MainWindow(QMainWindow):
                 estimates = 'None' if not estimates else '-'.join(estimates)
                 output.append(uncertain)
                 output.append(estimates)
+
+        output.append(str(sign.frequency))
+        output.append(sign.coder)
+        output.append(str(sign.lastUpdated))
+
         for option in GLOBAL_OPTIONS:
             output.append('True' if getattr(sign, option) else 'False')
         notes = ''.join([n.replace('\n', '  ').replace('\t', '    ') for n in sign.notes])
@@ -1910,6 +1915,10 @@ class MainWindow(QMainWindow):
                     model = ParameterTreeModel(parameters.defaultParameters)
                 else:
                     model = ParameterTreeModel(data['parameters'], fromXML=True)
+                kwargs['_frequency'] = float(data['frequency'])
+                kwargs['_coder'] = data['coder']
+                year, month, day = tuple(data['date'].split(sep='-'))
+                kwargs['_lastUpdated'] = date(int(year), int(month), int(day))
                 kwargs['parameters'] = model.params
                 kwargs['signNotes'] = '' if data['notes'] == 'None' else data['notes']
                 sign = Sign(kwargs)
