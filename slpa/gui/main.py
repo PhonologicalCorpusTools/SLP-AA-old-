@@ -20,7 +20,7 @@ from gui.parameterwidgets import ParameterDialog, ParameterTreeModel
 from gui.transcription_search import TranscriptionSearchDialog
 from gui.handshape_search import HandshapeSearchDialog
 from gui.phonological_search import ExtendedFingerSearchDialog
-from gui.results_windows import ResultsWindow
+from gui.results_windows import ResultsWindow, SearchResultsWindow
 from gui.helperwidgets import PredefinedHandshapeDialog
 #from slpa import __version__ as currentSLPAversion
 from pprint import pprint
@@ -714,7 +714,7 @@ class MainWindow(QMainWindow):
             newCorpus.addWord(word)
         newCorpus.path = path
         save_binary(newCorpus, newCorpus.path)
-        self.corpus =  load_binary(newCorpus.path)
+        self.corpus = load_binary(newCorpus.path)
 
     def checkForFlags(self):
         for word in self.corpus:
@@ -2217,8 +2217,8 @@ class ExportCorpusDialog(QDialog):
             alert.setText(text)
             alert.exec_()
 
-class BlenderPathDialog(QDialog):
 
+class BlenderPathDialog(QDialog):
     def __init__(self, current_path=None):
         super().__init__()
         self.setWindowTitle('Set path to Blender')
@@ -2355,7 +2355,7 @@ class AnalyzerMainWindow(QMainWindow):
         globalLayout.addWidget(self.incompleteButton)
 
         freqGroup = QGroupBox()
-        freqGroup.setFixedWidth(150)
+        freqGroup.setFixedWidth(175)
         freqLayout = QHBoxLayout()
         freqGroup.setLayout(freqLayout)
         self.freqLineEdit = QLineEdit()
@@ -2483,9 +2483,9 @@ class AnalyzerMainWindow(QMainWindow):
         searchDialog = TranscriptionSearchDialog(self.corpus, self, None, None)
         success = searchDialog.exec_()
         if success:
-            self.TSResultWindow = ResultsWindow('Transcription Search Results',
-                                                searchDialog,
-                                                self)
+            self.TSResultWindow = SearchResultsWindow('Transcription Search Results',
+                                                      searchDialog,
+                                                      self)
             self.TSResultWindow.show()
 
     def searchByExtendedFingers(self):

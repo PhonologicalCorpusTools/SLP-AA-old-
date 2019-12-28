@@ -1,8 +1,12 @@
 import csv
+import os
+from pprint import pprint
 from imports import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QFrame,
                      QFileDialog, QAbstractTableModel, QHeaderView, Qt, QModelIndex,
                      QTableView, QAbstractItemView, QSizePolicy, QApplication, QVariant,
                      QAbstractScrollArea)
+from lexicon import Corpus, Sign
+from binary import save_binary
 
 
 class ResultsTableModel(QAbstractTableModel):
@@ -76,14 +80,14 @@ class ResultsWindow(QDialog):
         self.resize(dialogWidth, dialogHeight)
 
         # Layout
-        buttonLayout = QHBoxLayout()
-        buttonLayout.addWidget(self.reopenButton)
-        buttonLayout.addWidget(self.saveButton)
-        buttonLayout.addWidget(self.closeButton)
+        self.buttonLayout = QHBoxLayout()
+        self.buttonLayout.addWidget(self.reopenButton)
+        self.buttonLayout.addWidget(self.saveButton)
+        self.buttonLayout.addWidget(self.closeButton)
 
         mainLayout = QVBoxLayout()
         mainLayout.addWidget(self.table)
-        mainLayout.addLayout(buttonLayout)
+        mainLayout.addLayout(self.buttonLayout)
 
         self.setLayout(mainLayout)
 
@@ -133,6 +137,36 @@ class ResultsWindow(QDialog):
                         dataPoint = str(model.data(idx))
                         entry.append(dataPoint)
                     writer.writerow(entry)
+
+
+class SearchResultsWindow(ResultsWindow):
+    def __init__(self, title, dialog, parent):
+        super().__init__(title, dialog, parent)
+
+        self.subsetButton = QPushButton('Subset as a corpus')
+        self.subsetButton.clicked.connect(self.subsetAndSave)
+
+        self.buttonLayout.insertWidget(2, self.subsetButton)
+
+    def subsetAndSave(self):
+        savename = QFileDialog.getSaveFileName(self, 'Save Corpus File As', os.getcwd(), '*.corpus')
+        path = savename[0]
+        if not path:
+            return
+        if not path.endswith('.corpus'):
+            path = path + '.corpus'
+
+        subset = {d['Sign'] for d in self.dialog.results}
+
+        newCorpus = Corpus({})
+        newCorpus.name = os.path.split(path)[1].split('.')[0]
+        newCorpus.path = path
+        for sign in self.dialog.corpus:
+            if sign.gloss in subset:
+                sign.flags = Sign.sign_attributes['flags'].copy()
+                newCorpus.addWord(sign)
+        print(newCorpus)
+        save_binary(newCorpus, newCorpus.path)
 
 
 class BaseTableModel(QAbstractTableModel):
