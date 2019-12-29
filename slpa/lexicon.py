@@ -108,7 +108,6 @@ class Corpus:
         return minFreq, maxFreq
 
 
-
 class Sign:
     sign_attributes = {'gloss': str(), 'config1': None, 'config2': None,
                        'parameters': defaultParameters,
@@ -150,6 +149,9 @@ class Sign:
         self.config1hand1, self.config1hand2 = self.config1
         self.config2hand1, self.config2hand2 = self.config2
 
+        self.determine_hand_type()
+        self.determine_config_type()
+
     def copyValue(self, value):
         if isinstance(value, dict):
             return value.copy()
@@ -174,6 +176,28 @@ class Sign:
 
     def __repr__(self):
         return self.__str__()
+
+    def determine_hand_type(self):
+        c1h1, c1h2, c2h1, c2h2 = self.get_transcription_strings()
+
+        if (c1h1 == '______∅/______1____2____3____4___' and c2h1 == '______∅/______1____2____3____4___') \
+                or (c1h2 == '______∅/______1____2____3____4___' and c2h2 == '______∅/______1____2____3____4___'):
+            typ = 'one'
+        else:
+            typ = 'two'
+
+        self.hand_type = typ
+
+    def determine_config_type(self):
+        c1h1, c1h2, c2h1, c2h2 = self.get_transcription_strings()
+
+        if (c1h1 == '______∅/______1____2____3____4___' and c1h2 == '______∅/______1____2____3____4___') \
+                or (c2h1 == '______∅/______1____2____3____4___' and c2h2 == '______∅/______1____2____3____4___'):
+            typ = 'one'
+        else:
+            typ = 'two'
+
+        self.config_type = typ
 
     @property
     def frequency(self):
@@ -292,14 +316,14 @@ class Sign:
                                                                      ''.join(transcription[29:34]))
         return transcription
 
-    def get_transcription(self):
+    def get_transcription_strings(self):
         '''
         Give a tuple of four strings, with each string corresponding to a hand/configuration
         Also, the first slot is not included
         :return: a tuple of four strings
         '''
-        c1h1 = '.'.join([slot if slot else '_' for slot in self.config1hand1[1:]])
-        c1h2 = '.'.join([slot if slot else '_' for slot in self.config1hand2[1:]])
-        c2h1 = '.'.join([slot if slot else '_' for slot in self.config2hand1[1:]])
-        c2h2 = '.'.join([slot if slot else '_' for slot in self.config2hand2[1:]])
+        c1h1 = ''.join([slot if slot else '_' for slot in self.config1hand1[1:]])
+        c1h2 = ''.join([slot if slot else '_' for slot in self.config1hand2[1:]])
+        c2h1 = ''.join([slot if slot else '_' for slot in self.config2hand1[1:]])
+        c2h2 = ''.join([slot if slot else '_' for slot in self.config2hand2[1:]])
         return c1h1, c1h2, c2h1, c2h2

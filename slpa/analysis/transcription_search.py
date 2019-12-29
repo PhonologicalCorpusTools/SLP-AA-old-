@@ -69,49 +69,54 @@ def check_uncertain_flag(sign, config1, config2):
 
 
 def check_config_type(sign, config):
-    typ = find_config_type(sign)
     if config == 'Either':
         return True
-    else:
-        return typ == config
+    if not hasattr(sign, 'config_type'):
+        sign.determine_config_type()
+    #typ = sign.hand_type
+    #typ = find_config_type(sign)
+    return sign.config_type == config[:3].lower()
 
 
-def find_config_type(sign):
-    c1h1 = ''.join([slot if slot else '_' for slot in sign.config1hand1])
-    c1h2 = ''.join([slot if slot else '_' for slot in sign.config1hand2])
-    c2h1 = ''.join([slot if slot else '_' for slot in sign.config2hand1])
-    c2h2 = ''.join([slot if slot else '_' for slot in sign.config2hand2])
-
-    if (c1h1 == '_______∅/______1____2____3____4___' and c1h2 == '_______∅/______1____2____3____4___') \
-            or (c2h1 == '_______∅/______1____2____3____4___' and c2h2 == '_______∅/______1____2____3____4___'):
-        typ = 'One-config signs'
-    else:
-        typ = 'Two-config signs'
-
-    return typ
+# def find_config_type(sign):
+#     c1h1 = ''.join([slot if slot else '_' for slot in sign.config1hand1])
+#     c1h2 = ''.join([slot if slot else '_' for slot in sign.config1hand2])
+#     c2h1 = ''.join([slot if slot else '_' for slot in sign.config2hand1])
+#     c2h2 = ''.join([slot if slot else '_' for slot in sign.config2hand2])
+#
+#     if (c1h1 == '_______∅/______1____2____3____4___' and c1h2 == '_______∅/______1____2____3____4___') \
+#             or (c2h1 == '_______∅/______1____2____3____4___' and c2h2 == '_______∅/______1____2____3____4___'):
+#         typ = 'One-config signs'
+#     else:
+#         typ = 'Two-config signs'
+#
+#     return typ
 
 
 def check_hand_type(sign, hand):
-    typ = find_hand_type(sign)
     if hand == 'Either':
         return True
-    else:
-        return typ == hand
+    if not hasattr(sign, 'hand_type'):
+        sign.determine_hand_type()
+    #typ = sign.hand_type
+    #typ = find_hand_type(sign)
+
+    return sign.hand_type == hand[:3].lower()
 
 
-def find_hand_type(sign):
-    c1h1 = ''.join([slot if slot else '_' for slot in sign.config1hand1])
-    c1h2 = ''.join([slot if slot else '_' for slot in sign.config1hand2])
-    c2h1 = ''.join([slot if slot else '_' for slot in sign.config2hand1])
-    c2h2 = ''.join([slot if slot else '_' for slot in sign.config2hand2])
-
-    if (c1h1 == '_______∅/______1____2____3____4___' and c2h1 == '_______∅/______1____2____3____4___')\
-            or (c1h2 == '_______∅/______1____2____3____4___' and c2h2 == '_______∅/______1____2____3____4___'):
-        typ = 'One-hand signs'
-    else:
-        typ = 'Two-hand signs'
-
-    return typ
+# def find_hand_type(sign):
+#     c1h1 = ''.join([slot if slot else '_' for slot in sign.config1hand1])
+#     c1h2 = ''.join([slot if slot else '_' for slot in sign.config1hand2])
+#     c2h1 = ''.join([slot if slot else '_' for slot in sign.config2hand1])
+#     c2h2 = ''.join([slot if slot else '_' for slot in sign.config2hand2])
+#
+#     if (c1h1 == '_______∅/______1____2____3____4___' and c2h1 == '_______∅/______1____2____3____4___')\
+#             or (c1h2 == '_______∅/______1____2____3____4___' and c2h2 == '_______∅/______1____2____3____4___'):
+#         typ = 'One-hand signs'
+#     else:
+#         typ = 'Two-hand signs'
+#
+#     return typ
 
 
 def check_global_options(sign, options):
@@ -201,42 +206,15 @@ def transcription_search(corpus, forearm, estimated, uncertain, incomplete, conf
 
     ret = list()
     for word in corpus:
-        #print(word)
-        if not frequency_range[0] <= word.frequency <= frequency_range[1]:
-            continue
+        if all([frequency_range[0] <= word.frequency <= frequency_range[1],
+                check_global_options(word, (forearm, estimated, uncertain, incomplete)),
+                check_config_type(word, configuration),
+                check_hand_type(word, hand),
+                check_estimate_flag(word, config1, config2),
+                check_uncertain_flag(word, config1, config2),
+                check_slot_symbol(word, config1, config2),
+                check_coder(word, coders),
+                check_lastUpdated(word, lastUpdateds)]):
+            ret.append(word)
 
-        if not check_global_options(word, (forearm, estimated, uncertain, incomplete)):
-            #print('global')
-            continue
-
-        if not check_config_type(word, configuration):
-            #print('config')
-            continue
-
-        if not check_hand_type(word, hand):
-            #print('hand')
-            continue
-
-        if not check_estimate_flag(word, config1, config2):
-            #print('estimate')
-            continue
-
-        if not check_uncertain_flag(word, config1, config2):
-            #print('uncertain')
-            continue
-
-        if not check_slot_symbol(word, config1, config2):
-            #print('slot')
-            #print(word)
-            continue
-
-        if not check_coder(word, coders):
-            continue
-
-        if not check_lastUpdated(word, lastUpdateds):
-            continue
-
-        ret.append(word)
-
-    #print(ret)
     return ret
