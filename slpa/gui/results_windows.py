@@ -120,7 +120,7 @@ class ResultsWindow(QDialog):
         fileDialog = QFileDialog(caption='Save results')
         fileDialog.setAcceptMode(QFileDialog.AcceptSave)
         fileDialog.setFileMode(QFileDialog.AnyFile)
-        fileDialog.setNameFilter('Text files (*.txt *.csv)')
+        fileDialog.setNameFilter('Text files (*.txt *.tsv)')
         fileDialog.selectFile('results')
         fileDialog.setDefaultSuffix('txt')
 
