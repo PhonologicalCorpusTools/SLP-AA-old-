@@ -117,7 +117,7 @@ class Sign:
                                  'config2hand1': [Flag(False, False) for n in range(34)],
                                  'config2hand2': [Flag(False, False) for n in range(34)]},
                        'signNotes': str(),
-                       '_frequency': 1.0, '_coder': str(), '_lastUpdated': date.today()}
+                       '_frequency': 1.0, '_coder': 'Unknown', '_lastUpdated': date.today()}
     for option in GLOBAL_OPTIONS:
         sign_attributes[option] = False
 
@@ -177,6 +177,8 @@ class Sign:
 
     @property
     def frequency(self):
+        if not hasattr(self, '_frequency'):
+            self._frequency = Sign.sign_attributes['_frequency']
         return self._frequency
 
     @frequency.setter
@@ -189,6 +191,8 @@ class Sign:
 
     @property
     def coder(self):
+        if not hasattr(self, '_coder'):
+            self._coder = Sign.sign_attributes['_coder']
         return self._coder
 
     @coder.setter
@@ -197,6 +201,8 @@ class Sign:
 
     @property
     def lastUpdated(self):
+        if not hasattr(self, '_lastUpdate'):
+            self._lastUpdated = Sign.sign_attributes['_lastUpdated']
         return self._lastUpdated
 
     @lastUpdated.setter
