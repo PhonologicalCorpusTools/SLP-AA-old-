@@ -149,7 +149,7 @@ class SearchResultsWindow(ResultsWindow):
         self.buttonLayout.insertWidget(2, self.subsetButton)
 
     def subsetAndSave(self):
-        savename = QFileDialog.getSaveFileName(self, 'Save Corpus File As', os.getcwd(), '*.corpus')
+        savename = QFileDialog.getSaveFileName(self, 'Save Corpus File As', 'subset', '*.corpus')
         path = savename[0]
         if not path:
             return
@@ -165,7 +165,6 @@ class SearchResultsWindow(ResultsWindow):
             if sign.gloss in subset:
                 sign.flags = Sign.sign_attributes['flags'].copy()
                 newCorpus.addWord(sign)
-        print(newCorpus)
         save_binary(newCorpus, newCorpus.path)
 
 

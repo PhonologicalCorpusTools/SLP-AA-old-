@@ -2474,28 +2474,22 @@ class AnalyzerMainWindow(QMainWindow):
         searchDialog = HandshapeSearchDialog(self.corpus, self, None, None)
         success = searchDialog.exec_()
         if success:
-            self.HSResultWindow = ResultsWindow('Handshape Search Results',
-                                                searchDialog,
-                                                self)
-            self.HSResultWindow.show()
+            HSResultWindow = SearchResultsWindow('Handshape Search Results', searchDialog, self)
+            HSResultWindow.show()
 
     def searchByTranscription(self):
         searchDialog = TranscriptionSearchDialog(self.corpus, self, None, None)
         success = searchDialog.exec_()
         if success:
-            self.TSResultWindow = SearchResultsWindow('Transcription Search Results',
-                                                      searchDialog,
-                                                      self)
-            self.TSResultWindow.show()
+            TSResultWindow = SearchResultsWindow('Transcription Search Results', searchDialog, self)
+            TSResultWindow.show()
 
     def searchByExtendedFingers(self):
         searchDialog = ExtendedFingerSearchDialog(self.corpus, self, None, None)
         success = searchDialog.exec_()
         if success:
-            self.EFResultWindow = ResultsWindow('Extended Finger Search Results',
-                                                searchDialog,
-                                                self)
-            self.EFResultWindow.show()
+            EFResultWindow = SearchResultsWindow('Extended Finger Search Results', searchDialog, self)
+            EFResultWindow.show()
 
     def switchMode(self):
         #pass
