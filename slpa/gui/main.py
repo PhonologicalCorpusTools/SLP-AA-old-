@@ -988,7 +988,7 @@ class MainWindow(QMainWindow):
         if self.corpus is None:
             self.saveCorpus()
         else:
-            savename = QFileDialog.getSaveFileName(self, 'Save Corpus File As', os.getcwd(), '*.corpus')
+            savename = QFileDialog.getSaveFileName(self, 'Save Corpus File As', 'corpus', '*.corpus')
             path = savename[0]
             if not path:
                 return
@@ -2169,7 +2169,7 @@ class ExportCorpusDialog(QDialog):
         self.setLayout(layout)
 
     def getSaveName(self):
-        savename = QFileDialog.getSaveFileName(self, 'Export Corpus as TSV', os.getcwd(), '*.tsv')
+        savename = QFileDialog.getSaveFileName(self, 'Export Corpus as TSV', 'corpus', '*.tsv')
         path = savename[0]
         if not path:
             return
