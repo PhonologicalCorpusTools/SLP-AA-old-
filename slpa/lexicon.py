@@ -225,7 +225,7 @@ class Sign:
 
     @property
     def lastUpdated(self):
-        if not hasattr(self, '_lastUpdate'):
+        if not hasattr(self, '_lastUpdated'):
             self._lastUpdated = Sign.sign_attributes['_lastUpdated']
         return self._lastUpdated
 
