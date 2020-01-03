@@ -222,8 +222,8 @@ class BlenderOutputWindow(QDialog):
         layout.addWidget(self.imageLabel)
         self.setLayout(layout)
 
-
-class CorpusList(QListWidget):
+class CorpusList(QTreeWidget):
+#class CorpusList(QListWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent

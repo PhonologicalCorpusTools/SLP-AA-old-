@@ -317,11 +317,11 @@ class Sign:
         return transcription
 
     def get_transcription_strings(self):
-        '''
+        """
         Give a tuple of four strings, with each string corresponding to a hand/configuration
         Also, the first slot is not included
         :return: a tuple of four strings
-        '''
+        """
         c1h1 = ''.join([slot if slot else '_' for slot in self.config1hand1[1:]])
         c1h2 = ''.join([slot if slot else '_' for slot in self.config1hand2[1:]])
         c2h1 = ''.join([slot if slot else '_' for slot in self.config2hand1[1:]])
