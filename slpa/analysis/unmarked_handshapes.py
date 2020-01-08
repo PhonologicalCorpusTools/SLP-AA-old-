@@ -63,111 +63,6 @@ class HandshapeAny(object):
         return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeAny.options)])
 
 
-class HandshapeC(object):
-    canonical = ('_', 'O', '<', 'i', 'i',
-                 '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
-                 '1', 'f', 'f', 'f',
-                 '=', '2', 'f', 'f', 'f',
-                 '=', '3', 'f', 'f', 'f',
-                 '=', '4', 'f', 'f', 'f')
-
-    options = [
-        ['O'], ['<'], ['E', 'e', 'i'], ['E', 'e', 'i'],
-        ['-'], ['-'], [NULL], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],
-        ['1'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
-        ['=', 'x-'], ['2'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
-        ['=', 'x-'], ['3'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
-        ['=', 'x-'], ['4'], ['E', 'e', 'i', 'f'], ['E', 'e', 'i', 'f'], ['E', 'e', 'i', 'f']
-    ]
-
-    def __init__(self):
-        super().__init__()
-
-    # constraint1: options[2] and options[3] can't be more than one value apart from each other
-    @staticmethod
-    def satisfy_const1(sign):
-        # not okay: (E, i), (i, E)
-        if (sign[2], sign[3]) in [('E', 'i'), ('i', 'E')]:
-            return False
-        else:
-            return True
-
-    # constraint2: options[15], options[20], and options[25] must exactly match each other
-    @staticmethod
-    def satisfy_const2(sign):
-        if sign[15] != sign[20] or sign[15] != sign[25] or sign[20] != sign[25]:
-            return False
-        else:
-            return True
-
-    # constraint3: options[16], options[21], and options[26] can't be more than one-value apart from each other
-    @staticmethod
-    def satisfy_const3(sign):
-        # not okay: e, f together
-        if 'e' in [sign[16], sign[21], sign[26]] and 'f' in [sign[16], sign[21], sign[26]]:
-            return False
-        else:
-            return True
-
-    # constraint4: options[17], options[22], and options[27] can't be more than one-value apart from each other
-    @staticmethod
-    def satisfy_const4(sign):
-        # E, e, i, f
-        # not okay: (E, i), (E, f), (e, f)
-        if ('E' in [sign[17], sign[22], sign[27]] and 'i' in [sign[17], sign[22], sign[27]]) \
-                or ('E' in [sign[17], sign[22], sign[27]] and 'f' in [sign[17], sign[22], sign[27]]) \
-                or ('e' in [sign[17], sign[22], sign[27]] and 'f' in [sign[17], sign[22], sign[27]]):
-            return False
-        else:
-            return True
-
-    # constraint5: options[30] can't be more than one value apart from options[15], options[20], options[25]
-    @staticmethod
-    def satisfy_const5(sign):
-        # [15, 20, 25]: e, i, f
-        # [30]: E, e, i, f
-        if sign[30] == 'E':
-            if 'i' in [sign[15], sign[20], sign[25]] or 'f' in [sign[15], sign[20], sign[25]]:
-                return False
-            else:
-                return True
-        elif sign[30] == 'e':
-            if 'f' in [sign[15], sign[20], sign[25]]:
-                return False
-            else:
-                return True
-        elif sign[30] == 'i':
-            return True
-        else:  # sign[30] == 'f':
-            if 'e' in [sign[15], sign[20], sign[25]]:
-                return False
-            else:
-                return True
-
-    # constraint6: options[31] can't be more than two values apart from options[16], options[21], options[26]
-    @staticmethod
-    def satisfy_const6(sign):
-        # [16, 21, 26]: e, i, f
-        # [31]: E, e, i, f
-        if sign[31] == 'E':
-            if 'f' in [sign[16], sign[21], sign[26]]:
-                return False
-            else:
-                return True
-        elif sign[31] == 'e':
-            return True
-        elif sign[31] == 'i':
-            return True
-        else:  # sign[30] == 'f':
-            return True
-
-    @staticmethod
-    def match(sign):
-        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeC.options)]) and \
-               all([HandshapeC.satisfy_const1(sign), HandshapeC.satisfy_const2(sign), HandshapeC.satisfy_const3(sign),
-                    HandshapeC.satisfy_const4(sign), HandshapeC.satisfy_const5(sign), HandshapeC.satisfy_const6(sign)])
-
-
 class Handshape1(object):
     canonical = ('_', 'O', '=', 'f', 'f',
                  'fr', 'd', NULL, '/', 'b', 'm', '-', '2', '-', '-',
@@ -260,124 +155,6 @@ class Handshape5(object):
                 return False
 
         return Handshape5.satisfy_const1(sign)
-
-
-class HandshapeO(object):
-    canonical = ('_', 'O', '{', 'i', 'i',
-                 'fr', 'd', NULL, '/', 't', 'd', '1', '2', '3', '-',
-                 '1', 'f', 'f', 'f',
-                 '=', '2', 'f', 'f', 'f',
-                 '=', '3', 'f', 'f', 'f',
-                 '=', '4', 'f', 'f', 'f')
-
-    options = [
-        ['O'], ['{'], ['e', 'i'], ['i', 'f', 'F', '?'],
-        ['t', 'fr'], ['d'], [NULL], ['/'], ['t', 'fr'], ['d'], ['-', '1'], ['-', '2'], ['-', '3'], ['-'],
-        ['1'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
-        ['=', 'x-'], ['2'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
-        ['=', 'x-'], ['3'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
-        ['=', 'x-'], ['4'], ['e', 'i', 'f'], ['e', 'i'], ['E', 'e', 'i', '?']
-    ]
-
-    def __init__(self):
-        super().__init__()
-
-    # constraint1: option[2], option[3]: can't be more than two values apart from each other
-    @staticmethod
-    def satisfy_const1(sign):
-        return (sign[2], sign[3]) != ('e', 'F')
-
-    # constraint2: option[10], option[11], option[12]: can't all be '-'
-    @staticmethod
-    def satisfy_const2(sign):
-        return (sign[10], sign[11], sign[12]) != ('-', '-', '-')
-
-    @staticmethod
-    def match(sign):
-        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeO.options)]) and \
-               all([HandshapeO.satisfy_const1(sign), HandshapeO.satisfy_const2(sign)])
-
-
-class HandshapeS(object):
-    canonical = ('_', 'O', '=', 'i', 'f',
-                 'fr', 'd', NULL, '/', 'b', 'm', '1', '2', '-', '-',
-                 '1', 'F', 'F', 'F',
-                 '=', '2', 'F', 'F', 'F',
-                 '=', '3', 'F', 'F', 'F',
-                 '=', '4', 'F', 'F', 'F')
-
-    options = [
-        ['O'], ['{', '=', '?'], ['e', 'i', 'f', '?'], ['e', 'i', 'f', 'F', '?'],
-        ['fr', 'u', '?'], ['d', '?'], [NULL], ['/'], ['b', '?'], ['m', '?'], ['-', '1', '?'], ['-', '2', '?'], ['-', '3', '?'], ['-', '?'],
-        ['1'], ['f', 'F'], ['F', '?'], ['f', 'F', '?'],
-        ['='], ['2'], ['f', 'F'], ['F', '?'], ['i', 'f', 'F', '?'],
-        ['='], ['3'], ['f', 'F'], ['F', '?'], ['i', 'f', 'F', '?'],
-        ['='], ['4'], ['f', 'F'], ['f', 'F', '?'], ['i', 'f', 'F', '?']
-    ]
-
-    def __init__(self):
-        super().__init__()
-
-    # constraint1: option[1] and option[3]: "{" can happen only if option[3] if "F"
-    @staticmethod
-    def satisfy_const1(sign):
-        if (sign[1], sign[3]) in [('{', 'e'), ('{', 'i')]:
-            return False
-        else:
-            return True
-
-    # constraint2: option[3], option[4], option[10], option[11], option[12]:
-    # "u" (option[4]) can happen only if thumb only contacts finger 1 (option[10]), or thumb's DIP is "F" (option[3])
-    @staticmethod
-    def satisfy_const2(sign):
-        if sign[4] == 'u':
-            if (sign[10], sign[11], sign[12]) != ('1', '-', '-'):
-                return False
-
-            if sign[3] != 'F':
-                return False
-
-            return True
-        else:
-            return True
-
-    # constraint3: option[10], option[11], option[12]:
-    # Minimum contact of one finger, Maximum 2, but they have to be adjacent to each other (e.g., [12--], not [1-3-])
-    @staticmethod
-    def satisfy_const3(sign):
-        # Minimum contact of one finger
-        if (sign[10], sign[11], sign[12]) == ('-', '-', '-'):
-            return False
-        # Maximum 2, but they have to be adjacent to each other (e.g., [12--], not [1-3-])
-        elif (sign[10], sign[11], sign[12]) in [('1', '2', '3'), ('1', '-', '3')]:
-            return False
-        else:
-            return True
-
-    # constraint4: option[15], option[20], option[25], option[30]: they have to have all the same flexion value (e.g., f, f, f, f),
-    # or from finger 1 to finger 4 have an increasing flexion value (e.g., f,f,F,F) or increasing-decreasing (e.g.: f,F,F,f),
-    # but not decreasing flexion (e.g.: F,f,f,f), decreasing-increasing (e.g.: F,f,f,F) or f, F, f, F.
-    @staticmethod
-    def satisfy_const4(sign):
-        if any([symbol == '?' for symbol in [sign[15], sign[20], sign[25], sign[30]]]):
-            return True
-
-        return not is_decreasing_flexion_first(sign[15], sign[20], sign[25], sign[30])
-
-    # constraint5: option[17], option[22], option[27], option[32]: they have to have all the same flexion value (e.g., f,f,f,f),
-    # or from thumb to finger 4 have an increasing flexion value (e.g., f, f, F, F, but not the other way around (e.g., F, f, f, i,),
-    # or F, f, F, i.
-    @staticmethod
-    def satisfy_const5(sign):
-        if any([symbol == '?' for symbol in [sign[17], sign[22], sign[27], sign[32]]]):
-            return True
-
-        return increasing_or_equal_flexion(sign[17], sign[22], sign[27], sign[32])
-
-    @staticmethod
-    def match(sign):
-        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeS.options)]) and \
-               all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])  # Constraint 4 and 5 are relaxed
 
 
 class HandshapeA(object):
@@ -633,3 +410,226 @@ class HandshapeB2(object):  #B2 = Plain B (Brentari, 2005)
     def match(sign):
         return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeB2.options)]) and \
                all([HandshapeB2.satisfy_const1(sign), HandshapeB2.satisfy_const2(sign), HandshapeB2.satisfy_const3(sign)])
+
+
+class HandshapeC(object):
+    canonical = ('_', 'O', '<', 'e', 'e',
+                 '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
+                 '1', 'i', 'i', 'e',
+                 '=', '2', 'i', 'i', 'e',
+                 '=', '3', 'i', 'i', 'e',
+                 '=', '4', 'e', 'e', 'e')
+
+    options = [
+        ['O'], ['<'], ['E', 'e', 'i'], ['E', 'e', 'i'],
+        ['-'], ['-'], [NULL], ['/'], ['-'], ['-'], ['-'], ['-'], ['-'], ['-'],
+        ['1'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
+        ['=', 'x-'], ['2'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
+        ['=', 'x-'], ['3'], ['e', 'i', 'f'], ['e', 'i', 'f'], ['E', 'e', 'i', 'f'],
+        ['=', 'x-'], ['4'], ['E', 'e', 'i', 'f'], ['E', 'e', 'i', 'f'], ['E', 'e', 'i', 'f']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: options[2] and options[3] can't be more than one value apart from each other
+    @staticmethod
+    def satisfy_const1(sign):
+        # not okay: (E, i), (i, E)
+        if (sign[2], sign[3]) in [('E', 'i'), ('i', 'E')]:
+            return False
+        else:
+            return True
+
+    # constraint2: options[15], options[20], and options[25] must exactly match each other
+    @staticmethod
+    def satisfy_const2(sign):
+        if sign[15] != sign[20] or sign[15] != sign[25] or sign[20] != sign[25]:
+            return False
+        else:
+            return True
+
+    # constraint3: options[16], options[21], and options[26] can't be more than one-value apart from each other
+    @staticmethod
+    def satisfy_const3(sign):
+        # not okay: e, f together
+        if 'e' in [sign[16], sign[21], sign[26]] and 'f' in [sign[16], sign[21], sign[26]]:
+            return False
+        else:
+            return True
+
+    # constraint4: options[17], options[22], and options[27] can't be more than one-value apart from each other
+    @staticmethod
+    def satisfy_const4(sign):
+        # E, e, i, f
+        # not okay: (E, i), (E, f), (e, f)
+        if ('E' in [sign[17], sign[22], sign[27]] and 'i' in [sign[17], sign[22], sign[27]]) \
+                or ('E' in [sign[17], sign[22], sign[27]] and 'f' in [sign[17], sign[22], sign[27]]) \
+                or ('e' in [sign[17], sign[22], sign[27]] and 'f' in [sign[17], sign[22], sign[27]]):
+            return False
+        else:
+            return True
+
+    # constraint5: options[30] can't be more than one value apart from options[15], options[20], options[25]
+    @staticmethod
+    def satisfy_const5(sign):
+        # [15, 20, 25]: e, i, f
+        # [30]: E, e, i, f
+        if sign[30] == 'E':
+            if 'i' in [sign[15], sign[20], sign[25]] or 'f' in [sign[15], sign[20], sign[25]]:
+                return False
+            else:
+                return True
+        elif sign[30] == 'e':
+            if 'f' in [sign[15], sign[20], sign[25]]:
+                return False
+            else:
+                return True
+        elif sign[30] == 'i':
+            return True
+        else:  # sign[30] == 'f':
+            if 'e' in [sign[15], sign[20], sign[25]]:
+                return False
+            else:
+                return True
+
+    # constraint6: options[31] can't be more than two values apart from options[16], options[21], options[26]
+    @staticmethod
+    def satisfy_const6(sign):
+        # [16, 21, 26]: e, i, f
+        # [31]: E, e, i, f
+        if sign[31] == 'E':
+            if 'f' in [sign[16], sign[21], sign[26]]:
+                return False
+            else:
+                return True
+        elif sign[31] == 'e':
+            return True
+        elif sign[31] == 'i':
+            return True
+        else:  # sign[30] == 'f':
+            return True
+
+    @staticmethod
+    def match(sign):
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeC.options)]) and \
+               all([HandshapeC.satisfy_const1(sign), HandshapeC.satisfy_const2(sign), HandshapeC.satisfy_const3(sign),
+                    HandshapeC.satisfy_const4(sign), HandshapeC.satisfy_const5(sign), HandshapeC.satisfy_const6(sign)])
+
+
+class HandshapeO(object):
+    canonical = ('_', 'O', '{', 'e', 'f',
+                 'fr', 'd', NULL, '/', 'fr', 'd', '1', '2', '-', '-',
+                 '1', 'f', 'i', 'e',
+                 '=', '2', 'f', 'i', 'e',
+                 '=', '3', 'f', 'i', 'e',
+                 '=', '4', 'e', 'i', 'e')
+
+    options = [
+        ['O'], ['{'], ['e', 'i'], ['i', 'f', 'F', '?'],
+        ['t', 'fr'], ['d'], [NULL], ['/'], ['t', 'fr'], ['d'], ['-', '1'], ['-', '2'], ['-', '3'], ['-'],
+        ['1'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
+        ['=', 'x-'], ['2'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
+        ['=', 'x-'], ['3'], ['i', 'f'], ['i', 'f'], ['e', 'i', 'f', '?'],
+        ['=', 'x-'], ['4'], ['e', 'i', 'f'], ['e', 'i'], ['E', 'e', 'i', '?']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: option[2], option[3]: can't be more than two values apart from each other
+    @staticmethod
+    def satisfy_const1(sign):
+        return (sign[2], sign[3]) != ('e', 'F')
+
+    # constraint2: option[10], option[11], option[12]: can't all be '-'
+    @staticmethod
+    def satisfy_const2(sign):
+        return (sign[10], sign[11], sign[12]) != ('-', '-', '-')
+
+    @staticmethod
+    def match(sign):
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeO.options)]) and \
+               all([HandshapeO.satisfy_const1(sign), HandshapeO.satisfy_const2(sign)])
+
+
+class HandshapeS(object):
+    canonical = ('_', 'O', '=', 'i', 'f',
+                 'fr', 'd', NULL, '/', 'b', 'm', '1', '2', '-', '-',
+                 '1', 'F', 'F', 'F',
+                 '=', '2', 'F', 'F', 'F',
+                 '=', '3', 'F', 'F', 'F',
+                 '=', '4', 'F', 'F', 'F')
+
+    options = [
+        ['O'], ['{', '=', '?'], ['e', 'i', 'f', '?'], ['e', 'i', 'f', 'F', '?'],
+        ['fr', 'u', '?'], ['d', '?'], [NULL], ['/'], ['b', '?'], ['m', '?'], ['-', '1', '?'], ['-', '2', '?'], ['-', '3', '?'], ['-', '?'],
+        ['1'], ['f', 'F'], ['F', '?'], ['f', 'F', '?'],
+        ['='], ['2'], ['f', 'F'], ['F', '?'], ['i', 'f', 'F', '?'],
+        ['='], ['3'], ['f', 'F'], ['F', '?'], ['i', 'f', 'F', '?'],
+        ['='], ['4'], ['f', 'F'], ['f', 'F', '?'], ['i', 'f', 'F', '?']
+    ]
+
+    def __init__(self):
+        super().__init__()
+
+    # constraint1: option[1] and option[3]: "{" can happen only if option[3] if "F"
+    @staticmethod
+    def satisfy_const1(sign):
+        if (sign[1], sign[3]) in [('{', 'e'), ('{', 'i')]:
+            return False
+        else:
+            return True
+
+    # constraint2: option[3], option[4], option[10], option[11], option[12]:
+    # "u" (option[4]) can happen only if thumb only contacts finger 1 (option[10]), or thumb's DIP is "F" (option[3])
+    @staticmethod
+    def satisfy_const2(sign):
+        if sign[4] == 'u':
+            if (sign[10], sign[11], sign[12]) != ('1', '-', '-'):
+                return False
+
+            if sign[3] != 'F':
+                return False
+
+            return True
+        else:
+            return True
+
+    # constraint3: option[10], option[11], option[12]:
+    # Minimum contact of one finger, Maximum 2, but they have to be adjacent to each other (e.g., [12--], not [1-3-])
+    @staticmethod
+    def satisfy_const3(sign):
+        # Minimum contact of one finger
+        if (sign[10], sign[11], sign[12]) == ('-', '-', '-'):
+            return False
+        # Maximum 2, but they have to be adjacent to each other (e.g., [12--], not [1-3-])
+        elif (sign[10], sign[11], sign[12]) in [('1', '2', '3'), ('1', '-', '3')]:
+            return False
+        else:
+            return True
+
+    # constraint4: option[15], option[20], option[25], option[30]: they have to have all the same flexion value (e.g., f, f, f, f),
+    # or from finger 1 to finger 4 have an increasing flexion value (e.g., f,f,F,F) or increasing-decreasing (e.g.: f,F,F,f),
+    # but not decreasing flexion (e.g.: F,f,f,f), decreasing-increasing (e.g.: F,f,f,F) or f, F, f, F.
+    @staticmethod
+    def satisfy_const4(sign):
+        if any([symbol == '?' for symbol in [sign[15], sign[20], sign[25], sign[30]]]):
+            return True
+
+        return not is_decreasing_flexion_first(sign[15], sign[20], sign[25], sign[30])
+
+    # constraint5: option[17], option[22], option[27], option[32]: they have to have all the same flexion value (e.g., f,f,f,f),
+    # or from thumb to finger 4 have an increasing flexion value (e.g., f, f, F, F, but not the other way around (e.g., F, f, f, i,),
+    # or F, f, F, i.
+    @staticmethod
+    def satisfy_const5(sign):
+        if any([symbol == '?' for symbol in [sign[17], sign[22], sign[27], sign[32]]]):
+            return True
+
+        return increasing_or_equal_flexion(sign[17], sign[22], sign[27], sign[32])
+
+    @staticmethod
+    def match(sign):
+        return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeS.options)]) and \
+               all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])  # Constraint 4 and 5 are relaxed
