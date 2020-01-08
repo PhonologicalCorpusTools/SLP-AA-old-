@@ -1651,7 +1651,6 @@ class MainWindow(QMainWindow):
         alert.setText('Corpus updated!')
         alert.exec_()
 
-
     def initCorpusNotes(self):
         self.corpusNotes = NotesDialog()
         if self.corpus is None:
