@@ -1095,9 +1095,8 @@ class MainWindow(QMainWindow):
         self.frequencySlot.setText(str(sign['_frequency']))
 
         if not hasattr(sign, '_coder') or not hasattr(sign, '_lastUpdated'):
-            # TODO: determine the default values here
             setattr(sign, '_coder', 'Unknown')
-            setattr(sign, '_lastUpdated', self.today)
+            setattr(sign, '_lastUpdated', date(year=1, month=1, day=1))
 
         self.transcriptionInfo.coderLineEdit.setText(sign['_coder'])
         self.transcriptionInfo.lastUpdatedLineEdit.setText(str(sign['_lastUpdated']))
