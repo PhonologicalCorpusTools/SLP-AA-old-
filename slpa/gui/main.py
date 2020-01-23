@@ -22,6 +22,7 @@ from gui.handshape_search import HandshapeSearchDialog
 from gui.phonological_search import ExtendedFingerSearchDialog
 from gui.results_windows import ResultsWindow, SearchResultsWindow
 from gui.helperwidgets import PredefinedHandshapeDialog
+from slpa import __version__
 #from slpa import __version__ as currentSLPAversion
 from pprint import pprint
 
@@ -280,6 +281,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('SLP-Annotator')
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
         self.setContentsMargins(0, 0, 0, 0)
+
+        self.statusBar().addWidget(QLabel(), stretch=1)
+        self.statusBar().addWidget(QLabel('Version: ' + __version__))
 
         self.frequency = 1.0
         self.coder = getuser()
