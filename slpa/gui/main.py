@@ -22,8 +22,7 @@ from gui.handshape_search import HandshapeSearchDialog
 from gui.phonological_search import ExtendedFingerSearchDialog
 from gui.results_windows import ResultsWindow, SearchResultsWindow
 from gui.helperwidgets import PredefinedHandshapeDialog
-from slpa import __version__
-#from slpa import __version__ as currentSLPAversion
+import __init__
 from pprint import pprint
 
 __currentSLPAversion__ = 0.1
@@ -283,7 +282,7 @@ class MainWindow(QMainWindow):
         self.setContentsMargins(0, 0, 0, 0)
 
         self.statusBar().addWidget(QLabel(), stretch=1)
-        self.statusBar().addWidget(QLabel('Version: ' + __version__))
+        self.statusBar().addWidget(QLabel('Version: ' + __init__.__version__))
 
         self.frequency = 1.0
         self.coder = getuser()
