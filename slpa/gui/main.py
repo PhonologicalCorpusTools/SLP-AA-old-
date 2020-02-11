@@ -644,6 +644,7 @@ class MainWindow(QMainWindow):
         self.settings.setValue('restrictedTranscriptions', self.setRestrictionsAct.isChecked())
         self.settings.setValue('autoSave', self.autoSaveAct.isChecked())
         self.settings.setValue('blenderPath', self.blenderPath)
+        self.settings.setValue('previousFolderPath', self.previousFolderPath)
         self.settings.endGroup()
 
         self.settings.beginGroup('recentSearches')
@@ -687,6 +688,7 @@ class MainWindow(QMainWindow):
         self.autoSave = self.settings.value('autosave', type=bool)
         self.autoSaveAct.setChecked(self.autoSave)
         self.blenderPath = self.settings.value('blenderPath')
+        self.previousFolderPath = self.settings.value('previousFolderPath', defaultValue=os.getcwd(), type=str)
         self.settings.endGroup()
 
         self.settings.beginGroup('recentSearches')
@@ -957,10 +959,12 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpusDock)
 
     def loadCorpus(self, showFileDialog = True):
-        file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', os.getcwd(), '*.corpus')
+        file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', self.previousFolderPath, '*.corpus')
         file_path = file_path[0]
+
         if not file_path:
             return None
+        self.previousFolderPath = file_path
         self.corpus = load_binary(file_path)
         self.corpus.path = file_path
         #self.checkBackwardsComptibility()
@@ -1016,12 +1020,13 @@ class MainWindow(QMainWindow):
             alert.exec_()
             role = alert.buttonRole(alert.clickedButton())
             if role == QMessageBox.AcceptRole:# create new corpus
-                savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', os.getcwd(), '*.corpus')
+                savename = QFileDialog.getSaveFileName(self, 'Save Corpus File', self.previousFolderPath, '*.corpus')
                 path = savename[0]
                 if not path:
                     return
                 if not path.endswith('.corpus'):
                     path = path + '.corpus'
+                self.previousFolderPath = path
                 kwargs['file_mode'] = 'w'
                 kwargs['path'] = path
                 kwargs['name'] = os.path.split(path)[1].split('.')[0]
@@ -1641,10 +1646,11 @@ class MainWindow(QMainWindow):
         self.analyzer.show()
 
     def forceComptibilityUpdate(self):
-        file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', os.getcwd(), '*.corpus')
+        file_path = QFileDialog.getOpenFileName(self, 'Open Corpus File', self.previousFolderPath, '*.corpus')
         file_path = file_path[0]
         if not file_path:
             return
+        self.previousFolderPath = file_path
         self.corpus = load_binary(file_path)
         self.corpus.path = file_path
         self.checkBackwardsComptibility(forceUpdate=True)
@@ -1831,10 +1837,11 @@ class MainWindow(QMainWindow):
             alert.exec_()
             if alert.buttonRole(alert.clickedButton()) == QMessageBox.NoRole:
                 return
-        filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from TSV', os.getcwd(), '*.tsv')
+        filepath = QFileDialog.getOpenFileName(self, 'Import Corpus from TSV', self.previousFolderPath, '*.tsv')
         filepath = filepath[0]
         if not filepath:
             return
+        self.previousFolderPath = filepath
         filepath, filename = os.path.split(filepath)
         filename = filename.split('.')[0]
 
