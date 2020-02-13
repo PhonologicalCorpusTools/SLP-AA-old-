@@ -321,7 +321,7 @@ class MainWindow(QMainWindow):
 
         #Make save button
         self.saveButton = QPushButton('Save word to corpus')
-        self.saveButton.clicked.connect(self.saveCorpus)
+        self.saveButton.clicked.connect(lambda: self.saveCorpus(checkForDuplicates=True, ))
         topLayout.addWidget(self.saveButton)
 
         #Make delete button
@@ -1008,7 +1008,7 @@ class MainWindow(QMainWindow):
 
     @decorators.checkForGloss
     #@decorators.checkForCorpus
-    def saveCorpus(self, checkForDuplicates=True, isDuplicate = False):
+    def saveCorpus(self, checkForDuplicates=True, isDuplicate=False):
         kwargs = self.generateKwargs()
         if self.corpus is None:
             alert = QMessageBox()
