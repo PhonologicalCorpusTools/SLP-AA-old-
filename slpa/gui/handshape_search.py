@@ -108,8 +108,11 @@ class ConfigHandList(QListWidget):
 class ConfigHandPanel(QGroupBox):
     def __init__(self, title):
         super().__init__(title)
+        self.positive = QCheckBox('Set negative', parent=self)
         self.selectionList = ConfigHandList(parent=self)
+
         Layout = QVBoxLayout()
+        Layout.addWidget(self.positive)
         Layout.addWidget(self.selectionList)
         self.setLayout(Layout)
 
