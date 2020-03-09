@@ -117,12 +117,17 @@ class ConfigHandPanel(QGroupBox):
         self.setLayout(Layout)
 
     def value(self):
-        labels = set()
-        numItems = self.selectionList.count()
-        for i in range(numItems):
-            label = self.selectionList.item(i).text()
-            labels.add(label)
-        return labels
+        labels = {self.selectionList.item(i).text() for i in range(self.selectionList.count())}
+        if self.positive.isChecked():  # Set negative
+            operator = lambda x: not x
+        else:
+            operator = lambda x: x
+        #labels = set()
+        #numItems = self.selectionList.count()
+        #for i in range(numItems):
+        #    label = self.selectionList.item(i).text()
+        #    labels.add(label)
+        return {'labels': labels, 'positive': operator}
 
 
 class HandshapePanel(QGroupBox):
@@ -311,7 +316,7 @@ class HandshapeSearchDialog(FunctionDialog):
 
     #def test(self):
     #    res = self.generateKwargs()
-    #    ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
+        #ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
     #    pprint(res)
 
     def createConfigHand(self):

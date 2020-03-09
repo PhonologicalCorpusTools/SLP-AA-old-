@@ -54,18 +54,27 @@ def handshape_search(corpus, forearm, estimated, uncertain, incomplete, config, 
 
 
 def check_handshape(sign, logic, c1h1, c1h2, c2h1, c2h2):
+    #print(sign)
     sign_c1h1 = [slot if slot else '_' for slot in sign.config1hand1[1:]]
     sign_c1h2 = [slot if slot else '_' for slot in sign.config1hand2[1:]]
     sign_c2h1 = [slot if slot else '_' for slot in sign.config2hand1[1:]]
     sign_c2h2 = [slot if slot else '_' for slot in sign.config2hand2[1:]]
 
+    #for shape in c1h1['labels']:
+    #    print(shape)
+    #    print('   ', handshape_mapping[shape]().match(sign_c1h1))
+    #    print('   ', 'positive', c1h1['positive'])
+    #    print('   ', c1h1['positive'](handshape_mapping[shape]().match(sign_c1h1)))
+
+    #print('Overall', c1h1['positive'](any([handshape_mapping[shape]().match(sign_c1h1) for shape in c1h1['labels']])))
+
     if logic == 'Any of the above configurations':
-        return any([any([handshape_mapping[shape]().match(sign_c1h1) for shape in c1h1]),
-                    any([handshape_mapping[shape]().match(sign_c1h2) for shape in c1h2]),
-                    any([handshape_mapping[shape]().match(sign_c2h1) for shape in c2h1]),
-                    any([handshape_mapping[shape]().match(sign_c2h2) for shape in c2h2])])
+        return any([c1h1['positive'](any([handshape_mapping[shape]().match(sign_c1h1) for shape in c1h1['labels']])),
+                    c1h1['positive'](any([handshape_mapping[shape]().match(sign_c1h2) for shape in c1h2['labels']])),
+                    c1h1['positive'](any([handshape_mapping[shape]().match(sign_c2h1) for shape in c2h1['labels']])),
+                    c1h1['positive'](any([handshape_mapping[shape]().match(sign_c2h2) for shape in c2h2['labels']]))])
     else:  # logic == 'All of the above configurations'
-        return all([any([handshape_mapping[shape]().match(sign_c1h1) for shape in c1h1]),
-                    any([handshape_mapping[shape]().match(sign_c1h2) for shape in c1h2]),
-                    any([handshape_mapping[shape]().match(sign_c2h1) for shape in c2h1]),
-                    any([handshape_mapping[shape]().match(sign_c2h2) for shape in c2h2])])
+        return all([c1h1['positive'](any([handshape_mapping[shape]().match(sign_c1h1) for shape in c1h1['labels']])),
+                    c1h2['positive'](any([handshape_mapping[shape]().match(sign_c1h2) for shape in c1h2['labels']])),
+                    c2h1['positive'](any([handshape_mapping[shape]().match(sign_c2h1) for shape in c2h1['labels']])),
+                    c2h2['positive'](any([handshape_mapping[shape]().match(sign_c2h2) for shape in c2h2['labels']]))])
