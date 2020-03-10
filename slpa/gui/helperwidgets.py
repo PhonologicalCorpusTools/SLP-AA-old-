@@ -3,6 +3,8 @@ from imports import (QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioBu
 from image import getMediaFilePath
 from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, HandshapeB1, HandshapeB2, HandshapeC,
                                           HandshapeO, HandshapeS)
+from analysis.marked_handshapes import (Handshape3, HandshapeCIndex, HandshapeD, HandshapeG, HandshapeILY, HandshapeK,
+                                        HandshapeL, HandshapeSick, HandshapeW, HandshapeY)
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -46,14 +48,23 @@ class HandshapePanel(QGroupBox):
 
     handshape_mapping = {
         '1': Handshape1,
+        '3': Handshape3,
         '5': Handshape5,
         'A': HandshapeA,
         'B1': HandshapeB1,
         'B2': HandshapeB2,
         'C': HandshapeC,
+        'C-index': HandshapeCIndex,
+        'D': HandshapeD,
+        'G': HandshapeG,
+        'ILY': HandshapeILY,
+        'K': HandshapeK,
+        'L': HandshapeL,
         'O': HandshapeO,
         'S': HandshapeS,
-        'g': Handshape5
+        'sick': HandshapeSick,
+        'W': HandshapeW,
+        'Y': HandshapeY
     }
 
     def __init__(self, title, parent=None):
@@ -130,7 +141,17 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addUnmarkedHandshape('C')
         ASLHandshapeInventory.addUnmarkedHandshape('O')
         ASLHandshapeInventory.addUnmarkedHandshape('S')
-        ASLHandshapeInventory.addMarkedHandshape('g')
+
+        ASLHandshapeInventory.addMarkedHandshape('3')
+        ASLHandshapeInventory.addMarkedHandshape('C-index')
+        ASLHandshapeInventory.addMarkedHandshape('D')
+        ASLHandshapeInventory.addMarkedHandshape('G')
+        ASLHandshapeInventory.addMarkedHandshape('ILY')
+        ASLHandshapeInventory.addMarkedHandshape('K')
+        ASLHandshapeInventory.addMarkedHandshape('L')
+        ASLHandshapeInventory.addMarkedHandshape('sick')
+        ASLHandshapeInventory.addMarkedHandshape('W')
+        ASLHandshapeInventory.addMarkedHandshape('Y')
 
         languageTab.addTab(ASLHandshapeInventory, 'ASL')
 
