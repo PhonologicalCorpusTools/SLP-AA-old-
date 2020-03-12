@@ -237,11 +237,26 @@ class HandshapeSearchDialog(FunctionDialog):
                                                  one='One-config signs', two='Two-config signs', e='Either')
         self.configLogic.chosen.connect(self.handleConfigChange)
 
-        self.handLogic = LogicRadioButtonGroup('vertical', 'e',
-                                               title='Hand',
-                                               one='One-hand signs', two='Two-hand signs', e='Either')
-        self.handLogic.chosen.connect(self.handleHandChange)
+        #self.handLogic = LogicRadioButtonGroup('vertical', 'e',
+        #                                       title='Hand',
+        #                                       one='One-hand signs', two='Two-hand signs', e='Either')
+        #self.handLogic.chosen.connect(self.handleHandChange)
 
+        self.handCheckboxGroup = QGroupBox('Hand')
+        self.box1 = QCheckBox('One-hand signs')
+        self.box2 = QCheckBox('Two-hand signs (H1 == H2)')
+        self.box3 = QCheckBox('Two-hand signs (H1 != H2)')
+
+        self.box1.setChecked(True)
+        self.box2.setChecked(True)
+        self.box3.setChecked(True)
+
+        vBox = QVBoxLayout()
+        vBox.addWidget(self.box1)
+        vBox.addWidget(self.box2)
+        vBox.addWidget(self.box3)
+        self.handCheckboxGroup.setLayout(vBox)
+        # TODO: implement function to handle the hand widget
 
         self.createConfigHand()
         self.createHandshapes()
@@ -258,7 +273,8 @@ class HandshapeSearchDialog(FunctionDialog):
         mainLayout = QGridLayout()
         mainLayout.addWidget(globalFrame, 0, 0, 1, 2)
         mainLayout.addWidget(self.configLogic, 0, 2, 1, 1)
-        mainLayout.addWidget(self.handLogic, 0, 3, 1, 1)
+        #mainLayout.addWidget(self.handLogic, 0, 3, 1, 1)
+        mainLayout.addWidget(self.handCheckboxGroup, 0, 3, 1, 1)
         mainLayout.addWidget(self.c1h1Group, 1, 0, 1, 1)
         mainLayout.addWidget(self.c1h2Group, 1, 1, 1, 1)
         mainLayout.addWidget(self.c2h1Group, 1, 2, 1, 1)
