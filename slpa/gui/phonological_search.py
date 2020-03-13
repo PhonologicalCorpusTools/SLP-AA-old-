@@ -116,12 +116,27 @@ class BasicSearchTab(QWidget):
                                                         fg='Apply only the finger configuration',
                                                         nf='Apply only the number of extended fingers')
 
-        self.signTypePanel = LogicRadioButtonGroup('vertical',
-                                                   'e',
-                                                   title='Sign type',
-                                                   sg='Only one-hand signs',
-                                                   db='Only two-hand signs',
-                                                   e='Either')
+        #self.signTypePanel = LogicRadioButtonGroup('vertical',
+        #                                           'e',
+        #                                           title='Sign type',
+        #                                           sg='Only one-hand signs',
+        #                                           db='Only two-hand signs',
+        #                                           e='Either')
+
+        self.handCheckboxGroup = QGroupBox('Hand')
+        self.box1 = QCheckBox('One-hand signs')
+        self.box2 = QCheckBox('Two-hand signs (H1 == H2)')
+        self.box3 = QCheckBox('Two-hand signs (H1 != H2)')
+
+        self.box1.setChecked(True)
+        self.box2.setChecked(True)
+        self.box3.setChecked(True)
+
+        vBox = QVBoxLayout()
+        vBox.addWidget(self.box1)
+        vBox.addWidget(self.box2)
+        vBox.addWidget(self.box3)
+        self.handCheckboxGroup.setLayout(vBox)
 
         self.modePanel = LogicRadioButtonGroup('vertical',
                                                'p',
@@ -138,7 +153,8 @@ class BasicSearchTab(QWidget):
         mainLayout.addWidget(self.fingerConfigPanel, 1, 0, 1, 3)
         mainLayout.addWidget(self.fingerNumberPanel, 2, 0, 1, 3)
         mainLayout.addWidget(self.relationlogicPanel, 3, 0, 1, 1)
-        mainLayout.addWidget(self.signTypePanel, 3, 1, 1, 1)
+        #mainLayout.addWidget(self.signTypePanel, 3, 1, 1, 1)
+        mainLayout.addWidget(self.handCheckboxGroup, 3, 1, 1, 1)
         mainLayout.addWidget(self.modePanel, 3, 2, 1, 1)
         mainLayout.addWidget(self.notePanel, 4, 0, 1, 3)
 
@@ -226,12 +242,29 @@ class AdvancedSearchTab(QWidget):
                                                 all='All four hand/configuration specifications',
                                                 any='Any of the four hand/configuration specifications')
 
-        self.signTypePanel = LogicRadioButtonGroup('horizontal',
-                                                   'e',
-                                                   title='Sign type',
-                                                   sg='Only one-hand signs',
-                                                   db='Only two-hand signs',
-                                                   e='Either')
+        #self.signTypePanel = LogicRadioButtonGroup('horizontal',
+        #                                           'e',
+        #                                           title='Sign type',
+        #                                           sg='Only one-hand signs',
+        #                                           db='Only two-hand signs',
+        #                                           e='Either')
+
+        self.handCheckboxGroup = QGroupBox('Hand')
+        self.box1 = QCheckBox('One-hand signs')
+        self.box2 = QCheckBox('Two-hand signs (H1 == H2)')
+        self.box3 = QCheckBox('Two-hand signs (H1 != H2)')
+
+        self.box1.setChecked(True)
+        self.box2.setChecked(True)
+        self.box3.setChecked(True)
+
+        hBox = QHBoxLayout()
+        hBox.addWidget(self.box1)
+        hBox.addWidget(self.box2)
+        hBox.addWidget(self.box3)
+        self.handCheckboxGroup.setLayout(hBox)
+        # TODO: connect to the handling function
+
         self.notePanel = QLineEdit()
         self.notePanel.setPlaceholderText('Enter notes here...')
 
@@ -239,7 +272,8 @@ class AdvancedSearchTab(QWidget):
         self.setLayout(mainLayout)
         mainLayout.addWidget(handTab)
         mainLayout.addWidget(self.logicPanel)
-        mainLayout.addWidget(self.signTypePanel)
+        #mainLayout.addWidget(self.signTypePanel)
+        mainLayout.addWidget(self.handCheckboxGroup)
         mainLayout.addWidget(self.notePanel)
 
     def value(self):

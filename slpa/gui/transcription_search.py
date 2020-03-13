@@ -1,5 +1,5 @@
 from datetime import date
-from imports import (QVBoxLayout, QHBoxLayout, QGroupBox, QPushButton, QLabel,
+from imports import (QVBoxLayout, QHBoxLayout, QGroupBox, QPushButton, QLabel, QCheckBox,
                      QGridLayout, QWidget, Qt, Slot, QLineEdit, QMenu, QAction)
 from gui.function_windows import FunctionDialog, FunctionWorker
 from pprint import pprint
@@ -707,9 +707,27 @@ class TranscriptionSearchDialog(FunctionDialog):
         self.incompleteLogic = LogicRadioButtonGroup('vertical', 'e', title='Incomplete', y='Yes', n='No', e='Either')
 
         self.configLogic = LogicRadioButtonGroup('vertical', 'e', title='Configuration', one='One-config signs', two='Two-config signs', e='Either')
-        self.configLogic.setFixedWidth(150)
-        self.handLogic = LogicRadioButtonGroup('vertical', 'e', title='Hand', one='One-hand signs', two='Two-hand signs', e='Either')
-        self.handLogic.setFixedWidth(150)
+        #self.configLogic.setFixedWidth(150)
+
+        self.handCheckboxGroup = QGroupBox('Hand')
+        self.box1 = QCheckBox('One-hand signs')
+        self.box2 = QCheckBox('Two-hand signs (H1 == H2)')
+        self.box3 = QCheckBox('Two-hand signs (H1 != H2)')
+
+        self.box1.setChecked(True)
+        self.box2.setChecked(True)
+        self.box3.setChecked(True)
+
+        vBox = QVBoxLayout()
+        vBox.addWidget(self.box1)
+        vBox.addWidget(self.box2)
+        vBox.addWidget(self.box3)
+        self.handCheckboxGroup.setLayout(vBox)
+        # TODO: implement function to handle the hand widget
+        #self.handCheckboxGroup.setFixedWidth(150)
+
+        #self.handLogic = LogicRadioButtonGroup('vertical', 'e', title='Hand', one='One-hand signs', two='Two-hand signs', e='Either')
+        #self.handLogic.setFixedWidth(150)
 
         frequencyGroup = QGroupBox('Frequency')
         frequencyGroup.setFixedWidth(100)
@@ -761,7 +779,8 @@ class TranscriptionSearchDialog(FunctionDialog):
         mainLayout.addWidget(globalFrame, 0, 0, 1, 1)
         mainLayout.addWidget(frequencyGroup, 0, 1, 1, 1)
         mainLayout.addWidget(self.configLogic, 0, 2, 1, 1)
-        mainLayout.addWidget(self.handLogic, 0, 3, 1, 1)
+        #mainLayout.addWidget(self.handLogic, 0, 3, 1, 1)
+        mainLayout.addWidget(self.handCheckboxGroup, 0, 3, 1, 1)
         mainLayout.addWidget(config1Frame, 1, 0, 1, 4)
         mainLayout.addWidget(config2Frame, 2, 0, 1, 4)
         mainLayout.addWidget(metaInfoGroup, 3, 0, 1, 2)
