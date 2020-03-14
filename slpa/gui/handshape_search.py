@@ -267,6 +267,10 @@ class HandshapeSearchDialog(FunctionDialog):
                                                 all='All of the above configurations',
                                                 any='Any of the above configurations')
 
+        self.searchModePanel = LogicRadioButtonGroup('vertical', 'pos', 'Global search mode',
+                                                     pos='Positive search',
+                                                     neg='Negative search')
+
         self.notePanel = QLineEdit()
         self.notePanel.setPlaceholderText('Enter notes here...')
 
@@ -279,7 +283,8 @@ class HandshapeSearchDialog(FunctionDialog):
         mainLayout.addWidget(self.c1h2Group, 1, 1, 1, 1)
         mainLayout.addWidget(self.c2h1Group, 1, 2, 1, 1)
         mainLayout.addWidget(self.c2h2Group, 1, 3, 1, 1)
-        mainLayout.addWidget(self.logicPanel, 2, 0, 1, 2)
+        mainLayout.addWidget(self.logicPanel, 2, 0, 1, 1)
+        mainLayout.addWidget(self.searchModePanel, 2, 1, 1, 1)
         mainLayout.addWidget(self.otherGroup, 2, 2, 1, 2)
         mainLayout.addWidget(self.unmarkedGroup, 3, 0, 1, 4)
         mainLayout.addWidget(self.markedGroup, 4, 0, 1, 4)

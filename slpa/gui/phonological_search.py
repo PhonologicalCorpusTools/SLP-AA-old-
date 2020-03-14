@@ -242,6 +242,10 @@ class AdvancedSearchTab(QWidget):
                                                 all='All four hand/configuration specifications',
                                                 any='Any of the four hand/configuration specifications')
 
+        self.searchModePanel = LogicRadioButtonGroup('horizontal', 'pos', 'Global search mode',
+                                                     pos='Positive search',
+                                                     neg='Negative search')
+
         #self.signTypePanel = LogicRadioButtonGroup('horizontal',
         #                                           'e',
         #                                           title='Sign type',
@@ -272,6 +276,7 @@ class AdvancedSearchTab(QWidget):
         self.setLayout(mainLayout)
         mainLayout.addWidget(handTab)
         mainLayout.addWidget(self.logicPanel)
+        mainLayout.addWidget(self.searchModePanel)
         #mainLayout.addWidget(self.signTypePanel)
         mainLayout.addWidget(self.handCheckboxGroup)
         mainLayout.addWidget(self.notePanel)
