@@ -78,7 +78,10 @@ def find_sign_type(sign):
             or (c1h2 == '_______∅/______1____2____3____4___' and c2h2 == '_______∅/______1____2____3____4___'):
         typ = 'one'
     else:
-        typ = 'two'
+        if c1h1 == c1h2 and c2h1 == c2h2:
+            typ = 'two-same'
+        else:
+            typ = 'two-diff'
 
     return typ
 
@@ -92,20 +95,22 @@ def filter_logic(logic, c1h1_match, c1h2_match, c2h1_match, c2h2_match):
 
 
 def filter_type(actual, desired):
-    if desired == 'Only one-hand signs':
-        if actual == 'one':
-            matched = True
-        else:
-            matched = False
-    elif desired == 'Only two-hand signs':
-        if actual == 'two':
-            matched = True
-        else:
-            matched = False
-    else:  # either
-        matched = True
+    return actual in desired
 
-    return matched
+    # if desired == 'Only one-hand signs':
+    #     if actual == 'one':
+    #         matched = True
+    #     else:
+    #         matched = False
+    # elif desired == 'Only two-hand signs':
+    #     if actual == 'two':
+    #         matched = True
+    #     else:
+    #         matched = False
+    # else:  # either
+    #     matched = True
+    #
+    # return matched
 
 
 def extended_finger_search(corpus, c1h1, c1h2, c2h1, c2h2, logic, sign_type):

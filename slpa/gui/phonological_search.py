@@ -207,13 +207,20 @@ class BasicSearchTab(QWidget):
             c2h1 = neutralvalue
             c2h2 = handconfigvalue
 
+        signType = set()
+        for typ, check in (('one', self.box1.isChecked()),
+                           ('two-same', self.box2.isChecked()),
+                           ('two-diff', self.box3.isChecked())):
+            if check:
+                signType.add(typ)
+
         return {
             'c1h1': c1h1,
             'c1h2': c1h2,
             'c2h1': c2h1,
             'c2h2': c2h2,
             'logic': 'All four hand/configuration specifications',
-            'signType': self.signTypePanel.value(),
+            'signType': signType,
             'note': self.notePanel.text()
         }
 
@@ -267,7 +274,6 @@ class AdvancedSearchTab(QWidget):
         hBox.addWidget(self.box2)
         hBox.addWidget(self.box3)
         self.handCheckboxGroup.setLayout(hBox)
-        # TODO: connect to the handling function
 
         self.notePanel = QLineEdit()
         self.notePanel.setPlaceholderText('Enter notes here...')
@@ -282,13 +288,20 @@ class AdvancedSearchTab(QWidget):
         mainLayout.addWidget(self.notePanel)
 
     def value(self):
+        signType = set()
+        for typ, check in (('one', self.box1.isChecked()),
+                           ('two-same', self.box2.isChecked()),
+                           ('two-diff', self.box3.isChecked())):
+            if check:
+                signType.add(typ)
+
         return {
             'c1h1': self.c1h1Tab.value(),
             'c1h2': self.c1h2Tab.value(),
             'c2h1': self.c2h1Tab.value(),
             'c2h2': self.c2h2Tab.value(),
             'logic': self.logicPanel.value(),
-            'signType': self.signTypePanel.value(),
+            'signType': signType,
             'note': self.notePanel.text()
         }
 
