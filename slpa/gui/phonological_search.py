@@ -381,10 +381,16 @@ class ExtendedFingerSearchDialog(FunctionDialog):
 
         self.layout().insertLayout(0, mainLayout)
 
+        #####This part should be removed later#####
+        #self.testButton = QPushButton('test')
+        #mainLayout.addWidget(self.testButton, 1, 0)
+        #self.testButton.clicked.connect(self.test)
+        #####This part should be removed later#####
+
     #def test(self):
     #    res = self.generateKwargs()
     #    ret = extended_finger_search(self.corpus, res['c1h1'], res['c1h2'], res['c2h1'], res['c2h2'], res['logic'])
-    #    pprint(ret)
+    #    pprint(res)
 
     def generateKwargs(self):
         kwargs = dict()

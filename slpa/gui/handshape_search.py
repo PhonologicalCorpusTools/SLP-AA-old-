@@ -251,12 +251,15 @@ class HandshapeSearchDialog(FunctionDialog):
         self.box2.setChecked(True)
         self.box3.setChecked(True)
 
+        self.box1.stateChanged.connect(self.handCheckboxGroupChange)
+        self.box2.stateChanged.connect(self.handCheckboxGroupChange)
+        self.box3.stateChanged.connect(self.handCheckboxGroupChange)
+
         vBox = QVBoxLayout()
         vBox.addWidget(self.box1)
         vBox.addWidget(self.box2)
         vBox.addWidget(self.box3)
         self.handCheckboxGroup.setLayout(vBox)
-        # TODO: implement function to handle the hand widget
 
         self.createConfigHand()
         self.createHandshapes()
@@ -297,6 +300,13 @@ class HandshapeSearchDialog(FunctionDialog):
         #self.testButton.clicked.connect(self.test)
         #####This part should be removed later#####
         self.layout().insertWidget(0, scroll)
+
+    def handCheckboxGroupChange(self):
+        # TODO: implement function to handle the hand widget
+        print('==========')
+        print(self.box1.isChecked())
+        print(self.box2.isChecked())
+        print(self.box3.isChecked())
 
     def handleConfigChange(self, option):
         if option == 'One-config signs':
