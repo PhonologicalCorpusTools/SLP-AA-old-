@@ -3,8 +3,9 @@ from imports import (QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioBu
 from image import getMediaFilePath
 from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, HandshapeB1, HandshapeB2, HandshapeC,
                                           HandshapeO, HandshapeS)
-from analysis.marked_handshapes import (Handshape3, HandshapeCIndex, HandshapeD, HandshapeG, HandshapeILY, HandshapeK,
-                                        HandshapeL, HandshapeSick, HandshapeW, HandshapeY)
+from analysis.marked_handshapes import (Handshape3, HandshapeCIndex, HandshapeD, HandshapeG, HandshapeILY,
+                                        HandshapeK, HandshapeL, HandshapeSick, HandshapeW, HandshapeY,
+                                        HandshapeClawedF, HandshapeClawedL, HandshapeClawedV, HandshapeCombinedIPlusOne)
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -64,7 +65,11 @@ class HandshapePanel(QGroupBox):
         'S': HandshapeS,
         'sick': HandshapeSick,
         'W': HandshapeW,
-        'Y': HandshapeY
+        'Y': HandshapeY,
+        'clawed-F': HandshapeClawedF,
+        'clawed-L': HandshapeClawedL,
+        'clawed-V': HandshapeClawedV,
+        'combined-I+1': HandshapeCombinedIPlusOne
     }
 
     def __init__(self, title, parent=None):
@@ -152,6 +157,10 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addMarkedHandshape('sick')
         ASLHandshapeInventory.addMarkedHandshape('W')
         ASLHandshapeInventory.addMarkedHandshape('Y')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-F')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-L')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-V')
+        ASLHandshapeInventory.addMarkedHandshape('combined-I+1')
 
         languageTab.addTab(ASLHandshapeInventory, 'ASL')
 
