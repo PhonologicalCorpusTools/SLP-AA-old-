@@ -1,7 +1,7 @@
 from constants import X_IN_BOX, NULL
 
 
-class Handshape3:
+class HandshapeExtendedU:
     canonical = ('_', 'L', '{', 'E', 'E',
                  '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
                  '1', 'E', 'E', 'E',
@@ -28,7 +28,7 @@ class HandshapeD:
                  '=', '4', 'i', 'i', 'i')
 
 
-class HandshapeG:
+class HandshapeModifiedG:
     canonical = ('_', 'O', '<', 'E', 'E',
                  'fr', 'M', NULL, '/', '-', 'd', '-', '2', '3', '4',
                  '1', 'E', 'E', 'E',
@@ -37,7 +37,7 @@ class HandshapeG:
                  '=', '4', 'F', 'F', 'F')
 
 
-class HandshapeILY:
+class HandshapeCombinedLY:
     canonical = ('_', 'U', '{', 'E', 'E',
                  '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
                  '1', 'E', 'E', 'E',
@@ -64,7 +64,7 @@ class HandshapeL:
                  '=', '4', 'F', 'F', 'F')
 
 
-class HandshapeSick:
+class HandshapeExtended8:
     canonical = ('_', 'L', '{', 'E', 'E',
                  '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
                  '1', 'E', 'E', 'E',

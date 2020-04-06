@@ -3,8 +3,8 @@ from imports import (QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioBu
 from image import getMediaFilePath
 from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, HandshapeB1, HandshapeB2, HandshapeC,
                                           HandshapeO, HandshapeS)
-from analysis.marked_handshapes import (Handshape3, HandshapeCIndex, HandshapeD, HandshapeG, HandshapeILY,
-                                        HandshapeK, HandshapeL, HandshapeSick, HandshapeW, HandshapeY,
+from analysis.marked_handshapes import (HandshapeExtendedU, HandshapeCIndex, HandshapeD, HandshapeModifiedG, HandshapeCombinedLY,
+                                        HandshapeK, HandshapeL, HandshapeExtended8, HandshapeW, HandshapeY,
                                         HandshapeClawedF, HandshapeClawedL, HandshapeClawedV, HandshapeCombinedIPlusOne)
 
 
@@ -49,7 +49,7 @@ class HandshapePanel(QGroupBox):
 
     handshape_mapping = {
         '1': Handshape1,
-        '3': Handshape3,
+        'extended-U': HandshapeExtendedU,
         '5': Handshape5,
         'A': HandshapeA,
         'B1': HandshapeB1,
@@ -57,13 +57,13 @@ class HandshapePanel(QGroupBox):
         'C': HandshapeC,
         'C-index': HandshapeCIndex,
         'D': HandshapeD,
-        'G': HandshapeG,
-        'ILY': HandshapeILY,
+        'modified-G': HandshapeModifiedG,
+        'combined-LY': HandshapeCombinedLY,
         'K': HandshapeK,
         'L': HandshapeL,
         'O': HandshapeO,
         'S': HandshapeS,
-        'sick': HandshapeSick,
+        'extended-8': HandshapeExtended8,
         'W': HandshapeW,
         'Y': HandshapeY,
         'clawed-F': HandshapeClawedF,
@@ -147,14 +147,14 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addUnmarkedHandshape('O')
         ASLHandshapeInventory.addUnmarkedHandshape('S')
 
-        ASLHandshapeInventory.addMarkedHandshape('3')
+        ASLHandshapeInventory.addMarkedHandshape('extended-U')
         ASLHandshapeInventory.addMarkedHandshape('C-index')
         ASLHandshapeInventory.addMarkedHandshape('D')
-        ASLHandshapeInventory.addMarkedHandshape('G')
-        ASLHandshapeInventory.addMarkedHandshape('ILY')
+        ASLHandshapeInventory.addMarkedHandshape('modified-G')
+        ASLHandshapeInventory.addMarkedHandshape('combined-LY')
         ASLHandshapeInventory.addMarkedHandshape('K')
         ASLHandshapeInventory.addMarkedHandshape('L')
-        ASLHandshapeInventory.addMarkedHandshape('sick')
+        ASLHandshapeInventory.addMarkedHandshape('extended-8')
         ASLHandshapeInventory.addMarkedHandshape('W')
         ASLHandshapeInventory.addMarkedHandshape('Y')
         ASLHandshapeInventory.addMarkedHandshape('clawed-F')
