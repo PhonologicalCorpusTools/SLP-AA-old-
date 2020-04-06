@@ -5,7 +5,8 @@ from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, Ha
                                           HandshapeO, HandshapeS)
 from analysis.marked_handshapes import (HandshapeExtendedU, HandshapeCIndex, HandshapeD, HandshapeModifiedG, HandshapeCombinedLY,
                                         HandshapeK, HandshapeL, HandshapeExtended8, HandshapeW, HandshapeY,
-                                        HandshapeClawedF, HandshapeClawedL, HandshapeClawedV, HandshapeCombinedIPlusOne)
+                                        HandshapeClawedF, HandshapeClawedL, HandshapeClawedV, HandshapeCombinedIPlusOne, HandshapeI,
+                                        HandshapeF, HandshapeClosedW, HandshapeClawedW, HandshapeClawedSpreadC)
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -69,7 +70,12 @@ class HandshapePanel(QGroupBox):
         'clawed-F': HandshapeClawedF,
         'clawed-L': HandshapeClawedL,
         'clawed-V': HandshapeClawedV,
-        'combined-I+1': HandshapeCombinedIPlusOne
+        'combined-I+1': HandshapeCombinedIPlusOne,
+        'I': HandshapeI,
+        'F': HandshapeF,
+        'closed-W': HandshapeClosedW,
+        'clawed-W': HandshapeClawedW,
+        'clawed-spread-C': HandshapeClawedSpreadC
     }
 
     def __init__(self, title, parent=None):
@@ -161,6 +167,11 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addMarkedHandshape('clawed-L')
         ASLHandshapeInventory.addMarkedHandshape('clawed-V')
         ASLHandshapeInventory.addMarkedHandshape('combined-I+1')
+        ASLHandshapeInventory.addMarkedHandshape('F')
+        ASLHandshapeInventory.addMarkedHandshape('I')
+        ASLHandshapeInventory.addMarkedHandshape('closed-W')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-W')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-spread-C')
 
         languageTab.addTab(ASLHandshapeInventory, 'ASL')
 
