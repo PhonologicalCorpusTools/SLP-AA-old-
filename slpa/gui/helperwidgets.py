@@ -6,7 +6,9 @@ from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, Ha
 from analysis.marked_handshapes import (HandshapeExtendedU, HandshapeCIndex, HandshapeD, HandshapeModifiedG, HandshapeCombinedLY,
                                         HandshapeK, HandshapeL, HandshapeExtended8, HandshapeW, HandshapeY,
                                         HandshapeClawedF, HandshapeClawedL, HandshapeClawedV, HandshapeCombinedIPlusOne, HandshapeI,
-                                        HandshapeF, HandshapeClosedW, HandshapeClawedW, HandshapeClawedSpreadC)
+                                        HandshapeF, HandshapeClosedW, HandshapeClawedW, HandshapeClawedSpreadC, HandshapeBentI,
+                                        HandshapeBentThumbL, HandshapeBentV, HandshapeClawedExtendedV, HandshapeDoubleCIndex, HandshapeFlatC,
+                                        HandshapeMiddleFinger, HandshapeOIndex, HandshapeOpenF)
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -75,7 +77,16 @@ class HandshapePanel(QGroupBox):
         'F': HandshapeF,
         'closed-W': HandshapeClosedW,
         'clawed-W': HandshapeClawedW,
-        'clawed-spread-C': HandshapeClawedSpreadC
+        'clawed-spread-C': HandshapeClawedSpreadC,
+        'bent-I': HandshapeBentI,
+        'bent-thumb-L': HandshapeBentThumbL,
+        'bent-V': HandshapeBentV,
+        'clawed-extended-V': HandshapeClawedExtendedV,
+        'double-C-index': HandshapeDoubleCIndex,
+        'flat-C': HandshapeFlatC,
+        'middle-finger': HandshapeMiddleFinger,
+        'O-index': HandshapeOIndex,
+        'open-F': HandshapeOpenF
     }
 
     def __init__(self, title, parent=None):
@@ -172,6 +183,15 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addMarkedHandshape('closed-W')
         ASLHandshapeInventory.addMarkedHandshape('clawed-W')
         ASLHandshapeInventory.addMarkedHandshape('clawed-spread-C')
+        ASLHandshapeInventory.addMarkedHandshape('bent-I')
+        ASLHandshapeInventory.addMarkedHandshape('bent-thumb-L')
+        ASLHandshapeInventory.addMarkedHandshape('bent-V')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-extended-V')
+        ASLHandshapeInventory.addMarkedHandshape('double-C-index')
+        ASLHandshapeInventory.addMarkedHandshape('flat-C')
+        ASLHandshapeInventory.addMarkedHandshape('middle-finger')
+        ASLHandshapeInventory.addMarkedHandshape('O-index')
+        ASLHandshapeInventory.addMarkedHandshape('open-F')
 
         languageTab.addTab(ASLHandshapeInventory, 'ASL')
 
