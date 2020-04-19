@@ -3,12 +3,16 @@ from imports import (QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioBu
 from image import getMediaFilePath
 from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, HandshapeB1, HandshapeB2, HandshapeC,
                                           HandshapeO, HandshapeS)
-from analysis.marked_handshapes import (HandshapeExtendedU, HandshapeCIndex, HandshapeD, HandshapeModifiedG, HandshapeCombinedLY,
+from analysis.marked_handshapes import (HandshapeExtendedU, HandshapeCIndex, HandshapeD, HandshapeG, HandshapeCombinedLY,
                                         HandshapeK, HandshapeL, HandshapeExtended8, HandshapeW, HandshapeY,
                                         HandshapeClawedF, HandshapeClawedL, HandshapeClawedV, HandshapeCombinedIPlusOne, HandshapeI,
                                         HandshapeF, HandshapeClosedW, HandshapeClawedW, HandshapeClawedSpreadC, HandshapeBentI,
                                         HandshapeBentThumbL, HandshapeBentV, HandshapeClawedExtendedV, HandshapeDoubleCIndex, HandshapeFlatC,
-                                        HandshapeMiddleFinger, HandshapeOIndex, HandshapeOpenF)
+                                        HandshapeMiddleFinger, HandshapeOIndex, HandshapeOpenF, Handshape8, HandshapeClawedI,
+                                        HandshapeDoubleModifiedG, HandshapeCovered8, HandshapeSlantedB, HandshapeClawed1,
+                                        HandshapeExtendedC, HandshapeClosedModifiedG, HandshapeFlatCombinedIPlusOne, Handshape3,
+                                        HandshapeExtendedB, Handshape4, HandshapeClosedDoubleModifiedG, HandshapeOpen8,
+                                        HandshapeU, HandshapeClawed3, HandshapeExtendedA, HandshapeR, HandshapeV)
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -60,7 +64,7 @@ class HandshapePanel(QGroupBox):
         'C': HandshapeC,
         'C-index': HandshapeCIndex,
         'D': HandshapeD,
-        'modified-G': HandshapeModifiedG,
+        'G': HandshapeG,
         'combined-LY': HandshapeCombinedLY,
         'K': HandshapeK,
         'L': HandshapeL,
@@ -86,7 +90,26 @@ class HandshapePanel(QGroupBox):
         'flat-C': HandshapeFlatC,
         'middle-finger': HandshapeMiddleFinger,
         'O-index': HandshapeOIndex,
-        'open-F': HandshapeOpenF
+        'open-F': HandshapeOpenF,
+        '8': Handshape8,
+        'clawed-I': HandshapeClawedI,
+        'double-modified-G': HandshapeDoubleModifiedG,
+        'covered-8': HandshapeCovered8,
+        'slanted-B': HandshapeSlantedB,
+        'clawed-1': HandshapeClawed1,
+        'extended-C': HandshapeExtendedC,
+        'closed-modified-G': HandshapeClosedModifiedG,
+        'flat-combined-I+1': HandshapeFlatCombinedIPlusOne,
+        '3': Handshape3,
+        'extended-B': HandshapeExtendedB,
+        '4': Handshape4,
+        'closed-double-modified-G': HandshapeClosedDoubleModifiedG,
+        'open-8': HandshapeOpen8,
+        'U': HandshapeU,
+        'clawed-3': HandshapeClawed3,
+        'extended-A': HandshapeExtendedA,
+        'R': HandshapeR,
+        'V': HandshapeV
     }
 
     def __init__(self, title, parent=None):
@@ -167,7 +190,7 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addMarkedHandshape('extended-U')
         ASLHandshapeInventory.addMarkedHandshape('C-index')
         ASLHandshapeInventory.addMarkedHandshape('D')
-        ASLHandshapeInventory.addMarkedHandshape('modified-G')
+        ASLHandshapeInventory.addMarkedHandshape('G')
         ASLHandshapeInventory.addMarkedHandshape('combined-LY')
         ASLHandshapeInventory.addMarkedHandshape('K')
         ASLHandshapeInventory.addMarkedHandshape('L')
@@ -192,6 +215,25 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addMarkedHandshape('middle-finger')
         ASLHandshapeInventory.addMarkedHandshape('O-index')
         ASLHandshapeInventory.addMarkedHandshape('open-F')
+        ASLHandshapeInventory.addMarkedHandshape('8')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-I')
+        ASLHandshapeInventory.addMarkedHandshape('double-modified-G')
+        ASLHandshapeInventory.addMarkedHandshape('covered-8')
+        ASLHandshapeInventory.addMarkedHandshape('slanted-B')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-1')
+        ASLHandshapeInventory.addMarkedHandshape('extended-C')
+        ASLHandshapeInventory.addMarkedHandshape('closed-modified-G')
+        ASLHandshapeInventory.addMarkedHandshape('flat-combined-I+1')
+        ASLHandshapeInventory.addMarkedHandshape('3')
+        ASLHandshapeInventory.addMarkedHandshape('extended-B')
+        ASLHandshapeInventory.addMarkedHandshape('4')
+        ASLHandshapeInventory.addMarkedHandshape('closed-double-modified-G')
+        ASLHandshapeInventory.addMarkedHandshape('open-8')
+        ASLHandshapeInventory.addMarkedHandshape('U')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-3')
+        ASLHandshapeInventory.addMarkedHandshape('extended-A')
+        ASLHandshapeInventory.addMarkedHandshape('R')
+        ASLHandshapeInventory.addMarkedHandshape('V')
 
         languageTab.addTab(ASLHandshapeInventory, 'ASL')
 
