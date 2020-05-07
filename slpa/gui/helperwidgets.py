@@ -12,7 +12,9 @@ from analysis.marked_handshapes import (HandshapeExtendedU, HandshapeCIndex, Han
                                         HandshapeDoubleModifiedG, HandshapeCovered8, HandshapeSlantedB, HandshapeClawed1,
                                         HandshapeExtendedC, HandshapeClosedModifiedG, HandshapeFlatCombinedIPlusOne, Handshape3,
                                         HandshapeExtendedB, Handshape4, HandshapeClosedDoubleModifiedG, HandshapeOpen8,
-                                        HandshapeU, HandshapeClawed3, HandshapeExtendedA, HandshapeR, HandshapeV)
+                                        HandshapeU, HandshapeClawed3, HandshapeExtendedA, HandshapeR, HandshapeV,
+                                        HandshapeClosedAIndex, HandshapeModifiedF, HandshapeBentExtendedB, HandshapeClawedC,
+                                        HandshapeCoveredF, HandshapeN, HandshapeT)
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -109,7 +111,14 @@ class HandshapePanel(QGroupBox):
         'clawed-3': HandshapeClawed3,
         'extended-A': HandshapeExtendedA,
         'R': HandshapeR,
-        'V': HandshapeV
+        'V': HandshapeV,
+        'closed-A-index': HandshapeClosedAIndex,
+        'modified-F': HandshapeModifiedF,
+        'bent-extended-B': HandshapeBentExtendedB,
+        'clawed-C': HandshapeClawedC,
+        'covered-F': HandshapeCoveredF,
+        'N': HandshapeN,
+        'T': HandshapeT
     }
 
     def __init__(self, title, parent=None):
@@ -234,6 +243,13 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addMarkedHandshape('extended-A')
         ASLHandshapeInventory.addMarkedHandshape('R')
         ASLHandshapeInventory.addMarkedHandshape('V')
+        ASLHandshapeInventory.addMarkedHandshape('closed-A-index')
+        ASLHandshapeInventory.addMarkedHandshape('modified-F')
+        ASLHandshapeInventory.addMarkedHandshape('bent-extended-B')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-C')
+        ASLHandshapeInventory.addMarkedHandshape('covered-F')
+        ASLHandshapeInventory.addMarkedHandshape('N')
+        ASLHandshapeInventory.addMarkedHandshape('T')
 
         languageTab.addTab(ASLHandshapeInventory, 'ASL')
 
