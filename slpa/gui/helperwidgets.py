@@ -14,7 +14,10 @@ from analysis.marked_handshapes import (HandshapeExtendedU, HandshapeCIndex, Han
                                         HandshapeExtendedB, Handshape4, HandshapeClosedDoubleModifiedG, HandshapeOpen8,
                                         HandshapeU, HandshapeClawed3, HandshapeExtendedA, HandshapeR, HandshapeV,
                                         HandshapeClosedAIndex, HandshapeModifiedF, HandshapeBentExtendedB, HandshapeClawedC,
-                                        HandshapeCoveredF, HandshapeN, HandshapeT)
+                                        HandshapeCoveredF, HandshapeN, HandshapeT, HandshapeContractedUIndex, HandshapeCurvedW,
+                                        HandshapeSpreadExtendedC, HandshapeClawedExtendedB, HandshapeCombinedYAndMiddle,
+                                        HandshapeContractedC, HandshapeE, HandshapeExtendedE, HandshapeM, HandshapeBent1,
+                                        HandshapeContracted5, HandshapeOffsetF)
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -118,7 +121,19 @@ class HandshapePanel(QGroupBox):
         'clawed-C': HandshapeClawedC,
         'covered-F': HandshapeCoveredF,
         'N': HandshapeN,
-        'T': HandshapeT
+        'T': HandshapeT,
+        'contracted-U-index': HandshapeContractedUIndex,
+        'curved-W': HandshapeCurvedW,
+        'spread-extended-C': HandshapeSpreadExtendedC,
+        'clawed-extended-B': HandshapeClawedExtendedB,
+        'combined-Y&middle': HandshapeCombinedYAndMiddle,
+        'contracted-C': HandshapeContractedC,
+        'E': HandshapeE,
+        'extended-E': HandshapeExtendedE,
+        'M': HandshapeM,
+        'bent-1': HandshapeBent1,
+        'contracted-5': HandshapeContracted5,
+        'offset-F': HandshapeOffsetF
     }
 
     def __init__(self, title, parent=None):
@@ -250,6 +265,18 @@ class PredefinedHandshapeDialog(QDialog):
         ASLHandshapeInventory.addMarkedHandshape('covered-F')
         ASLHandshapeInventory.addMarkedHandshape('N')
         ASLHandshapeInventory.addMarkedHandshape('T')
+        ASLHandshapeInventory.addMarkedHandshape('contracted-U-index')
+        ASLHandshapeInventory.addMarkedHandshape('curved-W')
+        ASLHandshapeInventory.addMarkedHandshape('spread-extended-C')
+        ASLHandshapeInventory.addMarkedHandshape('clawed-extended-B')
+        ASLHandshapeInventory.addMarkedHandshape('combined-Y&middle')
+        ASLHandshapeInventory.addMarkedHandshape('contracted-C')
+        ASLHandshapeInventory.addMarkedHandshape('E')
+        ASLHandshapeInventory.addMarkedHandshape('extended-E')
+        ASLHandshapeInventory.addMarkedHandshape('M')
+        ASLHandshapeInventory.addMarkedHandshape('bent-1')
+        ASLHandshapeInventory.addMarkedHandshape('contracted-5')
+        ASLHandshapeInventory.addMarkedHandshape('offset-F')
 
         languageTab.addTab(ASLHandshapeInventory, 'ASL')
 
