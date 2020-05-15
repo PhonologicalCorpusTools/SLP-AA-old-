@@ -37,7 +37,7 @@ class HandshapeG:
                  '=', '4', 'F', 'F', 'F')
 
 
-class HandshapeCombinedLY:
+class HandshapeCombinedILY:
     canonical = ('_', 'U', '{', 'E', 'E',
                  '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
                  '1', 'E', 'E', 'E',
@@ -291,7 +291,7 @@ class HandshapeSlantedB:
                  '=', '3', 'i', 'E', 'E',
                  '=', '4', 'i', 'E', 'E')
 
-class HandshapeClawed1:
+class HandshapeX:
     canonical = ('_', 'O', '{', 'E', 'i',
                  'fr', 'd', NULL, '/', 'b', 'm', '-', '2', '-', '-',
                  '1', 'E', 'F', 'i',
@@ -507,7 +507,7 @@ class HandshapeE:
                  '=', '3', 'F', 'F', 'F',
                  '=', '4', 'F', 'F', 'F')
 
-class HandshapeExtendedE:
+class HandshapeOpenE:
     canonical = ('_', 'O', '=', 'F', 'F',
                  '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
                  '1', 'E', 'F', 'F',
@@ -539,7 +539,7 @@ class HandshapeContracted5:
                  '<', '3', 'E', 'E', 'E',
                  '<', '4', 'E', 'E', 'E')
 
-class HandshapeOffsetF:
+class HandshapeCrookedF:
     canonical = ('_', 'O', '{', 'E', 'E',
                  'fr', 'd', NULL, '/', 'r', 'm', '1', '-', '-', '-',
                  '1', 'F', 'F', 'E',
