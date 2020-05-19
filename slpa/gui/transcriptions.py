@@ -556,7 +556,6 @@ class TranscriptionLayout(QVBoxLayout):
         self.lineLayout.addWidget(self.predefinedImage)
 
         self.predefinedLabel = QLabel('')
-        self.predefinedLabel.setToolTip('Predefined handshape label matching the current transcription')
         self.predefinedLabel.setFixedSize(20, 20)
         self.predefinedLabel.setStyleSheet('background-color: darkgray;'
                                            'border-style: outset;'
@@ -661,6 +660,7 @@ class TranscriptionLayout(QVBoxLayout):
         handshapeLabel = predefined_handshape_mapping.get(tuple(self.values()), '')
         handshapeImage = QPixmap(getMediaFilePath(handshapeLabel + '.png'))
         self.predefinedLabel.setText(handshapeLabel)
+        self.predefinedLabel.setToolTip('Matched handshape: ' + handshapeLabel)
         self.predefinedImage.setPixmap(handshapeImage.scaled(self.predefinedImage.width(), self.predefinedImage.height(), Qt.KeepAspectRatio))
 
     def emitUpdateSignal(self, p_str):
