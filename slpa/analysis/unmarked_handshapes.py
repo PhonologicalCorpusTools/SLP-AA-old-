@@ -70,13 +70,13 @@ class HandshapeAny(object):
         return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeAny.options)])
 
 
-class Handshape1(object):
-    canonical = ('_', 'O', '=', 'f', 'f',
+class Handshape1():  #checked
+    canonical = ('_', 'O', '=', 'i', 'i',
                  'fr', 'd', NULL, '/', 'b', 'm', '-', '2', '-', '-',
-                 '1', 'E', 'E', 'H',
-                 '=', '2', 'f', 'f', 'f',
-                 '=', '3', 'F', 'f', 'f',
-                 '=', '4', 'F', 'f', 'f')
+                 '1', 'E', 'E', 'E',
+                 '<', '2', 'F', 'F', 'F',
+                 '=', '3', 'F', 'F', 'F',
+                 '=', '4', 'F', 'F', 'F')
 
     options = [
         ['O'], ['<', '=', '?'], ['i', 'f', 'F', '?'], ['i', 'f', 'F', '?'],
@@ -129,14 +129,14 @@ class Handshape1(object):
                     Handshape1.satisfy_const4(sign)])
 
 
-class Handshape5(object):
+class Handshape5():  #checked
     # note that for canonical we have one extra slot in the very beginning, which is always '_'
-    canonical = ('_', 'L', '{', 'f', 'E',
+    canonical = ('_', 'L', '{', 'E', 'E',
                  '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
                  '1', 'E', 'E', 'E',
-                 '<', '2', 'E', 'E', 'E',
-                 '<', '3', 'E', 'E', 'E',
-                 '=', '4', 'E', 'E', 'E')
+                 '{', '2', 'E', 'E', 'E',
+                 '{', '3', 'E', 'E', 'E',
+                 '{', '4', 'E', 'E', 'E')
 
     options = [
         ['L', 'U'], ['{'], ['E', 'e', 'f'], ['H', 'E', 'e'],
@@ -164,8 +164,8 @@ class Handshape5(object):
         return Handshape5.satisfy_const1(sign)
 
 
-class HandshapeA(object):
-    canonical = ('_', 'U', '=', 'e', 'e',
+class HandshapeA():  #checked
+    canonical = ('_', 'U', '=', 'E', 'E',
                  'fr', 'd', NULL, '/', 'r', 'p', '1', '-', '-', '-',
                  '1', 'F', 'F', 'F',
                  '=', '2', 'F', 'F', 'F',
@@ -258,9 +258,9 @@ class HandshapeA(object):
                     HandshapeA.satisfy_const7(sign)])
 
 
-class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
-    canonical = ('_', 'O', '=', 'i', 'e',
-                 '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
+class HandshapeB1():  #B1 = Opposed B (Henner et al., 2013)  #checked
+    canonical = ('_', 'O', '=', 'i', 'i',
+                 'fr', 'd', NULL, '/', 'fr', 'M', '-', '-', '3', '-',
                  '1', 'E', 'E', 'E',
                  '=', '2', 'E', 'E', 'E',
                  '=', '3', 'E', 'E', 'E',
@@ -359,9 +359,9 @@ class HandshapeB1(object):  #B1 = Opposed B (Henner et al., 2013)
                all([HandshapeB1.satisfy_const1(sign), HandshapeB1.satisfy_const2(sign)])
 
 
-class HandshapeB2(object):  #B2 = Plain B (Brentari, 2005)
-    canonical = ('_', 'L', '<', 'E', 'E',
-                 '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
+class HandshapeB2():  #B2 = Plain B (Brentari, 2005) #checked
+    canonical = ('_', 'U', '=', 'E', 'i',
+                 'u', 'p', NULL, '/', 'r', 'M', '1', '-', '-', '-',
                  '1', 'E', 'E', 'E',
                  '=', '2', 'E', 'E', 'E',
                  '=', '3', 'E', 'E', 'E',
@@ -419,13 +419,13 @@ class HandshapeB2(object):  #B2 = Plain B (Brentari, 2005)
                all([HandshapeB2.satisfy_const1(sign), HandshapeB2.satisfy_const2(sign), HandshapeB2.satisfy_const3(sign)])
 
 
-class HandshapeC(object):
-    canonical = ('_', 'O', '<', 'e', 'e',
+class HandshapeC():  #checked
+    canonical = ('_', 'O', '{', 'E', 'E',
                  '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
-                 '1', 'i', 'i', 'e',
-                 '=', '2', 'i', 'i', 'e',
-                 '=', '3', 'i', 'i', 'e',
-                 '=', '4', 'e', 'e', 'e')
+                 '1', 'i', 'i', 'i',
+                 '=', '2', 'i', 'i', 'i',
+                 '=', '3', 'i', 'i', 'i',
+                 '=', '4', 'i', 'i', 'i')
 
     options = [
         ['O'], ['<'], ['E', 'e', 'i'], ['E', 'e', 'i'],
@@ -524,13 +524,13 @@ class HandshapeC(object):
                     HandshapeC.satisfy_const4(sign), HandshapeC.satisfy_const5(sign), HandshapeC.satisfy_const6(sign)])
 
 
-class HandshapeO(object):
-    canonical = ('_', 'O', '{', 'e', 'f',
-                 'fr', 'd', NULL, '/', 'fr', 'd', '1', '2', '-', '-',
-                 '1', 'f', 'i', 'e',
-                 '=', '2', 'f', 'i', 'e',
-                 '=', '3', 'f', 'i', 'e',
-                 '=', '4', 'e', 'i', 'e')
+class HandshapeO():  #checked
+    canonical = ('_', 'O', '{', 'i', 'i',
+                 't', 'd', NULL, '/', 't', 'd', '1', '2', '-', '-',
+                 '1', 'i', 'i', 'i',
+                 '=', '2', 'i', 'i', 'i',
+                 '=', '3', 'i', 'i', 'i',
+                 '=', '4', 'i', 'i', 'i')
 
     options = [
         ['O'], ['{'], ['e', 'i'], ['i', 'f', 'F', '?'],
@@ -560,9 +560,9 @@ class HandshapeO(object):
                all([HandshapeO.satisfy_const1(sign), HandshapeO.satisfy_const2(sign)])
 
 
-class HandshapeS(object):
-    canonical = ('_', 'O', '=', 'i', 'f',
-                 'fr', 'd', NULL, '/', 'b', 'm', '1', '2', '-', '-',
+class HandshapeS():  #checked
+    canonical = ('_', 'O', '=', 'i', 'i',
+                 'fr', 'd', NULL, '/', 'b', 'm', '-', '2', '-', '-',
                  '1', 'F', 'F', 'F',
                  '=', '2', 'F', 'F', 'F',
                  '=', '3', 'F', 'F', 'F',
@@ -640,3 +640,11 @@ class HandshapeS(object):
     def match(sign):
         return all([symbol in allowed for symbol, allowed in zip(sign, HandshapeS.options)]) and \
                all([HandshapeS.satisfy_const1(sign), HandshapeS.satisfy_const2(sign), HandshapeS.satisfy_const3(sign)])  # Constraint 4 and 5 are relaxed
+
+class HandshapeBase():  #checked
+    canonical = ('_', 'U', '{', 'E', 'E',
+                 '-', '-', NULL, '/', '-', '-', '-', '-', '-', '-',
+                 '1', 'i', 'E', 'E',
+                 '=', '2', 'i', 'E', 'E',
+                 '=', '3', 'i', 'E', 'E',
+                 '=', '4', 'i', 'E', 'E')

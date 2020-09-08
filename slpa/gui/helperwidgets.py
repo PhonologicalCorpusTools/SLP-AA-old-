@@ -1,24 +1,48 @@
 from imports import (QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioButton, Signal, QDialog, QListWidget,
                      QSize, QListView, QIcon, QListWidgetItem, Qt, QTabWidget, QWidget, QSizePolicy, QAbstractTableModel,
-                     QTableView, QAbstractItemView, QColor)
+                     QTableView, QAbstractItemView, QColor, QImage, QMimeData, QDrag, QPixmap, QPoint)
 from image import getMediaFilePath
-from analysis.unmarked_handshapes import (Handshape1, Handshape5, HandshapeA, HandshapeB1, HandshapeB2, HandshapeC,
-                                          HandshapeO, HandshapeS, HandshapeEmpty)
-from analysis.marked_handshapes import (HandshapeExtendedU, HandshapeCIndex, HandshapeD, HandshapeG, HandshapeCombinedILY,
-                                        HandshapeK, HandshapeL, HandshapeExtended8, HandshapeW, HandshapeY,
-                                        HandshapeClawedF, HandshapeClawedL, HandshapeClawedV, HandshapeCombinedIPlusOne, HandshapeI,
-                                        HandshapeF, HandshapeClosedW, HandshapeClawedW, HandshapeClawedSpreadC, HandshapeBentI,
-                                        HandshapeBentThumbL, HandshapeBentV, HandshapeClawedExtendedV, HandshapeDoubleCIndex, HandshapeFlatC,
-                                        HandshapeMiddleFinger, HandshapeOIndex, HandshapeOpenF, Handshape8, HandshapeClawedI,
-                                        HandshapeDoubleModifiedG, HandshapeCovered8, HandshapeSlantedB, HandshapeX,
-                                        HandshapeExtendedC, HandshapeClosedModifiedG, HandshapeFlatCombinedIPlusOne, Handshape3,
-                                        HandshapeExtendedB, Handshape4, HandshapeClosedDoubleModifiedG, HandshapeOpen8,
-                                        HandshapeU, HandshapeClawed3, HandshapeExtendedA, HandshapeR, HandshapeV,
-                                        HandshapeClosedAIndex, HandshapeModifiedF, HandshapeBentExtendedB, HandshapeClawedC,
-                                        HandshapeCoveredF, HandshapeN, HandshapeT, HandshapeContractedUIndex, HandshapeCurvedW,
-                                        HandshapeSpreadExtendedC, HandshapeClawedExtendedB, HandshapeCombinedYAndMiddle,
-                                        HandshapeContractedC, HandshapeE, HandshapeOpenE, HandshapeM, HandshapeBent1,
-                                        HandshapeContracted5, HandshapeCrookedF)
+from analysis.unmarked_handshapes import (
+    Handshape1,
+    Handshape5,
+    HandshapeA,
+    HandshapeB1, HandshapeB2,
+    HandshapeBase,
+    HandshapeC,
+    HandshapeO,
+    HandshapeS,
+    HandshapeEmpty
+)
+from analysis.marked_handshapes import (
+    HandshapeExtendedA, HandshapeClosedAIndex, HandshapeOpenA, HandshapeModifiedA,
+    HandshapeBentB, HandshapeClawedExtendedB, HandshapeContractedB, HandshapeCrookedExtendedB, HandshapeExtendedB, HandshapeSlantedExtendedB,
+    HandshapeBentExtendedB,
+    HandshapeClawedC, HandshapeClawedSpreadC, HandshapeCrookedC, HandshapeContractedC, HandshapeExtendedC, HandshapeFlatC, HandshapeCIndex, HandshapeDoubleCIndex, HandshapeSpreadC, HandshapeSpreadExtendedC,
+    HandshapeD, HandshapePartiallyBentD, HandshapeClosedBentD, HandshapeModifiedD,
+    HandshapeE, HandshapeOpenE,
+    HandshapeF, HandshapeClawedF, HandshapeCoveredF, HandshapeSlantedF, HandshapeFlatF, HandshapeFlatOpenF, HandshapeFlatClawedF, HandshapeAdductedF, HandshapeOffsetF, HandshapeOpenF,
+    HandshapeG, HandshapeClosedG, HandshapeDoubleModifiedG, HandshapeClosedDoubleModifiedG, HandshapeModifiedG,
+    HandshapeI, HandshapeBentCombinedIPlusOne, HandshapeBentI, HandshapeClawedI, HandshapeCombinedIPlusOne, HandshapeCombinedILY, HandshapeCombinedIPlusA, HandshapeFlatCombinedIPlusOne,
+    HandshapeK, HandshapeExtendedK,
+    HandshapeL, HandshapeBentL, HandshapeBentThumbL, HandshapeClawedL, HandshapeContractedL, HandshapeDoubleContractedL, HandshapeCrookedL,
+    HandshapeM, HandshapeFlatM,
+    HandshapeN,
+    HandshapeCoveredO, HandshapeFlatO, HandshapeOIndex, HandshapeModifiedO, HandshapeOffsetO, HandshapeOpenSpreadO, HandshapeOpenOIndex,
+    HandshapeR, HandshapeBentR, HandshapeExtendedR,
+    HandshapeT, HandshapeCoveredT,
+    HandshapeU, HandshapeBentU, HandshapeBentExtendedU, HandshapeClawedU, HandshapeCombinedUAndY, HandshapeContractedU, HandshapeContractedUIndex, HandshapeCrookedU, HandshapeExtendedU,
+    HandshapeV, HandshapeBentV, HandshapeBentExtendedV, HandshapeClawedV, HandshapeClawedExtendedV, HandshapeClosedV, HandshapeCrookedV, HandshapeCrookedExtendedV, HandshapeSlantedV,
+    HandshapeW, HandshapeClawedW, HandshapeClosedW, HandshapeCrookedW,
+    HandshapeX, HandshapeExtendedX, HandshapeClosedX,
+    HandshapeY, HandshapeCombinedYAndMiddle, HandshapeModifiedY,
+    HandshapeBent1, HandshapeBentOffset1, HandshapeClawed1, HandshapeCrooked1,
+    Handshape3, HandshapeClawed3, HandshapeContracted3,
+    Handshape4, HandshapeBent4, HandshapeClawed4, HandshapeCrooked4, HandshapeSlanted4,
+    HandshapeBent5, HandshapeBentMidfinger5, HandshapeClawed5, HandshapeContracted5, HandshapeRelaxedContracted5, HandshapeCrooked5, HandshapeCrookedSlanted5, HandshapeModified5, HandshapeSlanted5,
+    Handshape6,
+    Handshape8, HandshapeCovered8, HandshapeExtended8, HandshapeOpen8,
+    HandshapeMiddleFinger
+)
 
 
 class MyTableModel(QAbstractTableModel):
@@ -37,16 +61,16 @@ class MyTableModel(QAbstractTableModel):
         self.dataCached = [
             ['A',
              '',  # bent
-             '', '', '', '', '', '', '',  # 7 slots
+             '', '', '', '', '', '', '',  # clawed, closed, combined, contracted, covered, crooked, curved
              'extended-A',  # extended
              '',  # flat
-             'A-index',  # index
-             '',  # modified
+             '',  # index
+             'modified-A',  # modified
              '', 'open-A',  # offset, open
              '', ''],  # slanted, spread
             ['',
              '',  # bent
-             '', '', '', '', '', '', '',  # 7 slots
+             '', '', '', '', '', '', '',  # clawed, closed, combined, contracted, covered, crooked, curved
              '',  # extended
              '',  # flat
              'closed-A-index',  # index
@@ -61,7 +85,7 @@ class MyTableModel(QAbstractTableModel):
              '',  # index
              '',  # modified
              '', '',  # offset, open
-             'slanted-B', ''],  # slanted, spread
+             'slanted-extended-B', ''],  # slanted, spread
             ['B2',
              'bent-extended-B',  # bent
              '', '', '', '', '', '', '',  # 7 slots
@@ -90,8 +114,17 @@ class MyTableModel(QAbstractTableModel):
              '', '',  # offset, open
              '', 'spread-extended-C'],  # slanted, spread
             ['D',
-             'bent-D',  # bent
+             'partially-bent-D',  # bent
              '', 'closed-bent-D', '', '', '', '', '',  # 7 slots
+             '',  # extended
+             '',  # flat
+             '',  # index
+             'modified-D',  # modified
+             '', '',  # offset, open
+             '', ''],  # slanted, spread
+            ['',
+             'closed-bent-D',  # bent
+             '', '', '', '', '', '', '',  # 7 slots
              '',  # extended
              '',  # flat
              '',  # index
@@ -109,13 +142,13 @@ class MyTableModel(QAbstractTableModel):
              '', ''],  # slanted, spread
             ['F',
              '',  # bent
-             'clawed-F', '', '', '', 'covered-F', 'crooked-F', '',  # 7 slots
+             'clawed-F', '', '', '', 'covered-F', '', '',  # 7 slots
              '',  # extended
              'flat-F',  # flat
              '',  # index
-             'modified-F',  # modified
+             'adducted-F',  # modified
              'offset-F', 'open-F',  # offset, open
-             '', ''],  # slanted, spread
+             'slanted-F', ''],  # slanted, spread
             ['',
              '',  # bent
              '', '', '', '', '', '', '',  # 7 slots
@@ -164,6 +197,15 @@ class MyTableModel(QAbstractTableModel):
             ['',
              'bent-combined-I+1',  # bent
              '', '', 'combined-ILY', '', '', '', '',  # 7 slots
+             '',  # extended
+             '',  # flat
+             '',  # index
+             '',  # modified
+             '', '',  # offset, open
+             '', ''],  # slanted, spread
+            ['',
+             '',  # bent
+             '', '', 'combined-I+A', '', '', '', '',  # 7 slots
              '',  # extended
              '',  # flat
              '',  # index
@@ -298,7 +340,7 @@ class MyTableModel(QAbstractTableModel):
              '', ''],  # slanted, spread
             ['W',
              '',  # bent
-             'clawed-W', 'closed-W', '', '', '', '', 'curved-W',  # 7 slots
+             'clawed-W', 'closed-W', '', '', '', 'crooked-W', '',  # 7 slots
              '',  # extended
              '',  # flat
              '',  # index
@@ -308,7 +350,7 @@ class MyTableModel(QAbstractTableModel):
             ['X',
              '',  # bent
              'closed-X', '', '', '', '', '', '',  # 7 slots
-             '',  # extended
+             'extended-X',  # extended
              '',  # flat
              '',  # index
              '',  # modified
@@ -323,9 +365,19 @@ class MyTableModel(QAbstractTableModel):
              'modified-Y',  # modified
              '', '',  # offset, open
              '', ''],  # slanted, spread
+
             ['1',
              'bent-1',  # bent
-             '', '', '', '', '', 'crooked-1', '',  # 7 slots
+             'clawed-1', '', '', '', '', 'crooked-1', '',  # clawed, closed, combined, contracted, covered, crooked, curved (7 slots)
+             '',  # extended
+             '',  # flat
+             '',  # index
+             '',  # modified
+             '', '',  # offset, open
+             '', ''],  # slanted, spread
+            ['',
+             'bent-offset-1',  # bent
+             '', '', '', '', '', '', '', # clawed, closed, combined, contracted, covered, crooked, curved (7 slots)
              '',  # extended
              '',  # flat
              '',  # index
@@ -336,7 +388,7 @@ class MyTableModel(QAbstractTableModel):
              '',  # bent
              'clawed-3', '', '', 'contracted-3', '', '', '',  # 7 slots
              '',  # extended
-             'flat-open-F',  # flat
+             '',  # flat
              '',  # index
              '',  # modified
              '', '',  # offset, open
@@ -368,6 +420,15 @@ class MyTableModel(QAbstractTableModel):
              '',  # modified
              '', '',  # offset, open
              '', ''],  # slanted, spread
+            ['6',
+             '',  # bent
+             '', '', '', '', '', '', '',  # 7 slots
+             '',  # extended
+             '',  # flat
+             '',  # index
+             '',  # modified
+             '', '',  # offset, open
+             '', ''],  # slanted, spread
             ['8',
              '',  # bent
              '', '', '', '', 'covered-8', '', '',  # 7 slots
@@ -377,6 +438,7 @@ class MyTableModel(QAbstractTableModel):
              '',  # modified
              '', 'open-8',  # offset, open
              '', ''],  # slanted, spread
+
             ['middle-finger',
              '',  # bent
              '', '', '', '', '', '', '',  # 7 slots
@@ -386,6 +448,15 @@ class MyTableModel(QAbstractTableModel):
              '',  # modified
              '', '',  # offset, open
              '', ''],  # slanted, spread
+            ['base',
+             '',  # bent
+             '', '', '', '', '', '', '',  # 7 slots
+             '',  # extended
+             '',  # flat
+             '',  # index
+             '',  # modified
+             '', '',  # offset, open
+             '', '']  # slanted, spread
         ]
 
     def rowCount(self, parent):
@@ -432,9 +503,48 @@ class MyTableModel(QAbstractTableModel):
         return None
 
 
+class FreezeTableView(QTableView):
+    def __init__(self, parent=None, drag_enabled=False, *args):
+        super().__init__(parent=parent, *args)
+        self.setDragEnabled(drag_enabled)
+        self.setDragDropMode(QAbstractItemView.DragOnly)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+
+    def mouseMoveEvent(self, e):
+        self.startDrag(e)
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasText() and event.mimeData().hasImage():
+            label = event.mimeData().text()
+            if label in self.getSetOfItemLabels():
+                event.ignore()
+            else:
+                event.setDropAction(Qt.CopyAction)
+                event.accept()
+        else:
+            event.ignore()
+
+    def startDrag(self, event):
+        selectedshape = self.model().get_value(self.selectedIndexes()[0])
+        symbol = str(selectedshape)
+        icon = QPixmap(getMediaFilePath(symbol + '.png'))
+        icon.scaled(100, 100)
+
+        mime = QMimeData()
+        mime.setImageData(QImage(getMediaFilePath(symbol + '.png')))
+        mime.setText(symbol)
+
+        drag = QDrag(self)
+        drag.setMimeData(mime)
+        drag.setPixmap(icon)
+        drag.setHotSpot(QPoint(icon.width() / 2, icon.height() / 2))
+        drag.exec_(Qt.CopyAction)
+
+
 class FreezeTableWidget(QTableView):
-    def __init__(self, parent=None, *args):
-        QTableView.__init__(self, parent, *args)
+    def __init__(self, parent=None, drag_enabled=False, *args):
+        super().__init__(parent=parent, *args)
+        self.drag_enabled = drag_enabled
 
         #self.setMinimumSize(800, 600)
         self.setIconSize(QSize(50, 50))
@@ -443,15 +553,15 @@ class FreezeTableWidget(QTableView):
         tm = MyTableModel(self)
 
         # set the proxy model
-        pm = tm
+        #pm = tm
         #pm = QSortFilterProxyModel(self)
         #pm.setSourceModel(tm)
 
-        self.setModel(pm)
+        self.setModel(tm)
 
-        self.frozenTableView = QTableView(self)
+        self.frozenTableView = FreezeTableView(self, drag_enabled=drag_enabled)
         self.frozenTableView.setIconSize(QSize(50, 50))
-        self.frozenTableView.setModel(pm)
+        self.frozenTableView.setModel(tm)
         self.frozenTableView.verticalHeader().hide()
         #self.frozenTableView.setFocusPolicy(Qt.NoFocus)
         # self.frozenTableView.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
@@ -519,6 +629,9 @@ class FreezeTableWidget(QTableView):
         self.verticalScrollBar().valueChanged.connect(self.frozenTableView.verticalScrollBar().setValue)
 
         self.resizeRowsToContents()
+        self.setDragEnabled(drag_enabled)
+        self.setDragDropMode(QAbstractItemView.DragOnly)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
 
     def updateSectionWidth(self, logicalIndex, oldSize, newSize):
         if logicalIndex == 0: #or logicalIndex == 1:
@@ -548,6 +661,47 @@ class FreezeTableWidget(QTableView):
                                              self.columnWidth(0), # + self.columnWidth(1),
                                              self.viewport().height() + self.horizontalHeader().height())
 
+    #https://stackoverflow.com/questions/37496320/pyqt-dragging-item-from-list-view-and-dropping-to-table-view-the-drop-index-is
+    def mouseMoveEvent(self, e):
+        if self.drag_enabled:
+            self.startDrag(e)
+        else:
+            super().mouseMoveEvent(e)
+
+    def dragMoveEvent(self, event):
+        if self.drag_enabled:
+            if event.mimeData().hasText() and event.mimeData().hasImage():
+                label = event.mimeData().text()
+                if label in self.getSetOfItemLabels():
+                    event.ignore()
+                else:
+                    event.setDropAction(Qt.CopyAction)
+                    event.accept()
+            else:
+                event.ignore()
+        else:
+            super().dragMoveEvent(event)
+
+    def startDrag(self, event):
+        if self.drag_enabled:
+            selectedshape = self.model().get_value(self.selectedIndexes()[0])
+            symbol = str(selectedshape)
+            icon = QPixmap(getMediaFilePath(symbol + '.png'))
+            icon.scaled(100, 100)
+
+            mime = QMimeData()
+            mime.setImageData(QImage(getMediaFilePath(symbol + '.png')))
+            mime.setText(symbol)
+
+            drag = QDrag(self)
+            drag.setMimeData(mime)
+            drag.setPixmap(icon)
+            drag.setHotSpot(QPoint(icon.width() / 2, icon.height() / 2))
+            drag.exec_(Qt.CopyAction)
+        else:
+            super().startDrag(event)
+
+    '''
     def moveCursor(self, cursorAction, modifiers):
         current = QTableView.moveCursor(self, cursorAction, modifiers)
         x = self.visualRect(current).topLeft().x()
@@ -556,6 +710,7 @@ class FreezeTableWidget(QTableView):
             new_value = self.horizontalScrollBar().value() + x - frozen_width
             self.horizontalScrollBar().setValue(new_value)
         return current
+    '''
 
 
 class LogicRadioButtonGroup(QGroupBox):
@@ -598,81 +753,169 @@ class LogicRadioButtonGroup(QGroupBox):
 class PredefinedHandshapeDialog(QDialog):
     closeSignal = Signal(str)
     handshape_mapping = {
-        '': HandshapeEmpty,
         '1': Handshape1,
-        'extended-U': HandshapeExtendedU,
         '5': Handshape5,
         'A': HandshapeA,
         'B1': HandshapeB1,
         'B2': HandshapeB2,
+        'base': HandshapeBase,
         'C': HandshapeC,
-        'C-index': HandshapeCIndex,
-        'D': HandshapeD,
-        'G': HandshapeG,
-        'combined-ILY': HandshapeCombinedILY,
-        'K': HandshapeK,
-        'L': HandshapeL,
         'O': HandshapeO,
         'S': HandshapeS,
-        'extended-8': HandshapeExtended8,
-        'W': HandshapeW,
-        'Y': HandshapeY,
-        'clawed-F': HandshapeClawedF,
-        'clawed-L': HandshapeClawedL,
-        'clawed-V': HandshapeClawedV,
-        'combined-I+1': HandshapeCombinedIPlusOne,
-        'I': HandshapeI,
-        'F': HandshapeF,
-        'closed-W': HandshapeClosedW,
-        'clawed-W': HandshapeClawedW,
-        'clawed-spread-C': HandshapeClawedSpreadC,
-        'bent-I': HandshapeBentI,
-        'bent-thumb-L': HandshapeBentThumbL,
-        'bent-V': HandshapeBentV,
-        'clawed-extended-V': HandshapeClawedExtendedV,
-        'double-C-index': HandshapeDoubleCIndex,
-        'flat-C': HandshapeFlatC,
-        'middle-finger': HandshapeMiddleFinger,
-        'O-index': HandshapeOIndex,
-        'open-F': HandshapeOpenF,
-        '8': Handshape8,
-        'clawed-I': HandshapeClawedI,
-        'double-modified-G': HandshapeDoubleModifiedG,
-        'covered-8': HandshapeCovered8,
-        'slanted-B': HandshapeSlantedB,
-        'X': HandshapeX,
-        'extended-C': HandshapeExtendedC,
-        'closed-modified-G': HandshapeClosedModifiedG,
-        'flat-combined-I+1': HandshapeFlatCombinedIPlusOne,
-        '3': Handshape3,
-        'extended-B': HandshapeExtendedB,
-        '4': Handshape4,
-        'closed-double-modified-G': HandshapeClosedDoubleModifiedG,
-        'open-8': HandshapeOpen8,
-        'U': HandshapeU,
-        'clawed-3': HandshapeClawed3,
+
         'extended-A': HandshapeExtendedA,
-        'R': HandshapeR,
-        'V': HandshapeV,
         'closed-A-index': HandshapeClosedAIndex,
-        'modified-F': HandshapeModifiedF,
-        'bent-extended-B': HandshapeBentExtendedB,
-        'clawed-C': HandshapeClawedC,
-        'covered-F': HandshapeCoveredF,
-        'N': HandshapeN,
-        'T': HandshapeT,
-        'contracted-U-index': HandshapeContractedUIndex,
-        'curved-W': HandshapeCurvedW,
-        'spread-extended-C': HandshapeSpreadExtendedC,
+        'open-A': HandshapeOpenA,
+        'modified-A': HandshapeModifiedA,
+
+        'bent-B': HandshapeBentB,
         'clawed-extended-B': HandshapeClawedExtendedB,
-        'combined-Y&middle': HandshapeCombinedYAndMiddle,
+        'contracted-B': HandshapeContractedB,
+        'crooked-extended-B': HandshapeCrookedExtendedB,
+        'extended-B': HandshapeExtendedB,
+        'slanted-extended-B': HandshapeSlantedExtendedB,
+        'bent-extended-B': HandshapeBentExtendedB,
+
+        'clawed-C': HandshapeClawedC,
+        'clawed-spread-C': HandshapeClawedSpreadC,
+        'crooked-C': HandshapeCrookedC,
         'contracted-C': HandshapeContractedC,
+        'extended-C': HandshapeExtendedC,
+        'flat-C': HandshapeFlatC,
+        'C-index': HandshapeCIndex,
+        'double-C-index': HandshapeDoubleCIndex,
+        'spread-C': HandshapeSpreadC,
+        'spread-extended-C': HandshapeSpreadExtendedC,
+        'D': HandshapeD,
+        'partially-bent-D': HandshapePartiallyBentD,
+        'closed-bent-D': HandshapeClosedBentD,
+        'modified-D': HandshapeModifiedD,
+
         'E': HandshapeE,
         'open-E': HandshapeOpenE,
+
+        'F': HandshapeF,
+        'clawed-F': HandshapeClawedF,
+        'covered-F': HandshapeCoveredF,
+        'slanted-F': HandshapeSlantedF,
+        'flat-F': HandshapeFlatF,
+        'flat-open-F': HandshapeFlatOpenF,
+        'flat-clawed-F': HandshapeFlatClawedF,
+        'adducted-F': HandshapeAdductedF,
+        'offset-F': HandshapeOffsetF,
+        'open-F': HandshapeOpenF,
+
+        'G': HandshapeG,
+        'closed-G': HandshapeClosedG,
+        'double-modified-G': HandshapeDoubleModifiedG,
+        'closed-double-modified-G': HandshapeClosedDoubleModifiedG,
+        'modified-G': HandshapeModifiedG,
+
+        'I': HandshapeI,
+        'bent-combined-I+1': HandshapeBentCombinedIPlusOne,
+        'bent-I': HandshapeBentI,
+        'clawed-I': HandshapeClawedI,
+        'combined-I+1': HandshapeCombinedIPlusOne,
+        'combined-ILY': HandshapeCombinedILY,
+        'combined-I+A': HandshapeCombinedIPlusA,
+        'flat-combined-I+1': HandshapeFlatCombinedIPlusOne,
+
+        'K': HandshapeK,
+        'extended-K': HandshapeExtendedK,
+
+        'L': HandshapeL,
+        'bent-L': HandshapeBentL,
+        'thumb-L': HandshapeBentThumbL,
+        'clawed-L': HandshapeClawedL,
+        'contracted-L': HandshapeContractedL,
+        'double-contracted-L': HandshapeDoubleContractedL,
+        'crooked-L': HandshapeCrookedL,
+
         'M': HandshapeM,
+        'flat-M': HandshapeFlatM,
+
+        'N': HandshapeN,
+
+        'covered-O': HandshapeCoveredO,
+        'flat-O': HandshapeFlatO,
+        'O-index': HandshapeOIndex,
+        'modified-O': HandshapeModifiedO,
+        'offset-O': HandshapeOffsetO,
+        'open-spread-O': HandshapeOpenSpreadO,
+        'open-O-index': HandshapeOpenOIndex,
+
+        'R': HandshapeR,
+        'bent-R': HandshapeBentR,
+        'extended-R': HandshapeExtendedR,
+
+        'T': HandshapeT,
+        'covered-T': HandshapeCoveredT,
+
+        'U': HandshapeU,
+        'bent-U': HandshapeBentU,
+        'extended-U': HandshapeBentExtendedU,
+        'clawed-U': HandshapeClawedU,
+        'combined-U&Y': HandshapeCombinedUAndY,
+        'contracted-U': HandshapeContractedU,
+        'contracted-U-index': HandshapeContractedUIndex,
+        'crooked-U': HandshapeCrookedU,
+        'extended-U': HandshapeExtendedU,
+
+        'V': HandshapeV,
+        'bent-V': HandshapeBentV,
+        'bent-extended-V': HandshapeBentExtendedV,
+        'clawed-V': HandshapeClawedV,
+        'clawed-extended-V': HandshapeClawedExtendedV,
+        'closed-V': HandshapeClosedV,
+        'crooked-V': HandshapeCrookedV,
+        'crooked-extended-V': HandshapeCrookedExtendedV,
+        'slanted-V': HandshapeSlantedV,
+
+        'W': HandshapeW,
+        'clawed-W': HandshapeClawedW,
+        'closed-W': HandshapeClosedW,
+        'crooked-W': HandshapeCrookedW,
+
+        'X': HandshapeX,
+        'extended-X': HandshapeExtendedX,
+        'closed-X': HandshapeClosedX,
+
+        'Y': HandshapeY,
+        'combined-Y&middle': HandshapeCombinedYAndMiddle,
+        'modified-Y': HandshapeModifiedY,
+
         'bent-1': HandshapeBent1,
+        'bent-offset-1': HandshapeBentOffset1,
+        'clawed-1': HandshapeClawed1,
+        'crooked-1': HandshapeCrooked1,
+
+        '3': Handshape3,
+        'clawed-3': HandshapeClawed3,
+        'contracted-3': HandshapeContracted3,
+
+        '4': Handshape4,
+        'bent-4': HandshapeBent4,
+        'clawed-4': HandshapeClawed4,
+        'crooked-4': HandshapeCrooked4,
+        'slanted-4': HandshapeSlanted4,
+
+        'bent-5': HandshapeBent5,
+        'bent-midfinger-5': HandshapeBentMidfinger5,
+        'clawed-5': HandshapeClawed5,
         'contracted-5': HandshapeContracted5,
-        'crooked-F': HandshapeCrookedF
+        'relaxed-contracted-5': HandshapeRelaxedContracted5,
+        'crooked-5': HandshapeCrooked5,
+        'crooked-slanted-5': HandshapeCrookedSlanted5,
+        'modified-5': HandshapeModified5,
+        'slanted-5': HandshapeSlanted5,
+
+        '6': Handshape6,
+
+        '8': Handshape8,
+        'covered-8': HandshapeCovered8,
+        'extended-8': HandshapeExtended8,
+        'open-8': HandshapeOpen8,
+        'middle-finger': HandshapeMiddleFinger
     }
 
     def __init__(self, parent):
