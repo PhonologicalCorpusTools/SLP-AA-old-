@@ -853,7 +853,7 @@ class PredefinedHandshapeDialog(QDialog):
 
         'U': HandshapeU,
         'bent-U': HandshapeBentU,
-        'extended-U': HandshapeBentExtendedU,
+        'bent-extended-U': HandshapeBentExtendedU,
         'clawed-U': HandshapeClawedU,
         'combined-U&Y': HandshapeCombinedUAndY,
         'contracted-U': HandshapeContractedU,
