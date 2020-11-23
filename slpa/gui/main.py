@@ -444,8 +444,8 @@ class MainWindow(QMainWindow):
         if edited:
             self.askSaveChanges = True
 
-    def resizeEvent(self, e):
-        self.showMaximized()
+    #def resizeEvent(self, e):
+    #    self.showMaximized()
 
     def setGloss(self, text):
         self.gloss.glossEdit.setText(text)

@@ -922,7 +922,7 @@ class PredefinedHandshapeDialog(QDialog):
         super().__init__(parent=parent)
         self.resize(750, 750)
         self.setWindowTitle('Predefined handshapes')
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Window | Qt.WindowTitleHint |
+        self.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
                             Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
 
         # create table
