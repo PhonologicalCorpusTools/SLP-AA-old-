@@ -433,7 +433,7 @@ class MainWindow(QMainWindow):
         #self.initSignNotes()
         self.makeCorpusDock()
 
-        self.showMaximized()
+        #self.showMaximized()
         #self.defineTabOrder()
 
     def updateLastUpdated(self, value):
@@ -988,7 +988,7 @@ class MainWindow(QMainWindow):
 
         #self.signNotes.setText(self.currentHandShape().notes)
         #save_binary(self.corpus, self.corpus.path)
-        self.showMaximized()
+        #self.showMaximized()
 
     @decorators.checkForGloss
     def saveCorpusAs(self, event=None):
@@ -1134,7 +1134,7 @@ class MainWindow(QMainWindow):
             widget = getattr(self, name)
             widget.setChecked(sign[option])
         self.askSaveChanges = False
-        self.showMaximized()
+        #self.showMaximized()
 
     def generateKwargs(self):
         #This is called whenever the corpus is updated/saved
@@ -2002,7 +2002,7 @@ class MainWindow(QMainWindow):
         for widget in self.globalOptionsWidgets:
             widget.setChecked(False)
         self.askSaveChanges = False
-        self.showMaximized()
+        #self.showMaximized()
 
 
 class GlobalOptionCheckBox(QCheckBox):
