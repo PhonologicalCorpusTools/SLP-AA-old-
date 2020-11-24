@@ -1391,6 +1391,8 @@ class MainWindow(QMainWindow):
                         getattr(self.configTabs.widget(widgetnum), attribute_name)[slot].setText(symbol)
 
     def PredefinedHandshapeDialogClosed(self, event):
+        delattr(self, 'handshapeDialog')
+
         item1 = self.configTabs.widget(0).hand1Transcription.lineLayout.takeAt(0)
         w1 = item1.widget()
         w1.deleteLater()
@@ -1410,34 +1412,37 @@ class MainWindow(QMainWindow):
         self.selected.deleteLater()
 
     def predefinedTranscription(self):
-        handshapeDialog = PredefinedHandshapeDialog(parent=self)
-        handshapeDialog.closeSignal.connect(self.PredefinedHandshapeDialogClosed)
-        handshapeDialog.show()
+        if not hasattr(self, 'handshapeDialog'):
+            self.handshapeDialog = PredefinedHandshapeDialog(parent=self)
+            self.handshapeDialog.closeSignal.connect(self.PredefinedHandshapeDialogClosed)
+            self.handshapeDialog.show()
 
-        # Push button at the beginning for predefined handshapes
-        self.selected = QButtonGroup()
-        self.config1hand1selection = QRadioButton()
-        self.config1hand1selection.setToolTip('Select for predefined handshapes')
-        self.config1hand1selection.setChecked(True)
-        self.config1hand2selection = QRadioButton()
-        self.config1hand2selection.setToolTip('Select for predefined handshapes')
-        self.config2hand1selection = QRadioButton()
-        self.config2hand1selection.setToolTip('Select for predefined handshapes')
-        self.config2hand2selection = QRadioButton()
-        self.config2hand2selection.setToolTip('Select for predefined handshapes')
-        self.selected.addButton(self.config1hand1selection)
-        self.selected.addButton(self.config1hand2selection)
-        self.selected.addButton(self.config2hand1selection)
-        self.selected.addButton(self.config2hand2selection)
-        self.selected.setId(self.config1hand1selection, 1)
-        self.selected.setId(self.config1hand2selection, 2)
-        self.selected.setId(self.config2hand1selection, 3)
-        self.selected.setId(self.config2hand2selection, 4)
+            # Push button at the beginning for predefined handshapes
+            self.selected = QButtonGroup()
+            self.config1hand1selection = QRadioButton()
+            self.config1hand1selection.setToolTip('Select for predefined handshapes')
+            self.config1hand1selection.setChecked(True)
+            self.config1hand2selection = QRadioButton()
+            self.config1hand2selection.setToolTip('Select for predefined handshapes')
+            self.config2hand1selection = QRadioButton()
+            self.config2hand1selection.setToolTip('Select for predefined handshapes')
+            self.config2hand2selection = QRadioButton()
+            self.config2hand2selection.setToolTip('Select for predefined handshapes')
+            self.selected.addButton(self.config1hand1selection)
+            self.selected.addButton(self.config1hand2selection)
+            self.selected.addButton(self.config2hand1selection)
+            self.selected.addButton(self.config2hand2selection)
+            self.selected.setId(self.config1hand1selection, 1)
+            self.selected.setId(self.config1hand2selection, 2)
+            self.selected.setId(self.config2hand1selection, 3)
+            self.selected.setId(self.config2hand2selection, 4)
 
-        self.configTabs.widget(0).hand1Transcription.lineLayout.insertWidget(0, self.config1hand1selection)
-        self.configTabs.widget(0).hand2Transcription.lineLayout.insertWidget(0, self.config1hand2selection)
-        self.configTabs.widget(1).hand1Transcription.lineLayout.insertWidget(0, self.config2hand1selection)
-        self.configTabs.widget(1).hand2Transcription.lineLayout.insertWidget(0, self.config2hand2selection)
+            self.configTabs.widget(0).hand1Transcription.lineLayout.insertWidget(0, self.config1hand1selection)
+            self.configTabs.widget(0).hand2Transcription.lineLayout.insertWidget(0, self.config1hand2selection)
+            self.configTabs.widget(1).hand1Transcription.lineLayout.insertWidget(0, self.config2hand1selection)
+            self.configTabs.widget(1).hand2Transcription.lineLayout.insertWidget(0, self.config2hand2selection)
+        else:
+            self.handshapeDialog.raise_()
 
     def mergeCorpus(self):
         if self.corpus is None:
