@@ -252,7 +252,7 @@ class TranscriptionLayout(QVBoxLayout):
         self.lineLayout.addWidget(self.predefinedImage)
 
         self.predefinedLabel = QLabel('')
-        self.predefinedLabel.setFixedSize(20, 20)
+        self.predefinedLabel.setFixedSize(150, 20)
         self.predefinedLabel.setStyleSheet('background-color: darkgray;'
                                            'border-style: outset;'
                                            'border-color: black;'
@@ -588,7 +588,7 @@ class TranscriptionSlot(QLineEdit):
         else:
             self.setMaxLength(1)
 
-        self.setFixedWidth(30)
+        self.setFixedWidth(20)
         self.setFocusPolicy(Qt.TabFocus)
         completer = TranscriptionCompleter(completer_options, self)
         completer.setMaxVisibleItems(8)
