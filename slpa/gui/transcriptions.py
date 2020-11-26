@@ -259,6 +259,12 @@ class TranscriptionLayout(QVBoxLayout):
                                            'border-width: 1px;')
         self.lineLayout.addWidget(self.predefinedLabel)
 
+        self.clearTranscription = QPushButton('Clear')
+        self.clearTranscription.setFixedWidth(60)
+        self.clearTranscription.clicked.connect(self.clearTranscriptionSlots)
+        self.lineLayout.addWidget(self.clearTranscription)
+
+
     def updateFlags(self, flags):
         for flag, slot in zip(flags[1:], self.slots[1:]):
             slot.updateFlags(flag)
@@ -501,6 +507,10 @@ class TranscriptionLayout(QVBoxLayout):
                 continue
             else:
                 s.setText('')
+        self.predefinedImage.setPixmap(
+            QPixmap(getMediaFilePath('empty.png')).scaled(self.predefinedImage.width(), self.predefinedImage.height(),
+                                                          Qt.KeepAspectRatio))
+        self.update()
 
     def values(self):
         data = [slot.getText() for slot in self.slots]
