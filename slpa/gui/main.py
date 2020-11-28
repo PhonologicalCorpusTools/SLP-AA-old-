@@ -30,6 +30,11 @@ FONT_NAME = 'Arial'
 FONT_SIZE = 12
 
 
+class DockWidget(QWidget):
+    def sizeHint(self):
+        return QSize(100, 500)
+
+
 class QApplicationMessaging(QApplication):
     messageFromOtherInstance = Signal(bytes)
 
@@ -424,8 +429,11 @@ class MainWindow(QMainWindow):
 
         self.globalLayout.addLayout(layout)
 
+        #self.setCentralWidget(self.wrapper)
         self.wrapper.setLayout(self.globalLayout)
-        self.setCentralWidget(self.wrapper)
+        mainScroll = QScrollArea(parent=self)
+        mainScroll.setWidget(self.wrapper)
+        self.setCentralWidget(mainScroll)
 
         self.parameterDialog = None
         self.setupParameterDialog(ParameterTreeModel(parameters.defaultParameters))
@@ -948,7 +956,7 @@ class MainWindow(QMainWindow):
         self.corpusDock.setWindowTitle('Corpus')
         self.corpusDock.setAllowedAreas(Qt.RightDockWidgetArea)
         self.corpusDock.setFeatures(QDockWidget.NoDockWidgetFeatures)
-        self.dockWrapper = QWidget()
+        self.dockWrapper = DockWidget(parent=self)
         self.dockLayout = QVBoxLayout()
         self.dockWrapper.setLayout(self.dockLayout)
         self.corpusList = CorpusList(self)  #QListWidget(self)
