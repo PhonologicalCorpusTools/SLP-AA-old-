@@ -1,6 +1,6 @@
 from imports import (QGroupBox, QVBoxLayout, QHBoxLayout, QButtonGroup, QRadioButton, Signal, QDialog, QListWidget,
                      QSize, QListView, QIcon, QListWidgetItem, Qt, QTabWidget, QWidget, QSizePolicy, QAbstractTableModel,
-                     QTableView, QAbstractItemView, QColor, QImage, QMimeData, QDrag, QPixmap, QPoint)
+                     QTableView, QAbstractItemView, QColor, QImage, QMimeData, QDrag, QPixmap, QPoint, QMenu, QAction)
 from image import getMediaFilePath
 from analysis.unmarked_handshapes import (
     Handshape1,
@@ -43,6 +43,172 @@ from analysis.marked_handshapes import (
     Handshape8, HandshapeCovered8, HandshapeExtended8, HandshapeOpen8,
     HandshapeMiddleFinger
 )
+
+HANDSHAPE_MAPPING = {
+        '1': Handshape1,
+        '5': Handshape5,
+        'A': HandshapeA,
+        'B1': HandshapeB1,
+        'B2': HandshapeB2,
+        'base': HandshapeBase,
+        'C': HandshapeC,
+        'O': HandshapeO,
+        'S': HandshapeS,
+
+        'extended-A': HandshapeExtendedA,
+        'closed-A-index': HandshapeClosedAIndex,
+        'open-A': HandshapeOpenA,
+        'modified-A': HandshapeModifiedA,
+
+        'bent-B': HandshapeBentB,
+        'clawed-extended-B': HandshapeClawedExtendedB,
+        'contracted-B': HandshapeContractedB,
+        'crooked-extended-B': HandshapeCrookedExtendedB,
+        'extended-B': HandshapeExtendedB,
+        'slanted-extended-B': HandshapeSlantedExtendedB,
+        'bent-extended-B': HandshapeBentExtendedB,
+
+        'clawed-C': HandshapeClawedC,
+        'clawed-spread-C': HandshapeClawedSpreadC,
+        'crooked-C': HandshapeCrookedC,
+        'contracted-C': HandshapeContractedC,
+        'extended-C': HandshapeExtendedC,
+        'flat-C': HandshapeFlatC,
+        'C-index': HandshapeCIndex,
+        'double-C-index': HandshapeDoubleCIndex,
+        'spread-C': HandshapeSpreadC,
+        'spread-extended-C': HandshapeSpreadExtendedC,
+        'D': HandshapeD,
+        'partially-bent-D': HandshapePartiallyBentD,
+        'closed-bent-D': HandshapeClosedBentD,
+        'modified-D': HandshapeModifiedD,
+
+        'E': HandshapeE,
+        'open-E': HandshapeOpenE,
+
+        'F': HandshapeF,
+        'clawed-F': HandshapeClawedF,
+        'covered-F': HandshapeCoveredF,
+        'slanted-F': HandshapeSlantedF,
+        'flat-F': HandshapeFlatF,
+        'flat-open-F': HandshapeFlatOpenF,
+        'flat-clawed-F': HandshapeFlatClawedF,
+        'adducted-F': HandshapeAdductedF,
+        'offset-F': HandshapeOffsetF,
+        'open-F': HandshapeOpenF,
+
+        'G': HandshapeG,
+        'closed-G': HandshapeClosedG,
+        'double-modified-G': HandshapeDoubleModifiedG,
+        'closed-double-modified-G': HandshapeClosedDoubleModifiedG,
+        'modified-G': HandshapeModifiedG,
+
+        'I': HandshapeI,
+        'bent-combined-I+1': HandshapeBentCombinedIPlusOne,
+        'bent-I': HandshapeBentI,
+        'clawed-I': HandshapeClawedI,
+        'combined-I+1': HandshapeCombinedIPlusOne,
+        'combined-ILY': HandshapeCombinedILY,
+        'combined-I+A': HandshapeCombinedIPlusA,
+        'flat-combined-I+1': HandshapeFlatCombinedIPlusOne,
+
+        'K': HandshapeK,
+        'extended-K': HandshapeExtendedK,
+
+        'L': HandshapeL,
+        'bent-L': HandshapeBentL,
+        'thumb-L': HandshapeBentThumbL,
+        'clawed-L': HandshapeClawedL,
+        'contracted-L': HandshapeContractedL,
+        'double-contracted-L': HandshapeDoubleContractedL,
+        'crooked-L': HandshapeCrookedL,
+
+        'M': HandshapeM,
+        'flat-M': HandshapeFlatM,
+
+        'N': HandshapeN,
+
+        'covered-O': HandshapeCoveredO,
+        'flat-O': HandshapeFlatO,
+        'O-index': HandshapeOIndex,
+        'modified-O': HandshapeModifiedO,
+        'offset-O': HandshapeOffsetO,
+        'open-spread-O': HandshapeOpenSpreadO,
+        'open-O-index': HandshapeOpenOIndex,
+
+        'R': HandshapeR,
+        'bent-R': HandshapeBentR,
+        'extended-R': HandshapeExtendedR,
+
+        'T': HandshapeT,
+        'covered-T': HandshapeCoveredT,
+
+        'U': HandshapeU,
+        'bent-U': HandshapeBentU,
+        'bent-extended-U': HandshapeBentExtendedU,
+        'clawed-U': HandshapeClawedU,
+        'combined-U&Y': HandshapeCombinedUAndY,
+        'contracted-U': HandshapeContractedU,
+        'contracted-U-index': HandshapeContractedUIndex,
+        'crooked-U': HandshapeCrookedU,
+        'extended-U': HandshapeExtendedU,
+
+        'V': HandshapeV,
+        'bent-V': HandshapeBentV,
+        'bent-extended-V': HandshapeBentExtendedV,
+        'clawed-V': HandshapeClawedV,
+        'clawed-extended-V': HandshapeClawedExtendedV,
+        'closed-V': HandshapeClosedV,
+        'crooked-V': HandshapeCrookedV,
+        'crooked-extended-V': HandshapeCrookedExtendedV,
+        'slanted-V': HandshapeSlantedV,
+
+        'W': HandshapeW,
+        'clawed-W': HandshapeClawedW,
+        'closed-W': HandshapeClosedW,
+        'crooked-W': HandshapeCrookedW,
+
+        'X': HandshapeX,
+        'extended-X': HandshapeExtendedX,
+        'closed-X': HandshapeClosedX,
+
+        'Y': HandshapeY,
+        'combined-Y&middle': HandshapeCombinedYAndMiddle,
+        'modified-Y': HandshapeModifiedY,
+
+        'bent-1': HandshapeBent1,
+        'bent-offset-1': HandshapeBentOffset1,
+        'clawed-1': HandshapeClawed1,
+        'crooked-1': HandshapeCrooked1,
+
+        '3': Handshape3,
+        'clawed-3': HandshapeClawed3,
+        'contracted-3': HandshapeContracted3,
+
+        '4': Handshape4,
+        'bent-4': HandshapeBent4,
+        'clawed-4': HandshapeClawed4,
+        'crooked-4': HandshapeCrooked4,
+        'slanted-4': HandshapeSlanted4,
+
+        'bent-5': HandshapeBent5,
+        'bent-midfinger-5': HandshapeBentMidfinger5,
+        'clawed-5': HandshapeClawed5,
+        'contracted-5': HandshapeContracted5,
+        'relaxed-contracted-5': HandshapeRelaxedContracted5,
+        'crooked-5': HandshapeCrooked5,
+        'crooked-slanted-5': HandshapeCrookedSlanted5,
+        'modified-5': HandshapeModified5,
+        'slanted-5': HandshapeSlanted5,
+
+        '6': Handshape6,
+
+        '8': Handshape8,
+        'covered-8': HandshapeCovered8,
+        'extended-8': HandshapeExtended8,
+        'open-8': HandshapeOpen8,
+        'middle-finger': HandshapeMiddleFinger
+    }
 
 
 class MyTableModel(QAbstractTableModel):
@@ -633,6 +799,23 @@ class FreezeTableWidget(QTableView):
         self.setDragDropMode(QAbstractItemView.DragOnly)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
 
+        self.makeMenu()
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
+
+    def makeMenu(self):
+        self.popMenu = QMenu(self)
+        self.editHandshapeAct = QAction('Edit handshape', self, triggered=self.editHandshape)
+        self.popMenu.addAction(self.editHandshapeAct)
+
+    def editHandshape(self):
+        print(HANDSHAPE_MAPPING.get(self.indexToBeEdited.data(), 'empty'))
+
+    def showContextMenu(self, point):
+        # TODO: maybe need to initiate this...
+        self.indexToBeEdited = self.indexAt(point)
+        self.popMenu.exec_(self.mapToGlobal(point))
+
     def updateSectionWidth(self, logicalIndex, oldSize, newSize):
         if logicalIndex == 0: #or logicalIndex == 1:
             self.frozenTableView.setColumnWidth(logicalIndex, newSize)
@@ -926,14 +1109,14 @@ class PredefinedHandshapeDialog(QDialog):
                             Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
 
         # create table
-        table = FreezeTableWidget(self)
-        table.clicked.connect(self.fillSlots)
-        table.frozenTableView.clicked.connect(self.fillSlots)
+        self.table = FreezeTableWidget(parent=self)
+        self.table.clicked.connect(self.fillSlots)
+        self.table.frozenTableView.clicked.connect(self.fillSlots)
         #table.itemClicked.connect(self.fillSlots)
 
         # layout
         layout = QVBoxLayout()
-        layout.addWidget(table)
+        layout.addWidget(self.table)
         self.setLayout(layout)
 
     def closeEvent(self, QCloseEvent):
