@@ -151,7 +151,7 @@ predefined_handshape_mapping = {
 
     HandshapeU.canonical: 'U',
     HandshapeBentU.canonical: 'bent-U',
-    HandshapeBentExtendedU.canonical: 'extended-U',
+    HandshapeBentExtendedU.canonical: 'bent-extended-U',
     HandshapeClawedU.canonical: 'clawed-U',
     HandshapeCombinedUAndY.canonical: 'combined-U&Y',
     HandshapeContractedU.canonical: 'contracted-U',
