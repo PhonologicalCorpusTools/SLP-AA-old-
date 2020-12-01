@@ -1,4 +1,5 @@
 GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete']#, 'reduplicated']
+FINGERSPELL_OPTIONS = ['fingerspelled', 'initialized']
 
 X_IN_BOX = '\u2327'
 

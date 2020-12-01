@@ -7,7 +7,7 @@ from datetime import date
 from parameters import defaultParameters
 from gui.parameterwidgets import ParameterTreeModel
 from gui.transcriptions import Flag
-from constants import GLOBAL_OPTIONS
+from constants import GLOBAL_OPTIONS, FINGERSPELL_OPTIONS
 
 X_IN_BOX = '\u2327'
 NULL = '\u2205'
@@ -120,6 +120,9 @@ class Sign:
     for option in GLOBAL_OPTIONS:
         sign_attributes[option] = False
 
+    for option in FINGERSPELL_OPTIONS:
+        sign_attributes[option] = False
+
     sorted_attributes = ['gloss', 'config1', 'config2', 'parameters', 'flags', 'notes']
 
     headers = ['gloss', 'config1hand1', 'config1hand2', 'config2hand1', 'config2hand2']
@@ -134,6 +137,7 @@ class Sign:
     headers.append('coder')
     headers.append('date')
     headers.extend(GLOBAL_OPTIONS)
+    headers.extend(FINGERSPELL_OPTIONS)
     headers.append('notes')
     headers.append('parameters')
     headers = '\t'.join(headers)

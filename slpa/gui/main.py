@@ -15,7 +15,7 @@ from gui.search import *
 from image import *
 from gui.functional_load import *
 from gui.colour import *
-from constants import GLOBAL_OPTIONS
+from constants import GLOBAL_OPTIONS, FINGERSPELL_OPTIONS
 from gui.parameterwidgets import ParameterDialog, ParameterTreeModel
 from gui.transcription_search import TranscriptionSearchDialog
 from gui.handshape_search import HandshapeSearchDialog
@@ -326,7 +326,7 @@ class MainWindow(QMainWindow):
 
         #Make save button
         self.saveButton = QPushButton('Save word to corpus')
-        self.saveButton.clicked.connect(lambda: self.saveCorpus(checkForDuplicates=True, ))
+        self.saveButton.clicked.connect(lambda: self.saveCorpus(checkForDuplicates=True))
         topLayout.addWidget(self.saveButton)
 
         #Make delete button
@@ -386,9 +386,16 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.configTabs)
 
         #Add "global" handshape options (as checkboxes)
+        additionalOptionLayout = QHBoxLayout()
+        layout.addLayout(additionalOptionLayout)
+
         self.globalOptionsLayout = QHBoxLayout()
         self.setupGlobalOptions()
-        layout.addLayout(self.globalOptionsLayout)
+        additionalOptionLayout.addLayout(self.globalOptionsLayout)
+
+        self.fingerSpellLayout = QHBoxLayout()
+        self.setUpFingerSpell()
+        additionalOptionLayout.addLayout(self.fingerSpellLayout)
 
         #Make hand image and accompanying info
         self.infoPanel = QHBoxLayout()
@@ -443,6 +450,20 @@ class MainWindow(QMainWindow):
 
         #self.showMaximized()
         #self.defineTabOrder()
+
+    def setUpFingerSpell(self):
+        self.fingerSpellOptionsWidgets = list()
+        fingerSpellLabel = QLabel('Other:')
+        fingerSpellLabel.setFont(QFont(FONT_NAME, FONT_SIZE))
+        self.fingerSpellLayout.addWidget(fingerSpellLabel)
+
+        for option in FINGERSPELL_OPTIONS:
+            widget = GlobalOptionCheckBox(option.title(), self.userMadeChanges)
+            option += 'CheckBox'
+            setattr(self, option, widget)
+            widget = getattr(self, option)
+            self.fingerSpellLayout.addWidget(widget)
+            self.fingerSpellOptionsWidgets.append(widget)
 
     def updateLastUpdated(self, value):
         if value:
@@ -905,7 +926,7 @@ class MainWindow(QMainWindow):
         blenderFile = os.path.join(os.getcwd(), blend)
         blenderScript = os.path.join(os.getcwd(), 'applyHandCode.py')
 
-        if dialog.id in [0,1]:
+        if dialog.id in [0, 1]:
             tab = self.configTabs.widget(0)
         else:
             tab = self.configTabs.widget(1)
@@ -1141,6 +1162,15 @@ class MainWindow(QMainWindow):
             name = option+'CheckBox'
             widget = getattr(self, name)
             widget.setChecked(sign[option])
+
+        for option in FINGERSPELL_OPTIONS:
+            name = option+'CheckBox'
+            widget = getattr(self, name)
+
+            if not hasattr(sign, option):
+                setattr(sign, option, False)
+            widget.setChecked(sign[option])
+
         self.askSaveChanges = False
         #self.showMaximized()
 
@@ -1152,7 +1182,8 @@ class MainWindow(QMainWindow):
                   'corpusNotes': None, 'signNotes': None,
                   '_coder': None, '_lastUpdated': None,
                   'forearm': False, 'estimated': False,
-                  'uncertain': False, 'incomplete': False, 'reduplicated': False}
+                  'uncertain': False, 'incomplete': False, 'reduplicated': False,
+                  'fingerspelled': False, 'initialized': False}
 
         config1 = self.configTabs.widget(0)
         kwargs['config1'] = [config1.hand1(), config1.hand2()]
@@ -1178,6 +1209,9 @@ class MainWindow(QMainWindow):
         kwargs['_lastUpdated'] = self.transcriptionInfo.lastUpdated
         kwargs['_frequency'] = float(self.frequencySlot.text())
         for option in GLOBAL_OPTIONS:
+            kwargs[option] = getattr(self, option+'CheckBox').isChecked()
+
+        for option in FINGERSPELL_OPTIONS:
             kwargs[option] = getattr(self, option+'CheckBox').isChecked()
         return kwargs
 
@@ -1826,6 +1860,10 @@ class MainWindow(QMainWindow):
 
         for option in GLOBAL_OPTIONS:
             output.append('True' if getattr(sign, option) else 'False')
+
+        for option in FINGERSPELL_OPTIONS:
+            output.append('True' if getattr(sign, option) else 'False')
+
         notes = ''.join([n.replace('\n', '  ').replace('\t', '    ') for n in sign.notes])
         output.append(notes)
         if parameter_format == 'xml':
@@ -1934,6 +1972,8 @@ class MainWindow(QMainWindow):
                 kwargs['gloss'] = data['gloss']
                 for option in GLOBAL_OPTIONS:  #GLOBAL_OPTIONS = ['forearm', 'estimated', 'uncertain', 'incomplete']
                     kwargs[option] = True if data[option] == 'True' else False
+                for option in FINGERSPELL_OPTIONS:
+                    kwargs[option] = True if data[option] == 'True' else False
                 if useDefaultParameters:
                     model = ParameterTreeModel(parameters.defaultParameters)
                 else:
@@ -2014,6 +2054,10 @@ class MainWindow(QMainWindow):
         #self.initSignNotes()
         for widget in self.globalOptionsWidgets:
             widget.setChecked(False)
+
+        for widget in self.fingerSpellOptionsWidgets:
+            widget.setChecked(False)
+
         self.askSaveChanges = False
         #self.showMaximized()
 
