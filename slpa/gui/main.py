@@ -24,6 +24,7 @@ from gui.results_windows import ResultsWindow, SearchResultsWindow
 from gui.helperwidgets import PredefinedHandshapeDialog
 import __init__
 from pprint import pprint
+from gui.location_definer import LocationDefinerDialog
 
 __currentSLPAversion__ = 0.1
 FONT_NAME = 'Arial'
@@ -1261,6 +1262,7 @@ class MainWindow(QMainWindow):
         self.transcriptionMenu.addAction(self.setRestrictionsAct)
         self.transcriptionMenu.addAction(self.changeTranscriptionFlagsAct)
         self.transcriptionMenu.addAction(self.setBlenderPathAct)
+        self.transcriptionMenu.addAction(self.openLocationDefinerAct)
 
         self.notesMenu = self.menuBar().addMenu('&Notes')
         self.notesMenu.addAction(self.addCorpusNotesAct)
@@ -1673,6 +1675,13 @@ class MainWindow(QMainWindow):
                                  self,
                                  statusTip='Switch to analyzer mode',
                                  triggered=self.switchMode)
+
+        self.openLocationDefinerAct = QAction('Open location definer...', self, statusTip='Open location definer dialog',
+                                              triggered=self.openLocationDefiner)
+
+    def openLocationDefiner(self):
+        locationDefinerDialog = LocationDefinerDialog(parent=self)
+        locationDefinerDialog.exec_()
 
     def editCoder(self):
         coder = CoderDialog(self.coder, parent=self)
