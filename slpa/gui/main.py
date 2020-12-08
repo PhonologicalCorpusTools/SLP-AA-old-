@@ -2051,6 +2051,7 @@ class MainWindow(QMainWindow):
     @decorators.checkForUnsavedChanges
     def newGloss(self, clearFlags=True):
         self.gloss.glossEdit.setText('')
+        self.gloss.glossEdit.repaint()
         self.configTabs.widget(0).clearAll(clearFlags=clearFlags)
         self.configTabs.widget(1).clearAll(clearFlags=clearFlags)
         self.configTabs.setCurrentIndex(0)
