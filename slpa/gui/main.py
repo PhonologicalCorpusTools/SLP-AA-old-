@@ -368,7 +368,7 @@ class MainWindow(QMainWindow):
         paramButton.clicked.connect(self.showParameterTree)
         topLayout.addWidget(paramButton)
 
-        layout.addLayout(topLayout)
+        #layout.addLayout(topLayout)
 
         #Make gloss entry
         self.gloss = GlossLayout(parent=self)
@@ -1528,50 +1528,48 @@ class MainWindow(QMainWindow):
     def createActions(self):
 
         self.mergeCorpusAct = QAction('&Merge corpus...',
-                                self,
-                                triggered = self.mergeCorpus)
+                                      self,
+                                      triggered=self.mergeCorpus)
 
-        #self.funcloadAct = QAction('Calculate functional load...',
+        # self.funcloadAct = QAction('Calculate functional load...',
         #                           self,
         #                           triggered = self.funcLoad)
 
         self.copyAct = QAction('&Copy a transcription...',
-                              self,
-                              triggered = self.copyTranscription)
-        self.toolbar.addAction(self.copyAct)
+                               self,
+                               triggered=self.copyTranscription)
 
         self.pasteAct = QAction('&Paste a transcription...',
                                 self,
-                                triggered = self.pasteTranscription)
-        self.toolbar.addAction(self.pasteAct)
+                                triggered=self.pasteTranscription)
 
         self.autofillAct = QAction('&Autofill transcription slots...',
-                               self,
-                               triggered = self.autoFillTranscription)
+                                   self,
+                                   triggered=self.autoFillTranscription)
 
-        #self.predefineAct = QAction('&Open predefined handshapes...',
+        # self.predefineAct = QAction('&Open predefined handshapes...',
         #                            self,
         #                            triggered=self.predefineTranscription)
 
-        #self.glossSearchAct = QAction('Search by &gloss...',
+        # self.glossSearchAct = QAction('Search by &gloss...',
         #                              self,
         #                              triggered = lambda x: self.searchCorpus(searchType = 'gloss'))
 
-        #self.transcriptionSearchAct = QAction('Search by &transcription...',
+        # self.transcriptionSearchAct = QAction('Search by &transcription...',
         #                                      self,
         #                                      triggered = lambda x: self.searchCorpus(searchType = 'transcriptions'))
 
-        #self.phraseSearchAct = QAction('Search by descriptive &phrase...',
+        # self.phraseSearchAct = QAction('Search by descriptive &phrase...',
         #                               self,
         #                               triggered = lambda x: self.searchCorpus(searchType = 'phrases'))
 
         self.overwriteAllGlossesAct = QAction('Resave all glosses in new style',
                                               self,
-                                              triggered = self.overwriteAllGlosses)
+                                              triggered=self.overwriteAllGlosses)
 
         self.printCorpusObjectAct = QAction('Print corpus.__dict__',
-                                         self,
-                                         triggered = self.printCorpusObject)
+                                            self,
+                                            triggered=self.printCorpusObject)
 
         self.importCorpusAct = QAction('&Import corpus from tsv...',
                                        self,
@@ -1580,76 +1578,74 @@ class MainWindow(QMainWindow):
 
         self.setBlenderPathAct = QAction('Set path to Blender...',
                                          self,
-                                         statusTip = 'Set path to Blender',
-                                         triggered = self.setBlenderPath)
+                                         statusTip='Set path to Blender',
+                                         triggered=self.setBlenderPath)
 
         self.changeTranscriptionFlagsAct = QAction('Set transcription &flags...',
-                                                 self,
-                                                 statusTip = 'Change multiple flags at once',
-                                                 triggered = self.changeTranscriptionFlags)
+                                                   self,
+                                                   statusTip='Change multiple flags at once',
+                                                   triggered=self.changeTranscriptionFlags)
 
         self.autoSaveAct = QAction('&Autosave',
                                    self,
-                                   statusTip = 'Always save when moving between words in a corpus',
-                                   checkable = True,
-                                   triggered = self.setAutoSave)
+                                   statusTip='Always save when moving between words in a corpus',
+                                   checkable=True,
+                                   triggered=self.setAutoSave)
 
         self.forceCompatibilityUpdateAct = QAction('Force compatibility update',
-                                               self,
-                                               triggered = self.forceComptibilityUpdate)
+                                                   self,
+                                                   triggered=self.forceComptibilityUpdate)
 
         self.askAboutDuplicatesAct = QAction('Warn about duplicate glosses',
                                              self,
-                                             statusTip = 'Ask before overwriting duplicate glosses',
-                                             checkable = True,
-                                             triggered = self.askAboutDuplicates)
+                                             statusTip='Ask before overwriting duplicate glosses',
+                                             checkable=True,
+                                             triggered=self.askAboutDuplicates)
 
         self.resetSettingsAct = QAction('&Reset all settings',
                                         self,
-                                        statusTip = 'Reset all options and settings to defaults',
-                                        triggered = self.resetSettings)
-
+                                        statusTip='Reset all options and settings to defaults',
+                                        triggered=self.resetSettings)
 
         self.alertOnCorpusSaveAct = QAction('Show save &alert',
                                             self,
                                             statusTip='Show a pop-up window whenever a corpus entry is saved',
-                                            checkable = True,
-                                            triggered = self.alertOnCorpusSave)
+                                            checkable=True,
+                                            triggered=self.alertOnCorpusSave)
 
         self.keepParametersOnTopAct = QAction('Keep parameters window on &top',
                                               self,
-                                              statusTip = 'Always keep the parameters window on top of other windows',
-                                              checkable = True,
-                                              triggered = self.keepParametersOnTop)
-
+                                              statusTip='Always keep the parameters window on top of other windows',
+                                              checkable=True,
+                                              triggered=self.keepParametersOnTop)
 
         self.newCorpusAct = QAction('&New corpus',
                                     self,
-                                    statusTip="Start a new corpus", triggered = self.newCorpus)
+                                    statusTip="Start a new corpus", triggered=self.newCorpus)
 
-        self.loadCorpusAct = QAction( "&Load corpus...",
-                self,
-                statusTip="Load a corpus",
-                triggered=self.loadCorpus)
+        self.loadCorpusAct = QAction("&Load corpus...",
+                                     self,
+                                     statusTip="Load a corpus",
+                                     triggered=self.loadCorpus)
 
-        self.saveCorpusAct = QAction( "&Save current word",
-                self,
-                statusTip="Save current word and update corpus",
-                triggered=self.saveCorpus)
+        self.saveCorpusAct = QAction("&Save current word",
+                                     self,
+                                     statusTip="Save current word and update corpus",
+                                     triggered=self.saveCorpus)
 
         self.saveCorpusAsAct = QAction("Save corpus &as...",
                                        self,
-                                       statusTip = "Save current corpus under a new name",
+                                       statusTip="Save current corpus under a new name",
                                        triggered=self.saveCorpusAs)
 
         self.newGlossAct = QAction('&New gloss',
-                self,
-                statusTip='Clear current info and make a new gloss',
-                triggered=self.newGloss)
+                                   self,
+                                   statusTip='Clear current info and make a new gloss',
+                                   triggered=self.newGloss)
 
-        self.quitAct = QAction( "&Quit",
-                self,
-                statusTip="Quit", triggered=self.closeEvent)
+        self.quitAct = QAction("&Quit",
+                               self,
+                               statusTip="Quit", triggered=self.closeEvent)
 
         self.exportCorpusAct = QAction('&Export corpus as tsv...',
                                        self,
@@ -1657,14 +1653,14 @@ class MainWindow(QMainWindow):
                                        triggered=self.exportCorpus)
 
         self.setRestrictionsAct = QAction('Allow &unrestricted transcriptions',
-                                    self,
-                                    statusTip = 'If on, anything can be entered into transcriptions',
-                                    triggered = self.setTranscriptionRestrictions,
-                                    checkable = True)
+                                          self,
+                                          statusTip='If on, anything can be entered into transcriptions',
+                                          triggered=self.setTranscriptionRestrictions,
+                                          checkable=True)
         self.setConstraintsAct = QAction('Select anatomical/phonological &constraints...',
-                                    self,
-                                    statusTip = 'Select (violable) constraints on transcriptions',
-                                    triggered = self.setConstraints)
+                                         self,
+                                         statusTip='Select (violable) constraints on transcriptions',
+                                         triggered=self.setConstraints)
         self.addCorpusNotesAct = QAction('Edit &corpus notes...',
                                          self,
                                          statusTip='Open a notepad for information about the corpus',
@@ -1673,7 +1669,7 @@ class MainWindow(QMainWindow):
                                     self,
                                     statusTip='Edit the name for the default coder',
                                     triggered=self.editCoder)
-        #self.addSignNotesAct = QAction('Edit &sign notes...',
+        # self.addSignNotesAct = QAction('Edit &sign notes...',
         #                               self,
         #                               statusTip='Open a notepad for information about the current sign',
         #                               triggered=self.addSignNotes)
@@ -1683,8 +1679,33 @@ class MainWindow(QMainWindow):
                                  statusTip='Switch to analyzer mode',
                                  triggered=self.switchMode)
 
-        self.openLocationDefinerAct = QAction('Open location definer...', self, statusTip='Open location definer dialog',
+        self.openLocationDefinerAct = QAction('Open location definer...', self,
+                                              statusTip='Open location definer dialog',
                                               triggered=self.openLocationDefiner)
+
+        self.deleteFromCorpusAct = QAction('Delete word from corpus', self,
+                                           statusTip='Delete the current word from corpus',
+                                            triggered=self.deleteFromCorpus)
+
+        self.checkTranscriptionAct = QAction('Check transcription', self,
+                                             statusTip='Check transcription against constraints',
+                                             triggered=self.checkTranscription)
+
+        self.launchBlenderAct = QAction('Visualize transcription', self,
+                                        statusTip='Visualize the hand',
+                                        triggered=self.launchBlender)
+
+        self.predefinedTranscriptionAct = QAction('Predefined handshapes', self,
+                                        statusTip='Open predefined handshape window',
+                                        triggered=self.predefinedTranscription)
+
+        self.showParameterTreeAct = QAction('View Parameters', self,
+                                        statusTip='Open parameter window',
+                                        triggered=self.showParameterTree)
+
+
+        self.toolbar.addActions([self.newGlossAct, self.saveCorpusAct, self.deleteFromCorpusAct, self.checkTranscriptionAct,
+                                 self.launchBlenderAct, self.predefinedTranscriptionAct, self.showParameterTreeAct])
 
     def openLocationDefiner(self):
         locationDefinerDialog = LocationDefinerDialog(parent=self)
