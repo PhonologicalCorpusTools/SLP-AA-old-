@@ -287,6 +287,11 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
         self.setContentsMargins(0, 0, 0, 0)
 
+        # toolbar
+        self.toolbar = QToolBar('Main toolbar', parent=self)
+        self.toolbar.setIconSize(QSize(16, 16))
+        self.addToolBar(self.toolbar)
+
         self.statusBar().addWidget(QLabel(), stretch=1)
         self.statusBar().addWidget(QLabel('Version: ' + __init__.__version__))
 
@@ -1533,10 +1538,12 @@ class MainWindow(QMainWindow):
         self.copyAct = QAction('&Copy a transcription...',
                               self,
                               triggered = self.copyTranscription)
+        self.toolbar.addAction(self.copyAct)
 
         self.pasteAct = QAction('&Paste a transcription...',
                                 self,
                                 triggered = self.pasteTranscription)
+        self.toolbar.addAction(self.pasteAct)
 
         self.autofillAct = QAction('&Autofill transcription slots...',
                                self,
