@@ -15,6 +15,6 @@ from PyQt5.QtWidgets import (QMainWindow, QLayout, QHBoxLayout, QLabel, QAction,
                             QBoxLayout, QStackedWidget, QTabWidget, QTableWidget, QTableWidgetItem,
                             QGraphicsScene, QGraphicsView, QSpacerItem, QAbstractItemView, QColorDialog, QTreeView,
                             QListView, QSplitter, QHeaderView, QTableView, QAbstractScrollArea, QListWidgetItem, QStyle,
-                            QGraphicsPolygonItem, QGraphicsPixmapItem)
+                            QGraphicsPolygonItem, QGraphicsPixmapItem, QToolBar)
 from PyQt5.QtMultimedia import (QMediaPlayer, QMediaPlaylist, QMediaContent, QAbstractVideoSurface, QVideoSurfaceFormat)
 from PyQt5.QtMultimediaWidgets import QVideoWidget, QGraphicsVideoItem

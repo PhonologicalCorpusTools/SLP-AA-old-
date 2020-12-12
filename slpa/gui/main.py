@@ -1628,7 +1628,8 @@ class MainWindow(QMainWindow):
                                      statusTip="Load a corpus",
                                      triggered=self.loadCorpus)
 
-        self.saveCorpusAct = QAction("&Save current word",
+        self.saveCorpusAct = QAction(QIcon(getMediaFilePath('save_icon.png')),
+                                     "&Save current word",
                                      self,
                                      statusTip="Save current word and update corpus",
                                      triggered=self.saveCorpus)
@@ -1638,7 +1639,8 @@ class MainWindow(QMainWindow):
                                        statusTip="Save current corpus under a new name",
                                        triggered=self.saveCorpusAs)
 
-        self.newGlossAct = QAction('&New gloss',
+        self.newGlossAct = QAction(QIcon(getMediaFilePath('new_icon.png')),
+                                   '&New gloss',
                                    self,
                                    statusTip='Clear current info and make a new gloss',
                                    triggered=self.newGloss)
@@ -1683,23 +1685,28 @@ class MainWindow(QMainWindow):
                                               statusTip='Open location definer dialog',
                                               triggered=self.openLocationDefiner)
 
-        self.deleteFromCorpusAct = QAction('Delete word from corpus', self,
+        self.deleteFromCorpusAct = QAction(QIcon(getMediaFilePath('delete_icon.png')),
+                                           'Delete word from corpus', self,
                                            statusTip='Delete the current word from corpus',
-                                            triggered=self.deleteFromCorpus)
+                                           triggered=self.deleteFromCorpus)
 
-        self.checkTranscriptionAct = QAction('Check transcription', self,
+        self.checkTranscriptionAct = QAction(QIcon(getMediaFilePath('check_icon.png')),
+                                             'Check transcription', self,
                                              statusTip='Check transcription against constraints',
                                              triggered=self.checkTranscription)
 
-        self.launchBlenderAct = QAction('Visualize transcription', self,
+        self.launchBlenderAct = QAction(QIcon(getMediaFilePath('visualize_icon.png')),
+                                        'Visualize transcription', self,
                                         statusTip='Visualize the hand',
                                         triggered=self.launchBlender)
 
-        self.predefinedTranscriptionAct = QAction('Predefined handshapes', self,
+        self.predefinedTranscriptionAct = QAction(QIcon(getMediaFilePath('predefined_icon.png')),
+                                                  'Predefined handshapes', self,
                                         statusTip='Open predefined handshape window',
                                         triggered=self.predefinedTranscription)
 
-        self.showParameterTreeAct = QAction('View Parameters', self,
+        self.showParameterTreeAct = QAction(QIcon(getMediaFilePath('parameter_icon.png')),
+                                            'View Parameters', self,
                                         statusTip='Open parameter window',
                                         triggered=self.showParameterTree)
 
