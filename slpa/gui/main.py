@@ -283,7 +283,7 @@ class MainWindow(QMainWindow):
         if app is not None:
             app.messageFromOtherInstance.connect(self.handleMessage)
         super(MainWindow, self).__init__()
-        self.setWindowTitle('SLP-Annotator')
+        self.setWindowTitle('Sign Language Phonetic Annotator and Analyzer')
         self.setWindowIcon(QIcon(getMediaFilePath('slpa_icon.png')))
         self.setContentsMargins(0, 0, 0, 0)
 
