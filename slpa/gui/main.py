@@ -323,32 +323,32 @@ class MainWindow(QMainWindow):
         # self.globalLayout.addWidget(self.videoPlayer)
 
         layout = QVBoxLayout()
-        topLayout = QHBoxLayout()
+        #topLayout = QHBoxLayout()
 
-        #New gloss button
-        self.newGlossButton = QPushButton('New gloss')
-        self.newGlossButton.clicked.connect(lambda: self.newGloss(clearFlags=True))
-        topLayout.addWidget(self.newGlossButton)
+        # New gloss button
+        #self.newGlossButton = QPushButton('New gloss')
+        #self.newGlossButton.clicked.connect(lambda: self.newGloss(clearFlags=True))
+        #topLayout.addWidget(self.newGlossButton)
 
-        #Make save button
-        self.saveButton = QPushButton('Save word to corpus')
-        self.saveButton.clicked.connect(lambda: self.saveCorpus(checkForDuplicates=True))
-        topLayout.addWidget(self.saveButton)
+        # Make save button
+        #self.saveButton = QPushButton('Save word to corpus')
+        #self.saveButton.clicked.connect(lambda: self.saveCorpus(checkForDuplicates=True))
+        #topLayout.addWidget(self.saveButton)
 
-        #Make delete button
-        self.deleteButton = QPushButton('Delete word from corpus')
-        self.deleteButton.clicked.connect(self.deleteFromCorpus)
-        topLayout.addWidget(self.deleteButton)
+        # Make delete button
+        #self.deleteButton = QPushButton('Delete word from corpus')
+        #self.deleteButton.clicked.connect(self.deleteFromCorpus)
+        #topLayout.addWidget(self.deleteButton)
 
         # Make "check transcription" button
-        self.checkTranscriptionButton = QPushButton('Check transcription')
-        self.checkTranscriptionButton.clicked.connect(self.checkTranscription)
-        topLayout.addWidget(self.checkTranscriptionButton)
+        #self.checkTranscriptionButton = QPushButton('Check transcription')
+        #self.checkTranscriptionButton.clicked.connect(self.checkTranscription)
+        #topLayout.addWidget(self.checkTranscriptionButton)
 
         # Render handshape in Blender
-        self.openBlenderButton = QPushButton('Visualize transcription')
-        self.openBlenderButton.clicked.connect(self.launchBlender)
-        topLayout.addWidget(self.openBlenderButton)
+        #self.openBlenderButton = QPushButton('Visualize transcription')
+        #self.openBlenderButton.clicked.connect(self.launchBlender)
+        #topLayout.addWidget(self.openBlenderButton)
 
         # Copy and paste transcriptions
         #self.copyButton = QPushButton('Copy')
@@ -359,14 +359,14 @@ class MainWindow(QMainWindow):
         #topLayout.addWidget(self.pasteButton)
 
         # Predefined handshapes
-        self.predefineButton = QPushButton('Predefined handshapes')
-        self.predefineButton.clicked.connect(self.predefinedTranscription)
-        topLayout.addWidget(self.predefineButton)
+        #self.predefineButton = QPushButton('Predefined handshapes')
+        #self.predefineButton.clicked.connect(self.predefinedTranscription)
+        #topLayout.addWidget(self.predefineButton)
 
         # Add parameters button
-        paramButton = QPushButton('View Parameters')
-        paramButton.clicked.connect(self.showParameterTree)
-        topLayout.addWidget(paramButton)
+        #paramButton = QPushButton('View Parameters')
+        #paramButton.clicked.connect(self.showParameterTree)
+        #topLayout.addWidget(paramButton)
 
         #layout.addLayout(topLayout)
 
