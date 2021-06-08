@@ -6,7 +6,7 @@ Predefined Handshapes
 
 
 
-.. _enter_gloss:
+.. _Selecting a predefined handshape:
 
 1. Entering a Gloss
 `````````````````
