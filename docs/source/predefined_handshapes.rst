@@ -4,7 +4,6 @@
 Predefined Handshapes
 ***************
 
-      Note that if you already have a corpus that you would like to continue on expanding, you can load the corpus at this point (see :ref:`add_signs`)
 
 
 .. _enter_gloss:
