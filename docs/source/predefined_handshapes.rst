@@ -5,12 +5,16 @@ Predefined Handshapes
 ***************
 
 
-.. _enter gloss:
 
 1. Selecting a predefined handshape
 `````````````````
-To select a predefined handshape click on the hand icon on the top left menu bar. The predefined handshapes are organized vertically by base handshape and 
-horizontally by modification type. For example, if you are searching for 'clawed-F', you can find the 'F' row and the 'clawed' column.
+To select a predefined handshape click on the hand icon on the top left menu bar. A new window will open. The predefined handshapes are organized vertically by
+base handshape and horizontally by modification type. For example, if you are searching for 'clawed-F', you can find the 'F' row and the 'clawed' column.
+
+The configuration and hand you are selecting the handshape for can be changed on the top bar. For example, if you want to select a predefined handshape for
+Configuration 1 of Hand 2, select the option 'Config1 Hand2'.
+
+Once you have selected a predefined handshape, the slots will be filled in for the appropriate configuration and hand on the 'handshape transcription' window of the SLPAA. The name of the selected handshape will appear to the right of the slots. To clear this selection, click on the 'clear' button to the right of the predefined handshape name. To change the selection, you can simply select another predefined handshape to replace it (while the configuration you are trying to change is still selected).
 
 
 .. _fill_slot:
