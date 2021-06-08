@@ -19,10 +19,10 @@ Once you have selected a predefined handshape, the slots will be filled in for t
 
 .. _fill_slot:
 
-2. Filling in a slot
+2. Making specific changes
 `````````````````
-To fill in a slot, you can either click on a slot to select a symbol from the pull-down menu or type in 
-a symbol yourself (see :ref:`field_and_slot` as relevant).
+Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription. Once changes are made, the name of the predefined handshape will no longer appear to the right of the transcription. 
+(For more detailed axplanation of the transcription process, see 'transcription_process.rtf'?)
 
       Notes on typing in a symbol
       
