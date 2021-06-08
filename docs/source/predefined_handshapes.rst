@@ -5,12 +5,11 @@ Predefined Handshapes
 ***************
 
 
+.. _enter gloss:
 
-.. _Selecting a predefined handshape:
-
-1. Entering a Gloss
+1. Selecting a predefined handshape
 `````````````````
-To enter a gloss for a sign, simply click on the text box named "Gloss" and type in. This box is case-sensitive.
+To select a predefined handshape...
 
 
 .. _fill_slot:
