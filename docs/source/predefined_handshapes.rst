@@ -9,7 +9,8 @@ Predefined Handshapes
 
 1. Selecting a predefined handshape
 `````````````````
-To select a predefined handshape...
+To select a predefined handshape click on the hand icon on the top left menu bar. The predefined handshapes are organized vertically by base handshape and 
+horizontally by modification type. For example, if you are searching for 'clawed-F', you can find the 'F' row and the 'clawed' column.
 
 
 .. _fill_slot:
