@@ -28,7 +28,9 @@ Once a predefined handshape has been selected, you can change individual slots o
 TO DO: include info about components that can be ignored in searches. Also can search by base handshape and by modification type. 
 
 
+END OF EDITS SO FAR
 .. _copy_and_paste:
+
 
 4. Copying and Pasting
 `````````````````
