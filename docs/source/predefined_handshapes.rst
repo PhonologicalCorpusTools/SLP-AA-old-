@@ -4,8 +4,6 @@
 Predefined Handshapes
 ***************
 
-
-
 1. Selecting a predefined handshape
 `````````````````
 To select a predefined handshape click on the hand icon on the top left menu bar. A new window will open. The predefined handshapes are organized vertically by
@@ -24,43 +22,12 @@ Once you have selected a predefined handshape, the slots will be filled in for t
 Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription. Once changes are made, the name of the predefined handshape will no longer appear to the right of the transcription. 
 (For more detailed axplanation of the transcription process, see 'transcription_process.rtf'?)
 
-      Notes on typing in a symbol
-      
-      * Slots are generally case-insensitive. An exeption is Slot 11, which has both [m] and [M] in its list of permitted characters.
-      
-      * In Slots 20, 25, and 30, use the key 'z' for [x-]; 'c' for [x+]; and 's' for [☒].
-      
-      * It may be helpful to use the Tab key to move to the next slot. To do this on Mac, go to System Preferences > Keyboard > Shortcuts. At the bottom of the page under "Full Keyboard Access", select "All controls".
-
 
 .. _flag_slot:
 
-3. Flagging a slot
+3. Searches for handshapes
 `````````````````
-You can optionally flag individual slots. "Flag as uncertain" will colour the slot, and 
-"Flag as estimate" will mark the slot with a dotted line. 
-
-To do this, control-click or rightclick a slot. A pull-down menu will appear, and you can select or unselect these options:
-
-.. image:: static/flag.png
-   :width: 90%
-   :align: center
-
-Alternatively, go to "Transcription" in the menu bar and select "Set transcription flags...". A new window will appear. You can expand and scroll through the window to flag any slot in any Config. Click "OK".
-
-.. image:: static/set_flag.png
-   :width: 90%
-   :align: center
-
-"Flag as estimate" is intended to note that, because of obscurity, a symbol has been estimated in some way (based on
-knowledge of hand anatomy, a preceeding hand configuration, the other hand in a two-handed symmetrical sign, etc.).
-"Flag as uncertain" is intended to stand for the transcriber's subjective uncertainty about their choice of a symbol.
-Therefore, it is certainly possible to use these two options simultaneously when the transcriber is uncertain about their
-estimation.
-
-.. image:: static/use_both.png
-   :width: 90%
-   :align: center
+TO DO: include info about components that can be ignored in searches
 
 
 .. _copy_and_paste:
