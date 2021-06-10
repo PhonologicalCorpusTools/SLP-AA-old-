@@ -54,7 +54,7 @@ Note that any existing symbols in the Config will be overwritten.
    
    First, click on the Copy button. In the new window, select Config 1, Hand 1, and click OK.
    
-   .. image:: SLP-AA/slpa/media/A.png
+   .. image:: slpa/media/A.png
       :width: 90%
       :align: center
 
