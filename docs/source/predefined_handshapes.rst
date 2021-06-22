@@ -1,3 +1,20 @@
+A
+~ .. image:: static/A.png
+      :width: 90%
+      :align: center
+      
+      
+A
+~
+   .. image:: static/A.png
+      :width: 90%
+      :align: center
+      
+         .. image:: static/A.png
+      :width: 90%
+      :align: center
+
+
 .. _predefined_handshapes:
 
 ***************
