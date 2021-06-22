@@ -81,9 +81,9 @@ A [IMAGE]
     
     Image for A-handshape:
     
-.. image:: static/A.png
-      :width: 20%
-      :align: centre
+    .. image:: static/A.png
+         :width: 20%
+         :align: centre
 
 B [IMAGE]
 ~~~~~~~~~
