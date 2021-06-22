@@ -79,6 +79,8 @@ A [IMAGE]
     - [IMAGE] In “modified-A”  the fingers are extended down to touch the palm (rather than tucked as for baseline “A”).
     - “A-index” differs from the baseline “A” handshape in that the index finger is raised and curved rather than tucked, and the thumb has a neutral abduction (<) rather than full adduction (=). In this case, the handshape does not follow the description of the ‘index’ derivation.
     
+    Image for A-handshape:
+    
 .. image:: static/A.png
       :width: 20%
       :align: centre
@@ -194,7 +196,6 @@ III. Derived Handshapes
    
    .. image:: static/A.png
       :width: 20%
-      :height: 20%
       :align: center
 
   
@@ -215,15 +216,6 @@ III. Derived Handshapes
       :align: center
       
 
-.. _check_global_handshape:
-
-5. Checking Global handshape options
-`````````````````
-Global handshape options (see :ref:`global_handshape_options`) can be checked by simply cliking the box next to a description.
-The options "Estimated" and "Uncertain" can be thought of as a global counterpart of the slot options "Flag as estimate" 
-and "Flag as uncertain," respectively (see :ref:`flag_slot`).
-In other words, it may be useful, for example, to check these Global handshape options when estimation or uncertainty applies
-to a whole sign or a whole field(s) rather than individual slots.
 
 
 .. _other_parameters:
@@ -253,14 +245,6 @@ Sign notes are automatically saved when the signs are saved, and you can go back
 It may be useful, for example, to use this sign notes to describe reasons for checking the Global handshape options.    
 
 Similarly, "Notes" > "Edit corpus notes..." will allow you to add a note to the entire corpus.
-
-
-.. _check_transcription:
-
-8. Checking transcription
-`````````````````
-To check your transcription against your selected constraints (see :ref:`constraints`), click on "Check transcription" button.
-
 
 .. _visualize_transcription:
 
