@@ -32,9 +32,8 @@ General Conventions
 
 Base >> derived principle 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  * For baseline handshapes, pictures and transcriptions should be an exact match.
-  * For derived handshapes, the transcriptions will match the conventions below, even if that means the picture isn’t an exact match. For example, the convention for thumb abduction for all “extended” handshapes is to have it be fully abducted ({). However, the image for “clawed-extended-L” shows a laterally positioned (L) thumb that is not fully abducted. The image shows what would have been transcribed as a neutral (<) abduction value, but the transcription uses { as the conventions dictate. This discrepancy between images and transcriptions is simply an artifact of the images we had available.
+- For baseline handshapes, pictures and transcriptions should be an exact match.
+- For derived handshapes, the transcriptions will match the conventions below, even if that means the picture isn’t an exact match. For example, the convention for thumb abduction for all “extended” handshapes is to have it be fully abducted ({). However, the image for “clawed-extended-L” shows a laterally positioned (L) thumb that is not fully abducted. The image shows what would have been transcribed as a neutral (<) abduction value, but the transcription uses { as the conventions dictate. This discrepancy between images and transcriptions is simply an artifact of the images we had available.
 
 - Using only F, E, i not f, e
   - [F] was used for a fully bent joint, [i] was used to achieve a slightly bent joint, and [E] was used for a straight extended joint. [f] and [e] were avoided. 
