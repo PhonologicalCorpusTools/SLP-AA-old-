@@ -176,24 +176,6 @@ III. Derived Handshapes
 
 
 
-.. _copy_and_paste:
-
-
-4. Copying and Pasting
-`````````````````
-Using the Copy and Paste functions, you can copy your transcription for one Config and paste it to to 
-another Config within the same sign.
-
-To copy your transcription, click on the "Copy" button at the top right corner or go to "Edit" in the menu bar and 
-select "Copy a transcription...". A new window "Copy transcription" will appear. Select a Config that you would like to copy, 
-and click "OK".
-
-Similarly, to paste the transcription, click on the "Paste" button at the top right corner or go to "Edit" in the menu bar and 
-select "Paste a transcription...". A new window "Paste transcription" will appear. Make sure that the intended trasnscription 
-has been copied, and select a Config to which you would like to paste that transcription. If you would like to paste 
-only the symbols and not the flags, then uncheck the option "Paste in highlighting for uncertain and estimated slots". 
-Click "OK". 
-Note that any existing symbols in the Config will be overwritten.
 
    For example, let's say you would like to copy your transcription for Config 1 of Hand 1 and paste it to Config 1 of Hand 2.
    
