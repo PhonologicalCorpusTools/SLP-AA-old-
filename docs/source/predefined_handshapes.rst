@@ -87,7 +87,7 @@ C
 
 D
 ~
-    - “Modified-D” has third and fourth fingers touching the the thumb to create the body of the D (As opposed to baseline “D”, which makes the body of the D using only the middle finger and tucks fingers 3 & 4 against palm). 
+    - “Modified-D” has fingers 2, 3 & 4 creating the body of the D (as opposed to baseline “D”, which makes the body of the D using only the middle finger and tucks fingers 3 & 4 against palm). 
 
 E
 ~
@@ -97,15 +97,15 @@ F
 
 G
 ~
-    - “Modified-G” has the thumb extended parallel to the index finger (rather than the thumb sticking up at a 90 degree angle from the index finger as for baseline “G”).
+    - “Modified-G” has the thumb extended parallel to the index finger (rather than the thumb sticking up at roughly a 90 degree angle from the index finger as for baseline “G”).
 
 K
 ~
 
 L 
 ~
-    - “Bent-thumb-L” has i for proximal joint and F for distal joint, but finger 1 is extended as in baseline “L”. This differs from “bent-L” which has finger 1 bent and the thumb extended. 
-
+    - “Bent-thumb-L” has i for proximal joint and F for distal joint of thumb, but finger 1 is extended as in baseline “L”. This differs from “bent-L” which has finger 1 bent and the thumb extended. 
+    
 M
 ~
 
@@ -124,7 +124,7 @@ S
 
 T
 ~
-    - “Covered-T” has the medial joint of the index finger contacting the tip of the thumb, curving over the tip and covering the thumb. This differs from the description of "covered" which generally means the friction distal part of the thumb touching the back distal part of the finger(s).
+    - “Covered-T” has the medial joint of the index finger contacting the tip of the thumb, curving over the tip and covering the thumb. This differs from the description of "covered" which generally describes the friction distal part of the thumb touching the back distal part of the selected finger(s).
 
 U 
 ~
@@ -154,7 +154,7 @@ Y
 
 5
 ~
-    - “Modified-5” has the thumb extended forward from the palm in an opposed position (O), which differs from baseline 5, which has the thumb extended away from the side of the palm (L)
+    - “Modified-5” has the thumb extended forward from the palm in an opposed position (O), as opposed to baseline 5, which has the thumb extended away from the side of the palm (L)
 
 8
 ~
