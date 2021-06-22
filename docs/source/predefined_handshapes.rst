@@ -1,5 +1,6 @@
 A
-~ .. image:: static/A.png
+~  
+.. image:: static/A.png
       :width: 90%
       :align: center
       
