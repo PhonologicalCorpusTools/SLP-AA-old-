@@ -76,6 +76,7 @@ II. Baseline Handshapes
 
 A [IMAGE]       
 ~~~~~~~~~
+
    .. image:: static/A.png
       :width: 20%
       :align: centre
@@ -85,6 +86,7 @@ A [IMAGE]
 
 B [IMAGE]
 ~~~~~~~~~
+
    .. image:: static/A.png
       :width: 20%
       :align: left
