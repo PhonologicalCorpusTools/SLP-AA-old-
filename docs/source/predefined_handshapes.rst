@@ -70,6 +70,7 @@ General Conventions
 
 Baseline Handshapes
 ===================
+```````````````````
 
 **A [IMAGE]**
 [IMAGE] In “modified-A”  the fingers are extended down to touch the palm (rather than tucked as for baseline “A”).
