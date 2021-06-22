@@ -194,6 +194,7 @@ III. Derived Handshapes
    
    .. image:: static/A.png
       :width: 20%
+      :height: 20%
       :align: center
 
   
