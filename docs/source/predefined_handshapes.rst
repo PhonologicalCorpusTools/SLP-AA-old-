@@ -27,7 +27,7 @@ Once a predefined handshape has been selected, you can change individual slots o
 
 3. Conventions for how Pre-defined Handshapes were Coded
 `````````````````
-General Conventions
+I. General Conventions
 ===================
 
 - Base >> derived principle 
@@ -68,7 +68,7 @@ General Conventions
     - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
 
 
-Baseline Handshapes
+II. Baseline Handshapes
 ===================
 
 A [IMAGE]
@@ -167,7 +167,7 @@ Standard Base
 
 
 
-Derived Handshapes
+III. Derived Handshapes
 ===================
 
 
