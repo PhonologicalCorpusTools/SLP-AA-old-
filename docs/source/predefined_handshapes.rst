@@ -85,7 +85,7 @@ C
 
 D
 ~
-- “Modified-D” has third and fourth fingers touching the the thumb to create the body of the D (As opposed to baseline “D”, which makes the body of the D using only the middle finger and tucks fingers 3 & 4 against palm). 
+    - “Modified-D” has third and fourth fingers touching the the thumb to create the body of the D (As opposed to baseline “D”, which makes the body of the D using only the middle finger and tucks fingers 3 & 4 against palm). 
 
 E
 ~
@@ -95,14 +95,14 @@ F
 
 G
 ~
-- “Modified-G” has the thumb extended parallel to the index finger (rather than the thumb sticking up at a 90 degree angle from the index finger as for baseline “G”).
+    - “Modified-G” has the thumb extended parallel to the index finger (rather than the thumb sticking up at a 90 degree angle from the index finger as for baseline “G”).
 
 K
 ~
 
 L 
 ~
-- “Bent-thumb-L” has i for proximal joint and F for distal joint, but finger 1 is extended as in baseline “L”. This differs from “bent-L” which has finger 1 bent and the thumb extended. 
+    - “Bent-thumb-L” has i for proximal joint and F for distal joint, but finger 1 is extended as in baseline “L”. This differs from “bent-L” which has finger 1 bent and the thumb extended. 
 
 M
 ~
@@ -112,7 +112,7 @@ N
 
 O 
 ~
-- “Modified-O” appears to be a slightly flattened shape compared to baseline “O”, which has all joints of all fingers and thumb curved. In “modified-O”, the fingers are still curved at the medial and distal joints, with the proximal joint flexed (F). The thumb is extended forward from the palm in an opposed position (O) with no joints curved. This handshape is used in the ASL sign TEACH.
+    - “Modified-O” appears to be a slightly flattened shape compared to baseline “O”, which has all joints of all fingers and thumb curved. In “modified-O”, the fingers are still curved at the medial and distal joints, with the proximal joint flexed (F). The thumb is extended forward from the palm in an opposed position (O) with no joints curved. This handshape is used in the ASL sign TEACH.
 
 R
 ~
@@ -122,11 +122,11 @@ S
 
 T
 ~
-- “Covered-T” has the medial joint of the index finger contacting the tip of the thumb, curving over the tip and covering the thumb. This differs from the description of "covered" which generally means the friction distal part of the thumb touching the back distal part of the finger(s).
+    - “Covered-T” has the medial joint of the index finger contacting the tip of the thumb, curving over the tip and covering the thumb. This differs from the description of "covered" which generally means the friction distal part of the thumb touching the back distal part of the finger(s).
 
 U 
 ~
-- “Contracted-U-index” has the index finger in a half-folded position beside a fully extended middle finger. In this case, the index finger does not follow the [i-E-E] pattern of the other “contracted” handshapes.
+    - “Contracted-U-index” has the index finger in a half-folded position beside a fully extended middle finger. In this case, the index finger does not follow the [i-E-E] pattern of the other “contracted” handshapes.
 
 V
 ~
@@ -139,7 +139,7 @@ X
 
 Y
 ~
-- “Modified-Y”  was not included in the predefined handshapes. Although this handshape occurs in The Canadian Dictionary of ASL, there are only three entries of signs that use it and there is no consistency between the depictions of the handshape. 
+    - “Modified-Y”  was not included in the predefined handshapes. Although this handshape occurs in The Canadian Dictionary of ASL, there are only three entries of signs that use it and there is no consistency between the depictions of the handshape. 
 
 1
 ~
@@ -152,7 +152,7 @@ Y
 
 5
 ~
-- “Modified-5” has the thumb extended forward from the palm in an opposed position (O), which differs from baseline 5, which has the thumb extended away from the side of the palm (L)
+    - “Modified-5” has the thumb extended forward from the palm in an opposed position (O), which differs from baseline 5, which has the thumb extended away from the side of the palm (L)
 
 8
 ~
@@ -162,8 +162,8 @@ Middle Finger
 
 Standard Base
 ~~~~~~~~~~~~~
-- This handshape occurs in The Canadian Dictionary of ASL. 
-- All fingers are adducted (=) and have proximal joints slightly bent (i), and medial and distal joints extended (E). Thumb is unopposed (U) and has neutral abduction (<). 
+    - This handshape occurs in The Canadian Dictionary of ASL. 
+    - All fingers are adducted (=) and have proximal joints slightly bent (i), and medial and distal joints extended (E). Thumb is unopposed (U) and has neutral abduction (<). 
 
 
 
