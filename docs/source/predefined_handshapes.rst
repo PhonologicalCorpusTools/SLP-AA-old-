@@ -193,7 +193,7 @@ III. Derived Handshapes
    First, click on the Copy button. In the new window, select Config 1, Hand 1, and click OK.
    
    .. image:: static/A.png
-      :width: 90%
+      :width: 20%
       :align: center
 
   
