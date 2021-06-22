@@ -4,6 +4,8 @@
 Predefined Handshapes
 ***************
 
+.. _Select_handshape:
+
 1. Selecting a predefined handshape
 `````````````````
 To select a predefined handshape click on the hand icon on the menu bar at the top left. A new window will open. The predefined handshapes are organized vertically by base handshape and horizontally by modification type. For example, if you are searching for 'clawed-F', you can find if in the 'F' row and the 'clawed' column.
@@ -14,21 +16,20 @@ Configuration 1 of Hand 2, select the option 'Config1 Hand2' and then select the
 Once you have selected a predefined handshape, the transcription will be filled in to the slots of the appropriate configuration and hand on the 'handshape transcription' window. The name and image of the selected handshape will appear to the right of the slots. To clear this selection, click on the 'clear' button to the right of the predefined handshape name. To change the selection, you can simply select another predefined handshape to replace it (while the configuration and hand you are trying to change is still selected). 
 
 
-.. _fill_slot:
+.. _make_changes:
 
 2. Making specific changes
 `````````````````
-Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. For more detailed axplanation of the transcription process, see 'transcription_process.rtf'?)
+Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. For more detailed axplanation of the transcription process, see 'transcription_process.rtf')
 
 
-.. _flag_slot:
+.. _handshape_conventions:
 
-3. Searches for handshapes
-`````````````````
-TO DO: include info about components that can be ignored in searches. Also can search by base handshape and by modification type. 
+3. Conventions for how Pre-defined Handshapes were Coded
 
 
-END OF EDITS SO FAR
+
+
 
 .. _copy_and_paste:
 
