@@ -177,7 +177,7 @@ III. Derived Handshapes
 
 Image for A handshape (test): 
 
-   .. image:: static/A.png
+.. image:: static/A.png
       :width: 20%
       :align: center
 
