@@ -68,6 +68,8 @@ I. General Conventions
     - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
 
 
+`````````````````````````
+
 II. Baseline Handshapes
 ===================
 
@@ -165,6 +167,8 @@ Standard Base
     - This handshape occurs in The Canadian Dictionary of ASL. 
     - All fingers are adducted (=) and have proximal joints slightly bent (i), and medial and distal joints extended (E). Thumb is unopposed (U) and has neutral abduction (<). 
 
+
+`````````````````````````````````````````
 
 
 III. Derived Handshapes
