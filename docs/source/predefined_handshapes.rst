@@ -27,8 +27,8 @@ Once a predefined handshape has been selected, you can change individual slots o
 
 3. Conventions for how Pre-defined Handshapes were Coded
 `````````````````
-
-
+General Conventions
+===================
 
 
 
