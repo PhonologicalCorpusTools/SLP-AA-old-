@@ -74,7 +74,7 @@ I. General Conventions
 II. Baseline Handshapes
 ===================
 
-.. image:: static/A.png     "A [IMAGE]"
+.. image:: static/A.png    
       :width: 20
       :align: center 
       
@@ -177,9 +177,39 @@ Standard Base
 `````````````````````````````````````````
 
 
-
 III. Derived Handshapes
-=================== 
+===================
+
+Adducted
+~~~~~~~~
+
+- Dictionary description: N/A
+- Generic description: Fingers are adducted
+- SLP coding description: full adduction between each finger
+- Prototypical coding: [=] between each finger
+
+Adducted-F: [IMAGE]
+
+
+Adducted
+~~~~~~~~
+
+    - Dictionary description: N/A
+    - Generic description: Fingers are adducted
+    - SLP coding description: full adduction between each finger
+    - Prototypical coding: [=] between each finger
+
+    Adducted-F: [IMAGE]
+
+
+
+
+
+
+
+
+
+
 
 
 EXAMPLES FOR IMAGES:
