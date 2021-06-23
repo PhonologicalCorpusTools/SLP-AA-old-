@@ -7,7 +7,7 @@ Predefined Handshapes
 
 .. _Select_handshape:
 
-1. Selecting a predefined handshape
+1. Selecting a Predefined Handshape
 `````````````````
 To select a predefined handshape click on the hand icon on the menu bar at the top left. A new window will open. The predefined handshapes are organized vertically by base handshape and horizontally by modification type. For example, if you are searching for 'clawed-F', you can find if in the 'F' row and the 'clawed' column.
 
@@ -19,14 +19,14 @@ Once you have selected a predefined handshape, the transcription will be filled 
 
 .. _make_changes:
 
-2. Making specific changes
+2. Making Specific Changes
 `````````````````
 Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. For more detailed axplanation of the transcription process, see 'transcription_process.rtf')
 
 
 .. _handshape_conventions:
 
-3. Conventions for how Pre-defined Handshapes were Coded
+3. Conventions for How Pre-defined Handshapes were Coded
 `````````````````
 I. General Conventions
 ===================
@@ -75,7 +75,7 @@ II. Baseline Handshapes
 ===================
 
 
-   .. image:: static/A.png
+.. image:: static/A.png
       :width: 20%
       :align: center 
       
