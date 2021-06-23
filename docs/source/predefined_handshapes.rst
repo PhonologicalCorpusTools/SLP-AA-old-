@@ -74,7 +74,6 @@ I. General Conventions
 II. Baseline Handshapes
 ===================
 
-
 .. image:: static/A.png
       :width: 20
       :align: center 
@@ -178,73 +177,18 @@ Standard Base
 `````````````````````````````````````````
 
 
+
 III. Derived Handshapes
-===================
-
-Image for A handshape (test): 
-
-   .. image:: static/A.png
-      :width: 20%
-      :align: center
+=================== 
 
 
-
-   For example, let's say you would like to copy your transcription for Config 1 of Hand 1 and paste it to Config 1 of Hand 2.
-   
-   
-   First, click on the Copy button. In the new window, select Config 1, Hand 1, and click OK.
-   
-   .. image:: static/A.png
-      :width: 20%
-      :align: center
-
-  
-   Second, click on the Paste button. In the new window, you can see the copied transcription in the first line, 
-   introduced by    "The currently copied transcription is". Make sure that it is the correct one. 
-   Then select "Config 1, Hand 2", and click "OK".
-      
-   .. image:: static/paste.png
-      :width: 90%
-      :align: center
-   
-   
+EXAMPLES FOR IMAGES:
    This function may be particularly useful for transcribing symmetrical signs or assymmetrical signs in which
    only the dominant hand changes its handshape.
    
    .. image:: static/paste_result.png
       :width: 90%
       :align: center
-      
-
-
-
-.. _other_parameters:
-
-6. Transcribing other parameters
-`````````````````
-To transcribe parameters other than handshapes, click on "View Parameters" button at the top right corner. A new window will
-appear, and you can select relevant values. To transcribe handshapes and parameters at the same time, see :ref:`options`.
-
-.. image:: static/.png
-      :width: 90%
-      :align: center
-
-
-.. _add_sign_notes:
-
-7. Adding Sign and Corpus notes
-`````````````````
-To add a note to a sign that you are transcribing, go to "Notes" in the menu bar and click on "Edit sign notes..." A new 
-window will appear, and you can type in your comments. 
-
-.. image:: static/sign_notes.png
-      :width: 90%
-      :align: center
-        
-Sign notes are automatically saved when the signs are saved, and you can go back and edit them by following the above step.
-It may be useful, for example, to use this sign notes to describe reasons for checking the Global handshape options.    
-
-Similarly, "Notes" > "Edit corpus notes..." will allow you to add a note to the entire corpus.
 
 .. _visualize_transcription:
 
@@ -258,43 +202,5 @@ To see a graphic image of transcribed handshapes, click on "Visualize transcript
       :align: center
 
 
-.. _save_sign:
-
-10. Saving a sign to a corpus
-`````````````````
-Note that each sign should be saved before a next sign can be transcribed. To save a sign, either click on "Save word to
-corpus" button or go to "File" in the menu bar and select "Save current word". You will get a message 
-"Corpus successfully updated!" if "Show save alert" is selected in your setting (see :ref:`options`).
 
 
-If you do not have a corpus loaded beforehand, you will get a warning message: "You must have a corpus loaded before you can
-save words. What woule you like to do?". You can either "Create a new corpus" or "Add this word to an existing corpus".
-
-.. image:: static/corpus_warning.png
-      :width: 90%
-      :align: center
-
-
-If you have a sign with the same gloss already saved in the same corpus and "Warn about duplicate glosses" is selected in your
-setting (see :ref:`options`), you will get a warning message: "A word with the gloss XXX already exists in your corpus. What do you want to do?".
-You can either "Go back and edit the gloss" or "Overwrite existing word".
-
-.. image:: static/duplicate_warning.png
-      :width: 90%
-      :align: center
-
-
-Finally, if you click on "New gloss" (see :ref:`next_sign`) without saving the current sign, you will get a warning message: 
-"The current gloss has unsaved changes. what would you like to do?" It gives you options to either "Go back" to the current 
-sign or to "Continue without saving". 
-If this is the first time the sign is transcribed in the corpus, the latter option will delete a sign.
-
-
-.. _next_sign:
-
-11. Transcribing the next sign
-`````````````````
-Once a sign has been saved, if you would like to continue on transcribing a next sign, you can either click on 
-the "New gloss" button or go to "File" and select "New gloss".
-
-You can repeat the transcribing process from :ref:`enter_gloss`.
