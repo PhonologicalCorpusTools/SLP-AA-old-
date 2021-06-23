@@ -74,7 +74,7 @@ I. General Conventions
 II. Baseline Handshapes
 ===================
 
-.. image:: static/A.png
+.. image:: static/A.png     A [IMAGE] 
       :width: 20
       :align: center 
       
