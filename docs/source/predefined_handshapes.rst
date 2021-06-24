@@ -23,7 +23,6 @@ Once you have selected a predefined handshape, the transcription will be filled 
 `````````````````
 Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. For more detailed explanation of the transcription process, see :ref:`transcription_process.rtf`)
 
-:ref:`save_sign`
 
 
 .. _handshape_conventions:
