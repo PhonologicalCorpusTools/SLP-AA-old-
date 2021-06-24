@@ -37,7 +37,7 @@ Do they need subheaders to group them by topic?
 
 Do the titles of each bullet work? 
 
-Include in this paragraph: links to i,ii,iii sections 
+Include in this paragraph: links to i,ii,iii sections (reference them)
 
 
 - Naming of handshapes:
@@ -93,8 +93,8 @@ The baseline handshapes are organized on the left column (rows). link to grid.
       
 A       
 ~~      
-    - In “modified-A”  the fingers are extended down to touch the palm (rather than tucked as for baseline “A”).
-    - “A-index” differs from the baseline “A” handshape in that the index finger is raised and curved rather than tucked, and the thumb has a neutral abduction (<) rather than full adduction (=). In this case, the handshape does not follow the description of the ‘index’ derivation.
+- In “modified-A”  the fingers are extended down to touch the palm (rather than tucked as for baseline “A”).
+- “A-index” differs from the baseline “A” handshape in that the index finger is raised and curved rather than tucked, and the thumb has a neutral abduction (<) rather than full adduction (=). In this case, the handshape does not follow the description of the ‘index’ derivation.
 
 B 
 ~    
