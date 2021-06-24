@@ -36,6 +36,8 @@ Do they need subheaders to group them by topic?
 
 Do the titles of each bullet work? 
 
+Include in this paragraph: links to i,ii,iii sections 
+
 
 - Naming of handshapes:
     - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
