@@ -25,7 +25,7 @@ like to apply to your corpus, or use the "Select all" and "Unselect all" buttons
 
 Note that the constraints will NOT be automatically applied. To look for violations of 
 the selected constraints in each sign, click on the "Check transcription" 
-button (see:ref:`checking_transcriptions`).
+button (see :ref:`checking_transcriptions`).
 
 
 .. _options:
