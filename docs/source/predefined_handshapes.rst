@@ -78,6 +78,10 @@ II. Baseline Handshapes
       :width: 100px
       :align: center 
       
+.. image:: static/A.png    
+      :width: 25%
+      :align: center 
+      
       
 A [IMAGE]      
 ~~~~~~~~      
