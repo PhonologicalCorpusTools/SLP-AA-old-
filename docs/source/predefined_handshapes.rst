@@ -195,119 +195,119 @@ Adducted-F: [IMAGE]
 
 Bent
 ~~~~
-- Dictionary description: Handshape is compressed to take on a flat appearance
-- Generic description: Selected fingers are extended straight from the palm with only the bottom joint flexed (except “bent-thumb-L”, which has the thumb lateral and bent upwards parallel to the extended index finger) 
-- SLP coding description: proximal joint of each bent finger is F; other joints are often E but may depend on handshape (except for “bent-thumb-L” -- see description)
-- Prototypical coding: F-E-E on each bent finger
+- **Dictionary description:** Handshape is compressed to take on a flat appearance
+- **Generic description:** Selected fingers are extended straight from the palm with only the bottom joint flexed (except “bent-thumb-L”, which has the thumb lateral and bent upwards parallel to the extended index finger) 
+- **SLP coding description:** proximal joint of each bent finger is F; other joints are often E but may depend on handshape (except for “bent-thumb-L” -- see description)
+- **Prototypical coding:** F-E-E on each bent finger
 
 Bent-B: [IMAGE]
 Bent-L: [IMAGE]... 
 
 Clawed
 ~~~~~~
-- Dictionary description: Handshape with fingers rigidly retracted to resemble the talons on a bird of prey 
-- Generic description: Selected fingers are extended from palm, with top two joints flexed
-- SLP coding description: proximal joint of each clawed finger is E and the medial and distal joints are F and i respectively. Thumb flexion is i-F. Thumb is not flexed when a) the handshape is described as "extended" or b) thumb already has contact to another bone, for example: “clawed-4'', “clawed-F”, and “clawed-W”. 
-- Prototypical coding: E-F-i on each clawed finger and i-F on thumb 
+- **Dictionary description:** Handshape with fingers rigidly retracted to resemble the talons on a bird of prey 
+- **Generic description:** Selected fingers are extended from palm, with top two joints flexed
+- **SLP coding description:** proximal joint of each clawed finger is E and the medial and distal joints are F and i respectively. Thumb flexion is i-F. Thumb is not flexed when a) the handshape is described as "extended" or b) thumb already has contact to another bone, for example: “clawed-4'', “clawed-F”, and “clawed-W”. 
+- **Prototypical coding:** E-F-i on each clawed finger and i-F on thumb 
 
 Closed
 ~~~~~~
-- Dictionary description: A tighter handshape
-- Generic description: Closed may refer to decreased abduction between fingers and/or thumb compared to the base handshape, including complete adduction and contact."
-- SLP coding description: Coding dependent on baseline handshape. For example: baseline “W”  to “closed-W” involves abduction values between fingers 1 & 2 and 2 & 3 to change from { to =, whereas baseline “X” to “closed-X” involves a change in thumb-finger contact but the finger positions are not modified. 
-- Prototypical coding: N/A
+- **Dictionary description:** A tighter handshape
+- **Generic description:** Closed may refer to decreased abduction between fingers and/or thumb compared to the base handshape, including complete adduction and contact."
+- **SLP coding description:** Coding dependent on baseline handshape. For example: baseline “W”  to “closed-W” involves abduction values between fingers 1 & 2 and 2 & 3 to change from { to =, whereas baseline “X” to “closed-X” involves a change in thumb-finger contact but the finger positions are not modified. 
+- **Prototypical coding:** N/A
 
 Combined
 ~~~~~~~~
-- Dictionary description: Putting two shapes together
-- Generic description: Handshape results from combining two existing base handshapes into one
-- SLP coding description: Most prominent features of two handshapes are combined into one handshape (example “combined-ILY” handshape). No consistency due to variations in which handshapes are being combined. 
-- Prototypical coding: N/A
+- **Dictionary description:** Putting two shapes together
+- **Generic description:** Handshape results from combining two existing base handshapes into one
+- **SLP coding description:** Most prominent features of two handshapes are combined into one handshape (example “combined-ILY” handshape). No consistency due to variations in which handshapes are being combined. 
+- **Prototypical coding:** N/A
 
 Contracted
 ~~~~~~
-- Dictionary description: “The fingers contract as the description suggests, but the fingers involved remain straight”
-- Generic description: Selected fingers are extended from palm, with bottom joint curved. If the thumb is not in contact with any fingers, it will be extended forward from the palm in an opposed position (e.g., “contracted-C”). If the thumb is in contact with fingers that are contracted, it maintains contact and otherwise follows the preceding description for the thumb (this happens only in “contracted-B”). If the thumb is in contact with fingers that are not themselves contracted, the thumb is not affected (this happens only in  “contracted-U” and “contracted-U-index”). 
-- SLP coding description: For each contracted finger, the proximal joint is i. The thumb is E-E, opposed (O), and maximally abducted (except if thumb has contact with another bone, as in “contracted-B”, “contracted-U” & “contracted-U-index”) 
-- Prototypical coding: i-E-E for each contracted finger and E-E for thumb. Thumb opposed (O) and maximally abducted ({), except for “contracted-B”, “contracted-U” & “contracted-U-index”.
+- **Dictionary description:** “The fingers contract as the description suggests, but the fingers involved remain straight”
+- **Generic description:** Selected fingers are extended from palm, with bottom joint curved. If the thumb is not in contact with any fingers, it will be extended forward from the palm in an opposed position (e.g., “contracted-C”). If the thumb is in contact with fingers that are contracted, it maintains contact and otherwise follows the preceding description for the thumb (this happens only in “contracted-B”). If the thumb is in contact with fingers that are not themselves contracted, the thumb is not affected (this happens only in  “contracted-U” and “contracted-U-index”). 
+- **SLP coding description:** For each contracted finger, the proximal joint is i. The thumb is E-E, opposed (O), and maximally abducted (except if thumb has contact with another bone, as in “contracted-B”, “contracted-U” & “contracted-U-index”) 
+- **Prototypical coding:** i-E-E for each contracted finger and E-E for thumb. Thumb opposed (O) and maximally abducted ({), except for “contracted-B”, “contracted-U” & “contracted-U-index”.
 
 Covered
 ~~~~~~
-- Dictionary description: Fingers overlap slightly
-- Generic description: Thumb and selected fingers make contact and overlap 
-- SLP coding description: Thumb is opposed, and distal joint of thumb makes contact with selected finger(s) (except for “covered-T” -- see description above) 
-- Prototypical coding: Thumb/finger contact (typically friction distal part of thumb touching back distal part of fingers)
+- **Dictionary description:** Fingers overlap slightly
+- **Generic description:** Thumb and selected fingers make contact and overlap 
+- **SLP coding description:** Thumb is opposed, and distal joint of thumb makes contact with selected finger(s) (except for “covered-T” -- see description above) 
+- **Prototypical coding:** Thumb/finger contact (typically friction distal part of thumb touching back distal part of fingers)
 
 Crooked
 ~~~~~~~
-- Dictionary description: Fingers are slightly retracted in a relaxed way
-- Generic description: Selected finger(s) are extended from the palm, with the bottom joint extended and the top two joints curved
-- SLP coding description: For selected fingers, the proximal joint is E, medial and distal joints are i
-- Prototypical coding: [E-i-i] for each crooked finger
+- **Dictionary description:** Fingers are slightly retracted in a relaxed way
+- **Generic description:** Selected finger(s) are extended from the palm, with the bottom joint extended and the top two joints curved
+- **SLP coding description:** For selected fingers, the proximal joint is E, medial and distal joints are i
+- **Prototypical coding:** [E-i-i] for each crooked finger
 
 Extended
 ~~~~~~~~
-- Dictionary description: Thumb moves out to the side
-- Generic description: The thumb sticks straight out to the side from the hand
-- SLP coding description: The thumb is lateral and extended, with no finger contact
-- Prototypical coding: Thumb is L and thumb is E-E
+- **Dictionary description:** Thumb moves out to the side
+- **Generic description:** The thumb sticks straight out to the side from the hand
+- **SLP coding description:** The thumb is lateral and extended, with no finger contact
+- **Prototypical coding:** Thumb is L and thumb is E-E
 
 Flat
 ~~~~~~
-- Dictionary description: Hands are compressed to take on a flat appearance
-- Generic description: Handshape appears flattened
-- SLP coding description: Proximal joint is bent to make the handshape appear flattened
-- Prototypical coding: Usually F at the proximal joint, and E at the medial and distal joints [F-E-E] for each selected finger and thumb is generally E-E (except for “flat-M”)
+- **Dictionary description:** Hands are compressed to take on a flat appearance
+- **Generic description:** Handshape appears flattened
+- **SLP coding description:** Proximal joint is bent to make the handshape appear flattened
+- **Prototypical coding:** Usually F at the proximal joint, and E at the medial and distal joints [F-E-E] for each selected finger and thumb is generally E-E (except for “flat-M”)
 
 Index
 ~~~~~~
-- Dictionary description: Involves only the thumb and forefinger (as opposed to the entire hand)
-- Generic description: Handshape is made by using only the thumb and index finger (middle, ring and pinky fingers usually tucked away)
-- SLP coding description: Finger 1 is selected 
-- Prototypical coding: Generally follows the transcription of its base handshape but selecting only finger 1 (or fingers 1&2 in the case of “double-C-index”), and remaining fingers are often [F-F-F] (exceptions: see above for descriptions of “A-index” and “contracted-U-index”)
+- **Dictionary description:** Involves only the thumb and forefinger (as opposed to the entire hand)
+- **Generic description:** Handshape is made by using only the thumb and index finger (middle, ring and pinky fingers usually tucked away)
+- **SLP coding description:** Finger 1 is selected 
+- **Prototypical coding:** Generally follows the transcription of its base handshape but selecting only finger 1 (or fingers 1&2 in the case of “double-C-index”), and remaining fingers are often [F-F-F] (exceptions: see above for descriptions of “A-index” and “contracted-U-index”)
 
 Modified
 ~~~~~~
-- Dictionary description: “Has a slightly different look about it”
-- Generic description: Every modified handshape is different based on the type of modification it has
-- SLP coding description:  See specific descriptions above under the baseline handshape header.
-- Prototypical coding: N/A
+- **Dictionary description:** “Has a slightly different look about it”
+- **Generic description:** Every modified handshape is different based on the type of modification it has
+- **SLP coding description:**  See specific descriptions above under the baseline handshape header.
+- **Prototypical coding:** N/A
 
 Offset
 ~~~~~~
-- Dictionary description: Thumb moves just a little to the side of where it normally is for that handshape
-- Generic description: The thumb is extended straight from the palm and the bottom joint makes contact with the first finger 
-- SLP coding description: The proximal and medial joint of the thumb is extended, and the proximal joint of the thumb makes contact with the radial surface of the finger it contacts.
-- Prototypical coding: E-E for thumb
+- **Dictionary description:** Thumb moves just a little to the side of where it normally is for that handshape
+- **Generic description:** The thumb is extended straight from the palm and the bottom joint makes contact with the first finger 
+- **SLP coding description:** The proximal and medial joint of the thumb is extended, and the proximal joint of the thumb makes contact with the radial surface of the finger it contacts.
+- **Prototypical coding:** E-E for thumb
 
 Open
 ~~~~~~
-- Dictionary description: A less tucked handshape
-- Generic description: Selected fingers have no contact with the thumb
-- SLP coding description: The thumb is distanced from the selected fingers, with no contact between thumb and fingers
-- Prototypical coding: No contact between thumb & fingers (e.g. “open-F”, “open-O”) and sometimes the overall handshape may be ‘looser’ and fingers less tucked (e.g. “open-E”, “open-A”)
+- **Dictionary description:** A less tucked handshape
+- **Generic description:** Selected fingers have no contact with the thumb
+- **SLP coding description:** The thumb is distanced from the selected fingers, with no contact between thumb and fingers
+- **Prototypical coding:** No contact between thumb & fingers (e.g. “open-F”, “open-O”) and sometimes the overall handshape may be ‘looser’ and fingers less tucked (e.g. “open-E”, “open-A”)
 
 
 Relaxed
 ~~~~~~
-- Dictionary description: N/A
-- Generic description: In a relaxed handshape, the main distinction is that the fingers are not tensed and are primarily influenced by gravity. “Relaxed-contracted-5'' is currently the only handshape with this description. 
-- SLP coding description: “relaxed-contracted-5” differs from “contracted-5” in that the fingers are not tensed and their position is primarily influenced by gravity. The fingers are not forcefully curved, but this handshape is transcribed with medial joints curved (i) to systematically distinguish the transcription from “contracted-5,” where medial joints are extended (E), as in the description of "contracted". 
-- Prototypical coding: i-i-E for extended fingers
+- **Dictionary description:** N/A
+- **Generic description:** In a relaxed handshape, the main distinction is that the fingers are not tensed and are primarily influenced by gravity. “Relaxed-contracted-5'' is currently the only handshape with this description. 
+- **SLP coding description:** “relaxed-contracted-5” differs from “contracted-5” in that the fingers are not tensed and their position is primarily influenced by gravity. The fingers are not forcefully curved, but this handshape is transcribed with medial joints curved (i) to systematically distinguish the transcription from “contracted-5,” where medial joints are extended (E), as in the description of "contracted". 
+- **Prototypical coding:** i-i-E for extended fingers
 
 Slanted
 ~~~~~~
-- Dictionary description: A slightly askew handshape
-- Generic description: Selected fingers are slanted from its baseline handshape, with the bottom joints of each finger becoming more flexed as you move from the first finger to the fourth finger
-- SLP coding description: The fingers become progressively more flexed as you move towards finger 4. The proximal, medial, and distal joint for the first finger is extended, except for “slanted-F” (because the index finger has contact with the thumb) and “slanted-V” (because the index finger is slightly bent).
-- Prototypical coding: typically E-E-E for the first finger, then typically i-E-E for finger 2, i-E-E for finger 3, and F-F-E for finger 4. Note: since the flexion value i represents a range of flexion, for slanted handshapes that have two adjacent fingers both coded with i-E-E, it is understood that the finger farther from the thumb is slightly more flexed.
+- **Dictionary description:** A slightly askew handshape
+- **Generic description:** Selected fingers are slanted from its baseline handshape, with the bottom joints of each finger becoming more flexed as you move from the first finger to the fourth finger
+- **SLP coding description:** The fingers become progressively more flexed as you move towards finger 4. The proximal, medial, and distal joint for the first finger is extended, except for “slanted-F” (because the index finger has contact with the thumb) and “slanted-V” (because the index finger is slightly bent).
+- **Prototypical coding:** typically E-E-E for the first finger, then typically i-E-E for finger 2, i-E-E for finger 3, and F-F-E for finger 4. Note: since the flexion value i represents a range of flexion, for slanted handshapes that have two adjacent fingers both coded with i-E-E, it is understood that the finger farther from the thumb is slightly more flexed.
 
 Spread
 ~~~~~~
-- Dictionary description: Fingers spread to create space between them
-- Generic description: Selected fingers are spread from each other
-- SLP coding description: Fingers 1-4 are abducted
-- Prototypical coding: { between each pair of fingers
+- **Dictionary description:** Fingers spread to create space between them
+- **Generic description:** Selected fingers are spread from each other
+- **SLP coding description:** Fingers 1-4 are abducted
+- **Prototypical coding:** { between each pair of fingers
 
 
 
