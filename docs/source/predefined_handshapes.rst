@@ -31,6 +31,24 @@ Once a predefined handshape has been selected, you can change individual slots o
 I. General Conventions
 ===================
 
+There are general conventions that we used when coding the handshapes. Something about the order and organization of these conventions? (change around the order -based on user's needs, what do they need to understand first? what info is more important? Group together by same topic - general to specific) 
+Do they need subheaders to group them by topic?
+
+Do the titles of each bullet work? 
+
+
+- Naming of handshapes:
+    - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
+
+- Labels for combined handshapes: 
+    - All combined handshapes that have been coded involve at least one of either “I” or “Y” and have therefore been listed under one of those baseline handshapes as opposed to any other handshape they may be combined with. 
+    
+- Conventions used for labels where multiple derivations from the baseline are involved:
+    - Handshapes are sorted based on the first listed derivation in the label.
+    - The following order was generally followed for consistency: [derivations involving the fingers (flexion, adduction), involving thumb, “combined”, base(s), “index”] 
+    - “Offset” is considered a derivation involving the thumb
+    - Derivations “modified”, “closed” and “open” are positioned fitting to the order in which they apply to the base relative to the other derivation. For example: for “spread-open-O” the modification “open” applies before the modification “spread”; for “open-O-index”, “open” must go before “index” because “O-index” is essentially the handshape that is being modified.
+
 - Base >> derived principle 
     - For baseline handshapes, pictures and transcriptions should be an exact match.
     - For derived handshapes, the transcriptions will match the conventions below, even if that means the picture isn’t an exact match. For example, the convention for thumb abduction for all “extended” handshapes is to have it be fully abducted ({). However, the image for “clawed-extended-L” shows a laterally positioned (L) thumb that is not fully abducted. The image shows what would have been transcribed as a neutral (<) abduction value, but the transcription uses { as the conventions dictate. This discrepancy between images and transcriptions is simply an artifact of the images we had available.
@@ -38,15 +56,6 @@ I. General Conventions
 - Using only F, E, i not f, e
     - [F] was used for a fully bent joint, [i] was used to achieve a slightly bent joint, and [E] was used for a straight extended joint. [f] and [e] were avoided. 
     - [i-i-i] was used when the finger was meant to look rounded (i.e. “O” handshape)
-
-- Conventions used for labels where multiple derivations from the baseline are involved:
-    - Handshapes are sorted based on the first listed derivation in the label.
-    - The following order was generally followed for consistency: [derivations involving the fingers (flexion, adduction), involving thumb, “combined”, base(s), “index”] 
-    - “Offset” is considered a derivation involving the thumb
-    - Derivations “modified”, “closed” and “open” are positioned fitting to the order in which they apply to the base relative to the other derivation. For example: for “spread-open-O” the modification “open” applies before the modification “spread”; for “open-O-index”, “open” must go before “index” because “O-index” is essentially the handshape that is being modified.
-
-- Labels for combined handshapes: 
-    - All combined handshapes that have been coded involve at least one of either “I” or “Y” and have therefore been listed under one of those baseline handshapes as opposed to any other handshape they may be combined with. 
 
 - Finger tuckedness 
     - For consistency within a particular handshape group (a baseline handshape and its derivations) a somewhat arbitrary decision was made for certain handshapes that have multiple documented possibilities for finger tuckedness (e.g. L handshapes with fingers 3,4,5 flexion as F-F-F, with the non-selected fingers ‘tucked under,’ vs. with F-F-E, with the non-selected fingers in a fist shape but the distal joints ‘untucked’). 
@@ -65,14 +74,14 @@ I. General Conventions
 - Adduction/abduction of bent handshapes: 
     - For certain handshapes with extended fingers (e.g. “L”, "V" & "U") which are coded with neutral abduction (<) between the extended (E) finger(s) and flexed (F) fingers, their “bent” counterparts (i.e. "bent-L", "bent-V" & "bent-U") are coded with full adduction (=) between these same fingers due to all proximal joints being flexed (F). 
 
-- Naming of handshapes:
-    - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
-
 
 `````````````````````````
 
 II. Baseline Handshapes
 ===================
+
+These are overall list, most are just baseline. in alphabetical order. We added notes if there are something specific to be noted. 
+The baseline handshapes are organized on the left column (rows). link to grid. 
 
 .. image:: static/A.png    
       :width: 25%
@@ -80,12 +89,12 @@ II. Baseline Handshapes
       
       
 A       
-~~~~~~~~      
+~~      
     - In “modified-A”  the fingers are extended down to touch the palm (rather than tucked as for baseline “A”).
     - “A-index” differs from the baseline “A” handshape in that the index finger is raised and curved rather than tucked, and the thumb has a neutral abduction (<) rather than full adduction (=). In this case, the handshape does not follow the description of the ‘index’ derivation.
 
 B 
-~~~~~~~~~    
+~    
     - “B1” has the thumb crossed in front of the palm, while “B2” has the thumb adjacent to the index finger.
 
 C
@@ -178,7 +187,10 @@ Standard Base
 
 
 III. Derived Handshapes
-===================
+=======================
+Base, and then these are the derivations from that. 
+four descriptions:  Original dict. description, generic (lay terms), SLP, etc. These derivations are organized alphabetically.
+The derivations are the ones shown in the columns. Link to the grid.
 
 Adducted
 ~~~~~~~~
