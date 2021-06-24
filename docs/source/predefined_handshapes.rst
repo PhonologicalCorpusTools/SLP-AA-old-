@@ -79,7 +79,7 @@ II. Baseline Handshapes
       :align: center 
       
       
-A [IMAGE]       
+A [IMAGE]      
 ~~~~~~~~      
     - [IMAGE] In “modified-A”  the fingers are extended down to touch the palm (rather than tucked as for baseline “A”).
     - “A-index” differs from the baseline “A” handshape in that the index finger is raised and curved rather than tucked, and the thumb has a neutral abduction (<) rather than full adduction (=). In this case, the handshape does not follow the description of the ‘index’ derivation.
@@ -196,9 +196,8 @@ Bent
 - SLP coding description: proximal joint of each bent finger is F; other joints are often E but may depend on handshape (except for “bent-thumb-L” -- see description)
 - Prototypical coding: F-E-E on each bent finger
 
-	Bent-B: [IMAGE]
-	Bent-L: [IMAGE]
-	…
+Bent-B: [IMAGE]
+Bent-L: [IMAGE]... 
 
 Clawed
 ~~~~~~
