@@ -186,10 +186,10 @@ III. Derived Handshapes
 
 Adducted
 ~~~~~~~~
-- Dictionary description: N/A
-- Generic description: Fingers are adducted
-- SLP coding description: full adduction between each finger
-- Prototypical coding: [=] between each adducted finger
+- **Dictionary description:** N/A
+- **Generic description:** Fingers are adducted
+- **SLP coding description:** full adduction between each finger
+- **Prototypical coding:** [=] between each adducted finger
 
 Adducted-F: [IMAGE]
 
