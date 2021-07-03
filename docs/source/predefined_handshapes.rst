@@ -46,7 +46,7 @@ a) Labels and Images of Handshapes:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Naming of handshapes
-    - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
+    - Names for handshapes typically follow the names given by *The Canadian Dictionary of ASL*. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
     
 - Conventions used for labels where multiple derivations from the baseline are involved:
     - Handshapes are sorted based on the first listed derivation in the label.
@@ -76,7 +76,7 @@ b) Transcription of Handshapes:
     - Note the exception of baseline “A” and “modified-A”, whose only distinction is the tuckedness of the fingers.
 
 - Variations of Y-derived handshapes
-    - For consistency with baseline “Y”, which is coded with a neutral abduction (<) of finger 4, Y-derived handshapes (e.g. combined-ILY & combined-Y+U) maintain this abduction value for finger 4. However, variations exist with an adducted, or ‘upright’ (=), finger 4 or with a fully abducted ({) finger 4 (in the case of combined-ILY, both fingers 1&4 adducted (=) or fully abducted ({))
+    - For consistency with baseline “Y”, which is coded with a neutral abduction (<) of finger 4, Y-derived handshapes (e.g. combined-ILY & combined-Y+U) maintain this abduction value for finger 4. However, variations exist with an adducted, or ‘upright’ (=), finger 4 or with a fully abducted ({) finger 4 (in the case of combined-ILY, both fingers 1 & 4 adducted (=) or fully abducted ({))
 
 - Criteria for adduction
     - The criteria for full adduction (=) are slightly different for fingers 1-3 as compared to finger 4, with that of finger 4 being less strict. 
@@ -95,7 +95,7 @@ b) Transcription of Handshapes:
 II. Baseline Handshapes
 ===================
 
-This section provides an overall list of all the baseline handshapes. If relevant, a baseline handshape may have one or more bullet points describing handshapes derived from that base which may require special notes in addition to the overal descrpitions in section (III) :ref:`derived_handshapes`. For images of all base handshapes see :ref:`handshape_images`. The base handshapes are listed along the leftmost column of the grid. 
+This section provides an overall list of all the baseline handshapes. If relevant, a baseline handshape may have one or more bullet points describing handshapes derived from that base which may require special notes in addition to the overall descrpitions in section (III) :ref:`derived_handshapes`. All "modified" handshapes are described in this section. For images of all base handshapes see :ref:`handshape_images`. The base handshapes are listed along the leftmost column of the grid. 
 
 
 A       
@@ -122,7 +122,7 @@ F
 
 G
 ~
-- “Modified-G” has the thumb extended parallel to the index finger (rather than the thumb sticking up at roughly a 90 degree angle from the index finger as for baseline “G”).
+- “Modified-G” has the thumb extended parallel to the index finger (rather than the thumb sticking up at roughly a 90 degree angle from the index finger as in baseline “G”).
 
 K
 ~
@@ -166,7 +166,7 @@ X
 
 Y
 ~
-- “Modified-Y”  was not included in the predefined handshapes. Although this handshape occurs in The Canadian Dictionary of ASL, there are only three entries of signs that use it and there is no consistency between the depictions of the handshape. 
+- “Modified-Y”  was not included in the predefined handshapes. Although this handshape occurs in *The Canadian Dictionary of ASL*, there are only three entries of signs that use it and there is no consistency between the depictions of the handshape. 
 
 1
 ~
@@ -189,7 +189,7 @@ Middle Finger
 
 Standard Base
 ~~~~~~~~~~~~~
-- This handshape occurs in The Canadian Dictionary of ASL. 
+- This handshape occurs in *The Canadian Dictionary of ASL*. 
 - All fingers are adducted (=) and have proximal joints slightly bent (i), and medial and distal joints extended (E). Thumb is unopposed (U) and has neutral abduction (<). 
 
 
