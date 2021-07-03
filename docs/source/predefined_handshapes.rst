@@ -10,9 +10,9 @@ Predefined Handshapes
 
 1. Selecting a Predefined Handshape
 `````````````````
-To select a predefined handshape click on the hand icon on the menu bar at the top left. A new window will open. The predefined handshapes are organized vertically by base handshape and horizontally by modification type. For example, if you are searching for 'clawed-F', you can find if in the 'F' row and the 'clawed' column. (see :ref:`handshape_images`)
+To select a predefined handshape click on the hand icon on the menu bar at the top left. A new window will open. The predefined handshapes are organized vertically by base handshape and horizontally by modification type. For example, if you are searching for 'clawed-F', you can find it in the 'F' row and the 'clawed' column. (see :ref:`handshape_images`)
 
-The configuration and hand for which you are selecting the handshape will default to the one that is selected in the 'handshape transcription' window, but it can be changed on the top bar of the predefined handshapes window. For example, if you want to select a predefined handshape for
+The configuration and hand for which you are selecting the handshape will default to the one that has already been selected in the 'handshape transcription' window, but it can be changed on the top bar of the predefined handshapes window. For example, if you want to select a predefined handshape for
 Configuration 1 of Hand 2, select the option 'Config1 Hand2' and then select the handshape.
 
 Once you have selected a predefined handshape, the transcription will be filled in to the slots of the appropriate configuration and hand on the 'handshape transcription' window. The name and image of the selected handshape will appear to the right of the slots. To clear this selection, click on the 'clear' button to the right of the predefined handshape name. To change the selection, you can simply select another predefined handshape to replace it (while the configuration and hand you are trying to change is still selected). 
