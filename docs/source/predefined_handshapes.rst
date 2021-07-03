@@ -30,7 +30,7 @@ Once a predefined handshape has been selected, you can change individual slots o
 3. Conventions for How Pre-defined Handshapes were Coded
 `````````````````
 
-The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011,2012). *put formal citation of article?* Specific changes to this system were made for the pre-defined handshapes used in SLPAA. -- *Note: Kathleen to add/edit this part*
+The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the pre-defined handshapes used in SLPAA. -- *Note: Kathleen to add/edit this part*
 
 
 I. General Conventions
