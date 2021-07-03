@@ -39,10 +39,10 @@ The transcription system for the predefined handshapes is based on the system ou
 I. General Conventions
 ===================
 
-This section describes the general conventions that were used when coding the handshapes. These general conventions are organized in two groups: 1) conventions regarding the labels and images of the predefined handshapes 2) conventions regarding the transcriptions of the predefined handshapes. 
+This section describes the general conventions that were used when coding the handshapes. These general conventions are organized in two groups: a) conventions regarding the labels and images of the predefined handshapes b) conventions regarding the transcriptions of the predefined handshapes. 
 
 
-Labels and Images of Handshapes:
+a) Labels and Images of Handshapes:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Naming of handshapes
@@ -62,7 +62,7 @@ Labels and Images of Handshapes:
     - For derived handshapes, the transcriptions will match the conventions below, even if that means the picture isn’t an exact match. For example, the convention for thumb abduction for all “extended” handshapes is to have it be fully abducted ({). However, the image for “clawed-extended-L” shows a laterally positioned (L) thumb that is not fully abducted. The image shows what would have been transcribed as a neutral (<) abduction value, but the transcription uses { as the conventions dictate. This discrepancy between images and transcriptions is simply an artifact of the images we had available.
 
 
-Transcription of Handshapes:
+b) Transcription of Handshapes:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Using only F, E, i not f, e
