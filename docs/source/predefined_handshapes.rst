@@ -22,7 +22,7 @@ Once you have selected a predefined handshape, the transcription will be filled 
 
 2. Making Specific Changes
 `````````````````
-Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. For more detailed explanation of the transcription process, see :ref:`transcription_process.rst`)
+Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. (For more detailed explanation of the transcription process, see :ref:`transcription_process.rst`)
 
 
 .. _handshape_conventions:
@@ -31,7 +31,7 @@ Once a predefined handshape has been selected, you can change individual slots o
 `````````````````
 -- *Note: Kathleen to add/edit this part*
 
-The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the pre-defined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions :ref:`general_conventions` II) Baseline Handshapes :ref:`baseline_handshapes` III) Derived Handshapes :ref:`derived_handshapes`
+The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the pre-defined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions (see:ref:`general_conventions`) II) Baseline Handshapes (see :ref:`baseline_handshapes`) III) Derived Handshapes (see :ref:`derived_handshapes`)
 
 
 
