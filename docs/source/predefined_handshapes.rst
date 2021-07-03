@@ -75,7 +75,7 @@ b) Transcription of Handshapes:
     - Note that searches for these handshapes may include finger flexion values of F-F-F and F-F-E for a broader range of instances of the handshape, or be narrowed down to one or the other for more specific instances of a particular configuration.
     - Note the exception of baseline “A” and “modified-A”, whose only distinction is the tuckedness of the fingers.
 
-- ‘Upright’ for Y-derived handshapes
+- Variations of Y-derived handshapes
     - For consistency with baseline “Y”, which is coded with a neutral abduction (<) of finger 4, Y-derived handshapes (e.g. combined-ILY & combined-Y+U) maintain this abduction value for finger 4. However, variations exist with an adducted, or ‘upright’ (=), finger 4 or with a fully abducted ({) finger 4 (in the case of combined-ILY, both fingers 1&4 adducted (=) or fully abducted ({))
 
 - Criteria for adduction
