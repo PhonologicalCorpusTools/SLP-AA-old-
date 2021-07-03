@@ -29,9 +29,9 @@ Once a predefined handshape has been selected, you can change individual slots o
 
 3. Conventions for How Predefined Handshapes were Coded
 `````````````````
--- *Note: Kathleen to add/edit this part*
+-- *Note: Kathleen to add to/edit this part*
 
-The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the predefined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions :ref:`general_conventions` II) Baseline Handshapes :ref:`baseline_handshapes` III) Derived Handshapes :ref:`derived_handshapes`
+The transcription system for the predefined handshapes is based on the system outlined by Johnson & Lidell (2011, 2012). Specific changes to this system were made for the predefined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions :ref:`general_conventions` II) Baseline Handshapes :ref:`baseline_handshapes` III) Derived Handshapes :ref:`derived_handshapes`
 
 
 .. _general_conventions: 
@@ -39,7 +39,7 @@ The transcription system for hand configurations is based on the system outlined
 I. General Conventions
 ===================
 
-This section described the general conventions that we used when coding the handshapes. These general conventions are organized in two groups: conventions regarding the labels and images of the predefined handshapes followed by conventions regarding the transcriptions of the predefined handshapes. 
+This section describes the general conventions that were used when coding the handshapes. These general conventions are organized in two groups: 1) conventions regarding the labels and images of the predefined handshapes 2) conventions regarding the transcriptions of the predefined handshapes. 
 
 
 Labels and Images of Handshapes:
