@@ -338,25 +338,12 @@ Spread
 
 description of how the grid is organized and how to find a handshape. 
 
-
-EXAMPLES FOR IMAGES:
-   This function may be particularly useful for transcribing symmetrical signs or assymmetrical signs in which
-   only the dominant hand changes its handshape.
    
-   .. image:: static/paste_result.png
+   .. image:: static/handshape_grid_test.png
       :width: 90%
       :align: center
 
-.. _visualize_transcription:
 
-9. Visualizing transcription
-`````````````````
-To see a graphic image of transcribed handshapes, click on "Visualize transcription" button. A new window titled 
-"Handshape visualization" appears. Select a combination of Config and Hand you would like to visualize, and click "OK".
-
-.. image:: static/visualization.png
-      :width: 90%
-      :align: center
 
 
 
