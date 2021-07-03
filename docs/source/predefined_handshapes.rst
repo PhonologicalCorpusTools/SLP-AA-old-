@@ -43,13 +43,13 @@ Do the titles of each bullet work?
 
 Include in this paragraph: links to i,ii,iii sections (reference them)
 
-Names and images of handshapes:
+Names and Images of Handshapes:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Naming of handshapes:
+- Naming of handshapes
     - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
 
-- Labels for combined handshapes: 
+- Labels for combined handshapes 
     - All combined handshapes that have been coded involve at least one of either “I” or “Y” and have therefore been listed under one of those baseline handshapes as opposed to any other handshape they may be combined with. 
     
 - Conventions used for labels where multiple derivations from the baseline are involved:
@@ -63,7 +63,7 @@ Names and images of handshapes:
     - For derived handshapes, the transcriptions will match the conventions below, even if that means the picture isn’t an exact match. For example, the convention for thumb abduction for all “extended” handshapes is to have it be fully abducted ({). However, the image for “clawed-extended-L” shows a laterally positioned (L) thumb that is not fully abducted. The image shows what would have been transcribed as a neutral (<) abduction value, but the transcription uses { as the conventions dictate. This discrepancy between images and transcriptions is simply an artifact of the images we had available.
 
 
-Transcription of handshapes:
+Transcription of Handshapes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Using only F, E, i not f, e
@@ -76,15 +76,15 @@ Transcription of handshapes:
     - Note that searches for these handshapes may include finger flexion values of F-F-F and F-F-E for a broader range of instances of the handshape, or be narrowed down to one or the other for more specific instances of a particular configuration.
     - Note the exception of baseline “A” and “modified-A”, whose only distinction is the tuckedness of the fingers.
 
-- ‘Upright’ for Y-derived handshapes:
+- ‘Upright’ for Y-derived handshapes
     - For consistency with baseline “Y”, which is coded with a neutral abduction (<) of finger 4, Y-derived handshapes (e.g. combined-ILY & combined-Y+U) maintain this abduction value for finger 4. 
 
-- Criteria for adduction:
+- Criteria for adduction
     - The criteria for full adduction (=) are slightly different for fingers 1-3 as compared to finger 4, with finger 4 being less strict. 
     - For fingers 1-3, they are coded as adducted (=) if they are touching or if they are slightly apart but still parallel. 
     - For finger 4, it is coded as adducted (=) if it is touching the side of finger 3 or the space between finger 3 & 4 at the distal bone of finger 4 is equal to or smaller than the width of the distal bone of finger 4. 
 
-- Adduction/abduction of bent handshapes: 
+- Adduction/abduction of bent handshapes 
     - For certain handshapes with extended fingers (e.g. “L”, "V" & "U") which are coded with neutral abduction (<) between the extended (E) finger(s) and flexed (F) fingers, their “bent” counterparts (i.e. "bent-L", "bent-V" & "bent-U") are coded with full adduction (=) between these same fingers due to all proximal joints being flexed (F). 
 
 
