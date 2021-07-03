@@ -43,6 +43,8 @@ Do the titles of each bullet work?
 
 Include in this paragraph: links to i,ii,iii sections (reference them)
 
+Names and images of handshapes:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Naming of handshapes:
     - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
@@ -56,9 +58,13 @@ Include in this paragraph: links to i,ii,iii sections (reference them)
     - “Offset” is considered a derivation involving the thumb
     - Derivations “modified”, “closed” and “open” are positioned fitting to the order in which they apply to the base relative to the other derivation. For example: for “spread-open-O” the modification “open” applies before the modification “spread”; for “open-O-index”, “open” must go before “index” because “O-index” is essentially the handshape that is being modified.
 
-- Base >> derived principle 
+- Image match for base and derived 
     - For baseline handshapes, pictures and transcriptions should be an exact match.
     - For derived handshapes, the transcriptions will match the conventions below, even if that means the picture isn’t an exact match. For example, the convention for thumb abduction for all “extended” handshapes is to have it be fully abducted ({). However, the image for “clawed-extended-L” shows a laterally positioned (L) thumb that is not fully abducted. The image shows what would have been transcribed as a neutral (<) abduction value, but the transcription uses { as the conventions dictate. This discrepancy between images and transcriptions is simply an artifact of the images we had available.
+
+
+Transcription of handshapes:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Using only F, E, i not f, e
     - [F] was used for a fully bent joint, [i] was used to achieve a slightly bent joint, and [E] was used for a straight extended joint. [f] and [e] were avoided. 
