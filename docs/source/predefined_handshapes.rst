@@ -95,7 +95,7 @@ Transcription of Handshapes:
 II. Baseline Handshapes
 ===================
 
-This section provides an overall list of all the baseline handshapes. If relevant, a baseline handshape may have one or more bullet points describing handshapes derived from that base which may require special notes in addition to the overal descrpitions in section (III) :ref:`derived_handshapes`. For images of all base handshapes see :ref:`handshape_images`
+This section provides an overall list of all the baseline handshapes. If relevant, a baseline handshape may have one or more bullet points describing handshapes derived from that base which may require special notes in addition to the overal descrpitions in section (III) :ref:`derived_handshapes`. For images of all base handshapes see :ref:`handshape_images`.
 
 
 A       
@@ -200,9 +200,11 @@ Standard Base
 
 III. Derived Handshapes
 =======================
-Base, and then these are the derivations from that. 
-four descriptions:  Original dict. description, generic (lay terms), SLP, etc. These derivations are organized alphabetically.
-The derivations are the ones shown in the columns. Link to the grid.
+
+This section provides a complete list of the derivations which modify the base handshapes. The derivations are listed in alphabetical order. Under each heading, there are four descriptions: 1) Dictionary description, explaining the derivation as it is described in the *Canadian Dictionary of ASL* 2) Generic description, which outlines the derivation using general language 3) SLP coding description, which describes the derivation through the specific terms used in the transcription of the handshapes 4) Prototypical coding, which provides (if applicable) an example of the typical coding of particular aspects of the handshape that are associated with the derivation.
+
+For images of all derived handshapes see :ref:`handshape_images`.
+
 
 Adducted
 ~~~~~~~~
