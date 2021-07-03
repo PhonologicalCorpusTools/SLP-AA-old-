@@ -22,16 +22,16 @@ Once you have selected a predefined handshape, the transcription will be filled 
 
 2. Making Specific Changes
 `````````````````
-Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. (For more detailed explanation of the transcription process, see :ref:`transcription_process.rst`)
+Once a predefined handshape has been selected, you can change individual slots of the transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. (For more detailed explanation of the transcription process, see :ref:`transcription_process.rst`).
 
 
 .. _handshape_conventions:
 
-3. Conventions for How Pre-defined Handshapes were Coded
+3. Conventions for How Predefined Handshapes were Coded
 `````````````````
 -- *Note: Kathleen to add/edit this part*
 
-The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the pre-defined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions :ref:`general_conventions` II) Baseline Handshapes :ref:`baseline_handshapes` III) Derived Handshapes :ref:`derived_handshapes`
+The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the predefined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions :ref:`general_conventions` II) Baseline Handshapes :ref:`baseline_handshapes` III) Derived Handshapes :ref:`derived_handshapes`
 
 
 .. _general_conventions: 
@@ -39,7 +39,7 @@ The transcription system for hand configurations is based on the system outlined
 I. General Conventions
 ===================
 
-This section described the general conventions that we used when coding the handshapes. These general conventions are organized in two groups: conventions regarding the labels and images of the pre-defined handshapes followed by conventions regarding the transcriptions of the pre-defined handshapes. 
+This section described the general conventions that we used when coding the handshapes. These general conventions are organized in two groups: conventions regarding the labels and images of the predefined handshapes followed by conventions regarding the transcriptions of the predefined handshapes. 
 
 
 Labels and Images of Handshapes:
@@ -335,7 +335,7 @@ Spread
 
 4. Images of the Predefined Handshapes
 `````````````````
-The pre-defined handshapes are organized in a grid where the rows are organized by base handshape and the columns are organized by derivation type. In other words, each row starts on the left with the base handshape and continues to the right with the derived versions of that base handshape organized under their appropriate column. Both the rows and the columns are organized alphabetically. 
+The predefined handshapes are organized in a grid where the rows are organized by base handshape and the columns are organized by derivation type. In other words, each row starts on the left with the base handshape and continues to the right with the derived versions of that base handshape organized under their appropriate column. Both the rows and the columns are organized alphabetically. 
 
 
 -- *Note: The below image is a placeholder for a future image that shows the whole grid (may need to piece together separate screenshots of each section)*
