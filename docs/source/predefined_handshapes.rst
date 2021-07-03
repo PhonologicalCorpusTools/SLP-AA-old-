@@ -10,7 +10,7 @@ Predefined Handshapes
 
 1. Selecting a Predefined Handshape
 `````````````````
-To select a predefined handshape click on the hand icon on the menu bar at the top left. A new window will open. The predefined handshapes are organized vertically by base handshape and horizontally by modification type. For example, if you are searching for 'clawed-F', you can find if in the 'F' row and the 'clawed' column.
+To select a predefined handshape click on the hand icon on the menu bar at the top left. A new window will open. The predefined handshapes are organized vertically by base handshape and horizontally by modification type. For example, if you are searching for 'clawed-F', you can find if in the 'F' row and the 'clawed' column. (see :ref:`handshape_images`)
 
 The configuration and hand for which you are selecting the handshape will default to the one that is selected in the 'handshape transcription' window, but it can be changed on the top bar of the predefined handshapes window. For example, if you want to select a predefined handshape for
 Configuration 1 of Hand 2, select the option 'Config1 Hand2' and then select the handshape.
@@ -95,7 +95,7 @@ Transcription of Handshapes:
 II. Baseline Handshapes
 ===================
 
-This section provides an overall list of all the baseline handshapes. If relevant, a baseline handshape may have one or more bullet points describing handshapes derived from that base which may require special notes in addition to the overal descrpitions in section (III) :ref:`derived_handshapes`. For images of all base handshapes see :ref:`handshape_images`.
+This section provides an overall list of all the baseline handshapes. If relevant, a baseline handshape may have one or more bullet points describing handshapes derived from that base which may require special notes in addition to the overal descrpitions in section (III) :ref:`derived_handshapes`. For images of all base handshapes see :ref:`handshape_images`. The base handshapes are listed along the leftmost column of the grid. 
 
 
 A       
@@ -335,9 +335,10 @@ Spread
 
 4. Images of the Predefined Handshapes
 `````````````````
+The pre-defined handshapes are organized in a grid where the rows are organized by base handshape and the columns are organized by derivation type. In other words, each row starts on the left with the base handshape and continues to the right with the derived versions of that base handshape organized under their appropriate column. Both the rows and the columns are organized alphabetically. 
 
-description of how the grid is organized and how to find a handshape. 
 
+-- *Note: The below image is a placeholder for a future image that shows the whole grid (may need to piece together separate screenshots of each section)*
    
    .. image:: static/handshape_grid_test.png
       :width: 90%
