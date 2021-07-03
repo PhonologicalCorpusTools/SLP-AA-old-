@@ -31,8 +31,7 @@ Once a predefined handshape has been selected, you can change individual slots o
 `````````````````
 -- *Note: Kathleen to add/edit this part*
 
-The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the pre-defined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions (see:ref:`general_conventions`) II) Baseline Handshapes (see :ref:`baseline_handshapes`) III) Derived Handshapes (see :ref:`derived_handshapes`)
-
+The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the pre-defined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions :ref:`general_conventions` II) Baseline Handshapes :ref:`baseline_handshapes` III) Derived Handshapes :ref:`derived_handshapes`
 
 
 .. _general_conventions: 
@@ -96,14 +95,9 @@ Transcription of Handshapes:
 II. Baseline Handshapes
 ===================
 
-These are overall list, most are just baseline. in alphabetical order. We added notes if there are something specific to be noted. 
-The baseline handshapes are organized on the left column (rows). link to grid. 
+This section provides an overall list of all the baseline handshapes. If relevant, a baseline handshape may have one or more bullet points describing handshapes derived from that base which may require special notes in addition to the overal descrpitions in section III (:ref:`derived_handshapes`). For images of all base handshapes see :ref: `handshape_images`.
 
-.. image:: static/A.png    
-      :width: 25%
-      :align: center 
-      
-      
+
 A       
 ~~      
 - In “modified-A”  the fingers are extended down to touch the palm (rather than tucked as for baseline “A”).
@@ -331,8 +325,16 @@ Spread
 - **Prototypical coding:** { between each pair of fingers
 
 
+````````````````````````````````````````````
 
 
+.. _handshape_images: 
+
+
+4. Images of the Predefined Handshapes
+`````````````````
+
+description of how the grid is organized and how to find a handshape. 
 
 
 EXAMPLES FOR IMAGES:
