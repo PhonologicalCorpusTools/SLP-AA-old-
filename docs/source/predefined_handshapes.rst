@@ -1,6 +1,7 @@
 
 .. _predefined_handshapes:
 
+
 ***************
 Predefined Handshapes
 ***************
