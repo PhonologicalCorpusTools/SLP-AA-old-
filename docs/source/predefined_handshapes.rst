@@ -5,7 +5,7 @@
 Predefined Handshapes
 ***************
 
-.. _Select_handshape:
+.. _select_handshape:
 
 1. Selecting a Predefined Handshape
 `````````````````
@@ -21,49 +21,47 @@ Once you have selected a predefined handshape, the transcription will be filled 
 
 2. Making Specific Changes
 `````````````````
-Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. For more detailed explanation of the transcription process, see :ref:`transcription_process.rtf`)
-
+Once a predefined handshape has been selected, you can change individual slots of the predefined handshape transcription by clicking on a slot and either selecting an option from the dropdown menu or typing in the appropriate symbol. Once changes are made, the name and image of the predefined handshape will no longer appear to the right of the transcription. For more detailed explanation of the transcription process, see :ref:`transcription_process.rst`)
 
 
 .. _handshape_conventions:
 
 3. Conventions for How Pre-defined Handshapes were Coded
 `````````````````
+-- *Note: Kathleen to add/edit this part*
 
-The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the pre-defined handshapes used in SLPAA. -- *Note: Kathleen to add/edit this part*
+The transcription system for hand configurations is based on the system outlined by R. Johnson & S. Lidell (2011, 2012). -- *Put formal citation of article?* --Specific changes to this system were made for the pre-defined handshapes used in SLPAA. The conventions are organized in three main parts: I) General Conventions :ref:`general_conventions` II) Baseline Handshapes :ref:`baseline_handshapes` III) Derived Handshapes :ref:`derived_handshapes`
 
+
+.. _general_conventions: 
 
 I. General Conventions
 ===================
 
-There are general conventions that we used when coding the handshapes. Something about the order and organization of these conventions? (change around the order -based on user's needs, what do they need to understand first? what info is more important? Group together by same topic - general to specific) 
-Do they need subheaders to group them by topic?
+This section described the general conventions that we used when coding the handshapes. These general conventions are organized in two groups: conventions regarding the labels and images of the pre-defined handshapes followed by conventions regarding the transcriptions of the pre-defined handshapes. 
 
-Do the titles of each bullet work? 
 
-Include in this paragraph: links to i,ii,iii sections (reference them)
-
-Names and Images of Handshapes:
+Labels and Images of Handshapes:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Naming of handshapes
     - Names for handshapes typically follow the names given by The Canadian Dictionary of ASL. In some cases, there are other possible names for a given handshape that we did not use, even if there are more concise possibilities (e.g. the handshape "bent-extended-V"could have alternatively been labeled "bent-3"). 
-
-- Labels for combined handshapes 
-    - All combined handshapes that have been coded involve at least one of either “I” or “Y” and have therefore been listed under one of those baseline handshapes as opposed to any other handshape they may be combined with. 
     
 - Conventions used for labels where multiple derivations from the baseline are involved:
     - Handshapes are sorted based on the first listed derivation in the label.
     - The following order was generally followed for consistency: [derivations involving the fingers (flexion, adduction), involving thumb, “combined”, base(s), “index”] 
     - “Offset” is considered a derivation involving the thumb
     - Derivations “modified”, “closed” and “open” are positioned fitting to the order in which they apply to the base relative to the other derivation. For example: for “spread-open-O” the modification “open” applies before the modification “spread”; for “open-O-index”, “open” must go before “index” because “O-index” is essentially the handshape that is being modified.
+    
+- Labels for combined handshapes 
+    - All combined handshapes that have been coded involve at least one of either “I” or “Y” and have therefore been listed under one of those baseline handshapes as opposed to any other handshape they may be combined with. 
 
 - Image match for base and derived 
     - For baseline handshapes, pictures and transcriptions should be an exact match.
     - For derived handshapes, the transcriptions will match the conventions below, even if that means the picture isn’t an exact match. For example, the convention for thumb abduction for all “extended” handshapes is to have it be fully abducted ({). However, the image for “clawed-extended-L” shows a laterally positioned (L) thumb that is not fully abducted. The image shows what would have been transcribed as a neutral (<) abduction value, but the transcription uses { as the conventions dictate. This discrepancy between images and transcriptions is simply an artifact of the images we had available.
 
 
-Transcription of Handshapes
+Transcription of Handshapes:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Using only F, E, i not f, e
@@ -89,6 +87,7 @@ Transcription of Handshapes
 
 
 `````````````````````````
+.. _baseline_handshapes:
 
 II. Baseline Handshapes
 ===================
@@ -197,7 +196,7 @@ Standard Base
 
 
 `````````````````````````````````````````
-
+.. _derived_handshapes:
 
 III. Derived Handshapes
 =======================
